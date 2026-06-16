@@ -392,6 +392,32 @@ segments: les repetitions observees sont seulement intra-segment. La prochaine
 etape est donc de chercher un selecteur d'offsets lie au controle/opcode, pas
 seulement aux positions des bytes de longueur.
 
+La comparaison des pools de controle confirme que le controle court n'est pas
+la source directe des longueurs:
+
+```text
+output/tex_micro_stable_length_control/index.html
+output/tex_micro_stable_length_control/pools.csv
+```
+
+Etat courant:
+
+```text
+Segment bytes: 68
+Ordered pool bytes: 52
+Compact pool bytes: 0
+Best pool: segment_gap
+Suffix best pool: segment_gap
+Suffix best span: 482
+Suffix best gap total: 471
+Promotion-ready bytes: 0
+```
+
+Conclusion: `control_prefix` et `fragment` ne donnent pas de sequence de
+longueurs; tout le signal reste dans le grand `segment_gap`, tres disperse.
+La recherche doit donc porter sur une grammaire d'opcodes du `segment_gap` lui
+meme.
+
 Etat courant du noisy review:
 
 ```text

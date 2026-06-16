@@ -85,6 +85,7 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step("alternances stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_alternation_probe.py"]),
         Step("replay alternances stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_alternation_replay.py"]),
         Step("sequences longueurs alternances stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_length_sequence_probe.py"]),
+        Step("controle longueurs alternances stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_length_control_probe.py"]),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
         Step("inventaire historique projet", [sys.executable, "tools/lolg_project_legacy_inventory.py"]),
     ]
