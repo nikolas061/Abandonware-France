@@ -252,6 +252,31 @@ Conclusion: un contexte gauche/position ne predit pas le byte complet
 mais il reste proche du biais global `0x6*`. Il faut donc eviter de promouvoir
 un predicteur local et chercher une source d'etat plus externe.
 
+La passe source compare enfin les payloads du dominant avec les pools externes
+du fixture (`segment_gap`, `control_prefix`, `fragment`) et le replay decode:
+
+```text
+output/tex_micro_mixed_value_payload_source_profile/index.html
+output/tex_micro_mixed_value_payload_source_profile/rows.csv
+output/tex_micro_mixed_value_payload_source_profile/groups.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Compressed best exact bytes: 31
+Decoded zero-bias bytes: 364
+Profile overlap >=75 bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les sources compressees ne donnent qu'un recouvrement exact tres
+faible. Le replay decode semble meilleur en exact brut, mais surtout parce que
+des zones zero transformees par `xor_prefix` reproduisent le byte dominant; ce
+n'est pas une source promotable. La piste suivante doit chercher un etat de
+decodeur plus structurel que copie/source locale.
+
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
 
