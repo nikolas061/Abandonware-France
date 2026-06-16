@@ -174,6 +174,28 @@ Conclusion: deux signatures `plateau_walk` se repetent exactement a +320 bytes.
 C'est un bon indice de copie interne, mais pas encore une regle promotable tant
 que la source initiale et le controle associe ne sont pas expliques.
 
+Le probe de backrefs sur ces signatures confirme le blocage:
+
+```text
+output/tex_micro_stable_backrefs/index.html
+output/tex_micro_stable_backrefs/by_distance.csv
+```
+
+Etat courant:
+
+```text
+Repeated target bytes: 244
+Exact copy bytes: 122
+Distance +320 exact bytes: 122
+Distance +320 known-source bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: la distance 320 est la meilleure explication locale, mais les
+sources `67..131` et `349..407` ne sont pas encore marquees comme connues par
+le replay. La prochaine etape est donc de decoder ces sources, pas de promouvoir
+une copie +320 globale.
+
 Etat courant du noisy review:
 
 ```text

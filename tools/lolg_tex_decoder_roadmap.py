@@ -18,6 +18,7 @@ DEFAULT_REVIEW_SUMMARY = Path(
 )
 DEFAULT_STABLE_WALKS_SUMMARY = Path("output/tex_micro_stable_walks/summary.csv")
 DEFAULT_STABLE_WALKS_GROUPS = Path("output/tex_micro_stable_walks/groups.csv")
+DEFAULT_STABLE_BACKREFS_SUMMARY = Path("output/tex_micro_stable_backrefs/summary.csv")
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -169,7 +170,11 @@ def build_queue(decisions: list[dict[str, str]]) -> list[dict[str, object]]:
     return enriched
 
 
-def build_stable_walk_decision(summary: dict[str, str], groups: list[dict[str, str]]) -> dict[str, str] | None:
+def build_stable_walk_decision(
+    summary: dict[str, str],
+    groups: list[dict[str, str]],
+    backref_summary: dict[str, str] | None,
+) -> dict[str, str] | None:
     repeated_bytes = int_value(summary, "repeated_signature_bytes")
     copy_bytes = int_value(summary, "copy_distance_320_bytes")
     if repeated_bytes <= 0:
@@ -185,6 +190,12 @@ def build_stable_walk_decision(summary: dict[str, str], groups: list[dict[str, s
         positive.append(f"top_signature={strongest.get('signed_shape_key', '')}")
         positive.append(f"top_offsets={strongest.get('start_offsets', '')}")
 
+    blocking = ["source_control_unresolved", "promotion_ready=0"]
+    if backref_summary:
+        positive.append(f"backref_distance={backref_summary.get('best_distance', '')}")
+        positive.append(f"backref_exact_bytes={backref_summary.get('distance_320_exact_bytes', '0')}")
+        blocking.append(f"backref_known_source_bytes={backref_summary.get('distance_320_known_source_bytes', '0')}")
+
     return {
         "surface": "micro_token_stable_walks",
         "rows": summary.get("repeated_signature_rows", "0"),
@@ -192,7 +203,7 @@ def build_stable_walk_decision(summary: dict[str, str], groups: list[dict[str, s
         "promotion_ready_bytes": "0",
         "next_action": "map the +320 exact repeats to a source/control pair before promoting a copy rule",
         "positive_evidence": "; ".join(value for value in positive if value),
-        "blocking_evidence": "source_control_unresolved; promotion_ready=0",
+        "blocking_evidence": "; ".join(blocking),
     }
 
 
@@ -200,13 +211,16 @@ def append_optional_stable_walk_decision(
     decisions: list[dict[str, str]],
     summary_path: Path,
     groups_path: Path,
+    backrefs_summary_path: Path,
 ) -> list[dict[str, str]]:
     if not summary_path.exists() or not groups_path.exists():
         return decisions
     summary_rows = read_rows(summary_path)
     if not summary_rows:
         return decisions
-    decision = build_stable_walk_decision(summary_rows[0], read_rows(groups_path))
+    backref_summary_rows = read_rows(backrefs_summary_path) if backrefs_summary_path.exists() else []
+    backref_summary = backref_summary_rows[0] if backref_summary_rows else None
+    decision = build_stable_walk_decision(summary_rows[0], read_rows(groups_path), backref_summary)
     if decision is None:
         return decisions
     return [*decisions, decision]
@@ -301,6 +315,7 @@ def main() -> None:
     parser.add_argument("--review-summary", type=Path, default=DEFAULT_REVIEW_SUMMARY)
     parser.add_argument("--stable-walks-summary", type=Path, default=DEFAULT_STABLE_WALKS_SUMMARY)
     parser.add_argument("--stable-walks-groups", type=Path, default=DEFAULT_STABLE_WALKS_GROUPS)
+    parser.add_argument("--stable-backrefs-summary", type=Path, default=DEFAULT_STABLE_BACKREFS_SUMMARY)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -309,6 +324,7 @@ def main() -> None:
         read_rows(args.decisions),
         args.stable_walks_summary,
         args.stable_walks_groups,
+        args.stable_backrefs_summary,
     )
     review_summary = read_rows(args.review_summary)[0]
     queue = build_queue(decisions)
