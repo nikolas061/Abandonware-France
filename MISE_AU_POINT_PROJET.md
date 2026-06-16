@@ -108,6 +108,25 @@ actuel: 0 byte promotable automatiquement; la piste dominante reste
 `gradient`, puis les familles `mixed_token`, `jump`, `direction_value` et
 `flat_walk`.
 
+La premiere reduction de la piste `micro_token` isole les lignes
+`jump_mixed_walk`:
+
+```text
+output/tex_micro_jump_split/index.html
+output/tex_micro_jump_split/buckets.csv
+```
+
+Etat courant:
+
+```text
+Jump-mixed rows: 66
+Jump-mixed bytes: 1680
+Review buckets: 48
+Repeated buckets: 9
+Repeated bucket bytes: 909
+Promotion-ready bytes: 0
+```
+
 Etat courant du noisy review:
 
 ```text
