@@ -26,6 +26,12 @@ SUMMARY_FIELDNAMES = [
     "repeated_context_bytes",
     "repeated_value_length_context_rows",
     "repeated_value_length_context_bytes",
+    "shape_groups",
+    "repeated_shape_groups",
+    "repeated_shape_rows",
+    "repeated_shape_bytes",
+    "repeated_value_length_shape_rows",
+    "repeated_value_length_shape_bytes",
     "promotion_ready_bytes",
     "issue_rows",
 ]
@@ -44,6 +50,7 @@ CONTEXT_FIELDNAMES = [
     "nearest_value_offset",
     "offset_delta",
     "context_key",
+    "shape_key",
     "context_hex",
     "left_hex",
     "right_hex",
@@ -53,6 +60,23 @@ CONTEXT_FIELDNAMES = [
 GROUP_FIELDNAMES = [
     "rank",
     "group_key",
+    "rows",
+    "bytes",
+    "values",
+    "lengths",
+    "fixtures",
+    "offset_deltas",
+    "repeated_value_length_rows",
+    "repeated_value_length_bytes",
+    "sample_context_hex",
+    "sample_pcx",
+    "sample_frontier_id",
+    "verdict",
+]
+
+SHAPE_GROUP_FIELDNAMES = [
+    "rank",
+    "shape_key",
     "rows",
     "bytes",
     "values",
@@ -130,6 +154,27 @@ def context_key(data: bytes) -> str:
     return f"len={len(data)}|hex={data.hex()}"
 
 
+def shape_token(value: int, center: int) -> str:
+    if value == center:
+        return "SELF"
+    if value == 0:
+        return "ZERO"
+    delta = value - center
+    if -8 <= delta <= 8:
+        return f"D{delta:+d}"
+    if (value >> 4) == (center >> 4):
+        return "SAME_HI"
+    if value < 0x40:
+        return "LOW"
+    if value < 0x80:
+        return "MID"
+    return "HIGH"
+
+
+def shape_key(data: bytes, center: int) -> str:
+    return "|".join(shape_token(value, center) for value in data)
+
+
 def build(
     run_rows: list[dict[str, str]],
     fixture_rows: list[dict[str, str]],
@@ -155,6 +200,7 @@ def build(
         context = segment[left:right]
         left_context = segment[left:chosen]
         right_context = segment[chosen + 1 : right]
+        center_value = segment[chosen]
         contexts.append(
             {
                 "rank": 0,
@@ -170,6 +216,7 @@ def build(
                 "nearest_value_offset": chosen,
                 "offset_delta": chosen - run_start,
                 "context_key": context_key(context),
+                "shape_key": shape_key(context, center_value),
                 "context_hex": context.hex(),
                 "left_hex": left_context.hex(),
                 "right_hex": right_context.hex(),
@@ -206,15 +253,48 @@ def build(
             }
         )
 
+    shape_map: dict[str, list[dict[str, object]]] = defaultdict(list)
+    for row in contexts:
+        shape_map[str(row["shape_key"])].append(row)
+
+    shape_groups: list[dict[str, object]] = []
+    for key, rows in shape_map.items():
+        value_length_counts = Counter((row["run_value_hex"], row["run_length"]) for row in rows)
+        repeated_value_length_rows = [
+            row for row in rows if value_length_counts[(row["run_value_hex"], row["run_length"])] > 1
+        ]
+        shape_groups.append(
+            {
+                "rank": 0,
+                "shape_key": key,
+                "rows": len(rows),
+                "bytes": sum(int(row["run_length"]) for row in rows),
+                "values": ";".join(sorted({str(row["run_value_hex"]) for row in rows})),
+                "lengths": ";".join(str(value) for value in sorted({int(row["run_length"]) for row in rows})),
+                "fixtures": len({(row["archive"], row["pcx_name"], row["frontier_id"]) for row in rows}),
+                "offset_deltas": ";".join(str(value) for value in sorted({int(row["offset_delta"]) for row in rows})),
+                "repeated_value_length_rows": len(repeated_value_length_rows),
+                "repeated_value_length_bytes": sum(int(row["run_length"]) for row in repeated_value_length_rows),
+                "sample_context_hex": rows[0]["context_hex"],
+                "sample_pcx": rows[0]["pcx_name"],
+                "sample_frontier_id": rows[0]["frontier_id"],
+                "verdict": "repeated_shape_review" if len(rows) > 1 else "singleton_shape_review",
+            }
+        )
+
     groups.sort(key=lambda row: (-int(row["rows"]), -int(row["bytes"]), str(row["group_key"])))
+    shape_groups.sort(key=lambda row: (-int(row["rows"]), -int(row["bytes"]), str(row["shape_key"])))
     group_rank = {str(row["group_key"]): index for index, row in enumerate(groups, start=1)}
     for index, row in enumerate(groups, start=1):
+        row["rank"] = index
+    for index, row in enumerate(shape_groups, start=1):
         row["rank"] = index
     contexts.sort(key=lambda row: (group_rank[str(row["context_key"])], int(row["source_rank"]), int(row["run_index"])))
     for index, row in enumerate(contexts, start=1):
         row["rank"] = index
 
     repeated_groups = [row for row in groups if int(row["rows"]) > 1]
+    repeated_shapes = [row for row in shape_groups if int(row["rows"]) > 1]
     summary = {
         "scope": "total",
         "run_rows": len(run_rows),
@@ -226,10 +306,16 @@ def build(
         "repeated_context_bytes": sum(int(row["bytes"]) for row in repeated_groups),
         "repeated_value_length_context_rows": sum(int(row["repeated_value_length_rows"]) for row in repeated_groups),
         "repeated_value_length_context_bytes": sum(int(row["repeated_value_length_bytes"]) for row in repeated_groups),
+        "shape_groups": len(shape_groups),
+        "repeated_shape_groups": len(repeated_shapes),
+        "repeated_shape_rows": sum(int(row["rows"]) for row in repeated_shapes),
+        "repeated_shape_bytes": sum(int(row["bytes"]) for row in repeated_shapes),
+        "repeated_value_length_shape_rows": sum(int(row["repeated_value_length_rows"]) for row in repeated_shapes),
+        "repeated_value_length_shape_bytes": sum(int(row["repeated_value_length_bytes"]) for row in repeated_shapes),
         "promotion_ready_bytes": 0,
         "issue_rows": len(issues),
     }
-    return summary, contexts, groups
+    return summary, contexts, groups, shape_groups
 
 
 def render_table(rows: list[dict[str, object]], fields: list[str], limit: int = 220) -> str:
@@ -245,9 +331,14 @@ def build_html(
     summary: dict[str, object],
     contexts: list[dict[str, object]],
     groups: list[dict[str, object]],
+    shape_groups: list[dict[str, object]],
     title: str,
 ) -> str:
-    data_json = json.dumps({"summary": summary, "contexts": contexts, "groups": groups}, indent=2, sort_keys=True)
+    data_json = json.dumps(
+        {"summary": summary, "contexts": contexts, "groups": groups, "shapeGroups": shape_groups},
+        indent=2,
+        sort_keys=True,
+    )
     return f"""<!doctype html>
 <html lang="fr">
 <head>
@@ -272,9 +363,11 @@ th {{ color: #9dafb5; background: #172023; text-align: left; }}
   <div class="box"><div class="num">{summary['context_groups']}</div><div class="muted">context groups</div></div>
   <div class="box"><div class="num">{summary['repeated_context_bytes']}</div><div class="muted">repeated context bytes</div></div>
   <div class="box"><div class="num">{summary['repeated_value_length_context_bytes']}</div><div class="muted">repeated value/length bytes</div></div>
+  <div class="box"><div class="num">{summary['repeated_shape_bytes']}</div><div class="muted">repeated shape bytes</div></div>
   <div class="box"><div class="num">{summary['promotion_ready_bytes']}</div><div class="muted">promotion-ready bytes</div></div>
 </div>
 <div class="panel"><h2>Groups</h2>{render_table(groups, GROUP_FIELDNAMES)}</div>
+<div class="panel"><h2>Shape Groups</h2>{render_table(shape_groups, SHAPE_GROUP_FIELDNAMES)}</div>
 <div class="panel"><h2>Contexts</h2>{render_table(contexts, CONTEXT_FIELDNAMES)}</div>
 <script type="application/json" id="stable-value-context-data">{html.escape(data_json)}</script>
 </body>
@@ -291,18 +384,20 @@ def main() -> None:
     parser.add_argument("--title", default="Lands of Lore II .tex Micro Stable Value Context")
     args = parser.parse_args()
 
-    summary, contexts, groups = build(read_rows(args.runs), read_rows(args.fixtures), radius=args.radius)
+    summary, contexts, groups, shape_groups = build(read_rows(args.runs), read_rows(args.fixtures), radius=args.radius)
     args.output.mkdir(parents=True, exist_ok=True)
     write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(args.output / "contexts.csv", CONTEXT_FIELDNAMES, contexts)
     write_csv(args.output / "groups.csv", GROUP_FIELDNAMES, groups)
+    write_csv(args.output / "shape_groups.csv", SHAPE_GROUP_FIELDNAMES, shape_groups)
     html_path = args.output / "index.html"
-    html_path.write_text(build_html(summary, contexts, groups, args.title))
+    html_path.write_text(build_html(summary, contexts, groups, shape_groups, args.title))
 
     print(f"Value-hit rows: {summary['value_hit_rows']}")
     print(f"Context groups: {summary['context_groups']}")
     print(f"Repeated context bytes: {summary['repeated_context_bytes']}")
     print(f"Repeated value/length bytes: {summary['repeated_value_length_context_bytes']}")
+    print(f"Repeated shape bytes: {summary['repeated_shape_bytes']}")
     print(f"Promotion-ready bytes: {summary['promotion_ready_bytes']}")
     print(f"HTML: {html_path}")
 

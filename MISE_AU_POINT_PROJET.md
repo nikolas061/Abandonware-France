@@ -259,12 +259,16 @@ Value-hit bytes: 116
 Context groups: 16
 Repeated context bytes: 81
 Repeated value/length context bytes: 32
+Repeated shape bytes: 81
+Repeated value/length shape bytes: 32
 Promotion-ready bytes: 0
 ```
 
 Conclusion: plusieurs contextes se repetent, surtout par valeur, mais le couple
-valeur/longueur reste trop peu stable pour promouvoir une regle. Cette piste
-sert a ordonner le prochain travail d'opcode/state-machine.
+valeur/longueur reste trop peu stable pour promouvoir une regle. La
+normalisation de forme ne regroupe pas plus large que l'hex exact sur cette
+fenetre, donc cette piste sert surtout a ordonner le prochain travail
+d'opcode/state-machine.
 
 Etat courant du noisy review:
 

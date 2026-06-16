@@ -209,9 +209,14 @@ def build_stable_walk_decision(
         blocking.append(f"source_grammar_literal_run_bytes={source_grammar_summary.get('local_repeated_literal_bytes', '0')}")
     if value_context_summary:
         positive.append(f"value_context_repeated_bytes={value_context_summary.get('repeated_context_bytes', '0')}")
+        positive.append(f"value_context_repeated_shape_bytes={value_context_summary.get('repeated_shape_bytes', '0')}")
         blocking.append(
             f"value_context_repeated_value_length_bytes="
             f"{value_context_summary.get('repeated_value_length_context_bytes', '0')}"
+        )
+        blocking.append(
+            f"value_context_repeated_value_length_shape_bytes="
+            f"{value_context_summary.get('repeated_value_length_shape_bytes', '0')}"
         )
 
     return {
