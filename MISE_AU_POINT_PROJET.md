@@ -127,6 +127,32 @@ Repeated bucket bytes: 909
 Promotion-ready bytes: 0
 ```
 
+Le split conservateur par familles micro-token donne maintenant une file plus
+propre pour les passes suivantes:
+
+```text
+output/tex_micro_token_family_split/index.html
+output/tex_micro_token_family_split/families.csv
+output/tex_micro_token_family_split/conflicts.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 5149
+Clean family bytes: 5086
+Ambiguous bytes: 63
+Existing disagreement bytes: 0
+Top family: mixed_value
+Promotion-ready bytes: 0
+```
+
+Conclusion: les familles `mixed_value`, `jump_mixed`, `flat_plateau` et
+`small_delta` couvrent presque toute la piste micro-token sans desaccord avec
+la classe existante. Le seul cas ambigu est un `mixed_value` de 63 bytes sans
+reference de controle; il doit rester en revue pendant que les familles nettes
+sont traitees separement.
+
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
 

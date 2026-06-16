@@ -30,6 +30,7 @@ DEFAULT_STABLE_LENGTH_SEQUENCE_SUMMARY = Path("output/tex_micro_stable_length_se
 DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY = Path("output/tex_micro_stable_length_control/summary.csv")
 DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY = Path("output/tex_micro_stable_length_opcode/summary.csv")
 DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_interval/summary.csv")
+DEFAULT_MICRO_TOKEN_FAMILY_SPLIT_SUMMARY = Path("output/tex_micro_token_family_split/summary.csv")
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -144,12 +145,40 @@ def signal_score(row: dict[str, str]) -> int:
     return score
 
 
-def build_queue(decisions: list[dict[str, str]]) -> list[dict[str, object]]:
+def append_evidence(existing: str, extra: list[str]) -> str:
+    values = [existing] if existing else []
+    values.extend(value for value in extra if value)
+    return "; ".join(values)
+
+
+def build_queue(
+    decisions: list[dict[str, str]],
+    micro_token_family_split_summary: dict[str, str] | None = None,
+) -> list[dict[str, object]]:
     enriched: list[dict[str, object]] = []
     for row in decisions:
         ready = int_value(row, "promotion_ready_bytes")
         bytes_ = int_value(row, "bytes")
         status = "promotion_ready" if ready > 0 else "blocked_review"
+        positive_evidence = row.get("positive_evidence", "")
+        blocking_evidence = row.get("blocking_evidence", "")
+        if row.get("surface", "") == "micro_token" and micro_token_family_split_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"family_split_clean_bytes={micro_token_family_split_summary.get('clean_family_bytes', '0')}",
+                    f"family_split_top={micro_token_family_split_summary.get('top_family', '')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"family_split_ambiguous_bytes={micro_token_family_split_summary.get('ambiguous_bytes', '0')}",
+                    f"family_split_disagreement_bytes="
+                    f"{micro_token_family_split_summary.get('existing_disagreement_bytes', '0')}",
+                ],
+            )
+            row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
         enriched.append(
             {
                 "priority": 0,
@@ -461,6 +490,7 @@ def main() -> None:
     parser.add_argument("--stable-length-control-summary", type=Path, default=DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY)
     parser.add_argument("--stable-length-opcode-summary", type=Path, default=DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY)
     parser.add_argument("--stable-length-interval-summary", type=Path, default=DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY)
+    parser.add_argument("--micro-token-family-split-summary", type=Path, default=DEFAULT_MICRO_TOKEN_FAMILY_SPLIT_SUMMARY)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -483,7 +513,11 @@ def main() -> None:
         args.stable_length_interval_summary,
     )
     review_summary = read_rows(args.review_summary)[0]
-    queue = build_queue(decisions)
+    micro_token_family_split_rows = (
+        read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
+    )
+    micro_token_family_split_summary = micro_token_family_split_rows[0] if micro_token_family_split_rows else None
+    queue = build_queue(decisions, micro_token_family_split_summary)
     summary = build_summary(queue, review_summary)
 
     args.output.mkdir(parents=True, exist_ok=True)
