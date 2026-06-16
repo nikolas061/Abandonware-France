@@ -418,6 +418,32 @@ longueurs; tout le signal reste dans le grand `segment_gap`, tres disperse.
 La recherche doit donc porter sur une grammaire d'opcodes du `segment_gap` lui
 meme.
 
+Le voisinage local des bytes de longueur ne donne pas non plus un opcode de run
+direct:
+
+```text
+output/tex_micro_stable_length_opcode/index.html
+output/tex_micro_stable_length_opcode/candidates.csv
+output/tex_micro_stable_length_opcode/context_groups.csv
+```
+
+Etat courant:
+
+```text
+Candidate bytes: 52
+Direct after bytes: 0
+Direct before bytes: 0
+Nearby value-run bytes: 0
+Repeated context bytes: 20
+Promotion-ready bytes: 0
+```
+
+Conclusion: les bytes de longueur ordonnes ne pilotent pas directement les
+valeurs attendues dans leur voisinage court. Les deux contextes repetes
+observes sont conflictuels: les memes offsets servent a expliquer des valeurs
+differentes selon le segment. Il faut donc chercher un decodeur d'etat plus
+large que le voisinage immediat longueur/valeur.
+
 Etat courant du noisy review:
 
 ```text
