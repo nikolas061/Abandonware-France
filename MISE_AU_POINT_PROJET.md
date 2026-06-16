@@ -342,6 +342,29 @@ Conclusion: la source 22 contient un suffixe alterne `6c/6d` de 23 bytes. C'est
 une bonne cible pour un decodeur specialise de suffixe, mais le prefixe de la
 source et la source 18 restent hors couverture.
 
+Le replay specialise de ces segments alternes confirme la reconstruction quand
+la sequence de longueurs est connue:
+
+```text
+output/tex_micro_stable_alternation_replay/index.html
+output/tex_micro_stable_alternation_replay/replays.csv
+```
+
+Etat courant:
+
+```text
+Segment bytes: 68
+Oracle exact bytes: 55
+Length local-hit bytes: 63
+Alternating suffix bytes: 23
+Promotion-ready bytes: 0
+```
+
+Conclusion: le suffixe alterne `6c/6d` est reconstruit exactement avec les
+longueurs attendues, et ses longueurs ont une evidence locale. Il manque encore
+la lecture fiable de cette sequence de longueurs depuis le flux, donc la regle
+reste en revue.
+
 Etat courant du noisy review:
 
 ```text

@@ -25,6 +25,7 @@ DEFAULT_STABLE_VALUE_CONTEXT_SUMMARY = Path("output/tex_micro_stable_value_conte
 DEFAULT_STABLE_CONTEXT_RULES_SUMMARY = Path("output/tex_micro_stable_context_rules/summary.csv")
 DEFAULT_STABLE_SEQUENCES_SUMMARY = Path("output/tex_micro_stable_sequences/summary.csv")
 DEFAULT_STABLE_ALTERNATION_SUMMARY = Path("output/tex_micro_stable_alternation/summary.csv")
+DEFAULT_STABLE_ALTERNATION_REPLAY_SUMMARY = Path("output/tex_micro_stable_alternation_replay/summary.csv")
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -186,6 +187,7 @@ def build_stable_walk_decision(
     context_rules_summary: dict[str, str] | None,
     sequence_summary: dict[str, str] | None,
     alternation_summary: dict[str, str] | None,
+    alternation_replay_summary: dict[str, str] | None,
 ) -> dict[str, str] | None:
     repeated_bytes = int_value(summary, "repeated_signature_bytes")
     copy_bytes = int_value(summary, "copy_distance_320_bytes")
@@ -238,6 +240,10 @@ def build_stable_walk_decision(
     if alternation_summary:
         positive.append(f"alternating_suffix_bytes={alternation_summary.get('suffix_alternating_bytes', '0')}")
         blocking.append(f"alternating_run_bytes={alternation_summary.get('run_bytes', '0')}")
+    if alternation_replay_summary:
+        positive.append(f"alternation_replay_exact_bytes={alternation_replay_summary.get('exact_oracle_bytes', '0')}")
+        positive.append(f"alternation_replay_length_hit_bytes={alternation_replay_summary.get('length_local_hit_bytes', '0')}")
+        blocking.append("alternation_replay_uses_oracle_lengths")
 
     return {
         "surface": "micro_token_stable_walks",
@@ -261,6 +267,7 @@ def append_optional_stable_walk_decision(
     context_rules_summary_path: Path,
     sequence_summary_path: Path,
     alternation_summary_path: Path,
+    alternation_replay_summary_path: Path,
 ) -> list[dict[str, str]]:
     if not summary_path.exists() or not groups_path.exists():
         return decisions
@@ -283,6 +290,10 @@ def append_optional_stable_walk_decision(
     sequence_summary = sequence_summary_rows[0] if sequence_summary_rows else None
     alternation_summary_rows = read_rows(alternation_summary_path) if alternation_summary_path.exists() else []
     alternation_summary = alternation_summary_rows[0] if alternation_summary_rows else None
+    alternation_replay_summary_rows = (
+        read_rows(alternation_replay_summary_path) if alternation_replay_summary_path.exists() else []
+    )
+    alternation_replay_summary = alternation_replay_summary_rows[0] if alternation_replay_summary_rows else None
     decision = build_stable_walk_decision(
         summary_rows[0],
         read_rows(groups_path),
@@ -293,6 +304,7 @@ def append_optional_stable_walk_decision(
         context_rules_summary,
         sequence_summary,
         alternation_summary,
+        alternation_replay_summary,
     )
     if decision is None:
         return decisions
@@ -395,6 +407,11 @@ def main() -> None:
     parser.add_argument("--stable-context-rules-summary", type=Path, default=DEFAULT_STABLE_CONTEXT_RULES_SUMMARY)
     parser.add_argument("--stable-sequences-summary", type=Path, default=DEFAULT_STABLE_SEQUENCES_SUMMARY)
     parser.add_argument("--stable-alternation-summary", type=Path, default=DEFAULT_STABLE_ALTERNATION_SUMMARY)
+    parser.add_argument(
+        "--stable-alternation-replay-summary",
+        type=Path,
+        default=DEFAULT_STABLE_ALTERNATION_REPLAY_SUMMARY,
+    )
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -410,6 +427,7 @@ def main() -> None:
         args.stable_context_rules_summary,
         args.stable_sequences_summary,
         args.stable_alternation_summary,
+        args.stable_alternation_replay_summary,
     )
     review_summary = read_rows(args.review_summary)[0]
     queue = build_queue(decisions)
