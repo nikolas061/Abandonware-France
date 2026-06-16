@@ -379,14 +379,18 @@ Segment bytes: 68
 Ordered sequence bytes: 52
 Compact sequence bytes: 0
 Unique ordered sequence bytes: 0
+Multi-segment selector bytes: 0
 Suffix ordered bytes: 23
 Suffix compact bytes: 0
 Promotion-ready bytes: 0
 ```
 
 Conclusion: les longueurs du suffixe alterne apparaissent bien dans le flux en
-ordre, mais elles sont dispersees et non uniques. La prochaine etape est donc de
-trouver le selecteur d'offsets de longueurs, pas seulement leur presence.
+ordre, mais elles sont dispersees et non uniques. Les selecteurs simples
+testes (`delta`, `mod16`, `mod64`, sequence relative) ne generalisent pas entre
+segments: les repetitions observees sont seulement intra-segment. La prochaine
+etape est donc de chercher un selecteur d'offsets lie au controle/opcode, pas
+seulement aux positions des bytes de longueur.
 
 Etat courant du noisy review:
 

@@ -250,6 +250,10 @@ def build_stable_walk_decision(
         positive.append(f"length_sequence_ordered_bytes={length_sequence_summary.get('ordered_sequence_bytes', '0')}")
         positive.append(f"length_sequence_suffix_ordered_bytes={length_sequence_summary.get('suffix_ordered_bytes', '0')}")
         blocking.append(f"length_sequence_compact_bytes={length_sequence_summary.get('compact_sequence_bytes', '0')}")
+        blocking.append(
+            f"length_sequence_multi_segment_selector_bytes="
+            f"{length_sequence_summary.get('multi_segment_selector_rule_bytes', '0')}"
+        )
 
     return {
         "surface": "micro_token_stable_walks",

@@ -7,6 +7,7 @@ import argparse
 import csv
 import html
 import json
+from collections import defaultdict
 from pathlib import Path
 
 
@@ -24,6 +25,13 @@ SUMMARY_FIELDNAMES = [
     "compact_sequence_bytes",
     "unique_ordered_sequence_rows",
     "unique_ordered_sequence_bytes",
+    "selector_rule_rows",
+    "repeated_selector_rule_rows",
+    "repeated_selector_rule_bytes",
+    "multi_segment_selector_rule_rows",
+    "multi_segment_selector_rule_bytes",
+    "suffix_selector_rule_rows",
+    "suffix_selector_rule_bytes",
     "suffix_ordered_rows",
     "suffix_ordered_bytes",
     "suffix_compact_rows",
@@ -64,6 +72,21 @@ MATCH_FIELDNAMES = [
     "span",
     "gap_total",
     "compact_match",
+]
+
+SELECTOR_FIELDNAMES = [
+    "rank",
+    "selector_family",
+    "selector_key",
+    "rows",
+    "bytes",
+    "segments",
+    "suffix_rows",
+    "suffix_bytes",
+    "sample_offsets",
+    "sample_span",
+    "sample_gap_total",
+    "verdict",
 ]
 
 
@@ -164,13 +187,75 @@ def match_metrics(offsets: list[int], length_count: int) -> tuple[int, int, bool
     return span, gap_total, span == length_count
 
 
+def selector_keys(offsets: list[int]) -> list[tuple[str, str]]:
+    if not offsets:
+        return []
+    deltas = [right - left for left, right in zip(offsets, offsets[1:])]
+    mods16 = [offset % 16 for offset in offsets]
+    mods64 = [offset % 64 for offset in offsets]
+    relative = [offset - offsets[0] for offset in offsets]
+    return [
+        ("delta_sequence", ",".join(str(value) for value in deltas)),
+        ("mod16_sequence", ",".join(str(value) for value in mods16)),
+        ("mod64_sequence", ",".join(str(value) for value in mods64)),
+        ("relative_sequence", ",".join(str(value) for value in relative)),
+        ("first_mod16_delta_sequence", f"first={mods16[0]}|delta={','.join(str(value) for value in deltas)}"),
+        ("first_mod64_delta_sequence", f"first={mods64[0]}|delta={','.join(str(value) for value in deltas)}"),
+    ]
+
+
+def build_selector_rows(sequence_rows: list[dict[str, object]], match_rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    sequence_by_segment = {int(row["segment_rank"]): row for row in sequence_rows}
+    grouped: dict[tuple[str, str], list[dict[str, object]]] = defaultdict(list)
+    for match in match_rows:
+        offsets = [int(part) for part in str(match["offsets"]).split(";") if part.isdigit()]
+        for family, key in selector_keys(offsets):
+            grouped[(family, key)].append(match)
+
+    selector_rows: list[dict[str, object]] = []
+    for (family, key), rows in grouped.items():
+        suffix_rows = [
+            row for row in rows if str(sequence_by_segment[int(row["segment_rank"])]["is_suffix"]) == "1"
+        ]
+        selector_rows.append(
+            {
+                "rank": 0,
+                "selector_family": family,
+                "selector_key": key,
+                "rows": len(rows),
+                "bytes": sum(int_value(sequence_by_segment[int(row["segment_rank"])], "segment_bytes") for row in rows),
+                "segments": len({int(row["segment_rank"]) for row in rows}),
+                "suffix_rows": len(suffix_rows),
+                "suffix_bytes": sum(
+                    int_value(sequence_by_segment[int(row["segment_rank"])], "segment_bytes") for row in suffix_rows
+                ),
+                "sample_offsets": rows[0]["offsets"],
+                "sample_span": rows[0]["span"],
+                "sample_gap_total": rows[0]["gap_total"],
+                "verdict": "repeated_selector_review" if len(rows) > 1 else "singleton_selector_review",
+            }
+        )
+    selector_rows.sort(
+        key=lambda row: (
+            -int(row["segments"]),
+            -int(row["suffix_bytes"]),
+            -int(row["bytes"]),
+            str(row["selector_family"]),
+            str(row["selector_key"]),
+        )
+    )
+    for index, row in enumerate(selector_rows, start=1):
+        row["rank"] = index
+    return selector_rows
+
+
 def build(
     replay_rows: list[dict[str, str]],
     fixture_rows: list[dict[str, str]],
     *,
     max_matches: int,
     max_span: int,
-) -> tuple[dict[str, object], list[dict[str, object]], list[dict[str, object]]]:
+) -> tuple[dict[str, object], list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
     segments_by_fixture, segment_issues = load_segments(fixture_rows)
     sequence_rows: list[dict[str, object]] = []
     match_rows: list[dict[str, object]] = []
@@ -228,6 +313,10 @@ def build(
     unique_rows = [row for row in sequence_rows if int(row["unique_ordered_match"]) > 0]
     suffix_ordered = [row for row in ordered if str(row["is_suffix"]) == "1"]
     suffix_compact = [row for row in compact_rows if str(row["is_suffix"]) == "1"]
+    selector_rows = build_selector_rows(sequence_rows, match_rows)
+    repeated_selectors = [row for row in selector_rows if int(row["rows"]) > 1]
+    multi_segment_selectors = [row for row in selector_rows if int(row["segments"]) > 1]
+    suffix_selectors = [row for row in selector_rows if int(row["suffix_rows"]) > 0]
     summary = {
         "scope": "total",
         "segment_rows": len(sequence_rows),
@@ -238,6 +327,13 @@ def build(
         "compact_sequence_bytes": sum(int_value(row, "segment_bytes") for row in compact_rows),
         "unique_ordered_sequence_rows": len(unique_rows),
         "unique_ordered_sequence_bytes": sum(int_value(row, "segment_bytes") for row in unique_rows),
+        "selector_rule_rows": len(selector_rows),
+        "repeated_selector_rule_rows": len(repeated_selectors),
+        "repeated_selector_rule_bytes": sum(int(row["bytes"]) for row in repeated_selectors),
+        "multi_segment_selector_rule_rows": len(multi_segment_selectors),
+        "multi_segment_selector_rule_bytes": sum(int(row["bytes"]) for row in multi_segment_selectors),
+        "suffix_selector_rule_rows": len(suffix_selectors),
+        "suffix_selector_rule_bytes": sum(int(row["suffix_bytes"]) for row in suffix_selectors),
         "suffix_ordered_rows": len(suffix_ordered),
         "suffix_ordered_bytes": sum(int_value(row, "segment_bytes") for row in suffix_ordered),
         "suffix_compact_rows": len(suffix_compact),
@@ -245,7 +341,7 @@ def build(
         "promotion_ready_bytes": 0,
         "issue_rows": len(segment_issues),
     }
-    return summary, sequence_rows, match_rows
+    return summary, sequence_rows, match_rows, selector_rows
 
 
 def render_table(rows: list[dict[str, object]], fields: list[str], limit: int = 220) -> str:
@@ -261,9 +357,14 @@ def build_html(
     summary: dict[str, object],
     sequences: list[dict[str, object]],
     matches: list[dict[str, object]],
+    selectors: list[dict[str, object]],
     title: str,
 ) -> str:
-    data_json = json.dumps({"summary": summary, "sequences": sequences, "matches": matches}, indent=2, sort_keys=True)
+    data_json = json.dumps(
+        {"summary": summary, "sequences": sequences, "matches": matches, "selectors": selectors},
+        indent=2,
+        sort_keys=True,
+    )
     return f"""<!doctype html>
 <html lang="fr">
 <head>
@@ -286,11 +387,13 @@ th {{ color: #9dafb5; background: #172023; text-align: left; }}
 <div class="grid">
   <div class="box"><div class="num">{summary['ordered_sequence_bytes']}</div><div class="muted">ordered sequence bytes</div></div>
   <div class="box"><div class="num">{summary['compact_sequence_bytes']}</div><div class="muted">compact sequence bytes</div></div>
+  <div class="box"><div class="num">{summary['multi_segment_selector_rule_bytes']}</div><div class="muted">multi-segment selector bytes</div></div>
   <div class="box"><div class="num">{summary['suffix_ordered_bytes']}</div><div class="muted">suffix ordered bytes</div></div>
   <div class="box"><div class="num">{summary['suffix_compact_bytes']}</div><div class="muted">suffix compact bytes</div></div>
   <div class="box"><div class="num">{summary['promotion_ready_bytes']}</div><div class="muted">promotion-ready bytes</div></div>
 </div>
 <div class="panel"><h2>Sequences</h2>{render_table(sequences, SEQUENCE_FIELDNAMES)}</div>
+<div class="panel"><h2>Selector Rules</h2>{render_table(selectors, SELECTOR_FIELDNAMES)}</div>
 <div class="panel"><h2>Matches</h2>{render_table(matches, MATCH_FIELDNAMES)}</div>
 <script type="application/json" id="stable-length-sequence-data">{html.escape(data_json)}</script>
 </body>
@@ -308,7 +411,7 @@ def main() -> None:
     parser.add_argument("--title", default="Lands of Lore II .tex Micro Stable Length Sequences")
     args = parser.parse_args()
 
-    summary, sequences, matches = build(
+    summary, sequences, matches, selectors = build(
         read_rows(args.replays),
         read_rows(args.fixtures),
         max_matches=args.max_matches,
@@ -318,11 +421,14 @@ def main() -> None:
     write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(args.output / "sequences.csv", SEQUENCE_FIELDNAMES, sequences)
     write_csv(args.output / "matches.csv", MATCH_FIELDNAMES, matches)
+    write_csv(args.output / "selector_rules.csv", SELECTOR_FIELDNAMES, selectors)
     html_path = args.output / "index.html"
-    html_path.write_text(build_html(summary, sequences, matches, args.title))
+    html_path.write_text(build_html(summary, sequences, matches, selectors, args.title))
 
     print(f"Ordered sequence bytes: {summary['ordered_sequence_bytes']}")
     print(f"Compact sequence bytes: {summary['compact_sequence_bytes']}")
+    print(f"Repeated selector bytes: {summary['repeated_selector_rule_bytes']}")
+    print(f"Multi-segment selector bytes: {summary['multi_segment_selector_rule_bytes']}")
     print(f"Suffix ordered bytes: {summary['suffix_ordered_bytes']}")
     print(f"Promotion-ready bytes: {summary['promotion_ready_bytes']}")
     print(f"HTML: {html_path}")
