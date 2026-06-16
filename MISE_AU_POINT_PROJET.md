@@ -150,6 +150,30 @@ Conclusion: les buckets repetes partagent des zones de sauts, mais pas de
 signature exacte stable. La piste reste utile pour separer les familles, pas
 pour promouvoir une regle de replay.
 
+La passe complementaire compare les marches micro-token non jump stables
+(`plateau_walk`, `banded_small_signed_walk`, `small_signed_walk`):
+
+```text
+output/tex_micro_stable_walks/index.html
+output/tex_micro_stable_walks/groups.csv
+```
+
+Etat courant:
+
+```text
+Stable rows: 28
+Stable bytes: 1327
+Repeated signature groups: 2
+Repeated signature bytes: 244
+Exact repeat bytes: 244
+Distance +320 copy bytes: 122
+Promotion-ready bytes: 0
+```
+
+Conclusion: deux signatures `plateau_walk` se repetent exactement a +320 bytes.
+C'est un bon indice de copie interne, mais pas encore une regle promotable tant
+que la source initiale et le controle associe ne sont pas expliques.
+
 Etat courant du noisy review:
 
 ```text
