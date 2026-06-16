@@ -178,6 +178,31 @@ sous-familles repetees; le cas faible reste le meme `0x6|medium|control_missing`
 de 63 bytes. La prochaine passe peut donc attaquer le dominant
 `0x6|medium|control_known|strong` separement du reste.
 
+La sous-famille dominante `0x6|medium|control_known|strong` est maintenant
+croisee avec les signaux de controle connus:
+
+```text
+output/tex_micro_mixed_value_dominant_control/index.html
+output/tex_micro_mixed_value_dominant_control/groups.csv
+output/tex_micro_mixed_value_dominant_control/rows.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Repeated signal bytes: 417
+Repeated control+signal bytes: 292
+Repeated payload bytes: 0
+Dominant control+signal: 27|signed_delta:segment_gap:signed_delta
+Promotion-ready bytes: 0
+```
+
+Conclusion: le controle stabilise une partie du dominant `mixed_value`
+(292 bytes sur un couple controle+signal repete), mais les signatures de
+payload et les contextes d'offset restent tous uniques. Cette piste devient
+une bonne separation de revue, pas encore une grammaire promotable.
+
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
 

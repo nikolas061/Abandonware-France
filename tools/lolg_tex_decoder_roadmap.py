@@ -32,6 +32,9 @@ DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY = Path("output/tex_micro_stable_length_opco
 DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_interval/summary.csv")
 DEFAULT_MICRO_TOKEN_FAMILY_SPLIT_SUMMARY = Path("output/tex_micro_token_family_split/summary.csv")
 DEFAULT_MICRO_MIXED_VALUE_SUBFAMILY_SUMMARY = Path("output/tex_micro_mixed_value_subfamily/summary.csv")
+DEFAULT_MICRO_MIXED_VALUE_DOMINANT_CONTROL_SUMMARY = Path(
+    "output/tex_micro_mixed_value_dominant_control/summary.csv"
+)
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -156,6 +159,7 @@ def build_queue(
     decisions: list[dict[str, str]],
     micro_token_family_split_summary: dict[str, str] | None = None,
     micro_mixed_value_subfamily_summary: dict[str, str] | None = None,
+    micro_mixed_value_dominant_control_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
     enriched: list[dict[str, object]] = []
     for row in decisions:
@@ -197,6 +201,30 @@ def build_queue(
                     f"mixed_value_ambiguous_bytes={micro_mixed_value_subfamily_summary.get('ambiguous_bytes', '0')}",
                     f"mixed_value_promotion_ready="
                     f"{micro_mixed_value_subfamily_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_dominant_control_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_dominant_signal_bytes="
+                    f"{micro_mixed_value_dominant_control_summary.get('repeated_signal_bytes', '0')}",
+                    f"mixed_value_dominant_control_signal_bytes="
+                    f"{micro_mixed_value_dominant_control_summary.get('repeated_control_signal_bytes', '0')}",
+                    f"mixed_value_dominant_control="
+                    f"{micro_mixed_value_dominant_control_summary.get('dominant_control_signal', '')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_dominant_offset_context_bytes="
+                    f"{micro_mixed_value_dominant_control_summary.get('repeated_offset_context_bytes', '0')}",
+                    f"mixed_value_dominant_payload_bytes="
+                    f"{micro_mixed_value_dominant_control_summary.get('repeated_payload_bytes', '0')}",
+                    f"mixed_value_dominant_promotion_ready="
+                    f"{micro_mixed_value_dominant_control_summary.get('promotion_ready_bytes', '0')}",
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
@@ -517,6 +545,11 @@ def main() -> None:
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_SUBFAMILY_SUMMARY,
     )
+    parser.add_argument(
+        "--micro-mixed-value-dominant-control-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_DOMINANT_CONTROL_SUMMARY,
+    )
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -551,7 +584,20 @@ def main() -> None:
     micro_mixed_value_subfamily_summary = (
         micro_mixed_value_subfamily_rows[0] if micro_mixed_value_subfamily_rows else None
     )
-    queue = build_queue(decisions, micro_token_family_split_summary, micro_mixed_value_subfamily_summary)
+    micro_mixed_value_dominant_control_rows = (
+        read_rows(args.micro_mixed_value_dominant_control_summary)
+        if args.micro_mixed_value_dominant_control_summary.exists()
+        else []
+    )
+    micro_mixed_value_dominant_control_summary = (
+        micro_mixed_value_dominant_control_rows[0] if micro_mixed_value_dominant_control_rows else None
+    )
+    queue = build_queue(
+        decisions,
+        micro_token_family_split_summary,
+        micro_mixed_value_subfamily_summary,
+        micro_mixed_value_dominant_control_summary,
+    )
     summary = build_summary(queue, review_summary)
 
     args.output.mkdir(parents=True, exist_ok=True)
