@@ -277,6 +277,31 @@ des zones zero transformees par `xor_prefix` reproduisent le byte dominant; ce
 n'est pas une source promotable. La piste suivante doit chercher un etat de
 decodeur plus structurel que copie/source locale.
 
+La passe spatiale teste enfin les distances de copie dans l'image attendue,
+dont les voisinages courts et les distances proches d'une largeur 320:
+
+```text
+output/tex_micro_mixed_value_payload_spatial/index.html
+output/tex_micro_mixed_value_payload_spatial/rows.csv
+output/tex_micro_mixed_value_payload_spatial/distances.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Best aggregate distance: 1
+Best aggregate correct bytes: 138
+Distance 320 correct bytes: 24
+Exact copy bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: le voisin gauche donne le meilleur score agrege, mais reste trop
+faible et produit 429 faux bytes. Les distances type largeur d'image ne
+fournissent pas de copie exploitable non plus. Le dominant `mixed_value` reste
+donc bloque sur une grammaire d'etat, pas sur une copie spatiale directe.
+
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
 

@@ -44,6 +44,9 @@ DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_PREDICTOR_SUMMARY = Path(
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SOURCE_PROFILE_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_source_profile/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_spatial/summary.csv"
+)
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -172,6 +175,7 @@ def build_queue(
     micro_mixed_value_payload_local_grammar_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_predictor_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_source_profile_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_spatial_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
     enriched: list[dict[str, object]] = []
     for row in decisions:
@@ -307,6 +311,30 @@ def build_queue(
                     f"{micro_mixed_value_payload_source_profile_summary.get('decoded_zero_bias_bytes', '0')}",
                     f"mixed_value_source_promotion_ready="
                     f"{micro_mixed_value_payload_source_profile_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_spatial_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_spatial_best_distance="
+                    f"{micro_mixed_value_payload_spatial_summary.get('best_aggregate_distance', '0')}",
+                    f"mixed_value_spatial_best_correct="
+                    f"{micro_mixed_value_payload_spatial_summary.get('best_aggregate_correct_bytes', '0')}",
+                    f"mixed_value_spatial_distance320_correct="
+                    f"{micro_mixed_value_payload_spatial_summary.get('distance320_correct_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_spatial_best_false="
+                    f"{micro_mixed_value_payload_spatial_summary.get('best_aggregate_false_bytes', '0')}",
+                    f"mixed_value_spatial_exact_copy="
+                    f"{micro_mixed_value_payload_spatial_summary.get('exact_copy_bytes', '0')}",
+                    f"mixed_value_spatial_promotion_ready="
+                    f"{micro_mixed_value_payload_spatial_summary.get('promotion_ready_bytes', '0')}",
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
@@ -647,6 +675,11 @@ def main() -> None:
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SOURCE_PROFILE_SUMMARY,
     )
+    parser.add_argument(
+        "--micro-mixed-value-payload-spatial-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY,
+    )
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -713,6 +746,14 @@ def main() -> None:
     micro_mixed_value_payload_source_profile_summary = (
         micro_mixed_value_payload_source_profile_rows[0] if micro_mixed_value_payload_source_profile_rows else None
     )
+    micro_mixed_value_payload_spatial_rows = (
+        read_rows(args.micro_mixed_value_payload_spatial_summary)
+        if args.micro_mixed_value_payload_spatial_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_spatial_summary = (
+        micro_mixed_value_payload_spatial_rows[0] if micro_mixed_value_payload_spatial_rows else None
+    )
     queue = build_queue(
         decisions,
         micro_token_family_split_summary,
@@ -721,6 +762,7 @@ def main() -> None:
         micro_mixed_value_payload_local_grammar_summary,
         micro_mixed_value_payload_predictor_summary,
         micro_mixed_value_payload_source_profile_summary,
+        micro_mixed_value_payload_spatial_summary,
     )
     summary = build_summary(queue, review_summary)
 
