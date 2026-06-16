@@ -203,6 +203,32 @@ Conclusion: le controle stabilise une partie du dominant `mixed_value`
 payload et les contextes d'offset restent tous uniques. Cette piste devient
 une bonne separation de revue, pas encore une grammaire promotable.
 
+La passe locale sur les payloads du dominant `mixed_value` mesure maintenant
+les valeurs et n-grammes internes, au lieu de s'arreter au hash de ligne:
+
+```text
+output/tex_micro_mixed_value_payload_local_grammar/index.html
+output/tex_micro_mixed_value_payload_local_grammar/rows.csv
+output/tex_micro_mixed_value_payload_local_grammar/ngrams.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Repeated byte-value bytes: 562
+Byte trigram repeated slots: 230
+Byte ngram8 repeated slots: 0
+High ngram8 repeated slots: 421
+Promotion-ready bytes: 0
+```
+
+Conclusion: le payload dominant n'est pas aleatoire; les valeurs et motifs
+courts se repetent fortement. En revanche, aucune forme complete, aucun payload
+et aucun n-gramme byte de longueur 8 ne se repete. La prochaine passe doit donc
+chercher une grammaire positionnelle/courte ou un etat externe, pas une copie
+longue directe.
+
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
 
