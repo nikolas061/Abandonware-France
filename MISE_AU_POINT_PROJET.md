@@ -243,6 +243,29 @@ local, mais les couples longueur/valeur et les runs litteraux ne couvrent qu'une
 minorite des bytes. La prochaine piste est donc un decodeur a etat/opcode sur
 ces valeurs locales, pas un simple RLE litteral.
 
+Le contexte local des valeurs presentes est groupe pour chercher un motif
+d'opcode reutilisable:
+
+```text
+output/tex_micro_stable_value_context/index.html
+output/tex_micro_stable_value_context/groups.csv
+```
+
+Etat courant:
+
+```text
+Value-hit rows: 34
+Value-hit bytes: 116
+Context groups: 16
+Repeated context bytes: 81
+Repeated value/length context bytes: 32
+Promotion-ready bytes: 0
+```
+
+Conclusion: plusieurs contextes se repetent, surtout par valeur, mais le couple
+valeur/longueur reste trop peu stable pour promouvoir une regle. Cette piste
+sert a ordonner le prochain travail d'opcode/state-machine.
+
 Etat courant du noisy review:
 
 ```text
