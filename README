@@ -17,6 +17,18 @@ Tableau de bord local du travail HD:
 output/fullhd_dashboard/index.html
 ```
 
+Validation rapide du socle Full HD:
+
+```sh
+python3 tools/lolg_fullhd_pipeline.py --mode quick --fail-on-issues
+```
+
+Pour afficher la regeneration complete des rapports legers sans les lancer:
+
+```sh
+python3 tools/lolg_fullhd_pipeline.py --mode reports --dry-run
+```
+
 Etat actuel: le socle Full HD est valide par l'audit local. Le chantier restant
 est le decodage complet des textures proprietaires `.tex`; les notes detaillees
 sont dans `MISE_AU_POINT_PROJET.md` et `HD_TEXTURES.md`.

@@ -14,6 +14,12 @@ Point d'entree principal:
 output/fullhd_dashboard/index.html
 ```
 
+Pipeline de validation:
+
+```sh
+python3 tools/lolg_fullhd_pipeline.py --mode quick --fail-on-issues
+```
+
 Validation actuelle:
 
 ```text
@@ -262,7 +268,13 @@ Priorite 1: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.
 
 Priorite 2: transformer les meilleurs rapports de gaps en un module decodeur
-unique, au lieu d'accumuler seulement des sondes separees.
+unique, au lieu d'accumuler seulement des sondes separees. Un premier point de
+controle reproductible existe maintenant avec:
+
+```sh
+python3 tools/lolg_fullhd_pipeline.py --mode quick --fail-on-issues
+python3 tools/lolg_fullhd_pipeline.py --mode reports --dry-run
+```
 
 Priorite 3: garder le tableau de bord comme source de verite: toute nouvelle
 sonde utile doit produire `summary.csv`, `index.html`, puis etre auditee.
@@ -270,9 +282,7 @@ sonde utile doit produire `summary.csv`, `index.html`, puis etre auditee.
 ## Validation a relancer apres modification
 
 ```sh
-python3 tools/lolg_hd_audit.py --fail-on-issues
-python3 tools/lolg_hd_dashboard.py
-python3 tools/lolg_hd_audit.py --fail-on-issues
+python3 tools/lolg_fullhd_pipeline.py --mode quick --fail-on-issues
 ```
 
 Etat de reference apres cette mise au point:
