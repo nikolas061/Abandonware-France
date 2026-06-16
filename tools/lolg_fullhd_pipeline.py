@@ -78,6 +78,7 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step("stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_walks.py"]),
         Step("backrefs stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_backref_probe.py"]),
         Step("sources stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_source_probe.py"]),
+        Step("grammaire sources stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_source_grammar.py"]),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
         Step("inventaire historique projet", [sys.executable, "tools/lolg_project_legacy_inventory.py"]),
     ]

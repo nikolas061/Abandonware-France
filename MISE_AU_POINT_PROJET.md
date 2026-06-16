@@ -219,6 +219,30 @@ Conclusion: les sources de la copie +320 ne sont pas des fenetres brutes de
 ces fenetres. Elles sont elles-memes encodees et doivent etre traitees comme
 un sous-probleme de grammaire, pas comme une source disponible.
 
+La grammaire des runs attendus de ces sources est maintenant caracterisee:
+
+```text
+output/tex_micro_stable_source_grammar/index.html
+output/tex_micro_stable_source_grammar/runs.csv
+```
+
+Etat courant:
+
+```text
+Run rows: 35
+Run bytes: 122
+Local value-hit bytes: 116
+Local len/value pair bytes: 23
+Local value/len pair bytes: 6
+Local literal-run bytes: 20
+Promotion-ready bytes: 0
+```
+
+Conclusion: les valeurs de palette sont presque toutes presentes dans le flux
+local, mais les couples longueur/valeur et les runs litteraux ne couvrent qu'une
+minorite des bytes. La prochaine piste est donc un decodeur a etat/opcode sur
+ces valeurs locales, pas un simple RLE litteral.
+
 Etat courant du noisy review:
 
 ```text

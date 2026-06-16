@@ -20,6 +20,7 @@ DEFAULT_STABLE_WALKS_SUMMARY = Path("output/tex_micro_stable_walks/summary.csv")
 DEFAULT_STABLE_WALKS_GROUPS = Path("output/tex_micro_stable_walks/groups.csv")
 DEFAULT_STABLE_BACKREFS_SUMMARY = Path("output/tex_micro_stable_backrefs/summary.csv")
 DEFAULT_STABLE_SOURCES_SUMMARY = Path("output/tex_micro_stable_sources/summary.csv")
+DEFAULT_STABLE_SOURCE_GRAMMAR_SUMMARY = Path("output/tex_micro_stable_source_grammar/summary.csv")
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -176,6 +177,7 @@ def build_stable_walk_decision(
     groups: list[dict[str, str]],
     backref_summary: dict[str, str] | None,
     source_summary: dict[str, str] | None,
+    source_grammar_summary: dict[str, str] | None,
 ) -> dict[str, str] | None:
     repeated_bytes = int_value(summary, "repeated_signature_bytes")
     copy_bytes = int_value(summary, "copy_distance_320_bytes")
@@ -200,6 +202,9 @@ def build_stable_walk_decision(
     if source_summary:
         blocking.append(f"source_probe_best_exact_bytes={source_summary.get('best_exact_bytes_total', '0')}")
         blocking.append(f"source_probe_full_matches={source_summary.get('full_match_rows', '0')}")
+    if source_grammar_summary:
+        positive.append(f"source_grammar_value_hit_bytes={source_grammar_summary.get('local_value_hit_bytes', '0')}")
+        blocking.append(f"source_grammar_literal_run_bytes={source_grammar_summary.get('local_repeated_literal_bytes', '0')}")
 
     return {
         "surface": "micro_token_stable_walks",
@@ -218,6 +223,7 @@ def append_optional_stable_walk_decision(
     groups_path: Path,
     backrefs_summary_path: Path,
     sources_summary_path: Path,
+    source_grammar_summary_path: Path,
 ) -> list[dict[str, str]]:
     if not summary_path.exists() or not groups_path.exists():
         return decisions
@@ -228,7 +234,17 @@ def append_optional_stable_walk_decision(
     backref_summary = backref_summary_rows[0] if backref_summary_rows else None
     source_summary_rows = read_rows(sources_summary_path) if sources_summary_path.exists() else []
     source_summary = source_summary_rows[0] if source_summary_rows else None
-    decision = build_stable_walk_decision(summary_rows[0], read_rows(groups_path), backref_summary, source_summary)
+    source_grammar_summary_rows = (
+        read_rows(source_grammar_summary_path) if source_grammar_summary_path.exists() else []
+    )
+    source_grammar_summary = source_grammar_summary_rows[0] if source_grammar_summary_rows else None
+    decision = build_stable_walk_decision(
+        summary_rows[0],
+        read_rows(groups_path),
+        backref_summary,
+        source_summary,
+        source_grammar_summary,
+    )
     if decision is None:
         return decisions
     return [*decisions, decision]
@@ -325,6 +341,7 @@ def main() -> None:
     parser.add_argument("--stable-walks-groups", type=Path, default=DEFAULT_STABLE_WALKS_GROUPS)
     parser.add_argument("--stable-backrefs-summary", type=Path, default=DEFAULT_STABLE_BACKREFS_SUMMARY)
     parser.add_argument("--stable-sources-summary", type=Path, default=DEFAULT_STABLE_SOURCES_SUMMARY)
+    parser.add_argument("--stable-source-grammar-summary", type=Path, default=DEFAULT_STABLE_SOURCE_GRAMMAR_SUMMARY)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -335,6 +352,7 @@ def main() -> None:
         args.stable_walks_groups,
         args.stable_backrefs_summary,
         args.stable_sources_summary,
+        args.stable_source_grammar_summary,
     )
     review_summary = read_rows(args.review_summary)[0]
     queue = build_queue(decisions)
