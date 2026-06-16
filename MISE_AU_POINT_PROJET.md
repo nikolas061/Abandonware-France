@@ -319,6 +319,29 @@ Conclusion: l'etat precedent aide a isoler un motif `6a -> 6b` avec step 128,
 mais la couverture reste marginale. Cette piste confirme qu'il faut capturer un
 etat plus riche que le contexte immediat.
 
+La segmentation par alternance de valeurs de palette isole une sous-zone
+repetitive:
+
+```text
+output/tex_micro_stable_alternation/index.html
+output/tex_micro_stable_alternation/segments.csv
+```
+
+Etat courant:
+
+```text
+Run bytes: 122
+Alternating segment bytes: 68
+Longest alternating bytes: 23
+Longest values: 0x6c;0x6d
+Suffix alternating bytes: 23
+Promotion-ready bytes: 0
+```
+
+Conclusion: la source 22 contient un suffixe alterne `6c/6d` de 23 bytes. C'est
+une bonne cible pour un decodeur specialise de suffixe, mais le prefixe de la
+source et la source 18 restent hors couverture.
+
 Etat courant du noisy review:
 
 ```text
