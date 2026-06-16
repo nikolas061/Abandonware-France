@@ -23,6 +23,7 @@ DEFAULT_STABLE_SOURCES_SUMMARY = Path("output/tex_micro_stable_sources/summary.c
 DEFAULT_STABLE_SOURCE_GRAMMAR_SUMMARY = Path("output/tex_micro_stable_source_grammar/summary.csv")
 DEFAULT_STABLE_VALUE_CONTEXT_SUMMARY = Path("output/tex_micro_stable_value_context/summary.csv")
 DEFAULT_STABLE_CONTEXT_RULES_SUMMARY = Path("output/tex_micro_stable_context_rules/summary.csv")
+DEFAULT_STABLE_SEQUENCES_SUMMARY = Path("output/tex_micro_stable_sequences/summary.csv")
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -182,6 +183,7 @@ def build_stable_walk_decision(
     source_grammar_summary: dict[str, str] | None,
     value_context_summary: dict[str, str] | None,
     context_rules_summary: dict[str, str] | None,
+    sequence_summary: dict[str, str] | None,
 ) -> dict[str, str] | None:
     repeated_bytes = int_value(summary, "repeated_signature_bytes")
     copy_bytes = int_value(summary, "copy_distance_320_bytes")
@@ -226,6 +228,11 @@ def build_stable_walk_decision(
             f"{context_rules_summary.get('deterministic_context_exact_bytes', '0')}"
         )
         blocking.append(f"context_rule_conflicted_bytes={context_rules_summary.get('conflicted_rule_bytes', '0')}")
+    if sequence_summary:
+        positive.append(
+            f"sequence_shape_step_bytes={sequence_summary.get('deterministic_shape_offset_step_bytes', '0')}"
+        )
+        blocking.append(f"sequence_transition_bytes={sequence_summary.get('transition_bytes', '0')}")
 
     return {
         "surface": "micro_token_stable_walks",
@@ -247,6 +254,7 @@ def append_optional_stable_walk_decision(
     source_grammar_summary_path: Path,
     value_context_summary_path: Path,
     context_rules_summary_path: Path,
+    sequence_summary_path: Path,
 ) -> list[dict[str, str]]:
     if not summary_path.exists() or not groups_path.exists():
         return decisions
@@ -265,6 +273,8 @@ def append_optional_stable_walk_decision(
     value_context_summary = value_context_summary_rows[0] if value_context_summary_rows else None
     context_rules_summary_rows = read_rows(context_rules_summary_path) if context_rules_summary_path.exists() else []
     context_rules_summary = context_rules_summary_rows[0] if context_rules_summary_rows else None
+    sequence_summary_rows = read_rows(sequence_summary_path) if sequence_summary_path.exists() else []
+    sequence_summary = sequence_summary_rows[0] if sequence_summary_rows else None
     decision = build_stable_walk_decision(
         summary_rows[0],
         read_rows(groups_path),
@@ -273,6 +283,7 @@ def append_optional_stable_walk_decision(
         source_grammar_summary,
         value_context_summary,
         context_rules_summary,
+        sequence_summary,
     )
     if decision is None:
         return decisions
@@ -373,6 +384,7 @@ def main() -> None:
     parser.add_argument("--stable-source-grammar-summary", type=Path, default=DEFAULT_STABLE_SOURCE_GRAMMAR_SUMMARY)
     parser.add_argument("--stable-value-context-summary", type=Path, default=DEFAULT_STABLE_VALUE_CONTEXT_SUMMARY)
     parser.add_argument("--stable-context-rules-summary", type=Path, default=DEFAULT_STABLE_CONTEXT_RULES_SUMMARY)
+    parser.add_argument("--stable-sequences-summary", type=Path, default=DEFAULT_STABLE_SEQUENCES_SUMMARY)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -386,6 +398,7 @@ def main() -> None:
         args.stable_source_grammar_summary,
         args.stable_value_context_summary,
         args.stable_context_rules_summary,
+        args.stable_sequences_summary,
     )
     review_summary = read_rows(args.review_summary)[0]
     queue = build_queue(decisions)

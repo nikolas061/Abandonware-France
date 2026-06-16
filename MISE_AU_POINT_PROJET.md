@@ -295,6 +295,30 @@ valeur/longueur, mais la couverture reelle reste trop faible face aux conflits.
 Il faut donc continuer vers un modele d'opcodes/etat plus riche avant toute
 promotion.
 
+La sonde de transitions entre runs teste si l'etat precedent stabilise le run
+suivant:
+
+```text
+output/tex_micro_stable_sequences/index.html
+output/tex_micro_stable_sequences/rules.csv
+```
+
+Etat courant:
+
+```text
+Transition rows: 32
+Transition bytes: 104
+Deterministic next-pair bytes: 16
+Deterministic shape-step bytes: 6
+Deterministic value-step bytes: 6
+Best rule family: shape_offset_step
+Promotion-ready bytes: 0
+```
+
+Conclusion: l'etat precedent aide a isoler un motif `6a -> 6b` avec step 128,
+mais la couverture reste marginale. Cette piste confirme qu'il faut capturer un
+etat plus riche que le contexte immediat.
+
 Etat courant du noisy review:
 
 ```text
