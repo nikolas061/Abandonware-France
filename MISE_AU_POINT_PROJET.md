@@ -270,6 +270,31 @@ normalisation de forme ne regroupe pas plus large que l'hex exact sur cette
 fenetre, donc cette piste sert surtout a ordonner le prochain travail
 d'opcode/state-machine.
 
+Le probe table-driven contexte -> run complet mesure ce qui serait directement
+predictible:
+
+```text
+output/tex_micro_stable_context_rules/index.html
+output/tex_micro_stable_context_rules/rules.csv
+```
+
+Etat courant:
+
+```text
+Context rows: 34
+Context bytes: 116
+Rule rows: 132
+Deterministic exact-context bytes: 10
+Deterministic shape bytes: 10
+Conflicted rule bytes: 284
+Promotion-ready bytes: 0
+```
+
+Conclusion: deux petits contextes repetes predisent bien un couple
+valeur/longueur, mais la couverture reelle reste trop faible face aux conflits.
+Il faut donc continuer vers un modele d'opcodes/etat plus riche avant toute
+promotion.
+
 Etat courant du noisy review:
 
 ```text
