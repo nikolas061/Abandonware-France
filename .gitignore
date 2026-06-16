@@ -1,0 +1,24 @@
+# Game/runtime payloads
+C/
+CD/
+Might-and-Magic-World-of-Xeen/
+.wine-lolg-hd/
+dosbox
+francais074.lng
+soundfonts/
+mt32-roms/
+
+# Generated reports and exported assets
+output/
+
+# Python/runtime caches
+__pycache__/
+*.py[cod]
+tools/__pycache__/
+
+# Local captures and temporary files
+capture/
+*.log
+*.tmp
+*.bak
+*~

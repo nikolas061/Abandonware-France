@@ -1,0 +1,18 @@
+Pour lancer Lands of Lore 2 en Full HD:
+
+1/ Mettez les droits de lecture, ecriture et execution sur l'executable RUN_HD.sh.
+
+2/ Ouvrez un terminal dans ce dossier et tapez la commande suivante:
+
+./RUN_HD.sh
+
+Le lanceur Full HD force DOSBox en 1920x1080, sortie OpenGL, et reactive les
+reglages High du jeu au demarrage.
+
+Pour lancer la version classique, utilisez:
+
+./RUN.sh
+
+Si votre distribution le permet, clic droit sur RUN_HD.sh puis "executer comme
+un programme" ou "ouvrir dans un terminal".
+

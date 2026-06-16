@@ -1,0 +1,4 @@
+Pour désinstaller le jeu, il vous suffit juste de supprimer son dossier.
+
+
+Les dépendances de Dosbox-Staging ne seront pas désinstallées.

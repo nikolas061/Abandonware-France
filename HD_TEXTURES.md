@@ -1,0 +1,3629 @@
+# Full HD / Texture Notes
+
+This package now has two DOSBox rendering paths:
+
+- `RUN.sh`: original DOSBox launcher, forced to 1920x1080 fullscreen and 16:9 stretch.
+- `RUN_HD.sh`: DOSBox HD launcher. It reapplies the game quality settings,
+  forces the DOSBox config back to 1920x1080 OpenGL stretch output, fixes the
+  local CD image mount path, and starts the bundled `dosbox` binary.
+
+Game-side texture quality is already set to the engine maximum in:
+
+- `C/LOLG/OPTIONS.INI`
+- `C/LOLG/OPT3DFX.INI`
+- `C/LOLG/OPTFIX.INI`
+
+The relevant values are:
+
+```ini
+Video_Texture_Resolution=High
+Video_Texture_Cache=Large
+Acceleration_Filtering=On
+Acceleration_Toggle=On
+```
+
+Asset format findings:
+
+- `.MIX` files are Westwood archives with hash-based entries and no stored filenames.
+- Most visual assets are `VQA` videos or animations.
+- `FORM/XDIR` entries in `LOCAL.MIX` are XMID-related containers, not VQA
+  videos. The asset report now separates them from `FORM/WVQA`.
+- A small number of global UI/background assets are `PCX`.
+- Level textures are stored in proprietary `.tex` payloads referenced by
+  `C/LOLG/CDCACHE.LST`.
+- The official patch only exposes `High`/`Low` texture resolution. There is no native 1920x1080 texture mode in the game data or config.
+
+The practical no-Wine HD path is therefore DOSBox-Staging rendering with forced
+1920x1080 output, 16:9 stretch, OpenGL output, and the Catmull-Rom shader.
+`RUN_HD.sh` reapplies the high game/movie/texture settings to all three local
+profiles before launching DOSBox.
+
+## Full HD export inventory
+
+`tools/lolg_hd_inventory.py` builds a manifest-level inventory of generated
+Full HD PNG exports without duplicating the image files. It reads the existing
+static-image, VQA, and CDCACHE manifests, opens the PNGs, and records actual
+dimensions, image mode, transparency, and issues.
+
+The current inventory is:
+
+```text
+output/fullhd_inventory/manifest.csv
+output/fullhd_inventory/summary.csv
+output/fullhd_audit/audit.csv
+output/fullhd_audit/summary.csv
+output/fullhd_dashboard/index.html
+output/project_legacy_inventory/index.html
+output/project_legacy_inventory/summary.csv
+output/project_legacy_inventory/manifest.csv
+output/fullhd_archive_coverage/index.html
+output/fullhd_archive_coverage/summary.csv
+output/fullhd_archive_coverage/archives.csv
+output/tex_hd_coverage/index.html
+output/tex_hd_coverage/summary.csv
+output/tex_hd_coverage/cache_assets.csv
+output/tex_hd_coverage/material_links.csv
+output/tex_reference_coverage/index.html
+output/tex_reference_coverage/summary.csv
+output/tex_reference_coverage/references.csv
+output/tex_reference_coverage/missing_references.csv
+output/tex_reference_coverage/by_archive.csv
+output/tex_missing_reference_evidence/index.html
+output/tex_missing_reference_evidence/summary.csv
+output/tex_missing_reference_evidence/unique_missing.csv
+output/tex_missing_reference_evidence/evidence.csv
+output/cdcache_raw_reference_probe/index.html
+output/cdcache_raw_reference_probe/summary.csv
+output/cdcache_raw_reference_probe/raw_reference_probe.csv
+output/cdcache_alias_candidates/index.html
+output/cdcache_alias_candidates/summary.csv
+output/cdcache_alias_candidates/alias_candidates.csv
+output/cdcache_alias_candidates/synthetic_descriptors.csv
+output/cdcache_alias_candidate_textures/manifest.csv
+output/cdcache_alias_candidate_textures/verification.csv
+output/cdcache_alias_candidate_textures/tiles_manifest.csv
+output/cdcache_alias_candidate_textures/tiles_verification.csv
+output/cdcache_tex_alias_pack/index.html
+output/cdcache_tex_alias_pack/summary.csv
+output/cdcache_tex_alias_pack/manifest.csv
+output/tex_augmented_coverage/index.html
+output/tex_augmented_coverage/summary.csv
+output/tex_augmented_coverage/references.csv
+output/tex_augmented_coverage/aliases.csv
+output/tex_unresolved_material_probe_render/index.html
+output/tex_unresolved_material_probe_render/summary.csv
+output/tex_unresolved_material_probe_render/gallery_manifest.csv
+output/tex_unresolved_material_probe_render/manifest.csv
+output/tex_unresolved_material_probe_render/analysis.html
+output/tex_unresolved_material_probe_render/analysis_summary.csv
+output/tex_unresolved_material_probe_render/analysis.csv
+output/tex_unresolved_material_probe_render/best_candidates.csv
+output/tex_material_decoder_queue/index.html
+output/tex_material_decoder_queue/summary.csv
+output/tex_material_decoder_queue/queue.csv
+output/tex_material_decoder_queue/by_prefix.csv
+output/tex_exact_cdcache_compare/index.html
+output/tex_exact_cdcache_compare/summary.csv
+output/tex_exact_cdcache_compare/comparisons.csv
+output/tex_exact_chunk_evidence/index.html
+output/tex_exact_chunk_evidence/summary.csv
+output/tex_exact_chunk_evidence/matches.csv
+output/tex_exact_match_overlays/index.html
+output/tex_exact_match_overlays/summary.csv
+output/tex_exact_match_overlays/overlays.csv
+output/tex_decoder_seed_report/index.html
+output/tex_decoder_seed_report/summary.csv
+output/tex_decoder_seed_report/seeds.csv
+output/tex_exact_chunk_scan/index.html
+output/tex_exact_chunk_scan/summary.csv
+output/tex_exact_chunk_scan/scan.csv
+output/tex_exact_chunk_clusters/index.html
+output/tex_exact_chunk_clusters/summary.csv
+output/tex_exact_chunk_clusters/clusters.csv
+output/tex_exact_cluster_overlays/index.html
+output/tex_exact_cluster_overlays/summary.csv
+output/tex_exact_cluster_overlays/overlays.csv
+output/tex_decoder_run_corpus/index.html
+output/tex_decoder_run_corpus/summary.csv
+output/tex_decoder_run_corpus/runs.csv
+output/tex_decoder_run_corpus/runs/
+output/tex_partial_raw_decoder/index.html
+output/tex_partial_raw_decoder/summary.csv
+output/tex_partial_raw_decoder/manifest.csv
+output/tex_partial_raw_decoder/fullhd/
+output/tex_partial_raw_coverage/index.html
+output/tex_partial_raw_coverage/summary.csv
+output/tex_partial_raw_coverage/coverage.csv
+output/tex_partial_raw_coverage/gaps.csv
+output/tex_gap_frontier_report/index.html
+output/tex_gap_frontier_report/summary.csv
+output/tex_gap_frontier_report/frontiers.csv
+output/tex_gap_opcode_probe/index.html
+output/tex_gap_opcode_probe/summary.csv
+output/tex_gap_opcode_probe/probe.csv
+output/tex_gap_opcode_probe/opcode_stats.csv
+output/tex_gap_rle_probe/index.html
+output/tex_gap_rle_probe/summary.csv
+output/tex_gap_rle_probe/hypotheses.csv
+output/tex_gap_rle_probe/best_by_frontier.csv
+output/tex_gap_rule_queue/index.html
+output/tex_gap_rule_queue/summary.csv
+output/tex_gap_rule_queue/queue.csv
+output/tex_gap_rule_queue/by_rule.csv
+output/tex_gap_rule_fixtures/index.html
+output/tex_gap_rule_fixtures/summary.csv
+output/tex_gap_rule_fixtures/manifest.csv
+output/tex_gap_rule_fixtures/fixtures/
+output/tex_gap_zero_run_probe/index.html
+output/tex_gap_zero_run_probe/summary.csv
+output/tex_gap_zero_run_probe/fixtures.csv
+output/tex_gap_zero_run_probe/runs.csv
+output/tex_gap_geometry_replay/index.html
+output/tex_gap_geometry_replay/summary.csv
+output/tex_gap_geometry_replay/candidates.csv
+output/tex_gap_geometry_replay/best_by_fixture.csv
+output/tex_gap_nonzero_stream_probe/index.html
+output/tex_gap_nonzero_stream_probe/summary.csv
+output/tex_gap_nonzero_stream_probe/candidates.csv
+output/tex_gap_nonzero_stream_probe/best_by_fixture.csv
+output/tex_gap_control_word_probe/index.html
+output/tex_gap_control_word_probe/summary.csv
+output/tex_gap_control_word_probe/fixtures.csv
+output/tex_gap_control_word_probe/hits.csv
+output/tex_gap_control_word_probe/by_metric.csv
+output/tex_gap_header_schema_probe/index.html
+output/tex_gap_header_schema_probe/summary.csv
+output/tex_gap_header_schema_probe/fixtures.csv
+output/tex_gap_header_schema_probe/blocks.csv
+output/tex_gap_header_schema_probe/payload_candidates.csv
+output/tex_gap_header_schema_probe/best_by_fixture.csv
+output/tex_gap_row_stride_probe/index.html
+output/tex_gap_row_stride_probe/summary.csv
+output/tex_gap_row_stride_probe/fixtures.csv
+output/tex_gap_row_stride_probe/candidates.csv
+output/tex_gap_row_stride_probe/best_by_fixture.csv
+output/tex_gap_row_stride_mismatch_probe/index.html
+output/tex_gap_row_stride_mismatch_probe/summary.csv
+output/tex_gap_row_stride_mismatch_probe/candidates.csv
+output/tex_gap_row_stride_mismatch_probe/row_scores.csv
+output/tex_gap_row_delta_probe/index.html
+output/tex_gap_row_delta_probe/summary.csv
+output/tex_gap_row_delta_probe/candidates.csv
+output/tex_gap_row_delta_probe/row_deltas.csv
+output/tex_gap_row_transform_probe/index.html
+output/tex_gap_row_transform_probe/summary.csv
+output/tex_gap_row_transform_probe/candidates.csv
+output/tex_gap_row_transform_probe/row_transforms.csv
+output/tex_gap_row_control_probe/index.html
+output/tex_gap_row_control_probe/summary.csv
+output/tex_gap_row_control_probe/candidates.csv
+output/tex_gap_row_control_probe/row_controls.csv
+output/tex_gap_row_control_probe/by_control.csv
+output/tex_gap_row_control_probe/by_metric.csv
+output/tex_gap_row_sequence_probe/index.html
+output/tex_gap_row_sequence_probe/summary.csv
+output/tex_gap_row_sequence_probe/candidates.csv
+output/tex_gap_row_sequence_probe/transitions.csv
+output/tex_gap_row_sequence_probe/by_step.csv
+output/tex_gap_row_literal_scan_probe/index.html
+output/tex_gap_row_literal_scan_probe/summary.csv
+output/tex_gap_row_literal_scan_probe/candidates.csv
+output/tex_gap_row_literal_scan_probe/row_scans.csv
+output/tex_gap_row_fill_run_probe/index.html
+output/tex_gap_row_fill_run_probe/summary.csv
+output/tex_gap_row_fill_run_probe/candidates.csv
+output/tex_gap_row_fill_run_probe/row_fills.csv
+output/tex_gap_row_fill_run_probe/run_matches.csv
+output/tex_gap_control_grammar_probe/index.html
+output/tex_gap_control_grammar_probe/summary.csv
+output/tex_gap_control_grammar_probe/candidates.csv
+output/tex_gap_control_grammar_probe/best_by_fixture.csv
+output/tex_gap_mismatch_trace_probe/index.html
+output/tex_gap_mismatch_trace_probe/summary.csv
+output/tex_gap_mismatch_trace_probe/mismatches.csv
+output/tex_gap_mismatch_trace_probe/control_operations.csv
+output/tex_gap_zero_literal_switch_probe/index.html
+output/tex_gap_zero_literal_switch_probe/summary.csv
+output/tex_gap_zero_literal_switch_probe/candidates.csv
+output/tex_gap_zero_literal_switch_probe/best_by_fixture.csv
+output/tex_gap_zero_literal_segmentation_probe/index.html
+output/tex_gap_zero_literal_segmentation_probe/summary.csv
+output/tex_gap_zero_literal_segmentation_probe/strategies.csv
+output/tex_gap_zero_literal_segmentation_probe/operations.csv
+output/tex_gap_zero_literal_segmentation_probe/best_by_fixture.csv
+output/tex_gap_segmentation_control_correlation_probe/index.html
+output/tex_gap_segmentation_control_correlation_probe/summary.csv
+output/tex_gap_segmentation_control_correlation_probe/operations.csv
+output/tex_gap_segmentation_control_correlation_probe/by_pre_context.csv
+output/tex_gap_segmentation_control_correlation_probe/by_source_delta.csv
+output/tex_gap_literal_token_probe/index.html
+output/tex_gap_literal_token_probe/summary.csv
+output/tex_gap_literal_token_probe/rules.csv
+output/tex_gap_literal_token_probe/literals.csv
+output/tex_gap_literal_token_probe/by_token.csv
+output/tex_gap_literal_token_probe/by_fixture.csv
+output/tex_gap_literal_token_classifier_probe/index.html
+output/tex_gap_literal_token_classifier_probe/summary.csv
+output/tex_gap_literal_token_classifier_probe/classifiers.csv
+output/tex_gap_literal_token_classifier_probe/classifier_errors.csv
+output/tex_gap_literal_token_classifier_probe/by_fixture.csv
+output/tex_gap_literal_fp_rejection_probe/index.html
+output/tex_gap_literal_fp_rejection_probe/summary.csv
+output/tex_gap_literal_fp_rejection_probe/classifiers.csv
+output/tex_gap_literal_fp_rejection_probe/rejections.csv
+output/tex_gap_literal_fp_rejection_probe/by_fixture.csv
+output/tex_gap_zero_run_alignment_probe/index.html
+output/tex_gap_zero_run_alignment_probe/summary.csv
+output/tex_gap_zero_run_alignment_probe/zero_runs.csv
+output/tex_gap_zero_run_alignment_probe/by_length.csv
+output/tex_gap_zero_run_alignment_probe/by_transition.csv
+output/tex_gap_zero_run_alignment_probe/by_fixture.csv
+output/tex_gap_zero_control_risk_probe/index.html
+output/tex_gap_zero_control_risk_probe/summary.csv
+output/tex_gap_zero_control_risk_probe/classifiers.csv
+output/tex_gap_zero_control_risk_probe/false_positives.csv
+output/tex_gap_zero_control_risk_probe/by_kind.csv
+output/tex_gap_zero_control_risk_probe/by_fixture.csv
+output/tex_gap_decoder_skeleton_candidate_probe/index.html
+output/tex_gap_decoder_skeleton_candidate_probe/summary.csv
+output/tex_gap_decoder_skeleton_candidate_probe/candidates.csv
+output/tex_gap_decoder_skeleton_candidate_probe/by_fixture.csv
+output/tex_gap_decoder_risk_adjusted_probe/index.html
+output/tex_gap_decoder_risk_adjusted_probe/summary.csv
+output/tex_gap_decoder_risk_adjusted_probe/candidates.csv
+output/tex_gap_decoder_risk_adjusted_probe/by_fixture.csv
+output/tex_gap_decoder_seed_replay/index.html
+output/tex_gap_decoder_seed_replay/summary.csv
+output/tex_gap_decoder_seed_replay/fixtures.csv
+output/tex_gap_decoder_seed_replay/decisions.csv
+output/tex_gap_decoder_control_promotion_probe/index.html
+output/tex_gap_decoder_control_promotion_probe/summary.csv
+output/tex_gap_decoder_control_promotion_probe/selectors.csv
+output/tex_gap_decoder_control_promotion_probe/signatures.csv
+output/tex_gap_decoder_control_promotion_probe/by_fixture.csv
+output/tex_gap_decoder_false_risk_queue/index.html
+output/tex_gap_decoder_false_risk_queue/summary.csv
+output/tex_gap_decoder_false_risk_queue/queue.csv
+output/tex_gap_decoder_false_risk_queue/rejectors.csv
+output/tex_gap_decoder_false_risk_queue/by_fixture.csv
+output/tex_gap_decoder_clean_replay/index.html
+output/tex_gap_decoder_clean_replay/summary.csv
+output/tex_gap_decoder_clean_replay/fixtures.csv
+output/tex_gap_decoder_clean_replay/decisions.csv
+output/tex_gap_decoder_clean_gap_queue/index.html
+output/tex_gap_decoder_clean_gap_queue/summary.csv
+output/tex_gap_decoder_clean_gap_queue/spans.csv
+output/tex_gap_decoder_clean_gap_queue/by_fixture.csv
+output/tex_gap_decoder_unresolved_run_probe/index.html
+output/tex_gap_decoder_unresolved_run_probe/summary.csv
+output/tex_gap_decoder_unresolved_run_probe/by_span.csv
+output/tex_gap_decoder_unresolved_run_probe/runs.csv
+output/tex_gap_decoder_unresolved_run_probe/by_fixture.csv
+output/tex_gap_decoder_unresolved_zero_queue/index.html
+output/tex_gap_decoder_unresolved_zero_queue/summary.csv
+output/tex_gap_decoder_unresolved_zero_queue/queue.csv
+output/tex_gap_decoder_unresolved_zero_queue/by_signature.csv
+output/tex_gap_decoder_unresolved_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_internal_probe/index.html
+output/tex_gap_decoder_len64_internal_probe/summary.csv
+output/tex_gap_decoder_len64_internal_probe/targets.csv
+output/tex_gap_decoder_len64_internal_probe/by_neighbor_signature.csv
+output/tex_gap_decoder_len64_internal_probe/by_fixture.csv
+output/tex_gap_decoder_len64_source_probe/index.html
+output/tex_gap_decoder_len64_source_probe/summary.csv
+output/tex_gap_decoder_len64_source_probe/targets.csv
+output/tex_gap_decoder_len64_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_selector_probe/index.html
+output/tex_gap_decoder_len64_selector_probe/summary.csv
+output/tex_gap_decoder_len64_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_replay/index.html
+output/tex_gap_decoder_len64_promoted_replay/summary.csv
+output/tex_gap_decoder_len64_promoted_replay/fixtures.csv
+output/tex_gap_decoder_len64_promoted_replay/promotions.csv
+output/tex_gap_decoder_len64_promoted_gap_queue/index.html
+output/tex_gap_decoder_len64_promoted_gap_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_gap_queue/spans.csv
+output/tex_gap_decoder_len64_promoted_gap_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_run_probe/index.html
+output/tex_gap_decoder_len64_promoted_run_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_run_probe/by_span.csv
+output/tex_gap_decoder_len64_promoted_run_probe/runs.csv
+output/tex_gap_decoder_len64_promoted_run_probe/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/index.html
+output/tex_gap_decoder_len64_promoted_zero_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/queue.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/by_signature.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/index.html
+output/tex_gap_decoder_len64_promoted_zero_source_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_large32_replay/index.html
+output/tex_gap_decoder_len64_promoted_large32_replay/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_replay/fixtures.csv
+output/tex_gap_decoder_len64_promoted_large32_replay/promotions.csv
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/index.html
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/spans.csv
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_run_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/by_span.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/runs.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/index.html
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/queue.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/by_signature.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_medium8_replay/index.html
+output/tex_gap_decoder_len64_promoted_medium8_replay/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_replay/fixtures.csv
+output/tex_gap_decoder_len64_promoted_medium8_replay/promotions.csv
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/index.html
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/spans.csv
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/by_span.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/runs.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/index.html
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/queue.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/by_signature.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/targets.csv
+output/tex_gap_fixture_replay/index.html
+output/tex_gap_fixture_replay/summary.csv
+output/tex_gap_fixture_replay/replay.csv
+output/tex_gap_fixture_replay/best_by_fixture.csv
+output/fullhd_images/index.html
+output/fullhd_images/gallery_manifest.csv
+output/vqa_batch_window_lcw_transparent0_allframes/status.html
+output/vqa_batch_window_lcw_transparent0_allframes/status_summary.csv
+output/vqa_batch_window_lcw_transparent0_allframes/status_by_archive.csv
+output/vqa_batch_window_lcw_transparent0_allframes/status_by_resolution.csv
+output/vqa_batch_window_lcw_transparent0_allframes/status_by_pointer.csv
+```
+
+Regenerate it with:
+
+```sh
+python3 tools/lolg_hd_inventory.py -o output/fullhd_inventory
+python3 tools/lolg_project_legacy_inventory.py -o output/project_legacy_inventory
+python3 tools/lolg_still_hd_gallery.py output/fullhd_images
+python3 tools/lolg_vqa_status_report.py output/vqa_batch_window_lcw_transparent0_allframes
+python3 tools/lolg_hd_archive_coverage.py C/LOLG/*.MIX -o output/fullhd_archive_coverage
+python3 tools/lolg_tex_hd_coverage.py -o output/tex_hd_coverage
+python3 tools/lolg_tex_reference_coverage.py -o output/tex_reference_coverage
+python3 tools/lolg_tex_missing_reference_evidence.py -o output/tex_missing_reference_evidence
+python3 tools/lolg_cdcache_raw_reference_probe.py -o output/cdcache_raw_reference_probe
+python3 tools/lolg_cdcache_alias_candidates.py -o output/cdcache_alias_candidates
+python3 tools/lolg_cdcache_texture_extract.py \
+  --descriptors output/cdcache_alias_candidates/synthetic_descriptors.csv \
+  --decode-mode tiled --fullhd --content-crop --export-tiles --rgba \
+  -o output/cdcache_alias_candidate_textures
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_alias_candidate_textures --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_alias_candidate_textures \
+  --manifest output/cdcache_alias_candidate_textures/tiles_manifest.csv \
+  --report output/cdcache_alias_candidate_textures/tiles_verification.csv \
+  --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_tex_alias_pack.py -o output/cdcache_tex_alias_pack
+python3 tools/lolg_tex_augmented_coverage.py -o output/tex_augmented_coverage
+python3 tools/lolg_tex_probe_render.py \
+  --names beaker4.pcx,puddle.pcx,undead.pcx,dirt.pcx,ston.pcx,death.pcx,statue.pcx,dn-dead.pcx \
+  --palette C/LOLG/LOCAL.MIX:94 --fullhd --max-samples 64 \
+  -o output/tex_unresolved_material_probe_render
+python3 tools/lolg_tex_probe_gallery.py output/tex_unresolved_material_probe_render
+python3 tools/lolg_tex_probe_analyze.py output/tex_unresolved_material_probe_render
+python3 tools/lolg_tex_material_decoder_queue.py -o output/tex_material_decoder_queue
+python3 tools/lolg_tex_exact_cdcache_compare.py -o output/tex_exact_cdcache_compare
+python3 tools/lolg_tex_exact_chunk_evidence.py -o output/tex_exact_chunk_evidence
+python3 tools/lolg_tex_exact_match_overlays.py -o output/tex_exact_match_overlays
+python3 tools/lolg_tex_decoder_seed_report.py -o output/tex_decoder_seed_report
+python3 tools/lolg_tex_exact_chunk_scan.py -o output/tex_exact_chunk_scan
+python3 tools/lolg_tex_exact_chunk_clusters.py -o output/tex_exact_chunk_clusters
+python3 tools/lolg_tex_exact_cluster_overlays.py -o output/tex_exact_cluster_overlays
+python3 tools/lolg_tex_decoder_run_corpus.py -o output/tex_decoder_run_corpus
+python3 tools/lolg_tex_partial_raw_decoder.py -o output/tex_partial_raw_decoder
+python3 tools/lolg_tex_partial_raw_coverage.py -o output/tex_partial_raw_coverage
+python3 tools/lolg_tex_gap_frontier_report.py -o output/tex_gap_frontier_report
+python3 tools/lolg_tex_gap_opcode_probe.py -o output/tex_gap_opcode_probe
+python3 tools/lolg_tex_gap_rle_probe.py -o output/tex_gap_rle_probe
+python3 tools/lolg_tex_gap_rule_queue.py -o output/tex_gap_rule_queue
+python3 tools/lolg_tex_gap_rule_fixtures.py -o output/tex_gap_rule_fixtures
+python3 tools/lolg_tex_gap_zero_run_probe.py -o output/tex_gap_zero_run_probe
+python3 tools/lolg_tex_gap_geometry_replay.py -o output/tex_gap_geometry_replay
+python3 tools/lolg_tex_gap_nonzero_stream_probe.py -o output/tex_gap_nonzero_stream_probe
+python3 tools/lolg_tex_gap_control_word_probe.py -o output/tex_gap_control_word_probe
+python3 tools/lolg_tex_gap_header_schema_probe.py -o output/tex_gap_header_schema_probe
+python3 tools/lolg_tex_gap_row_stride_probe.py -o output/tex_gap_row_stride_probe
+python3 tools/lolg_tex_gap_row_stride_mismatch_probe.py -o output/tex_gap_row_stride_mismatch_probe
+python3 tools/lolg_tex_gap_row_delta_probe.py -o output/tex_gap_row_delta_probe
+python3 tools/lolg_tex_gap_row_transform_probe.py -o output/tex_gap_row_transform_probe
+python3 tools/lolg_tex_gap_row_control_probe.py -o output/tex_gap_row_control_probe
+python3 tools/lolg_tex_gap_row_sequence_probe.py -o output/tex_gap_row_sequence_probe
+python3 tools/lolg_tex_gap_row_literal_scan_probe.py -o output/tex_gap_row_literal_scan_probe
+python3 tools/lolg_tex_gap_row_fill_run_probe.py -o output/tex_gap_row_fill_run_probe
+python3 tools/lolg_tex_gap_control_grammar_probe.py -o output/tex_gap_control_grammar_probe
+python3 tools/lolg_tex_gap_mismatch_trace_probe.py -o output/tex_gap_mismatch_trace_probe
+python3 tools/lolg_tex_gap_zero_literal_switch_probe.py -o output/tex_gap_zero_literal_switch_probe
+python3 tools/lolg_tex_gap_zero_literal_segmentation_probe.py -o output/tex_gap_zero_literal_segmentation_probe
+python3 tools/lolg_tex_gap_segmentation_control_correlation_probe.py -o output/tex_gap_segmentation_control_correlation_probe
+python3 tools/lolg_tex_gap_literal_token_probe.py -o output/tex_gap_literal_token_probe
+python3 tools/lolg_tex_gap_literal_token_classifier_probe.py -o output/tex_gap_literal_token_classifier_probe
+python3 tools/lolg_tex_gap_literal_fp_rejection_probe.py -o output/tex_gap_literal_fp_rejection_probe
+python3 tools/lolg_tex_gap_zero_run_alignment_probe.py -o output/tex_gap_zero_run_alignment_probe
+python3 tools/lolg_tex_gap_zero_control_risk_probe.py -o output/tex_gap_zero_control_risk_probe
+python3 tools/lolg_tex_gap_decoder_skeleton_candidate_probe.py -o output/tex_gap_decoder_skeleton_candidate_probe
+python3 tools/lolg_tex_gap_decoder_risk_adjusted_probe.py -o output/tex_gap_decoder_risk_adjusted_probe
+python3 tools/lolg_tex_gap_decoder_seed_replay.py -o output/tex_gap_decoder_seed_replay
+python3 tools/lolg_tex_gap_decoder_control_promotion_probe.py -o output/tex_gap_decoder_control_promotion_probe
+python3 tools/lolg_tex_gap_decoder_false_risk_queue.py -o output/tex_gap_decoder_false_risk_queue
+python3 tools/lolg_tex_gap_decoder_clean_replay.py -o output/tex_gap_decoder_clean_replay
+python3 tools/lolg_tex_gap_decoder_clean_gap_queue.py -o output/tex_gap_decoder_clean_gap_queue
+python3 tools/lolg_tex_gap_decoder_unresolved_run_probe.py -o output/tex_gap_decoder_unresolved_run_probe
+python3 tools/lolg_tex_gap_decoder_unresolved_zero_queue.py -o output/tex_gap_decoder_unresolved_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_internal_probe.py -o output/tex_gap_decoder_len64_internal_probe
+python3 tools/lolg_tex_gap_decoder_len64_source_probe.py -o output/tex_gap_decoder_len64_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_selector_probe.py -o output/tex_gap_decoder_len64_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_replay.py -o output/tex_gap_decoder_len64_promoted_replay
+python3 tools/lolg_tex_gap_decoder_len64_promoted_gap_queue.py -o output/tex_gap_decoder_len64_promoted_gap_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_run_probe.py -o output/tex_gap_decoder_len64_promoted_run_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_zero_queue.py -o output/tex_gap_decoder_len64_promoted_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_zero_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_selector_probe.py -o output/tex_gap_decoder_len64_promoted_large32_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_replay.py -o output/tex_gap_decoder_len64_promoted_large32_replay
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_gap_queue.py -o output/tex_gap_decoder_len64_promoted_large32_gap_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_run_probe.py -o output/tex_gap_decoder_len64_promoted_large32_run_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_zero_queue.py -o output/tex_gap_decoder_len64_promoted_large32_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_large32_zero_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_selector_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_replay.py -o output/tex_gap_decoder_len64_promoted_medium8_replay
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_gap_queue.py -o output/tex_gap_decoder_len64_promoted_medium8_gap_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_run_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_run_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_queue.py -o output/tex_gap_decoder_len64_promoted_medium8_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_remaining_selector_probe.py -o output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --target-signature 'trailing|large32|left_nonzero|right_nonzero' --target-bucket large32 --pair-family large32_pair -o output/tex_gap_decoder_len64_promoted_trailing_large32_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --target-signature 'leading|len64|left_nonzero|right_nonzero' --target-bucket len64 --pair-family len64_pair -o output/tex_gap_decoder_len64_promoted_leading_len64_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --target-signature 'internal|small|left_nonzero|right_nonzero' --target-bucket small --pair-family small_pair -o output/tex_gap_decoder_len64_promoted_internal_small_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --target-signature 'leading|large32|left_nonzero|right_nonzero' --target-bucket large32 --pair-family large32_pair -o output/tex_gap_decoder_len64_promoted_leading_large32_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --target-signature 'trailing|medium8|left_nonzero|right_nonzero' --target-bucket medium8 --pair-family medium8_pair -o output/tex_gap_decoder_len64_promoted_trailing_medium8_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_remaining_replay.py -o output/tex_gap_decoder_len64_promoted_remaining_replay
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_gap_queue.py -o output/tex_gap_decoder_len64_promoted_remaining_gap_queue --promoted-fixtures output/tex_gap_decoder_len64_promoted_remaining_replay/fixtures.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_run_probe.py -o output/tex_gap_decoder_len64_promoted_remaining_run_probe --spans output/tex_gap_decoder_len64_promoted_remaining_gap_queue/spans.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_queue.py -o output/tex_gap_decoder_len64_promoted_remaining_zero_queue --spans output/tex_gap_decoder_len64_promoted_remaining_run_probe/by_span.csv --runs output/tex_gap_decoder_len64_promoted_remaining_run_probe/runs.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe --targets output/tex_gap_decoder_len64_promoted_remaining_zero_queue/queue.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --targets output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe/targets.csv --target-signature 'internal|medium8|left_nonzero|right_nonzero' --target-bucket medium8 --pair-family medium8_pair --greedy-min-target-rows 1 -o output/tex_gap_decoder_len64_promoted_micro_internal_medium8_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --targets output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe/targets.csv --target-signature 'internal|large32|left_nonzero|right_nonzero' --target-bucket large32 --pair-family large32_pair --greedy-min-target-rows 1 -o output/tex_gap_decoder_len64_promoted_micro_internal_large32_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --targets output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe/targets.csv --target-signature 'internal|small|left_nonzero|right_nonzero' --target-bucket small --pair-family small_pair --greedy-min-target-rows 1 -o output/tex_gap_decoder_len64_promoted_micro_internal_small_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --targets output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe/targets.csv --target-signature 'leading|large32|left_nonzero|right_nonzero' --target-bucket large32 --pair-family large32_pair --greedy-min-target-rows 1 -o output/tex_gap_decoder_len64_promoted_micro_leading_large32_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --targets output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe/targets.csv --target-signature 'trailing|medium8|left_nonzero|right_nonzero' --target-bucket medium8 --pair-family medium8_pair --greedy-min-target-rows 1 -o output/tex_gap_decoder_len64_promoted_micro_trailing_medium8_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_signature_selector_probe.py --targets output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe/targets.csv --target-signature 'trailing|large32|left_nonzero|right_nonzero' --target-bucket large32 --pair-family large32_pair --greedy-min-target-rows 1 -o output/tex_gap_decoder_len64_promoted_micro_trailing_large32_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_remaining_replay.py -o output/tex_gap_decoder_len64_promoted_micro_replay --base-fixtures output/tex_gap_decoder_len64_promoted_remaining_replay/fixtures.csv --selector-targets output/tex_gap_decoder_len64_promoted_micro_internal_medium8_selector_probe/targets.csv output/tex_gap_decoder_len64_promoted_micro_internal_large32_selector_probe/targets.csv output/tex_gap_decoder_len64_promoted_micro_internal_small_selector_probe/targets.csv output/tex_gap_decoder_len64_promoted_micro_leading_large32_selector_probe/targets.csv output/tex_gap_decoder_len64_promoted_micro_trailing_medium8_selector_probe/targets.csv output/tex_gap_decoder_len64_promoted_micro_trailing_large32_selector_probe/targets.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_gap_queue.py -o output/tex_gap_decoder_len64_promoted_micro_gap_queue --promoted-fixtures output/tex_gap_decoder_len64_promoted_micro_replay/fixtures.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_run_probe.py -o output/tex_gap_decoder_len64_promoted_micro_run_probe --spans output/tex_gap_decoder_len64_promoted_micro_gap_queue/spans.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_queue.py -o output/tex_gap_decoder_len64_promoted_micro_zero_queue --spans output/tex_gap_decoder_len64_promoted_micro_run_probe/by_span.csv --runs output/tex_gap_decoder_len64_promoted_micro_run_probe/runs.csv
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_micro_zero_source_probe --targets output/tex_gap_decoder_len64_promoted_micro_zero_queue/queue.csv
+python3 tools/lolg_tex_gap_fixture_replay.py -o output/tex_gap_fixture_replay
+python3 tools/lolg_hd_audit.py --fail-on-issues
+python3 tools/lolg_hd_dashboard.py
+python3 tools/lolg_hd_audit.py --fail-on-issues
+```
+
+## Project legacy inventory
+
+`tools/lolg_project_legacy_inventory.py` tracks older files added for the
+project without moving or duplicating the large assets. Its default scan window
+is `2026-05-01` through `2026-06-14`, covering the first HD/project work before
+the current decoder/reporting batch.
+
+The report classifies old scripts, handoff notes, configs, mod archives, HD
+asset trees, runtime overrides, extracted references, historical reports, and
+diagnostic previews:
+
+```text
+output/project_legacy_inventory/index.html
+output/project_legacy_inventory/summary.csv
+output/project_legacy_inventory/manifest.csv
+```
+
+The current verified inventory result is 177452 Full HD PNG rows, 177452
+existing files, 177452 files at 1920x1080, and 0 issue rows. The summary
+breaks down as:
+
+- 171167 VQA frame exports.
+- 78 static still-image exports.
+- 531 CDCACHE descriptor Full HD exports, including descriptor crops.
+- 5676 CDCACHE tile Full HD exports, including tile crops.
+- 6238 transparent RGBA Full HD exports.
+
+The current master Full HD audit result is 229/229 gates passed:
+
+- 78 static still-image PNGs verified at 1920x1080.
+- `output/fullhd_images/index.html` verified with 78 gallery entries and 0
+  missing Full HD image paths.
+- 171167 VQA Full HD frame PNGs verified against 1955 rendered entries.
+- `output/vqa_batch_window_lcw_transparent0_allframes/index.html` verified
+  with 1955 VQA gallery entries, 171167 covered frames, and 0 missing paths.
+- `output/vqa_batch_window_lcw_transparent0_allframes/status.html` verified
+  against 1955 VQA entries, 66 source archives, 171167 Full HD frames, 13 held
+  frame rows, and 0 issue rows.
+- `output/fullhd_archive_coverage/index.html` verified against 86 `.MIX`
+  archives with 1992 detected visual entries: 1955/1955 VQA and 37/37 PCX
+  entries covered by Full HD outputs.
+- 177452 inventoried Full HD PNG outputs exist and are 1920x1080.
+- 266 CDCACHE RGBA descriptor rows and 2838 CDCACHE RGBA tile rows verified.
+- 3104 CDCACHE HD asset-pack symlinks verified, including 194 `.tex`-linked
+  pack entries.
+- `output/tex_hd_coverage/index.html` verified with 194 `.tex`-linked Full HD
+  pack assets: 14 descriptors, 180 tiles, 8 material-link rows, and 0 missing
+  source or pack paths.
+- `output/tex_reference_coverage/index.html` verified with 87 unique likely
+  PCX references from `.tex` payloads: 14 currently descriptor-backed and 73
+  still not attached to decoded CDCACHE descriptors, with 0 covered-path
+  issues.
+- `output/tex_missing_reference_evidence/index.html` verified for the 73
+  still-missing unique `.tex` PCX names: 9 have raw CDCACHE string evidence in
+  the same archive, 10 have material-record evidence, and all 73 still have a
+  mapped `.tex` segment.
+- `output/cdcache_raw_reference_probe/index.html` verified 16 raw CDCACHE
+  probes for those same-archive references, including 8 descriptor-candidate
+  windows and 0 issue rows.
+- `output/cdcache_alias_candidates/index.html` verified 8 CDCACHE alias
+  candidates for 7 still-missing `.tex` names: 5 point to existing descriptors
+  and 3 are synthetic descriptors built from nearby raw headers.
+- `output/cdcache_alias_candidate_textures/` verified 3 synthetic descriptor
+  Full HD RGBA exports and 31 synthetic tile Full HD RGBA exports, all with 0
+  issue rows.
+- `output/cdcache_tex_alias_pack/index.html` verified 8 alias-pack symlinks:
+  5 to existing Full HD descriptor exports and 3 to the new synthetic Full HD
+  exports.
+- `output/tex_augmented_coverage/index.html` verified the combined `.tex`
+  coverage: 14 exact unique PCX names, 7 alias-backed unique names, 21 exact
+  or alias-backed unique names total, and 66 still unresolved unique names.
+- `output/tex_unresolved_material_probe_render/index.html` verified 168
+  Full HD diagnostic previews for 8 material-linked unresolved `.tex` PCX
+  names, covering 8 mapped segments with 0 issue rows.
+- `output/tex_unresolved_material_probe_render/analysis.html` verified the
+  probe-ranking report: 168 analyzed previews, 8 segments, 24 best-candidate
+  rows, and 0 issue rows.
+- `output/tex_material_decoder_queue/index.html` verified the material-linked
+  `.tex` decoder queue: 36 material rows, 8 exact rows, 4 alias rows, 24
+  unresolved rows, 8 queued unresolved segments, and 0 issue rows.
+- `output/tex_exact_cdcache_compare/index.html` verified the 4 exact
+  material `.tex`/CDCACHE segment comparisons: 1 segment with 32-byte direct
+  chunk matches, 2 with 16-byte direct chunk matches, and 0 issue rows.
+- `output/tex_exact_chunk_evidence/index.html` verified the direct chunk
+  evidence report: 40 matched windows across 2 exact segments, with
+  32/16/8-byte match rows split 3/7/30 and 0 issue rows.
+- `output/tex_exact_match_overlays/index.html` verified 2 Full HD 1920x1080
+  RGBA overlays for direct `.tex` chunk matches, covering 416 native pixels
+  and 0 issue rows.
+- `output/tex_decoder_seed_report/index.html` verified 40 ranked direct-match
+  decoder seeds: 3 strong, 11 medium, 26 weak, and 0 issue rows.
+- `output/tex_exact_chunk_scan/index.html` verified the high-signal exhaustive
+  `.tex`/CDCACHE chunk scan: 1243 scan rows across 2 exact segments, with no
+  segment-size group hitting the configured row cap and 0 issue rows.
+- `output/tex_exact_chunk_clusters/index.html` verified the scan clustering:
+  140 contiguous decoder runs, including 35 strong runs and a longest direct
+  span of 48 bytes, with 0 issue rows.
+- `output/tex_exact_cluster_overlays/index.html` verified 2 Full HD 1920x1080
+  RGBA overlays from those clustered runs, covering 3014 native pixels and 0
+  issue rows.
+- `output/tex_decoder_run_corpus/index.html` verified 140 byte-exact decoder
+  run fixtures, 3565 exact bytes, 0 mismatches, and 0 issue rows.
+- `output/tex_partial_raw_decoder/index.html` verified the first partial
+  raw-copy `.tex` decoder: 2 Full HD outputs, 140 runs, 3565 decoded bytes,
+  3565 verified pixels, and 0 mismatches.
+- `output/tex_partial_raw_coverage/index.html` verified the partial decoder
+  coverage report: 3014 unique pixels covered across 2 textures, 127 remaining
+  gaps, largest gap 10827 pixels, and 0 issue rows.
+- `output/tex_gap_frontier_report/index.html` verified the gap frontier
+  report: 127 gap frontiers, 123 internal gaps, 105 frontiers with positive
+  `.tex` segment windows, largest pixel gap 10827, and 0 issue rows.
+- `output/tex_gap_opcode_probe/index.html` verified the byte-checked opcode
+  probe for those positive gap windows: 105 probe rows, 0 complete raw replay
+  candidates, 75 rows with at least one raw prefix byte, best prefix 13 bytes,
+  63 first-byte opcode groups, and 0 issue rows.
+- `output/tex_gap_rle_probe/index.html` verified 735 simple RLE hypotheses
+  across 7 variants and 105 positive gap windows: 0 full matches, 8 frontiers
+  with a nonzero prefix, best prefix 3 bytes, and 0 issue rows.
+- `output/tex_gap_rule_queue/index.html` verified the ranked decoder-rule
+  queue built from the opcode and RLE probes: 105 queue rows, 6 rule types,
+  top priority `literal_fragment_probe:254`, 58 compact-control rows, 32
+  expanded-control rows, and 0 issue rows.
+- `output/tex_gap_rule_fixtures/index.html` verified binary fixtures for the
+  top 32 decoder-rule candidates: 128 fixture files, 17503 expected pixels,
+  65666 `.tex` segment bytes, 61 literal fragment bytes, and 0 issue rows.
+- `output/tex_gap_zero_run_probe/index.html` verified zero/nonzero run
+  structure for the 32 fixtures: 673 binary runs, 332 zero runs, 8383 zero
+  bytes, max zero run 111 bytes, and 0 issue rows.
+- `output/tex_gap_geometry_replay/index.html` verified geometry-aware replay
+  candidates for the 8 fixtures with row-prefix zero runs: 1140 candidates
+  across 2 stream modes, 0 complete matches, best prefix 65 bytes, best
+  exact-byte count 4127, and 0 issue rows.
+- `output/tex_gap_nonzero_stream_probe/index.html` verified simple transforms
+  over the nonzero slots from those geometry-aware fixtures: 10260 candidates,
+  2 stream modes, 9 transforms, 0 complete matches, best prefix 4 bytes, best
+  exact-byte count 85, and 0 issue rows.
+- `output/tex_gap_control_word_probe/index.html` verified known-value hits in
+  the first control bytes of the 32 fixtures: 214 hits across 20 metrics,
+  including 11 u16le hits, 25 u16be hits, 178 byte hits, and 0 issue rows.
+- `output/tex_gap_header_schema_probe/index.html` verified schema blocks from
+  those control-word hits: 71 header blocks, 732 payload candidates, 1
+  dimension block, 2 row-mask blocks, 0 complete matches, best prefix 65
+  bytes, best exact-byte count 4122, and 0 issue rows.
+- `output/tex_gap_row_stride_probe/index.html` verified row-stride payload
+  layouts for the 8 fixtures with row-prefix zero runs: 49924 candidates, 36
+  payload offsets, 106 stride values, 0 complete matches, best prefix 65
+  bytes, best exact-byte count 4157, and 0 issue rows.
+- `output/tex_gap_row_stride_mismatch_probe/index.html` verified row-level
+  diagnostics for the top row-stride candidates: 18 selected candidates, 318
+  row score rows, 8 fixtures, 2 fully exact nonzero rows, best nonzero slot
+  score 610, and 0 issue rows.
+- `output/tex_gap_row_delta_probe/index.html` verified local per-row source
+  deltas for those selected row-stride candidates: 318 row-delta rows, 125
+  unique delta values, best adjusted nonzero score 610, best gain 352, and 0
+  issue rows. This improves `barrel.pcx` locally but does not produce a stable
+  row-control rule.
+- `output/tex_gap_row_transform_probe/index.html` verified simple local byte
+  transforms after row-delta alignment: 318 row-transform rows, 5 transform
+  modes, 2 fully exact nonzero rows, best transformed score 610, best gain over
+  delta 7, and 0 issue rows. The top transform remains identity, so XOR/add
+  style transforms do not explain the remaining gaps.
+- `output/tex_gap_row_control_probe/index.html` verified source-byte control
+  context around those per-row starts: 318 row-control rows, 139 control
+  groups, 72 repeated groups, 125 distinct deltas, best byte/delta metric hit
+  count 5, 32 out-of-range starts, and 0 issue rows. The weak metric coverage
+  rules out a direct one-byte relative-control explanation for the current
+  deltas.
+- `output/tex_gap_row_sequence_probe/index.html` verified row-to-row source
+  start transitions after the control probe: 300 transition rows, 274 valid
+  transitions, 106 source-step groups, 90 valid source-step groups, 46 repeated
+  starts, 40 rewinds, 10 stride-step rows, and 0 issue rows. This rules out a
+  simple fixed row advance as the missing decoder rule.
+- `output/tex_gap_row_literal_scan_probe/index.html` verified whole-stream
+  literal scans for each row: 318 row-scan rows, 163 rows with a literal gain,
+  213 unique best starts, 0 fully exact nonzero rows, best literal score 542,
+  best gain over delta 121, and 0 issue rows. Literal data exists in places,
+  but whole-row literal placement is weaker than the row-delta alignment.
+- `output/tex_gap_row_fill_run_probe/index.html` verified a row-local
+  zero-fill plus literal-run grammar around the candidate starts: 318 row-fill
+  rows, 462 eligible literal runs, 13838 eligible literal bytes, only 4
+  sequential run matches, 32 sequential literal bytes, 0 full rows, best
+  candidate score 8 sequential bytes, and 0 issue rows. A naive fill/copy run
+  grammar is therefore not sufficient.
+- `output/tex_gap_control_grammar_probe/index.html` verified sequential
+  skip/copy control grammar candidates over the top gap fixtures: 4396
+  candidates across 32 fixtures, 28 grammar variants, 61 payload offsets, 0
+  exact matches, best prefix 64 bytes, best exact-byte count 3817 on
+  `barrel.pcx`, and 0 issue rows. The best variant is `flag_high_copy`, but it
+  remains below the broader fixture replay score and is not yet a decoder.
+- `output/tex_gap_mismatch_trace_probe/index.html` traced the first mismatch
+  boundary for the best control-grammar and fixture-replay candidate on each
+  fixture: 64 trace rows, 60 control-operation rows, 0 full matches, 64 first
+  mismatches, 11 expected-zero mismatches, best control prefix 64, best replay
+  prefix 64, and 0 issue rows. For `barrel.pcx`, the trace shows the compact
+  control grammar over-extending a zero operation at byte 64 while the expected
+  stream switches to `5d5bd93f...`.
+- `output/tex_gap_zero_literal_switch_probe/index.html` tested explicit
+  zero-prefix then literal-source switches from trace/header-derived offsets:
+  900 candidates, 15 zero-prefix values, 66 source offsets, 2 stream modes, 0
+  complete matches, best prefix 73 bytes on `barrel.pcx`, best exact-byte count
+  163, and 0 issue rows. This confirms the byte-64 transition can be extended
+  locally, but the switch model is far weaker globally than the replay scores.
+- `output/tex_gap_zero_literal_segmentation_probe/index.html` segmented the 32
+  gap fixtures into zero, literal-copy, and uncovered spans with three greedy
+  strategies: 96 strategy rows, 2037 sampled operation rows, 9866 covered bytes
+  out of 17503 expected bytes, 7637 remaining gap bytes, 1524 literal-copy
+  bytes, 8342 zero bytes, 0 fully covered fixtures, and 0 issue rows. This is
+  a decoder skeleton map, not a valid control stream yet.
+- `output/tex_gap_segmentation_control_correlation_probe/index.html`
+  correlated that skeleton with nearby source/control bytes: 984 best-segment
+  operations, 238 literal-copy ops, 292 zero ops, 454 unresolved gap ops, 159
+  forward source steps, 157 operation lengths found as nearby u8 control
+  values, top literal pre2 context `d034`, top source delta `3`, and 0 issue
+  rows. This makes the next decoder pass focus on short source deltas and
+  length bytes instead of only raw byte matching.
+- `output/tex_gap_literal_token_probe/index.html` tested the strongest
+  decoder-facing length rule from that correlation: the byte before a literal
+  source as `token + 3`. It explains 141 of 238 literal-copy operations, 1034
+  of 1524 literal-copy bytes, 19 fixtures with all literal ops covered by the
+  rule, 141 of 166 small-token rows, and 0 issue rows. The competing raw,
+  plus1, plus2, plus4, and high-nibble rules are much weaker.
+- `output/tex_gap_literal_token_classifier_probe/index.html` classified which
+  small tokens are likely real length tokens: `small_not_backward` keeps
+  134/141 true token+3 rows with 12 false positives, while
+  `small_not_backward_abs_delta_le512` keeps 104/141 with 5 false positives.
+  The full small-token rule has 25 false positives, concentrated in
+  `barrel.pcx` and two `dinodead.pcx` frontiers.
+- `output/tex_gap_literal_fp_rejection_probe/index.html` tested non-oracle
+  rejectors for those false positives. The full-recall
+  `small_nonzero_next2_clean` rule keeps all 141 true token+3 rows while
+  reducing false-positive literal bytes from 127 to 57; the stricter
+  `small_not_backward_nonzero_pre4_mod_clean` tier keeps 127 true rows with 24
+  false-positive bytes.
+- `output/tex_gap_zero_run_alignment_probe/index.html` measured the zero-run
+  side of the same skeleton: 292 zero operations, 8342 zero bytes, 58 runs of
+  length 64, 0 runs that merely fill to the next 64-byte boundary, 1 aligned
+  full-64 run, 31 nearby u8 length hits, and 205 zero-runs surrounded by gap
+  spans. This rules out a simple row-boundary zero-fill decoder rule.
+- `output/tex_gap_zero_control_risk_probe/index.html` applies the same zero
+  selectors to every segmented operation, not only known zero-runs. The broad
+  `len64_or_u8` selector covers 4096 zero bytes but would also select 947
+  nonzero bytes without an extra control decision; `len64_and_u8` is false-free
+  at 576 zero bytes, while `u8_len32_64` reaches 698 zero bytes with 48 false
+  nonzero bytes.
+- `output/tex_gap_decoder_skeleton_candidate_probe/index.html` combines the
+  literal-token and zero-run evidence into candidate decoder tiers. Across the
+  17503 fixture bytes, the current zero/literal skeleton covers 9866 bytes.
+  The best non-oracle tier, `zero=len64_or_u8|literal=small_nonzero_next2_clean`,
+  has 5130 correct bytes with 57 false-positive literal bytes across 45
+  candidates; the oracle upper bound using all segmented zeros plus verified
+  token+3 literals reaches 9376 correct bytes with 0 false bytes.
+- `output/tex_gap_decoder_risk_adjusted_probe/index.html` scores the same
+  zero/literal skeleton with false-zero risk included. The best-by-correct
+  tier keeps 5130 correct bytes but carries 894 false bytes; the best-net tier
+  is `priority=literal_first|zero=len64|literal=small_nonzero_next2_clean` at
+  4746/249 (`net=4497`), and the best low-false tier is
+  `priority=zero_first|zero=len64_and_u8|literal=small_nonzero_next2_clean` at
+  1610/57.
+- `output/tex_gap_decoder_seed_replay/index.html` applies that low-false seed
+  back onto the 32 gap fixtures and writes decoded, known-mask, and risk-mask
+  buffers per fixture, plus 32 native and 32 Full HD diagnostic previews. It
+  selects 1667 bytes, with 1610 trusted bytes, 57 false-risk bytes, 1667
+  byte-exact selected outputs, and 0 issue rows.
+- `output/tex_gap_decoder_control_promotion_probe/index.html` separates seed
+  decisions that can be promoted by false-free control signatures from those
+  that remain ambiguous. `pre4|next2` promotes 1034 literal bytes,
+  `len64_and_u8` promotes 576 zero bytes, and together they cover all 1610
+  trusted seed bytes while leaving 57 seed bytes tagged as risk.
+- `output/tex_gap_decoder_false_risk_queue/index.html` partitions the 162
+  selected seed decisions after promotion: 150 operations / 1610 bytes are
+  promoted, 12 literal operations / 57 bytes are rejected as false-risk, and 0
+  bytes remain in review.
+- `output/tex_gap_decoder_clean_replay/index.html` replays only the promoted
+  decisions into clean fixture buffers: 1610 byte-exact bytes written, 57
+  false-risk bytes skipped, 0 false bytes written, and 32 Full HD previews.
+- `output/tex_gap_decoder_clean_gap_queue/index.html` ranks the bytes still
+  outside the clean replay: 15836 unresolved bytes split across 192 spans, 57
+  rejected false-risk bytes across 12 spans, and a largest unresolved span of
+  459 bytes.
+- `output/tex_gap_decoder_unresolved_run_probe/index.html` splits those 192
+  unresolved spans into 729 internal runs: 303 zero runs / 7787 zero bytes and
+  426 nonzero runs / 8049 nonzero bytes, with a max zero run of 111 bytes.
+- `output/tex_gap_decoder_unresolved_zero_queue/index.html` queues the 303
+  unresolved zero runs by local context: 7787 zero bytes total, 5972 internal
+  zero bytes, 49 len64 runs, 19 signatures, and no promotion.
+- `output/tex_gap_decoder_len64_internal_probe/index.html` isolates the top
+  unresolved zero signature: 44 internal len64 targets / 2816 bytes, 28 spans,
+  44 context snippets, and the top neighbor motif `prev29|zero64|next29` with
+  10 rows.
+- `output/tex_gap_decoder_len64_source_probe/index.html` joins those 44 len64
+  targets back to segmented operation source evidence: 44/44 joined, 0 length
+  u8/u16 hits, 34 control refs, 34 control-window signatures, and top ref 506
+  with 5 rows.
+- `output/tex_gap_decoder_len64_selector_probe/index.html` scores source-side
+  selector candidates for those 44 len64 targets: best single candidate
+  `cw_b16=6f&len=64` covers 12 target rows / 768 bytes with 0 false bytes, and
+  a 12-selector false-free greedy union covers all 44 target rows / 2816 bytes.
+- `output/tex_gap_decoder_len64_promoted_replay/index.html` applies those
+  false-free len64 selector targets on top of clean buffers: 44/44 targets
+  promoted, +2816 exact bytes, total clean bytes 4426, remaining unresolved
+  bytes 13020, and 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_gap_queue/index.html` re-ranks the
+  remaining gaps after that promotion: 13020 unresolved bytes across 236
+  unresolved spans, 189 zero bytes, 2009 nonzero bytes, 10822 mixed bytes, and
+  largest unresolved span 306 bytes.
+- `output/tex_gap_decoder_len64_promoted_run_probe/index.html` splits those
+  236 unresolved spans into 685 internal runs: 259 zero runs / 4971 zero bytes,
+  426 nonzero runs / 8049 nonzero bytes, max zero run 111 bytes.
+- `output/tex_gap_decoder_len64_promoted_zero_queue/index.html` re-queues the
+  remaining zero runs by context after len64 promotion: 259 zero runs / 4971
+  bytes, 193 internal rows / 3156 bytes, 5 len64 rows / 320 bytes, 18
+  signatures, and top signature `internal|large32|left_nonzero|right_nonzero`.
+- `output/tex_gap_decoder_len64_promoted_zero_source_probe/index.html` joins
+  the promoted zero queue to source/control operations: 239/259 rows and
+  4950/4971 bytes joined, 20 rows / 21 bytes left unjoined, 74 control refs,
+  80 control windows, and 22 length-u8 hits.
+- `output/tex_gap_decoder_len64_promoted_large32_selector_probe/index.html`
+  scores source selectors for the top remaining large32/internal zero
+  signature: 35 targets / 1451 bytes, 1759 candidates, 463 false-free
+  candidates, best selector 291 target bytes, and a 9-selector greedy union
+  covering 1036 target bytes with 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_large32_replay/index.html` applies
+  that false-free large32 greedy union on top of the len64-promoted buffers:
+  25/25 targets promoted, +1036 exact bytes, total clean bytes 5462, remaining
+  unresolved bytes 11984, and 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_large32_gap_queue/index.html`
+  rebuilds the remaining gap queue after large32 promotion: 11984 unresolved
+  bytes across 261 unresolved spans, 189 pure zero bytes, 2113 pure nonzero
+  bytes, 9682 mixed bytes, and largest unresolved span 301 bytes.
+- `output/tex_gap_decoder_len64_promoted_large32_run_probe/index.html` splits
+  those 261 unresolved spans into 660 internal runs: 234 zero runs / 3935 zero
+  bytes, 426 nonzero runs / 8049 nonzero bytes, max zero run 111 bytes.
+- `output/tex_gap_decoder_len64_promoted_large32_zero_queue/index.html`
+  re-queues the remaining zero runs after large32 promotion: 234 zero runs /
+  3935 bytes, 168 internal rows / 2120 bytes, 5 len64 rows / 320 bytes, 18
+  signatures, and top signature `internal|medium8|left_nonzero|right_nonzero`.
+- `output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/index.html`
+  joins that post-large32 zero queue back to source/control operations:
+  214/234 rows and 3914/3935 bytes joined, 20 rows / 21 bytes left unjoined,
+  71 control refs, 77 control windows, and 19 length-u8 hits.
+- `output/tex_gap_decoder_len64_promoted_medium8_selector_probe/index.html`
+  scores false-free source selectors for the top remaining medium8/internal
+  zero signature: 83 targets / 1421 bytes, 3907 candidates, 173 false-free
+  candidates, best selector 91 target bytes, and a 3-selector greedy union
+  covering 118 target bytes with 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_medium8_replay/index.html` applies
+  that false-free medium8 greedy union on top of the large32-promoted buffers:
+  8/8 targets promoted, +118 exact bytes, total clean bytes 5580, remaining
+  unresolved bytes 11866, and 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_medium8_gap_queue/index.html`
+  rebuilds the remaining gap queue after medium8 promotion: 11866 unresolved
+  bytes across 269 unresolved spans, 189 pure zero bytes, 2283 pure nonzero
+  bytes, 9394 mixed bytes, and largest unresolved span 301 bytes.
+- `output/tex_gap_decoder_len64_promoted_medium8_run_probe/index.html` splits
+  those 269 unresolved spans into 652 internal runs: 226 zero runs / 3817 zero
+  bytes, 426 nonzero runs / 8049 nonzero bytes, max zero run 111 bytes.
+- `output/tex_gap_decoder_len64_promoted_medium8_zero_queue/index.html`
+  re-queues the remaining zero runs after medium8 promotion: 226 zero runs /
+  3817 bytes, 160 internal rows / 2002 bytes, 5 len64 rows / 320 bytes, 18
+  signatures, and top signature `internal|medium8|left_nonzero|right_nonzero`.
+- `output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/index.html`
+  joins that post-medium8 zero queue back to source/control operations:
+  206/226 rows and 3796/3817 bytes joined, 20 rows / 21 bytes left unjoined,
+  69 control refs, 75 control windows, and 17 length-u8 hits.
+- `output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/index.html`
+  scores the remaining medium8/internal signature after that replay: 75
+  targets / 1303 bytes, 3521 candidates, only 4 false-free candidates, best
+  selector 23 target bytes, and no greedy selector at the 2-target threshold.
+- `output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/index.html`
+  scores the next remaining large32/internal signature: 10 targets / 415
+  bytes, 591 candidates, 109 false-free candidates, best selector 46 target
+  bytes, and no greedy selector at the 2-target threshold.
+- `output/tex_gap_decoder_len64_promoted_trailing_large32_selector_probe/index.html`
+  scores the remaining trailing large32 signature: 9 targets / 340 bytes,
+  247 false-free candidates, best selector 127 target bytes, and a 2-selector
+  greedy union covering 195 bytes with 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_leading_len64_selector_probe/index.html`
+  scores the remaining leading len64 signature: 5 targets / 320 bytes and a
+  3-selector greedy union covering all 320 bytes with 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_internal_small_selector_probe/index.html`,
+  `output/tex_gap_decoder_len64_promoted_leading_large32_selector_probe/index.html`,
+  and `output/tex_gap_decoder_len64_promoted_trailing_medium8_selector_probe/index.html`
+  record the adjacent fragmented signatures: internal small has no 2-target
+  greedy selector, leading large32 has no 2-target greedy selector, and
+  trailing medium8 has a 34-byte false-free greedy selector.
+- `output/tex_gap_decoder_len64_promoted_remaining_replay/index.html` applies
+  the grouped post-medium8 selectors on top of the medium8-promoted buffers:
+  12/12 targets promoted, +549 exact zero bytes, total clean bytes 6129,
+  remaining unresolved bytes 11317, 32 Full HD previews, and 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_remaining_gap_queue/index.html`,
+  `output/tex_gap_decoder_len64_promoted_remaining_run_probe/index.html`,
+  `output/tex_gap_decoder_len64_promoted_remaining_zero_queue/index.html`, and
+  `output/tex_gap_decoder_len64_promoted_remaining_zero_source_probe/index.html`
+  rebuild the review chain after that replay: 11317 unresolved bytes, 640
+  runs, 214 zero runs / 3268 zero bytes, 17 signatures, and 194/214 zero
+  rows joined back to source operations.
+- The micro selector reports under
+  `output/tex_gap_decoder_len64_promoted_micro_*_selector_probe/` lower the
+  greedy threshold to 1 after the grouped replay. They expose 611 additional
+  false-free target bytes across internal medium8, internal large32, internal
+  small, leading large32, trailing medium8, and trailing large32 signatures.
+- `output/tex_gap_decoder_len64_promoted_micro_replay/index.html` applies
+  those micro-promotions as a separate replay: 22/22 targets promoted, +611
+  exact zero bytes, total clean bytes 6740, remaining unresolved bytes 10706,
+  32 Full HD previews, and 0 false bytes.
+- `output/tex_gap_decoder_len64_promoted_micro_gap_queue/index.html`,
+  `output/tex_gap_decoder_len64_promoted_micro_run_probe/index.html`,
+  `output/tex_gap_decoder_len64_promoted_micro_zero_queue/index.html`, and
+  `output/tex_gap_decoder_len64_promoted_micro_zero_source_probe/index.html`
+  rebuild the review chain after the micro replay: 10706 unresolved bytes, 618
+  runs, 192 zero runs / 2657 zero bytes, 16 signatures, and 172/192 zero rows
+  joined back to source operations.
+- The post-micro triple selector reports under
+  `output/tex_gap_decoder_len64_promoted_postmicro_*_triple_selector_probe/`
+  extend the same validated selector replay to 3-source combinations. The
+  triple replay promotes 68/68 targets, writes 913 additional exact zero bytes,
+  raises clean coverage to 7653 bytes, reduces unresolved bytes to 9793, and
+  leaves 124 zero runs / 1744 zero bytes, with 104/124 source-joined rows.
+- The post-triple micro reports under
+  `output/tex_gap_decoder_len64_promoted_posttriple_micro_*_triple_selector_probe/`
+  promote another 72/72 targets. The replay writes 1096 exact zero bytes,
+  raises clean coverage to 8749 bytes, reduces unresolved bytes to 8697, and
+  leaves 52 zero runs / 648 zero bytes, with 32/52 source-joined rows.
+- The residual boundary pass promotes 25/25 edge and trailing targets, writes
+  578 exact zero bytes, raises clean coverage to 9327 bytes, reduces unresolved
+  bytes to 8119, and leaves 27 zero runs / 70 zero bytes. The tiny span pass
+  then promotes 1/1 target, writes 3 more exact zero bytes, raises clean
+  coverage to 9330 bytes, reduces unresolved bytes to 8116, and leaves 26 zero
+  runs / 67 zero bytes, with 6/26 source-joined rows. The non-zero fill replay
+  promotes 17 false-free fill targets, writes 62 exact non-zero bytes, raises
+  clean coverage to 9392 bytes, and reduces unresolved bytes to 8054 with 0
+  false bytes.
+- `output/tex_gap_decoder_len64_promoted_tiny_nonzero_queue/index.html` and
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_source_probe/index.html`
+  queue the remaining non-zero side after the tiny replay: 426 non-zero runs /
+  8049 bytes, 381 pure non-zero spans / 7559 bytes, 35 signatures, and
+  330/426 rows joined back to operations. Only 4 joined bytes are literal
+  source-backed; 6317 joined bytes remain classified as `gap`, with 96 rows /
+  1728 bytes not yet matched to an operation.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_source_probe/index.html`
+  then tests local source windows around those joined gap operations: 329
+  targets / 6317 bytes, 827953 candidate rows evaluated, 296 best rows, 88
+  complete local matches, and 907 best exact bytes. The complete matches are
+  mostly tiny runs, so this is evidence for the next rule search rather than a
+  clean promotion pass.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_pattern_probe/index.html`
+  classifies the same 329 gap targets / 6317 bytes by expected-byte pattern:
+  150 noisy rows / 5149 bytes, 112 small-palette rows / 854 bytes, 61 fill rows
+  / 134 bytes, 6 dominant rows / 180 bytes, and 0 ramp rows. That narrows the
+  next pass to control/pattern rule discovery rather than direct local-copy
+  promotion.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_control_pattern_probe/index.html`
+  then correlates those pattern classes with control-derived selectors and the
+  local source-window scores: 173 structured rows / 988 bytes, 1839 selector
+  groups, 981 pure selector groups, 24 repeated pure groups, and 0 strong pure
+  groups. This keeps the small fill/palette cases in review, but blocks an
+  automatic promotion until a stronger recurring control rule is found.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_value_probe/index.html`
+  checks whether those 173 structured rows / 988 bytes can be explained by
+  actual control, prefix, fragment, or neighbor byte pools. Control identity
+  fully covers unique values for 194 bytes; fixed transforms raise this to 201
+  control bytes and 280 best-pool bytes, with only 43 fixed exact-sequence
+  bytes. Parametric transforms can cover 694 bytes, but that is treated as
+  exploratory signal rather than a safe promotion rule.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_exact_sequence_probe/index.html`
+  isolates the strict fixed exact matches: 34 rows / 43 bytes across 100
+  candidates, with 27 ambiguous rows, 34 tiny rows, 0 non-tiny rows, and a
+  maximum exact length of 3 bytes. This confirms the strict matches are useful
+  as review evidence but too small and ambiguous for an automatic decoder
+  promotion.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_fill_rule_probe/index.html`
+  tests a stricter generator for `fill_single_byte`: repeat one fixed
+  source/control byte for the whole run. It covers 44/61 fill rows and 114/134
+  fill bytes, with 54 control-identity bytes and 59 control-fixed bytes, but
+  35 covered rows remain ambiguous across 162 candidates. This is the best
+  current non-zero rule surface, but still needs a selector to choose the
+  source byte safely.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_fill_selector_probe/index.html`
+  scores fixed offset selectors for that fill generator across all 61 fill
+  targets: 14144 rule rows, 140 false-free rules, 13 false-free multi-row
+  rules, best false-free coverage 38 bytes, and the best unconstrained rule
+  reaches 41 correct bytes but 55 false bytes. This keeps broad fill decoding
+  in review, while the false-free multi-row subset is replayed separately.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_replay/index.html`
+  applies that subset on top of the tiny replay. It selects 4 rule families,
+  promotes 17 fill targets / 62 exact non-zero bytes, writes 0 false bytes,
+  raises clean coverage from 9330 to 9392 bytes, reduces unresolved bytes from
+  8116 to 8054, and generates 32 Full HD diagnostic previews.
+  The post-fill reports under
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_*` rebuild the
+  review queue from that new baseline: 8054 unresolved bytes, 409 remaining
+  non-zero runs / 7987 non-zero bytes, 312 joined gap targets / 6255 gap bytes,
+  872 best local-source exact bytes, and a reduced fill class of 44 rows / 72
+  bytes. The post-fill fill selector finds 114 false-free rules but 0
+  false-free multi-row rules and only 13 best false-free bytes, so no second
+  fill replay is promoted yet.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_selector_probe/index.html`
+  applies the same fixed-selector discipline to the 112 small-palette rows /
+  854 bytes: 29988 rule rows, 16 false-free rules, 4 false-free multi-row
+  rules, and only 6 best false-free exact bytes. The strongest matches are
+  tiny two-row fragment selectors, so the palette surface remains evidence for
+  grammar search rather than a promotable decoder rule.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_shape_probe/index.html`
+  separates palette values from palette sequence shape. Across the same 112
+  rows / 854 bytes it finds 58 first-use shapes, 47 run-length shapes, 312
+  bytes in repeated exact normalized shapes, 372 bytes in repeated run-length
+  shapes, 159 alternating bytes, and 131 dominant-75 bytes. This gives the next
+  grammar pass a concrete shape vocabulary without selecting source values yet.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_shape_control_probe/index.html`
+  correlates those normalized shapes with fixed metadata/control selectors. It
+  evaluates 5770 selector rows, finds 3495 pure selectors and 157 repeated pure
+  selectors, and covers 52 rows / 269 bytes in the union of repeated pure
+  selectors. The best broad selector is shape-side only
+  (`palette_size=3|length_bucket=len2_3`, 19 rows / 57 bytes), so this is a
+  useful grammar signal, not a complete value-producing decoder rule.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_shape_value_probe/index.html`
+  then adds those sequence shapes as value-selector conditions. It evaluates
+  102664 rule rows, finds 40 false-free rules and 8 false-free multi-row
+  rules, but still tops out at 6 false-free exact bytes. This confirms that
+  shape selection alone does not identify the palette values.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_pair_value_probe/index.html`
+  tests non-contiguous two-offset value selectors for the 47 palette-2 rows /
+  392 bytes. With offsets capped at 64 it evaluates 1031650 rule rows, finds
+  466 false-free rules and 233 exact false-free rules, including one exact
+  46-byte singleton from `dinodead.pcx`, but 0 false-free multi-row rules. That
+  makes it useful decoder evidence, not a safe promotion rule.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_dominant_probe/index.html`
+  covers the 6 `dominant_50` rows / 180 bytes: 97 dominant bytes and 83
+  exception bytes across 6 unique exception-position shapes. It evaluates 2532
+  fixed dominant-byte selector rules; only 6 are false-free, none cover
+  multiple rows, and the best false-free selector covers 26 dominant bytes.
+  That keeps this class in evidence mode until exception placement and broader
+  dominant-byte selection are solved together.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_noisy_shape_probe/index.html`
+  classifies the remaining 150 noisy rows / 5149 bytes without promoting them.
+  It finds 147 first-use shape groups, 148 delta-class shape groups, 142
+  run-length shape groups, 36 gradient-like rows / 1925 bytes, 3 periodic rows
+  / 72 bytes, 464 scattered best exact source bytes, and 0 full local matches.
+  This confirms the large noisy surface needs a real grammar signal, not a
+  direct local-copy rule.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_probe/index.html`
+  drills into the 36 gradient-like noisy rows / 1925 bytes. Across 1889
+  adjacent deltas, 1672 are small deltas in [-4,+4], 859 are zero deltas, and
+  569 are +/-1 steps, but 0 rows reach 75% coverage as a simple linear ramp.
+  The split is 17 flat-run walks / 813 bytes, 7 banded small-delta walks / 404
+  bytes, 2 small-delta walks / 48 bytes, and 10 mixed-gradient rows / 660
+  bytes. This points to a small-delta grammar, not a linear ramp decoder.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_repeat_context_probe/index.html`
+  isolates the 4 repeated gradient-shape rows / 244 bytes. They form 2 exact
+  payload groups / 244 bytes, both at distance 320; the second occurrence in
+  each pair unlocks 122 copy bytes, but the control-ref phases differ and 0
+  bytes are promotion-ready.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_unlock_probe/index.html`
+  ties those first occurrences to the palette seed reports. The 2 seed rows /
+  122 bytes both have control-window candidates, one single-transform seed and
+  one mixed-transform seed; together they unlock 122 copy bytes for 244 total
+  potential bytes. Both transform sets are singletons, so 122 seed bytes remain
+  blocked and 0 bytes are promotion-ready.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_shift_family_probe/index.html`
+  normalizes those two seeds by source family. Both seeds use the repeated
+  `control_window|identity_shift_family`, covering 122 seed bytes and 122
+  copy-unlock bytes, with 14 palette values and 4 distinct deltas in the range
+  -2..+1. The exact delta sets are still singletons, so the next decoder step
+  is the per-value delta selector, not replay promotion.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_selector_probe/index.html`
+  weights those 14 palette mappings by the 122 real seed bytes. It finds 4
+  delta values and 86 repeated deterministic bytes only through target-oracle
+  selectors, while source-only selectors provide 0 repeated deterministic
+  bytes and 604 conflicted evidence-bytes. This rejects target-value shortcuts
+  and keeps the branch blocked on a source-side delta selector.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_context_probe/index.html`
+  tests the immediate source-side control-window neighborhood for the same 14
+  mappings / 122 real seed bytes. It finds 0 repeated deterministic context
+  bytes, 569 conflicted evidence-bytes, 4 delta values, and 0 promotion-ready
+  bytes, so the missing selector is not in the local neighbor bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_phase_probe/index.html`
+  expands the same check to source phase, absolute control bytes, positionless
+  control n-grams, broad control profile keys, and wider relative windows. It
+  tests 902 selector groups across 5 scopes and still finds 0 repeated
+  deterministic bytes, with 15425 conflicted evidence-bytes and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_state_probe/index.html`
+  tests prefix accumulators, small FSM states, nibble counters, and parser-like
+  counters over the same 14 mappings / 122 bytes. It covers 2013 state groups
+  across 4 scopes and still finds 0 repeated deterministic bytes, with 31654
+  conflicted evidence-bytes and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_opcode_sequence_probe/index.html`
+  then inspects the two seed rows as ordered opcode/source sequences. It
+  records 2 seed rows, 12 adjacent transitions, 187 transition groups, 43
+  offset-reuse bytes, 0 repeated deterministic transition bytes, 1220
+  conflicted evidence-bytes, and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_semantic_opcode_probe/index.html`
+  joins those 14 mappings / 122 bytes to the segmented operation stream. It
+  records 89 semantic groups across operation context, operation neighborhood,
+  source role, control token, and combo families. It still finds 0 repeated
+  deterministic bytes, 2004 conflicted evidence-bytes, and 0 promotion-ready
+  bytes, so the next useful pass needs a payload opcode-token grammar rather
+  than more operation-neighborhood selectors.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_probe/index.html`
+  isolates those 17 flat-run walks / 813 bytes. It finds 276 value runs, 537
+  plateau bytes, 259 value transitions, 181 small transitions, 15 run-length
+  shapes, and 15 transition shapes. Only 2 repeated run-length/transition
+  shapes cover 4 rows / 244 bytes, so this is a plateau grammar clue rather
+  than a safe reusable run decoder.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_source_probe/index.html`
+  checks whether those plateau run lengths and transitions are present in
+  local byte/nibble streams. It finds only 88/276 length symbols and 60/259
+  transition symbols, with 1 row / 44 bytes reaching 50% on both sides. The
+  matches all come from weak `segment_gap` nibble views, so this rejects a
+  simple source-table decoder for the plateau class.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_shape_control_probe/index.html`
+  correlates the plateau run, transition, and run-value shapes with fixed
+  metadata/control selectors. It evaluates 1827 selector rows, finds 1251 pure
+  selectors and 30 repeated pure selectors, and covers 4 rows / 244 bytes in
+  the union of repeated pure selectors. This makes the plateau shape grammar
+  concrete, but still lacks a value-producing decoder.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_value_probe/index.html`
+  scores full-span, run-value, and first-use palette value producers against
+  the same 17 flat-walk rows / 813 bytes. After excluding expected-byte
+  shortcuts, it checks 1182664 rule rows, finds 0 exact rules and 0 false-free
+  multi-row rules, with a best partial candidate at 70 correct bytes / 743
+  false bytes. It also records 2 exact prefix-copy rows / 122 bytes at distance
+  320, useful as repetition evidence but not enough for replay promotion until
+  the first occurrence has a real value producer.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_probe/index.html`
+  confirms the copy-distance hypothesis directly. Across distances 1..640 it
+  finds distance 320 as the best copy rule: 2 exact rows / 122 bytes, 209
+  correct bytes and 267 false bytes across all applicable rows. The exact rows
+  have 0 known source bytes and 122 unresolved source bytes in the current
+  post-fill mask, so back-reference replay must wait until the first
+  occurrences are decoded.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_seed_probe/index.html`
+  searches small control-side pools for palette seeds that could decode those
+  first occurrences. It finds one singleton seed: the 58-byte source row
+  `dinodead.pcx` frontier 22, 349..407 can take its 5-value palette from
+  `control_window` with `identity_shift+1`, unlocking its 58-byte distance-320
+  copy for 116 potential bytes. It has 0 repeated groups, so it stays a review
+  candidate rather than a replay rule.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_mix_probe/index.html`
+  broadens that check to compact mixed-transform palette covers. With at most
+  4 transforms per row, it finds 7 candidate rows / 361 bytes, including 303
+  mixed-transform bytes, 259 control-window bytes, and the same 122 copy-unlock
+  bytes for 483 total potential bytes. The best group is still a singleton, so
+  the mixed cover remains a blocked review signal rather than a value decoder.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_chain_probe/index.html`
+  joins exact distance-320 copies back to their first occurrences. Both exact
+  copies now have a source-side palette hypothesis, giving 244 source+copy
+  candidate bytes, but 0 repeated-group chain bytes. The chain view keeps the
+  dependency explicit: repeatable first-occurrence evidence is still required
+  before copy replay.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_signature_probe/index.html`
+  groups the same rows by first-use palette signatures. It finds 15 palette
+  signatures total, with 2 repeated signatures / 244 bytes; both repeated
+  groups are copy-backed and all 244 bytes have a palette candidate. This
+  confirms the palette values repeat, while the actual source producer remains
+  non-repeatable.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_context_probe/index.html`
+  compares control-side context for those repeated signatures. Both groups are
+  distance-320 copy-backed, but 0 share the same transform set or control-ref
+  phase; only 1 shares the candidate pool, and the best unique control overlap
+  is 5 values. This rejects a fixed context shortcut for the repeated palettes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_micro_token_probe/index.html`
+  tokenizes the full noisy surface into coarse and signed delta runs. Across
+  150 rows / 5149 bytes it finds 4999 adjacent deltas, 3272 small deltas,
+  1019 jump deltas, 244 repeated signed-shape bytes, and 0 promotion-ready
+  bytes. This keeps the next pass on a real grammar rather than a repeated
+  shape shortcut.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_uniqueness_probe/index.html`
+  isolates the 56 mixed-token rows / 2142 bytes. It finds 56 coarse shapes, 56
+  signed shapes, and 56 transition profiles, with 0 repeated bytes in all three
+  tokenized views. The only strong recurrence is coarse: top nibble `0x6`
+  covers 36 rows / 1619 bytes, so this branch needs a value-band split before
+  token-shape promotion.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_band_probe/index.html`
+  splits those mixed-token rows by high-nibble and low-nibble transition
+  profiles. The dominant `0x6` high-nibble bucket still has 36 unique
+  low-profile rows / 1619 bytes, while the only repeated low profile is a tiny
+  24-byte non-dominant case. This keeps the branch blocked on an external
+  control/value-band signal.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_backref_probe/index.html`
+  checks whether mixed-token rows are hidden backward copies. Across 56 rows /
+  2142 bytes and distances 1..640 it finds 0 exact-copy bytes. Distance 1 is
+  again only partial, at 502 correct bytes and 1640 false bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_control_probe/index.html`
+  tests mixed-token high nibbles, low nibbles, signed deltas, and exact bytes
+  against the existing control/source pools. Across 56 rows / 2142 bytes it
+  checks 1519092 candidate windows, finds 8 high-nibble-only rows / 86 bytes,
+  0 low/signed/byte profile-like rows, 0 byte matches >=75%, and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_control_context_probe/index.html`
+  rechecks those mixed-token control signals against exact payload reuse.
+  It finds 10 signal groups, 5 repeated signal groups / 1894 bytes, 9 repeated
+  signal+top-nibble groups / 1654 bytes, 1 repeated offset context / 95 bytes,
+  56 unique payload signatures, 0 repeated payload bytes, 0 full-byte >=50
+  bytes, and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_probe/index.html`
+  splits the 66 jump-mixed rows / 1680 bytes into jump-separated islands and
+  signed jump profiles. It finds 637 jump deltas, 703 islands, 308 long-island
+  bytes, 58 repeated signed/nibble jump-shape bytes, 0 repeated exact-pair
+  bytes, and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_backref_probe/index.html`
+  checks whether the repeated jump shapes are simple backward copies. Across
+  66 rows / 1680 bytes and distances 1..640, it finds 0 exact-copy bytes. The
+  best distance is 1 with 353 correct bytes and 1266 false bytes, so jump
+  repetition remains a grammar target rather than replay evidence.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_context_probe/index.html`
+  compares the repeated jump-token shapes against decoder context. It finds 5
+  repeated groups / 134 bytes, 67 repeated-candidate bytes, 0 shared-context
+  bytes, 134 conflicted-context bytes, 116 copy-backed bytes, and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_repeated_nibble_probe/index.html`
+  isolates the 6 repeated-nibble jump rows / 231 bytes. It finds 3 ping-pong
+  rows / 103 bytes, 219 bytes sharing repeated band pairs, 41 repeated
+  band-phase bytes, a best external signal ratio of 0.500000, and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_repeated_nibble_context_probe/index.html`
+  checks those repeated bands against exact payload reuse. It keeps 6 rows /
+  231 bytes in scope, records 2 repeated band-pair groups / 219 bytes, 1
+  repeated phase context / 41 bytes, 6 unique payload signatures, 0 repeated
+  payload bytes, 12 source-signal bytes at >=50%, and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_jump_probe/index.html`
+  profiles the 19 mixed jump-split rows / 682 bytes. It finds 14 dominant-band
+  rows / 550 bytes, 10 zero-band rows / 438 bytes, 12 multi-band rows / 452
+  bytes, 129 long-island bytes, a best external signal ratio of 0.250000, and
+  0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_dense_jump_probe/index.html`
+  isolates the 33 dense jump-weave rows / 601 bytes. It finds 297 jump deltas,
+  a 0.708333 direction-switch ratio, 184 single-byte islands, 172 alternating
+  bytes, 0 repeated direction/magnitude/nibble/island/phase-shape bytes, and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_dense_control_probe/index.html`
+  scores those 33 dense rows against nearby control/source byte views. It
+  checks 850077 candidate windows, finds 30 rows with direction matches >=75%,
+  but only 3 short phase matches >=75%, 0 long phase matches >=75%, and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_control_signal_gate_probe/index.html`
+  gates the mixed, residual, and dense control reports together. Across 60 rows
+  / 1449 bytes it checks 1784529 candidate windows, finds 53 direction matches
+  >=75% / 1141 bytes, rejects 45 direction-only rows / 1075 bytes, keeps 8
+  short phase rows / 66 bytes in review, finds 0 long phase bytes, and marks 0
+  bytes as promotion-ready.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_weak_control_value_probe/index.html`
+  rechecks the 7 weak-control rows / 308 bytes left by that gate. It finds 3
+  magnitude rows / 142 bytes at signal ratio >=75%, 2 repeated signal groups /
+  189 bytes, 7 unique payload signatures, 0 repeated payload bytes, and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_probe/index.html`
+  rechecks the 45 direction-only rows / 1075 bytes for value-side bucket
+  evidence. It finds 34 rows / 726 bytes with a >=75% value signal, 19 rows /
+  213 bytes with exact value-bucket ratios, but 9 repeated direction/value
+  groups / 590 bytes have conflicting offsets and 0 bytes are promotion-ready.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_offset_probe/index.html`
+  reduces the value-scored direction rows to offset deltas. It keeps 34 rows /
+  726 bytes, records 7 repeated keys / 412 bytes, finds 0 same-delta bytes, 1
+  surface-stable delta group / 31 bytes, 6 conflicted delta groups / 381 bytes,
+  and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_delta_context_probe/index.html`
+  tests whether local context can split those offset conflicts. It covers 34
+  rows / 726 bytes across 10 context profiles. The best contexts
+  (`surface+key+head4`, `surface+key+mod64`, and `surface+key+tail4`) stabilize
+  all 726 bytes only by singleton splits: 0 repeated stable bytes, 0 repeated
+  payload bytes, and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_payload_grammar_probe/index.html`
+  rechecks those 34 rows / 726 bytes against expected payload micro-grammar.
+  Broad signals repeat: 565 bytes share top-token/top-nibble groups and 593
+  bytes are dominated by `JUMP`. Exact transition profiles remain unique
+  across all 726 bytes, repeated payload bytes stay at 0, and 0 bytes are
+  promotion-ready.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_source_profile_probe/index.html`
+  compares those payload transition profiles against fixture source profiles.
+  The best source pool is `segment_gap` for all 34 rows / 726 bytes, 19 rows /
+  251 bytes have >=75% profile overlap, 3 rows / 26 bytes match exact profile
+  multisets, 6 rows / 52 bytes reach >=50% positional alignment, source
+  profiles remain singleton-only, and 0 bytes are promotion-ready.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_source_value_probe/index.html`
+  tests fixed byte transforms from those selected source-profile windows. It
+  keeps 34 rows / 726 bytes under review, checks 14 transforms, finds only 29
+  best exact bytes in total, 0 rows at ratio >=25%, 0 exact-match bytes, top
+  transform `xor80` with 15 rows / 232 bytes but only 2 exact bytes, and 0
+  promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_source_window_probe/index.html`
+  scans nearby source windows around those selected offsets. With radius 128 it
+  checks 4512 offset candidates and 14 transforms for the same 34 rows / 726
+  bytes. The best total rises to 95 exact bytes, but the max ratio is only
+  0.428571, 12 rows / 119 bytes reach >=25%, 0 rows reach >=50%, exact-match
+  bytes stay at 0, and 0 bytes are promotion-ready.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_control_context_probe/index.html`
+  groups those same rows by local control context around the direction/value
+  offsets. It keeps 34 rows / 726 bytes, finds 11 direction-signal groups with
+  8 repeated groups / 618 bytes, but the local windows split into 34 combined
+  contexts, 34 op-phase contexts, and 34 payload signatures. Repeated combined
+  context bytes, repeated op-phase bytes, repeated payload bytes, and
+  promotion-ready bytes all stay at 0.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_exact_context_probe/index.html`
+  isolates the 19 exact value-bucket rows / 213 bytes. It finds 4 repeated
+  direction/value keys / 117 bytes, 4 conflicted delta groups / 117 bytes, 19
+  unique payload signatures, 0 repeated payload bytes, and 0 promotion-ready
+  bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_partial_context_probe/index.html`
+  isolates the 15 partial value-bucket rows / 513 bytes. It finds 2 repeated
+  direction/value keys / 238 bytes, 4 rows / 130 bytes at ratio >=90%, 10 rows
+  / 294 bytes at ratio >=80%, 15 unique payload signatures, 0 repeated payload
+  bytes, and 0 promotion-ready bytes.
+  `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_noisy_review/index.html`
+  aggregates the noisy evidence into a decision matrix: 150 rows / 5149 bytes
+  remain in review, 36 rows / 1925 bytes are gradient-like, 4 repeated
+  gradient-context rows / 244 bytes carry 122 copy-unlock bytes, 17 rows / 813
+  bytes are flat walks, 4 flat-walk shape-control rows / 244 bytes are
+  repeated-pure-scored, 2 flat-walk prefix-copy rows / 122 bytes are
+  value-reviewed, 2 flat-walk back-reference rows / 122 bytes are confirmed
+  but source-blocked, 1 flat-walk palette seed / 58 bytes could unlock 58 copy
+  bytes but remains singleton-only, 150 rows / 5149 bytes are micro-tokenized,
+  56 mixed-token rows / 2142 bytes are control-scored with 0 profile-like
+  bytes,
+  66 rows /
+  1680 bytes are jump-tokenized, 67 repeated jump-context candidate bytes are
+  blocked, 1654 mixed-token control-context bytes are signal-repeat-scored
+  with unique payloads, 6 rows / 231 bytes are repeated-nibble scored, 219
+  repeated-nibble context bytes are payload-unique,
+  19 rows / 682 bytes are mixed-jump scored, 19 rows / 682 bytes are
+  mixed-jump-context-scored with 566 repeated band-pair bytes and 0 repeated
+  payload bytes, 19 rows / 682 bytes are mixed-control-scored, 8 rows / 166
+  bytes are residual-jump scored, 8 rows / 166 bytes are residual-control-scored, 33 rows / 601 bytes are
+  dense-jump-tokenized, 33 rows / 601 bytes are dense-control-scored, 60 rows /
+  1449 bytes are control-signal-gated, 1075 direction-only bytes are rejected,
+  308 weak-control bytes are value-scored with unique payloads, 726
+  direction-value bytes are bucket-scored with 590 offset-conflict bytes, 381
+  offset-delta-conflict bytes remain, 726 delta-context bytes split only into
+  singleton-stable groups with 0 repeated stable bytes, 726 payload-grammar
+  bytes have broad top-token/top-nibble repeats but 0 repeated transition
+  profile bytes, 726 source-profile bytes prefer `segment_gap` but only 26
+  exact-profile bytes and 0 repeated source-profile bytes are found, fixed
+  source-value transforms add only 29 exact bytes total with 0 rows >=25%,
+  nearby source-window scans improve to 95 exact bytes but still produce 0 rows
+  >=50%, local control context still splits into 34 unique combined contexts
+  and 34 unique payloads, exact bucket payloads are all unique,
+  partial bucket payloads are all unique, 0 long phase bytes are found, and 0
+  bytes are promotion-ready. The next pass stays
+  focused on grammar discovery instead of expected-byte or source-table
+  shortcuts.
+- `output/tex_gap_fixture_replay/index.html` verified replay hypotheses for
+  those fixtures: 704 candidate rows across 22 variants, 0 complete matches,
+  best prefix 64 bytes, best exact-byte count 4050, and 0 issue rows.
+- `output/cdcache_hd_asset_pack/index.html` verified with 3104 gallery assets,
+  including 194 `.tex`-linked assets and 0 missing image/source paths.
+- `output/fullhd_dashboard/index.html` verified with 4 dashboard cards, 228 quick
+  links, and 0 missing paths.
+- `RUN_HD.sh` and `lol2dos.conf` verify as the direct 1920x1080 DOSBox HD
+  launch path.
+
+`output/fullhd_dashboard/index.html` is the current top-level local entry point
+for the Full HD outputs. It links to the VQA gallery and status report,
+archive coverage report, CDCACHE gallery, `.tex` coverage report, still image
+gallery and manifest, `.tex` reference coverage and missing-reference evidence
+reports, CDCACHE raw probe and alias-pack reports, audit reports, inventory
+summary, augmented `.tex` coverage, unresolved material `.tex` probe previews,
+unresolved `.tex` probe analysis, material decoder queue, exact `.tex`/CDCACHE
+comparison, direct chunk evidence, direct-match Full HD overlays, decoder seed
+ranking, high-signal chunk scan, gap row-control, row-sequence, row-literal
+scan, row-fill-run, control-grammar, mismatch-trace, zero-literal switch and
+zero-literal segmentation probes, len64 source selector probe, len64 promoted
+replay, len64 promoted gap queue, len64 promoted run probe, len64 promoted zero
+queue, len64 promoted zero-source probe, len64 promoted large32 selector probe,
+len64 promoted large32 replay, len64 promoted large32 gap queue, len64
+promoted large32 run probe, len64 promoted large32 zero queue, len64 promoted
+large32 zero-source probe, len64 promoted medium8 selector probe, len64
+promoted medium8 replay, len64 promoted medium8 gap queue, len64 promoted
+medium8 run probe, len64 promoted medium8 zero queue, len64 promoted medium8
+zero-source probe, len64 promoted medium8 remaining selector probe,
+len64 promoted large32 remaining selector probe, trailing large32 selector
+probe, leading len64 selector probe, internal small selector probe, leading
+large32 selector probe, trailing medium8 selector probe, remaining promoted
+replay and queues, micro selector probes, micro promoted replay and queues,
+post-micro triple selector probes, triple promoted replay and queues,
+post-triple micro selector probes, post-triple micro replay and queues,
+residual selector probes, residual promoted replay and queues, tiny promoted
+replay and queues, tiny non-zero queue, non-zero source probe, local gap-source
+probe, non-zero gap-pattern probe, non-zero control-pattern probe,
+non-zero value probe, non-zero exact-sequence probe, non-zero fill-rule probe,
+non-zero fill-selector probe, non-zero fill replay, post-fill non-zero queues
+and fill review, non-zero palette-selector probe,
+non-zero palette-shape probe, non-zero palette-shape control probe,
+non-zero palette-shape value probe, non-zero palette-pair value probe,
+non-zero dominant probe, non-zero noisy-shape probe, non-zero noisy-gradient
+probe, non-zero noisy-gradient repeat-context probe, non-zero noisy-flat-walk
+probe, non-zero noisy-flat-walk source probe,
+non-zero noisy-flat-walk shape-control probe, non-zero noisy-flat-walk value
+probe, non-zero noisy-flat-walk backref probe, non-zero noisy-flat-walk
+palette-seed probe,
+non-zero noisy micro-token probe, non-zero noisy jump-token probe,
+non-zero noisy jump-token context probe,
+non-zero noisy mixed-token control-context probe,
+non-zero noisy repeated-nibble probe, non-zero noisy repeated-nibble context
+probe, non-zero noisy mixed-jump probe, non-zero noisy mixed-jump context probe,
+non-zero noisy dense-jump probe,
+non-zero noisy dense-control probe, non-zero noisy weak-control value probe,
+non-zero noisy direction-value probe,
+non-zero noisy direction-value offset probe,
+non-zero noisy direction-value delta-context probe,
+non-zero noisy direction-value payload-grammar probe,
+non-zero noisy direction-value source-profile probe,
+non-zero noisy direction-value source-value probe,
+non-zero noisy direction-value source-window probe,
+non-zero noisy direction-value control-context probe,
+non-zero noisy direction-value exact-context probe,
+non-zero noisy direction-value partial-context probe,
+non-zero noisy review,
+`RUN_HD.sh`, these notes, and `MISE_AU_POINT_PROJET.md`.
+
+## Full HD archive coverage
+
+`tools/lolg_hd_archive_coverage.py` scans the local `C/LOLG/*.MIX` archives,
+classifies visual `VQA` and `PCX` entries, and compares them with the generated
+Full HD manifests.
+
+The current coverage report is:
+
+```text
+output/fullhd_archive_coverage/index.html
+output/fullhd_archive_coverage/summary.csv
+output/fullhd_archive_coverage/archives.csv
+```
+
+Regenerate it with:
+
+```sh
+python3 tools/lolg_hd_archive_coverage.py C/LOLG/*.MIX \
+  -o output/fullhd_archive_coverage
+```
+
+The current report covers 86 `.MIX` archives, 3056 total entries, and 1992
+detected visual entries. All detected `.MIX` visual entries are covered by
+Full HD outputs: 1955/1955 VQA entries and 37/37 PCX entries.
+
+## Full HD image exports
+
+All detected static PCX images from the game archives, direct game icons, and
+Windows image resources from the game executables have been exported as
+1920x1080 PNG files under:
+
+```text
+output/fullhd_images/
+```
+
+The export contains 78 images:
+
+- 37 PCX images from `GLOBAL.MIX` and `LOCAL.MIX`
+- 2 direct icon images from `C/LOLG/LOLG.ICO` and `C/LOLG/NOTES.ICO`
+- 29 icon resources from game executables/DLLs
+- 10 bitmap resources from game executables/DLLs
+
+The manifest and gallery outputs are:
+
+```text
+output/fullhd_images/manifest.csv
+output/fullhd_images/gallery_manifest.csv
+output/fullhd_images/index.html
+```
+
+Regenerate them with:
+
+```sh
+python3 tools/lolg_fullhd_export.py C/LOLG/*.MIX \
+  --direct-images C/LOLG/*.ICO \
+  --pe-resources \
+    C/LOLG/*.EXE \
+    C/LOLG/*.exe \
+    C/LOLG/*.DLL \
+    C/LOLG/*.dll
+```
+
+The exporter keeps the original image ratio and centers each image on a Full HD
+canvas. Use `--fit stretch` only if a forced 16:9 stretch is desired.
+
+Verify the still-image export with:
+
+```sh
+python3 tools/lolg_fullhd_verify.py output/fullhd_images --fail-on-issues
+```
+
+Regenerate the still-image gallery with:
+
+```sh
+python3 tools/lolg_still_hd_gallery.py output/fullhd_images
+```
+
+The current verification result is 78 Full HD still-image exports, 0 entries
+with issues.
+
+These files are asset exports, not drop-in replacements for the running game.
+The original `.MIX` archives do not store filenames, most animated visuals are
+Westwood VQA files, and the level textures are proprietary `.tex` payloads.
+Injecting 1920x1080 assets back into the game archives would require format-
+specific encoders and engine compatibility checks that are not present here.
+
+## Texture cache report
+
+The level texture cache entries referenced by `C/LOLG/CDCACHE.LST` are now
+catalogued with:
+
+```sh
+python3 tools/lolg_texture_report.py
+```
+
+The report is:
+
+```text
+output/texture_report/manifest.csv
+```
+
+The per-reference offset map is:
+
+```text
+output/texture_report/references.csv
+output/texture_report/reference_summary.csv
+output/texture_report/texture_string_clusters.csv
+output/texture_report/texture_segments.csv
+output/texture_report/texture_body_prefixes.csv
+output/texture_report/texture_segment_head_profiles.csv
+output/texture_report/texture_archive_summary.csv
+output/texture_report/cdcache_raw_references.csv
+output/texture_report/cdcache_descriptors.csv
+output/texture_report/cdcache_palette_candidates.csv
+```
+
+The direct LCW compression probe is:
+
+```text
+output/texture_report/lcw_probe.csv
+```
+
+The per-payload header map is:
+
+```text
+output/texture_report/headers.csv
+output/texture_report/texture_payload_header_profiles.csv
+```
+
+The PCX-signature false-positive map is:
+
+```text
+output/texture_report/pcx_signatures.csv
+```
+
+The palette candidate map is:
+
+```text
+output/texture_report/palette_candidates.csv
+```
+
+The level-entry and material maps are:
+
+```text
+output/texture_report/level_entries.csv
+output/texture_report/material_sections.csv
+output/texture_report/material_ranges.csv
+output/texture_report/material_strings.csv
+output/texture_report/material_texture_name_matches.csv
+output/texture_report/material_sequences.csv
+output/texture_report/material_strides.csv
+output/texture_report/material_record_candidates.csv
+output/texture_report/material_record_profiles.csv
+output/texture_report/material_record_field_profiles.csv
+output/texture_report/material_texture_record_links.csv
+output/texture_report/cdcache_material_texture_links.csv
+```
+
+`references.csv` records the PCX-like string offset, surrounding bytes,
+nearby little-endian words, classification, and confidence for each candidate
+inside the packed texture payloads. It also reconstructs source paths when a
+nearby `F:\PROJECTS...\WALLSEH` root is present, keeping the binary control
+bytes in a separate hex field. `reference_summary.csv` groups those references
+by payload and lists the likely texture names separately from low-confidence
+candidates. `texture_string_clusters.csv` records the local string cluster
+around each PCX-like reference, including the byte before the name, distances
+to neighboring references, and bytes after the string terminator.
+`texture_segments.csv` splits each texture payload into the prefix
+and one segment per PCX-like reference, with segment size, entropy, printable
+ratio, body prefix words, and LCW probe status from the bytes after the string
+terminator. `texture_body_prefixes.csv` groups those body prefix words by
+reference class and confidence. `texture_segment_head_profiles.csv` profiles
+the first 64 bytes after each texture-name terminator, grouped by body prefix.
+`texture_archive_summary.csv` compares packed payload size, cache-declared
+decoded size, segment totals, and dominant body prefix per archive.
+`cdcache_raw_references.csv` scans the raw 50 MB `CDCACHE.MIX` cache area for
+PCX-like names and maps those basenames back to texture payload archives when
+possible. `cdcache_descriptors.csv` filters those raw references to entries
+that have a binary descriptor immediately after the NUL-padded name and records
+the marker word, origin, width, height, cache index, and guessed pixel offset.
+It also records pixel-data metrics such as unique index count, zero ratio,
+non-zero bounding box, and whether a naive `width * height` read crosses the
+next descriptor. `cdcache_palette_candidates.csv` records the two 768-byte
+VGA-style blocks found 1024 bytes after raw `palette.pcx` references.
+`lcw_probe.csv` tests standard direct LCW stream offsets and the 64K-window
+LCW variant structurally, without allocating decompressed image buffers.
+`headers.csv` records the payload header prefix, `palette.pcx` offset, first
+texture-name offset, source path offsets, common marker offsets, and the two
+observed header alignment variants. `texture_payload_header_profiles.csv`
+profiles the sampled payload header bytes across all archives and per alignment
+variant.
+`pcx_signatures.csv` records every PCX-like byte signature, interpreted header
+values, surrounding bytes, and whether the standard PCX decoder can read it.
+`palette_candidates.csv` scans MIX entries for palette-sized payloads and
+currently finds one 768-byte VGA-style candidate in `LOCAL.MIX` entry 94.
+`level_entries.csv` classifies each level archive member. `material_sections.csv`
+maps the 18 fixed header records inside each material entry. `material_ranges.csv`
+summarizes the payload ranges derived from those header records.
+`material_strings.csv` extracts material/object strings with both raw text and
+conservative cleaned text, preserving the original offsets. It also tags each
+row with a name class and confidence so printable binary fragments can be
+filtered without losing them. It now includes NUL boundaries, surrounding
+bytes, and nearby little-endian words for each string.
+`material_texture_name_matches.csv` cross-checks likely texture filenames
+against material labels from the same archive. `material_sequences.csv` and
+`material_strides.csv` measure adjacent-label distances inside each material
+range to expose likely fixed-size records. `material_record_candidates.csv`
+extracts candidate fixed-stride material records and records the next label
+distance for stride validation. `material_record_profiles.csv` summarizes
+repeated suffixes, stride-match ratios, and matched texture names per
+archive/range. `material_record_field_profiles.csv` profiles 1-, 2-, and
+4-byte fields inside those candidate records. `material_texture_record_links.csv`
+joins name-matched material records to their texture payload segments.
+`cdcache_material_texture_links.csv` then joins those material/texture links to
+decoded CDCACHE descriptors when the same archive and PCX basename are present.
+
+Current result:
+
+- 15 level `.tex` payloads found in the level `.MIX` archives.
+- `CDCACHE.LST` now contributes its block offset, table flags, and the eight
+  tail words at `0xd0`; the cache-declared size is always present in
+  `cache_tail_dc` or `cache_tail_e0`.
+- The first 32-bit word of the `.tex` payload is tracked separately as
+  `payload_declared_size`. It matches the cache-declared size for only 3 of
+  the 15 payloads, so both possible output-size values are kept in reports.
+- `texture_payload_header_profiles.csv` maps 957 header field histograms. It
+  confirms two alignment variants: 12 payloads with the common marker at
+  `0x10`, and 3 payloads with the same marker shifted to `0x0f`.
+- 106 PCX-like texture strings found inside those payloads.
+- 90 of those strings are classified as likely texture references:
+  12 source path strings and 78 plausible filename strings.
+- 16 PCX-like strings are low-confidence candidates from packed data.
+- 15 `palette.pcx` references found, one per payload.
+- String-cluster mapping shows `palette.pcx` consistently uses tag byte `08`;
+  likely filename references most often use tag byte `0a`.
+- Texture segmentation currently maps 136 payload segments. The segment sizes
+  sum to the full 156011041 bytes of the 15 packed texture payloads.
+- `texture_archive_summary.csv` confirms each archive's segment total exactly
+  matches its packed payload size; cache-declared decoded sizes are 1.6511x to
+  2.1950x larger than the packed payloads.
+- Among likely filename segments, the most common first body word is
+  `2700302b` (17 rows), followed by related `*00302b` variants. Those prefixes
+  do not match a simple PCX header or a direct decoded-size field.
+- `texture_body_prefixes.csv` currently maps 81 prefix groups. The largest
+  group by total packed bytes is also the `2700302b` filename group.
+- `texture_segment_head_profiles.csv` currently records 10287 byte/word/dword
+  histograms over 81 segment-prefix groups. The largest filename group is
+  `2700302b`, with 17 texture segments.
+- 12 complete source-path clusters have been found with stable local layout:
+  `PROJECTS` is 32 bytes before the texture path, `WALLSEH` is 10 bytes
+  before it, and the bytes between `WALLSEH` and the path are `02 00 xx`
+  except one low-confidence `.SPHERE...` candidate.
+- `references.csv` now includes `source_root`, `source_control_hex`, and
+  `reconstructed_source_path`; 10 reconstructed source roots use uppercase
+  `F:\PROJECTS...` and 2 use lowercase `f:\PROJECTS...`.
+- The common header marker starts at `0x10` in 12 payloads and at `0x0f` in
+  3 payloads; decoding cannot assume one fixed alignment for every level.
+- Every level archive contributing a cache payload has exactly 3 entries:
+  one texture payload, one material entry, and one script entry.
+- The 15 material entries all start with 18 fixed 28-byte header records.
+  The material-section report currently maps 270 header records, including
+  30 rows with plausible payload offsets.
+- The material-range report maps 93 derived payload ranges. Its string-count
+  totals match the 2967 extracted material strings.
+- 2967 material strings are extracted. The cleaned-text column now strips only
+  obvious binary/punctuation prefixes while preserving complete labels such as
+  `Dracoid Statue`, `Give Magic`, and `Cave floor`.
+- Material-string context columns show repeated nearby words such as
+  `00020000` and `00000003` around many object labels, supporting the current
+  hypothesis that these entries are structured records rather than loose text.
+- Material stride analysis currently records 2635 adjacent-label sequences and
+  62 archive/range stride summaries. Dominant distances are 22 bytes in
+  `data_start`, 38 bytes in `section0.word0`, and 30 bytes in `section0.word1`.
+- Fixed-stride record extraction currently yields 1899 candidate records, all
+  within payload bounds. Of those, 29 records are linked to likely texture
+  filenames through normalized material/texture name matches.
+- The fixed-stride check marks 1751 of those records as exactly followed by
+  another label at the expected stride. Another 36 rows are terminal records
+  with no following label, leaving 112 stride outliers to inspect manually.
+- Record profiling currently maps 36 archive/range groups. Common suffixes
+  include `0000000003000000` for many 38-byte object records and
+  `0000020003000000` for many 30-byte object records. Field profiling adds
+  2204 rows of per-offset histograms across byte, word, and dword views.
+- `material_texture_record_links.csv` currently records 36 material/texture
+  name links. All 36 resolve to a texture segment, and 30 also resolve to a
+  candidate fixed-stride material record.
+- `cdcache_material_texture_links.csv` currently links 8 of those material
+  rows to descriptor-backed cache images. The exact linked names are
+  `barrel.pcx`, `dinodead.pcx`, `tower.pcx`, and `pillar.pcx`.
+- The material-string classifier currently marks 270 rows as low-confidence
+  fragments/noisy printable data and keeps 2697 rows as plausible labels.
+- `material_texture_name_matches.csv` currently records 36 normalized name
+  matches between likely texture filenames and material labels, including
+  exact matches such as `barrel.pcx` -> `Barrel` and `puddle.pcx` -> `puddle`.
+- `palette_candidates.csv` currently records 1 candidate palette:
+  `C/LOLG/LOCAL.MIX` entry 94, 768 bytes, max value 63.
+- `cdcache_palette_candidates.csv` records 2 raw cache palette-like blocks.
+  They are identical to each other, have max value 63 and 61 unique values, but
+  do not match `LOCAL.MIX` entry 94 and produced poorer comparison renders.
+- `tools/lolg_tex_probe_render.py` renders exploratory byte previews from
+  linked texture segments. The current probe outputs are in
+  `output/tex_probe_render`, `output/tex_probe_render_palette`, and
+  `output/tex_unresolved_material_probe_render`; these are diagnostic views,
+  not final decoded texture exports. The targeted unresolved-material probe
+  currently covers `beaker4.pcx`, `puddle.pcx`, `undead.pcx`, `dirt.pcx`,
+  `ston.pcx`, `death.pcx`, `statue.pcx`, and `dn-dead.pcx`.
+- `tools/lolg_tex_probe_gallery.py` verifies the targeted probe PNGs and writes
+  a browsable gallery. The current targeted probe report has 168 Full HD
+  previews, 8 unique PCX names, 8 mapped segments, and 0 issue rows.
+- The raw `CDCACHE.MIX` scan records 579 PCX-like strings and 266 usable cache
+  descriptors. Of those descriptors, 14 match names referenced by the packed
+  level `.tex` payloads.
+- Cache descriptors use a stable small header after the NUL-padded name. The
+  decoded fields currently treated as `origin_x`, `origin_y`, `width`,
+  `height`, `scale`, and `cache_index` produce plausible dimensions including
+  256x256 wall textures, 320x200 screens, 400x248 sprites, and smaller object
+  cutouts.
+- Most descriptors sit in a fixed cache-record cadence. The dominant distance
+  between descriptors is 4153 bytes, which matches a 4096-byte data chunk plus
+  57 bytes of name/header metadata. The extractor now supports `contiguous`
+  reads, `strided` reads that concatenate 4096-byte chunks while skipping the
+  metadata stride, and `tiled` reads that arrange those chunks as 64x64 tiles.
+  The tiled mode is the preferred decoder path because it reconstructs the
+  current atlases/sprite sheets much more coherently.
+- `tools/lolg_cdcache_texture_extract.py` exports those descriptor-backed byte
+  planes as paletted or RGBA PNGs, optional 1920x1080 centered PNGs, and
+  optional content-cropped PNGs. It can also export the underlying non-empty
+  64x64 tile records as individual native, Full HD, and crop PNGs. Add
+  `--rgba` to write the transparent index as alpha 0; manifests record
+  `image_mode`, and the verifier checks it. The preferred visual palette
+  remains `C/LOLG/LOCAL.MIX:94`.
+- The current `.tex`-matched descriptor comparison export is:
+
+```text
+output/cdcache_textures_all_modes/manifest.csv
+output/cdcache_textures_all_modes/verification.csv
+output/cdcache_textures_all_modes/native/       (42 PNGs)
+output/cdcache_textures_all_modes/fullhd/       (42 PNGs, all 1920x1080)
+output/cdcache_textures_all_modes/crop_native/  (42 PNGs)
+output/cdcache_textures_all_modes/crop_fullhd/  (42 PNGs, all 1920x1080)
+output/cdcache_textures_all_modes/contact_sheet_modes.png
+```
+
+- The current `.tex`-matched individual tile export is:
+
+```text
+output/cdcache_textures_matched_tiles/manifest.csv
+output/cdcache_textures_matched_tiles/verification.csv
+output/cdcache_textures_matched_tiles/tiles_manifest.csv
+output/cdcache_textures_matched_tiles/tiles_verification.csv
+output/cdcache_textures_matched_tiles/tiles_native/       (180 PNGs)
+output/cdcache_textures_matched_tiles/tiles_fullhd/       (180 PNGs, all 1920x1080)
+output/cdcache_textures_matched_tiles/tiles_crop_native/  (180 PNGs)
+output/cdcache_textures_matched_tiles/tiles_crop_fullhd/  (180 PNGs, all 1920x1080)
+output/cdcache_textures_matched_tiles/contact_sheet_tiles_native.png
+```
+
+- The current full cache descriptor export is tiled:
+
+```text
+output/cdcache_textures_all_tiled/manifest.csv
+output/cdcache_textures_all_tiled/verification.csv
+output/cdcache_textures_all_tiled/native/       (266 PNGs)
+output/cdcache_textures_all_tiled/fullhd/       (266 PNGs, all 1920x1080)
+output/cdcache_textures_all_tiled/crop_native/  (265 PNGs)
+output/cdcache_textures_all_tiled/crop_fullhd/  (265 PNGs, all 1920x1080)
+output/cdcache_textures_all_tiled/contact_sheet_native.png
+output/cdcache_textures_all_tiled/contact_sheet_crop_native.png
+```
+
+- The current full cache individual tile export is:
+
+```text
+output/cdcache_textures_all_tiled_tiles/manifest.csv
+output/cdcache_textures_all_tiled_tiles/verification.csv
+output/cdcache_textures_all_tiled_tiles/tiles_manifest.csv
+output/cdcache_textures_all_tiled_tiles/tiles_verification.csv
+output/cdcache_textures_all_tiled_tiles/tiles_native/       (2838 PNGs)
+output/cdcache_textures_all_tiled_tiles/tiles_fullhd/       (2838 PNGs, all 1920x1080)
+output/cdcache_textures_all_tiled_tiles/tiles_crop_native/  (2838 PNGs)
+output/cdcache_textures_all_tiled_tiles/tiles_crop_fullhd/  (2838 PNGs, all 1920x1080)
+output/cdcache_textures_all_tiled_tiles/contact_sheet_tiles_native.png
+```
+
+- The current transparent RGBA `.tex`-matched tile export is:
+
+```text
+output/cdcache_textures_matched_tiles_rgba/manifest.csv
+output/cdcache_textures_matched_tiles_rgba/verification.csv
+output/cdcache_textures_matched_tiles_rgba/tiles_manifest.csv
+output/cdcache_textures_matched_tiles_rgba/tiles_verification.csv
+output/cdcache_textures_matched_tiles_rgba/native/             (14 RGBA PNGs)
+output/cdcache_textures_matched_tiles_rgba/fullhd/             (14 RGBA PNGs, all 1920x1080)
+output/cdcache_textures_matched_tiles_rgba/crop_native/        (14 RGBA PNGs)
+output/cdcache_textures_matched_tiles_rgba/crop_fullhd/        (14 RGBA PNGs, all 1920x1080)
+output/cdcache_textures_matched_tiles_rgba/tiles_native/       (180 RGBA PNGs)
+output/cdcache_textures_matched_tiles_rgba/tiles_fullhd/       (180 RGBA PNGs, all 1920x1080)
+output/cdcache_textures_matched_tiles_rgba/tiles_crop_native/  (180 RGBA PNGs)
+output/cdcache_textures_matched_tiles_rgba/tiles_crop_fullhd/  (180 RGBA PNGs, all 1920x1080)
+```
+
+- The current transparent RGBA full cache tile export is:
+
+```text
+output/cdcache_textures_all_tiled_tiles_rgba/manifest.csv
+output/cdcache_textures_all_tiled_tiles_rgba/verification.csv
+output/cdcache_textures_all_tiled_tiles_rgba/tiles_manifest.csv
+output/cdcache_textures_all_tiled_tiles_rgba/tiles_verification.csv
+output/cdcache_textures_all_tiled_tiles_rgba/native/             (266 RGBA PNGs)
+output/cdcache_textures_all_tiled_tiles_rgba/fullhd/             (266 RGBA PNGs, all 1920x1080)
+output/cdcache_textures_all_tiled_tiles_rgba/crop_native/        (265 RGBA PNGs)
+output/cdcache_textures_all_tiled_tiles_rgba/crop_fullhd/        (265 RGBA PNGs, all 1920x1080)
+output/cdcache_textures_all_tiled_tiles_rgba/tiles_native/       (2838 RGBA PNGs)
+output/cdcache_textures_all_tiled_tiles_rgba/tiles_fullhd/       (2838 RGBA PNGs, all 1920x1080)
+output/cdcache_textures_all_tiled_tiles_rgba/tiles_crop_native/  (2838 RGBA PNGs)
+output/cdcache_textures_all_tiled_tiles_rgba/tiles_crop_fullhd/  (2838 RGBA PNGs, all 1920x1080)
+```
+
+- The current CDCACHE Full HD asset pack is an index and symlink layer over the
+  verified RGBA exports:
+
+```text
+output/cdcache_hd_asset_pack/manifest.csv
+output/cdcache_hd_asset_pack/summary.csv
+output/cdcache_hd_asset_pack/verification.csv
+output/cdcache_hd_asset_pack/verification_summary.csv
+output/cdcache_hd_asset_pack/index.html
+output/cdcache_hd_asset_pack/all/descriptors/       (266 symlinks)
+output/cdcache_hd_asset_pack/all/tiles/             (2838 symlinks)
+output/cdcache_hd_asset_pack/linked_tex/            (194 symlinks grouped by archive)
+output/cdcache_hd_asset_pack/contact_sheet_all_descriptors.png
+output/cdcache_hd_asset_pack/contact_sheet_linked_descriptors.png
+output/cdcache_hd_asset_pack/contact_sheet_linked_tiles.png
+output/tex_hd_coverage/index.html
+output/tex_hd_coverage/summary.csv
+output/tex_hd_coverage/cache_assets.csv
+output/tex_hd_coverage/material_links.csv
+output/tex_reference_coverage/index.html
+output/tex_reference_coverage/summary.csv
+output/tex_reference_coverage/references.csv
+output/tex_reference_coverage/missing_references.csv
+output/tex_reference_coverage/by_archive.csv
+output/tex_missing_reference_evidence/index.html
+output/tex_missing_reference_evidence/summary.csv
+output/tex_missing_reference_evidence/unique_missing.csv
+output/tex_missing_reference_evidence/evidence.csv
+output/cdcache_raw_reference_probe/index.html
+output/cdcache_raw_reference_probe/summary.csv
+output/cdcache_raw_reference_probe/raw_reference_probe.csv
+output/cdcache_alias_candidates/index.html
+output/cdcache_alias_candidates/summary.csv
+output/cdcache_alias_candidates/alias_candidates.csv
+output/cdcache_alias_candidates/synthetic_descriptors.csv
+output/cdcache_alias_candidate_textures/manifest.csv
+output/cdcache_alias_candidate_textures/verification.csv
+output/cdcache_alias_candidate_textures/tiles_manifest.csv
+output/cdcache_alias_candidate_textures/tiles_verification.csv
+output/cdcache_tex_alias_pack/index.html
+output/cdcache_tex_alias_pack/summary.csv
+output/cdcache_tex_alias_pack/manifest.csv
+output/tex_augmented_coverage/index.html
+output/tex_augmented_coverage/summary.csv
+output/tex_augmented_coverage/references.csv
+output/tex_augmented_coverage/aliases.csv
+output/tex_unresolved_material_probe_render/index.html
+output/tex_unresolved_material_probe_render/summary.csv
+output/tex_unresolved_material_probe_render/gallery_manifest.csv
+output/tex_unresolved_material_probe_render/manifest.csv
+output/tex_unresolved_material_probe_render/analysis.html
+output/tex_unresolved_material_probe_render/analysis_summary.csv
+output/tex_unresolved_material_probe_render/analysis.csv
+output/tex_unresolved_material_probe_render/best_candidates.csv
+output/tex_material_decoder_queue/index.html
+output/tex_material_decoder_queue/summary.csv
+output/tex_material_decoder_queue/queue.csv
+output/tex_material_decoder_queue/by_prefix.csv
+output/tex_exact_cdcache_compare/index.html
+output/tex_exact_cdcache_compare/summary.csv
+output/tex_exact_cdcache_compare/comparisons.csv
+output/tex_exact_chunk_evidence/index.html
+output/tex_exact_chunk_evidence/summary.csv
+output/tex_exact_chunk_evidence/matches.csv
+output/tex_exact_match_overlays/index.html
+output/tex_exact_match_overlays/summary.csv
+output/tex_exact_match_overlays/overlays.csv
+output/tex_decoder_seed_report/index.html
+output/tex_decoder_seed_report/summary.csv
+output/tex_decoder_seed_report/seeds.csv
+output/tex_exact_chunk_scan/index.html
+output/tex_exact_chunk_scan/summary.csv
+output/tex_exact_chunk_scan/scan.csv
+output/tex_exact_chunk_clusters/index.html
+output/tex_exact_chunk_clusters/summary.csv
+output/tex_exact_chunk_clusters/clusters.csv
+output/tex_exact_cluster_overlays/index.html
+output/tex_exact_cluster_overlays/summary.csv
+output/tex_exact_cluster_overlays/overlays.csv
+output/tex_decoder_run_corpus/index.html
+output/tex_decoder_run_corpus/summary.csv
+output/tex_decoder_run_corpus/runs.csv
+output/tex_decoder_run_corpus/runs/
+output/tex_partial_raw_decoder/index.html
+output/tex_partial_raw_decoder/summary.csv
+output/tex_partial_raw_decoder/manifest.csv
+output/tex_partial_raw_decoder/fullhd/
+output/tex_partial_raw_coverage/index.html
+output/tex_partial_raw_coverage/summary.csv
+output/tex_partial_raw_coverage/coverage.csv
+output/tex_partial_raw_coverage/gaps.csv
+output/tex_gap_frontier_report/index.html
+output/tex_gap_frontier_report/summary.csv
+output/tex_gap_frontier_report/frontiers.csv
+output/tex_gap_opcode_probe/index.html
+output/tex_gap_opcode_probe/summary.csv
+output/tex_gap_opcode_probe/probe.csv
+output/tex_gap_opcode_probe/opcode_stats.csv
+output/tex_gap_rle_probe/index.html
+output/tex_gap_rle_probe/summary.csv
+output/tex_gap_rle_probe/hypotheses.csv
+output/tex_gap_rle_probe/best_by_frontier.csv
+output/tex_gap_rule_queue/index.html
+output/tex_gap_rule_queue/summary.csv
+output/tex_gap_rule_queue/queue.csv
+output/tex_gap_rule_queue/by_rule.csv
+output/tex_gap_rule_fixtures/index.html
+output/tex_gap_rule_fixtures/summary.csv
+output/tex_gap_rule_fixtures/manifest.csv
+output/tex_gap_rule_fixtures/fixtures/
+output/tex_gap_zero_run_probe/index.html
+output/tex_gap_zero_run_probe/summary.csv
+output/tex_gap_zero_run_probe/fixtures.csv
+output/tex_gap_zero_run_probe/runs.csv
+output/tex_gap_geometry_replay/index.html
+output/tex_gap_geometry_replay/summary.csv
+output/tex_gap_geometry_replay/candidates.csv
+output/tex_gap_geometry_replay/best_by_fixture.csv
+output/tex_gap_nonzero_stream_probe/index.html
+output/tex_gap_nonzero_stream_probe/summary.csv
+output/tex_gap_nonzero_stream_probe/candidates.csv
+output/tex_gap_nonzero_stream_probe/best_by_fixture.csv
+output/tex_gap_control_word_probe/index.html
+output/tex_gap_control_word_probe/summary.csv
+output/tex_gap_control_word_probe/fixtures.csv
+output/tex_gap_control_word_probe/hits.csv
+output/tex_gap_control_word_probe/by_metric.csv
+output/tex_gap_header_schema_probe/index.html
+output/tex_gap_header_schema_probe/summary.csv
+output/tex_gap_header_schema_probe/fixtures.csv
+output/tex_gap_header_schema_probe/blocks.csv
+output/tex_gap_header_schema_probe/payload_candidates.csv
+output/tex_gap_header_schema_probe/best_by_fixture.csv
+output/tex_gap_row_stride_probe/index.html
+output/tex_gap_row_stride_probe/summary.csv
+output/tex_gap_row_stride_probe/fixtures.csv
+output/tex_gap_row_stride_probe/candidates.csv
+output/tex_gap_row_stride_probe/best_by_fixture.csv
+output/tex_gap_row_stride_mismatch_probe/index.html
+output/tex_gap_row_stride_mismatch_probe/summary.csv
+output/tex_gap_row_stride_mismatch_probe/candidates.csv
+output/tex_gap_row_stride_mismatch_probe/row_scores.csv
+output/tex_gap_row_delta_probe/index.html
+output/tex_gap_row_delta_probe/summary.csv
+output/tex_gap_row_delta_probe/candidates.csv
+output/tex_gap_row_delta_probe/row_deltas.csv
+output/tex_gap_row_transform_probe/index.html
+output/tex_gap_row_transform_probe/summary.csv
+output/tex_gap_row_transform_probe/candidates.csv
+output/tex_gap_row_transform_probe/row_transforms.csv
+output/tex_gap_row_control_probe/index.html
+output/tex_gap_row_control_probe/summary.csv
+output/tex_gap_row_control_probe/candidates.csv
+output/tex_gap_row_control_probe/row_controls.csv
+output/tex_gap_row_control_probe/by_control.csv
+output/tex_gap_row_control_probe/by_metric.csv
+output/tex_gap_row_sequence_probe/index.html
+output/tex_gap_row_sequence_probe/summary.csv
+output/tex_gap_row_sequence_probe/candidates.csv
+output/tex_gap_row_sequence_probe/transitions.csv
+output/tex_gap_row_sequence_probe/by_step.csv
+output/tex_gap_row_literal_scan_probe/index.html
+output/tex_gap_row_literal_scan_probe/summary.csv
+output/tex_gap_row_literal_scan_probe/candidates.csv
+output/tex_gap_row_literal_scan_probe/row_scans.csv
+output/tex_gap_row_fill_run_probe/index.html
+output/tex_gap_row_fill_run_probe/summary.csv
+output/tex_gap_row_fill_run_probe/candidates.csv
+output/tex_gap_row_fill_run_probe/row_fills.csv
+output/tex_gap_row_fill_run_probe/run_matches.csv
+output/tex_gap_control_grammar_probe/index.html
+output/tex_gap_control_grammar_probe/summary.csv
+output/tex_gap_control_grammar_probe/candidates.csv
+output/tex_gap_control_grammar_probe/best_by_fixture.csv
+output/tex_gap_mismatch_trace_probe/index.html
+output/tex_gap_mismatch_trace_probe/summary.csv
+output/tex_gap_mismatch_trace_probe/mismatches.csv
+output/tex_gap_mismatch_trace_probe/control_operations.csv
+output/tex_gap_zero_literal_switch_probe/index.html
+output/tex_gap_zero_literal_switch_probe/summary.csv
+output/tex_gap_zero_literal_switch_probe/candidates.csv
+output/tex_gap_zero_literal_switch_probe/best_by_fixture.csv
+output/tex_gap_zero_literal_segmentation_probe/index.html
+output/tex_gap_zero_literal_segmentation_probe/summary.csv
+output/tex_gap_zero_literal_segmentation_probe/strategies.csv
+output/tex_gap_zero_literal_segmentation_probe/operations.csv
+output/tex_gap_zero_literal_segmentation_probe/best_by_fixture.csv
+output/tex_gap_segmentation_control_correlation_probe/index.html
+output/tex_gap_segmentation_control_correlation_probe/summary.csv
+output/tex_gap_segmentation_control_correlation_probe/operations.csv
+output/tex_gap_segmentation_control_correlation_probe/by_pre_context.csv
+output/tex_gap_segmentation_control_correlation_probe/by_source_delta.csv
+output/tex_gap_literal_token_probe/index.html
+output/tex_gap_literal_token_probe/summary.csv
+output/tex_gap_literal_token_probe/rules.csv
+output/tex_gap_literal_token_probe/literals.csv
+output/tex_gap_literal_token_probe/by_token.csv
+output/tex_gap_literal_token_probe/by_fixture.csv
+output/tex_gap_literal_token_classifier_probe/index.html
+output/tex_gap_literal_token_classifier_probe/summary.csv
+output/tex_gap_literal_token_classifier_probe/classifiers.csv
+output/tex_gap_literal_token_classifier_probe/classifier_errors.csv
+output/tex_gap_literal_token_classifier_probe/by_fixture.csv
+output/tex_gap_literal_fp_rejection_probe/index.html
+output/tex_gap_literal_fp_rejection_probe/summary.csv
+output/tex_gap_literal_fp_rejection_probe/classifiers.csv
+output/tex_gap_literal_fp_rejection_probe/rejections.csv
+output/tex_gap_literal_fp_rejection_probe/by_fixture.csv
+output/tex_gap_zero_run_alignment_probe/index.html
+output/tex_gap_zero_run_alignment_probe/summary.csv
+output/tex_gap_zero_run_alignment_probe/zero_runs.csv
+output/tex_gap_zero_run_alignment_probe/by_length.csv
+output/tex_gap_zero_run_alignment_probe/by_transition.csv
+output/tex_gap_zero_run_alignment_probe/by_fixture.csv
+output/tex_gap_zero_control_risk_probe/index.html
+output/tex_gap_zero_control_risk_probe/summary.csv
+output/tex_gap_zero_control_risk_probe/classifiers.csv
+output/tex_gap_zero_control_risk_probe/false_positives.csv
+output/tex_gap_zero_control_risk_probe/by_kind.csv
+output/tex_gap_zero_control_risk_probe/by_fixture.csv
+output/tex_gap_decoder_skeleton_candidate_probe/index.html
+output/tex_gap_decoder_skeleton_candidate_probe/summary.csv
+output/tex_gap_decoder_skeleton_candidate_probe/candidates.csv
+output/tex_gap_decoder_skeleton_candidate_probe/by_fixture.csv
+output/tex_gap_decoder_risk_adjusted_probe/index.html
+output/tex_gap_decoder_risk_adjusted_probe/summary.csv
+output/tex_gap_decoder_risk_adjusted_probe/candidates.csv
+output/tex_gap_decoder_risk_adjusted_probe/by_fixture.csv
+output/tex_gap_decoder_seed_replay/index.html
+output/tex_gap_decoder_seed_replay/summary.csv
+output/tex_gap_decoder_seed_replay/fixtures.csv
+output/tex_gap_decoder_seed_replay/decisions.csv
+output/tex_gap_decoder_control_promotion_probe/index.html
+output/tex_gap_decoder_control_promotion_probe/summary.csv
+output/tex_gap_decoder_control_promotion_probe/selectors.csv
+output/tex_gap_decoder_control_promotion_probe/signatures.csv
+output/tex_gap_decoder_control_promotion_probe/by_fixture.csv
+output/tex_gap_decoder_false_risk_queue/index.html
+output/tex_gap_decoder_false_risk_queue/summary.csv
+output/tex_gap_decoder_false_risk_queue/queue.csv
+output/tex_gap_decoder_false_risk_queue/rejectors.csv
+output/tex_gap_decoder_false_risk_queue/by_fixture.csv
+output/tex_gap_decoder_clean_replay/index.html
+output/tex_gap_decoder_clean_replay/summary.csv
+output/tex_gap_decoder_clean_replay/fixtures.csv
+output/tex_gap_decoder_clean_replay/decisions.csv
+output/tex_gap_decoder_clean_gap_queue/index.html
+output/tex_gap_decoder_clean_gap_queue/summary.csv
+output/tex_gap_decoder_clean_gap_queue/spans.csv
+output/tex_gap_decoder_clean_gap_queue/by_fixture.csv
+output/tex_gap_decoder_unresolved_run_probe/index.html
+output/tex_gap_decoder_unresolved_run_probe/summary.csv
+output/tex_gap_decoder_unresolved_run_probe/by_span.csv
+output/tex_gap_decoder_unresolved_run_probe/runs.csv
+output/tex_gap_decoder_unresolved_run_probe/by_fixture.csv
+output/tex_gap_decoder_unresolved_zero_queue/index.html
+output/tex_gap_decoder_unresolved_zero_queue/summary.csv
+output/tex_gap_decoder_unresolved_zero_queue/queue.csv
+output/tex_gap_decoder_unresolved_zero_queue/by_signature.csv
+output/tex_gap_decoder_unresolved_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_internal_probe/index.html
+output/tex_gap_decoder_len64_internal_probe/summary.csv
+output/tex_gap_decoder_len64_internal_probe/targets.csv
+output/tex_gap_decoder_len64_internal_probe/by_neighbor_signature.csv
+output/tex_gap_decoder_len64_internal_probe/by_fixture.csv
+output/tex_gap_decoder_len64_source_probe/index.html
+output/tex_gap_decoder_len64_source_probe/summary.csv
+output/tex_gap_decoder_len64_source_probe/targets.csv
+output/tex_gap_decoder_len64_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_selector_probe/index.html
+output/tex_gap_decoder_len64_selector_probe/summary.csv
+output/tex_gap_decoder_len64_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_replay/index.html
+output/tex_gap_decoder_len64_promoted_replay/summary.csv
+output/tex_gap_decoder_len64_promoted_replay/fixtures.csv
+output/tex_gap_decoder_len64_promoted_replay/promotions.csv
+output/tex_gap_decoder_len64_promoted_gap_queue/index.html
+output/tex_gap_decoder_len64_promoted_gap_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_gap_queue/spans.csv
+output/tex_gap_decoder_len64_promoted_gap_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_run_probe/index.html
+output/tex_gap_decoder_len64_promoted_run_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_run_probe/by_span.csv
+output/tex_gap_decoder_len64_promoted_run_probe/runs.csv
+output/tex_gap_decoder_len64_promoted_run_probe/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/index.html
+output/tex_gap_decoder_len64_promoted_zero_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/queue.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/by_signature.csv
+output/tex_gap_decoder_len64_promoted_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/index.html
+output/tex_gap_decoder_len64_promoted_zero_source_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_promoted_zero_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_large32_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_large32_replay/index.html
+output/tex_gap_decoder_len64_promoted_large32_replay/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_replay/fixtures.csv
+output/tex_gap_decoder_len64_promoted_large32_replay/promotions.csv
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/index.html
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/spans.csv
+output/tex_gap_decoder_len64_promoted_large32_gap_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_run_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/by_span.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/runs.csv
+output/tex_gap_decoder_len64_promoted_large32_run_probe/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/index.html
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/queue.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/by_signature.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_medium8_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_medium8_replay/index.html
+output/tex_gap_decoder_len64_promoted_medium8_replay/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_replay/fixtures.csv
+output/tex_gap_decoder_len64_promoted_medium8_replay/promotions.csv
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/index.html
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/spans.csv
+output/tex_gap_decoder_len64_promoted_medium8_gap_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/by_span.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/runs.csv
+output/tex_gap_decoder_len64_promoted_medium8_run_probe/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/index.html
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/queue.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/by_signature.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_queue/by_fixture.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/by_control_window.csv
+output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/by_control_ref.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/summary.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/greedy.csv
+output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/targets.csv
+output/tex_gap_fixture_replay/index.html
+output/tex_gap_fixture_replay/summary.csv
+output/tex_gap_fixture_replay/replay.csv
+output/tex_gap_fixture_replay/best_by_fixture.csv
+```
+
+The pack selects the content-cropped Full HD RGBA PNG whenever one exists, and
+falls back to the centered Full HD PNG for the one descriptor without visible
+content. It records material names from `cdcache_material_texture_links.csv`
+when a descriptor is linked to a known `.tex` material.
+`output/cdcache_hd_asset_pack/index.html` is a static gallery over that pack,
+with search and filters for asset type, `.tex` linkage, archive, and material.
+`output/tex_hd_coverage/index.html` is the focused `.tex` coverage report. It
+lists the 14 `.tex`-linked CDCACHE descriptors, their 180 linked tile assets,
+and the 8 material-link rows recovered from the `.tex` material reports.
+`output/tex_reference_coverage/index.html` compares the 90 likely PCX reference
+rows extracted from `.tex` payloads against decoded CDCACHE descriptors. It
+currently records 87 unique likely PCX names, 14 covered unique names, and 73
+unique names that are still reference-only.
+`output/tex_missing_reference_evidence/index.html` breaks down those 73 unique
+missing names by secondary evidence. It currently finds 9 unique names with raw
+CDCACHE strings in the same archive and 10 unique names with material-record
+matches; all 73 are still represented by a mapped `.tex` segment.
+`output/cdcache_raw_reference_probe/index.html` then probes the 9 raw CDCACHE
+names and finds 8 descriptor-candidate windows. `output/cdcache_alias_candidates/index.html`
+maps those windows to 8 alias candidates: 5 existing descriptors and 3
+synthetic descriptors. The synthetic descriptors are rendered under
+`output/cdcache_alias_candidate_textures/`, and
+`output/cdcache_tex_alias_pack/index.html` collects all 8 alias candidates as
+Full HD descriptor symlinks for `.tex` review.
+`output/tex_augmented_coverage/index.html` combines exact descriptor matches
+with those alias-pack assets. It currently reports 14 exact unique PCX names,
+7 alias-backed unique names, 21 exact-or-alias unique names, and 66 unresolved
+unique likely `.tex` PCX names.
+`output/tex_unresolved_material_probe_render/index.html` is the focused
+diagnostic gallery for 8 unresolved names that still have material-record
+evidence. It verifies 168 Full HD previews at 1920x1080, but those previews are
+raw byte-layout probes and are not counted as decoded replacement textures.
+`output/tex_unresolved_material_probe_render/analysis.html` ranks those probes
+with simple image-structure metrics. It currently analyzes all 168 previews and
+keeps the top 3 candidates per segment, producing 24 best-candidate rows.
+`output/tex_material_decoder_queue/index.html` merges the material texture
+links, augmented `.tex` coverage, and best probe candidates into a focused
+decoder queue. It currently tracks 36 material-linked rows: 8 exact rows, 4
+alias rows, and 24 unresolved rows grouped into 8 unresolved segments.
+`output/tex_exact_cdcache_compare/index.html` compares the 4 exact
+material-linked `.tex` segments against their decoded CDCACHE pixel exports.
+It currently finds direct 32-byte chunks in 1 segment and direct 16-byte chunks
+in 2 segments, with 0 issue rows.
+`output/tex_exact_chunk_evidence/index.html` expands those direct hits into
+40 concrete segment/pixel windows. The current evidence is limited to
+`barrel.pcx` and `dinodead.pcx`, which makes them the best next targets for a
+real `.tex` stream decoder.
+`output/tex_exact_match_overlays/index.html` renders that evidence as 2 Full
+HD overlays. They are intentionally sparse masks, not replacement textures:
+48 native `barrel.pcx` pixels and 368 native `dinodead.pcx` pixels are covered.
+`output/tex_decoder_seed_report/index.html` ranks the 40 direct matches into
+3 strong, 11 medium, and 26 weak decoder seeds. The strong seeds are the next
+best anchors for turning the `.tex` stream analysis into a real decoder.
+`output/tex_exact_chunk_scan/index.html` runs the higher-coverage scan over
+32- and 16-byte chunks with entropy filtering. It currently finds 1243 rows:
+21 for `barrel.pcx`, 1134 16-byte rows for `dinodead.pcx`, and 88 32-byte
+rows for `dinodead.pcx`; no segment-size group hits the configured cap.
+`output/tex_exact_chunk_clusters/index.html` condenses those scan rows into
+140 contiguous decoder runs. It currently identifies 35 strong runs and a
+longest direct span of 48 bytes across the exact `.tex`/CDCACHE matches.
+`output/tex_exact_cluster_overlays/index.html` renders those runs as 2 Full
+HD RGBA overlays. The overlays cover 3014 native pixels across `barrel.pcx`
+and `dinodead.pcx` while preserving the source CDCACHE colors.
+`output/tex_decoder_run_corpus/index.html` extracts the same clusters as
+binary decoder fixtures. It currently verifies 140/140 runs as byte-identical
+between the `.tex` segment bytes and the CDCACHE pixel bytes, totaling 3565
+exact bytes.
+`output/tex_partial_raw_decoder/index.html` is the first partial raw-copy
+decoder output. It copies those byte-exact `.tex` runs into transparent
+texture canvases and renders 2 verified Full HD PNGs with 0 mismatched pixels.
+`output/tex_partial_raw_coverage/index.html` tracks the remaining work for
+that partial decoder: 3014 unique pixels are covered, 127 gaps remain, and
+the largest current gap is 10827 pixels.
+`output/tex_gap_frontier_report/index.html` links those gaps back to their
+neighboring decoded runs and segment windows. It currently tracks 127 gap
+frontiers, including 123 internal gaps and 105 frontiers with positive `.tex`
+segment windows for the next decoder pass.
+`output/tex_gap_opcode_probe/index.html` probes those 105 positive segment
+windows against the expected CDCACHE gap pixels. It confirms that no remaining
+gap is a complete raw-copy replay after a short control prefix, while exposing
+75 short raw prefix echoes, a 13-byte best prefix, 62 compressed windows, 38
+expanded control windows, and 63 first-byte opcode groups for the next decoder
+rule pass.
+`output/tex_gap_rle_probe/index.html` tests common RLE families against the
+same windows. It covers PCX RLE, PackBits, inverse PackBits, high-bit
+literal/repeat variants, and count/value variants; none decode a complete
+gap, with only 8 frontiers showing any prefix and a best prefix of 3 bytes.
+`output/tex_gap_rule_queue/index.html` ranks those findings into concrete
+next decoder-rule work. It currently contains 105 queue rows across 6 rule
+types: 1 literal-fragment probe, 7 short-echo probes, 58 compact-control
+streams, 32 expanded-control streams, 1 balanced transform stream, and 6 mixed
+control streams.
+`output/tex_gap_rule_fixtures/index.html` extracts binary fixtures for the top
+32 ranked decoder-rule candidates. Each fixture includes the raw `.tex` segment
+window, the expected CDCACHE gap bytes, the skipped control prefix, and the
+currently aligned literal fragment.
+`output/tex_gap_zero_run_probe/index.html` measures the zero/nonzero run
+structure in those expected gap bytes. It currently records 673 binary runs,
+332 zero runs, and 8383 zero bytes. `barrel.pcx` rank 1 shows 64 leading zero
+bytes repeating with period 93, the native width, across 53 leading row-prefix
+runs. That is now the strongest evidence for a geometry-aware skip/fill rule.
+`output/tex_gap_geometry_replay/index.html` tests that geometry-aware lead:
+it applies row-prefix zero masks and replays raw or zero-filtered segment bytes
+into the remaining slots. It covers 8 fixtures, 1140 candidates, and 2 stream
+modes. There are still 0 complete matches, but `barrel.pcx` improves to a
+65-byte prefix and 4127 exact bytes, which narrows the next decoder step to
+the nonzero slot stream rather than the zero mask.
+`output/tex_gap_nonzero_stream_probe/index.html` extracts only those nonzero
+slots and probes identity, bit-not, nibble-swap, low7/highbit, XOR constants,
+and add constants over raw and zero-filtered `.tex` streams. It tests 10260
+candidates across 9 transforms. There are 0 complete matches, with only a
+4-byte best prefix and 85 exact bytes, so the nonzero stream is not a simple
+linear byte transform.
+`output/tex_gap_control_word_probe/index.html` scans the first control bytes of
+the fixture windows as bytes, u16le, and u16be values and compares them to
+known geometry/count metrics. It records 214 hits across 20 metrics. For the
+top `barrel.pcx` fixture, the control prefix contains `width=93` as u16le at
+offset 16 and `height=99` as u16le at offset 18, matching the native 93x99
+texture and confirming that part of the `.tex` control header is geometric.
+`output/tex_gap_header_schema_probe/index.html` groups those control-word hits
+into candidate header blocks and tests the implied payload starts through the
+same geometry-aware gap replay. It currently records 71 header blocks and 732
+payload candidates across the 32 fixtures, including 1 true dimension block
+and 2 row-mask blocks. There are still 0 complete matches; the best prefix
+stays 65 bytes at offset 52 on `barrel.pcx`, while the best exact-byte count
+is 4122, so this is schema evidence rather than a complete decoder rule.
+`output/tex_gap_row_stride_probe/index.html` tests whether those payloads are
+laid out by row with a fixed stride and per-row prefix bytes. It covers the 8
+fixtures that have row-prefix zero runs, producing 49924 candidates across 36
+payload offsets and 106 stride values. There are still 0 complete matches, but
+the best exact-byte count rises to 4157; the strongest prefix still remains 65
+bytes on `barrel.pcx`, so the row-stride model is useful evidence but not yet
+a promotable decoder.
+`output/tex_gap_row_stride_mismatch_probe/index.html` takes the top row-stride
+candidates and scores each output row separately. It currently selects 18
+candidates and emits 318 row score rows. Only 2 nonzero rows are fully exact;
+the best selected candidate is on `dinodead.pcx` frontier 16 with 610/934
+nonzero slots matching. This shows that the stride model captures some local
+layout but still needs another per-row control or transform rule.
+`output/tex_gap_row_delta_probe/index.html` then tests whether a local source
+delta per row can explain those mismatches. It covers the same 18 selected
+candidates and 318 row rows with a +/-96 byte delta window. The best adjusted
+score is 610 nonzero slots with a 352-slot gain, matching the strongest
+row-stride case while still requiring 125 distinct best deltas. This confirms
+that a simple per-row source shift is not yet a stable decoder rule.
+`output/tex_gap_row_transform_probe/index.html` tests simple byte transforms
+after those per-row deltas: identity, bit-not, nibble swap, low7/highbit, XOR,
+and add constants. It keeps the best transformed score at 610 nonzero slots,
+with only a 7-slot best gain over the delta pass and identity as the dominant
+row transform. That rules out a simple local byte transform as the missing
+piece.
+`output/tex_gap_row_control_probe/index.html` then inspects the source bytes
+around each best per-row start. It emits 318 row-control rows, 139 grouped
+control contexts, and 31 nonzero metric rows. The strongest byte/delta relation
+hits only 5 rows, while 125 distinct deltas are still needed; this points away
+from a direct one-byte relative-control rule and toward a wider row grammar or
+stateful skip/fill rule.
+`output/tex_gap_row_sequence_probe/index.html` checks that wider row grammar
+angle by measuring every row-to-row best-source-start transition. It emits 300
+transition rows, but they split into 106 source-step groups with 40 rewinds and
+46 repeated starts. Only 10 transitions match the candidate row stride. That
+rules out a simple fixed row advance and keeps the likely decoder shape in a
+stateful skip/fill or compact-control grammar.
+`output/tex_gap_row_literal_scan_probe/index.html` scans every expected
+nonzero row against the entire candidate source stream. It finds 163 rows where
+a literal match elsewhere beats the row-delta position, but 0 fully exact
+nonzero rows and a best total score of 542, below the 610 from row-delta. That
+means the remaining gaps are not solved by relocating literal rows; a real
+decoder still needs to interpret control state or synthesize/fill spans.
+`output/tex_gap_row_fill_run_probe/index.html` narrows that further by testing
+a local zero-fill plus literal-run grammar around the row starts. With
+3-byte-or-longer literal runs, it sees 462 eligible runs and 13838 eligible
+bytes, but only 4 sequential matches totaling 32 bytes, with 0 full rows. The
+missing rule is therefore not a naive "fill zeros then copy nearby literal
+runs" decoder.
+`output/tex_gap_control_grammar_probe/index.html` is the first true sequential
+skip/copy grammar replay over the gap fixtures. It tests nibble zero/copy
+fields, byte-pair zero/copy fields, and high-bit copy/zero flags over payload
+offsets from segment starts, skips, fragments, and header blocks. It emits
+4396 candidates and finds 0 full matches; best exact is 3817 bytes on
+`barrel.pcx`, so these compact grammars are not the missing decoder yet.
+`output/tex_gap_mismatch_trace_probe/index.html` then traces the first mismatch
+of the best compact control grammar and the best broader fixture replay for
+each fixture. It emits 64 trace rows and 60 nearby control-operation rows. The
+key `barrel.pcx` boundary is now explicit: both best families match 64 leading
+bytes, then the expected gap switches to literal-looking bytes while the compact
+control grammar is still emitting zeros. That gives the next decoder pass a
+concrete control boundary to model.
+`output/tex_gap_zero_literal_switch_probe/index.html` tests that boundary as a
+diagnostic zero-prefix then literal-source switch. It raises the best prefix to
+73 bytes on `barrel.pcx`, using the expected 64-byte zero prefix and a source
+offset where the expected literal window appears. However, it only reaches 163
+exact bytes overall and 0 full matches, so the real decoder still needs a
+stateful rule rather than a one-time zero/literal splice.
+`output/tex_gap_zero_literal_segmentation_probe/index.html` generalizes the
+same idea into a multi-operation skeleton over every fixture. With
+zero/literal/gap spans it covers 9866 of 17503 expected bytes: most covered
+bytes are zeros, but 1524 bytes are literal-copy spans found in the source
+segment. `barrel.pcx` is 73.5% coverable this way, starting with a 64-byte zero
+span followed by exact literal snippets at segment offsets such as 166. The
+remaining 7637 bytes still require the real control/transform rule.
+`output/tex_gap_segmentation_control_correlation_probe/index.html` turns that
+segmentation skeleton into decoder-facing control evidence. Across the 984
+best-segment operations it records preceding literal bytes, source deltas, and
+nearby u8/u16 length hits. The strongest repeated source movement is a
+3-byte forward delta from the previous literal end, and 157 operations have
+their output length visible as a nearby u8 value in the source/control window.
+That is the current best lead for a frame-by-frame `.tex` decoder rule.
+`output/tex_gap_literal_token_probe/index.html` promotes that lead into a
+specific literal-length candidate: for many literal-copy spans, the byte
+immediately before the source span equals `copy_length - 3`. The rule covers
+141 operations and 1034 literal bytes, with 19 fixtures fully explained at the
+literal-token level. `barrel.pcx` remains mixed, so the next missing part is
+the control decision that chooses when the byte is a length token versus
+ordinary source data.
+`output/tex_gap_literal_token_classifier_probe/index.html` then measures that
+decision problem directly. Treating every token value <= 13 as a token has
+perfect recall for the current segmented token+3 rows, but 25 false positives.
+Rejecting backward source jumps drops false positives to 12 while keeping 95%
+of true token+3 rows. Adding `abs(delta)<=512` drops false positives to 5, but
+keeps only 73.8% of the true token+3 rows. This points to a two-tier decoder
+rule: confident forward/local tokens first, then a separate rule for the
+long-jump and backward cases.
+`output/tex_gap_literal_fp_rejection_probe/index.html` checks that split with
+source-context rejectors. `small_nonzero_next2_clean` keeps full recall for the
+141 true token+3 rows and cuts false-positive literal bytes from 127 to 57.
+The stricter `small_not_backward_nonzero_pre4_mod_clean` tier drops to 24 false
+bytes while keeping 127 true rows, which is useful as a high-confidence tier
+but not enough for the full literal path by itself.
+`output/tex_gap_zero_run_alignment_probe/index.html` checks whether the zero
+side of the skeleton is a row-fill artifact. It is not: no zero-run simply
+fills to the next 64-byte boundary, and only one 64-byte run starts aligned.
+Most zero-runs sit between unresolved gap spans, and only 31 of 292 have their
+length visible as a nearby u8 value. The next decoder work should therefore
+focus on the surrounding control decision, not on a plain row-stride fill.
+`output/tex_gap_zero_control_risk_probe/index.html` makes that risk explicit by
+applying zero selectors to all 984 segmented operations. The current broad
+`len64_or_u8` selector finds 4096 zero bytes but would also hit 947 nonzero
+bytes if used without another control bit. `len64_and_u8` is the clean
+false-free tier at 576 zero bytes, and `u8_len32_64` reaches 698 zero bytes
+with 48 false bytes.
+`output/tex_gap_decoder_skeleton_candidate_probe/index.html` translates the
+current evidence into concrete decoder tiers. Without oracle filtering, the
+best tier uses 64-byte-or-u8 zero evidence plus `small_nonzero_next2_clean` and
+reaches 5130 correct bytes, while carrying 57 false-positive literal bytes. The
+all-zero plus verified-token upper bound reaches 9376 bytes, so the remaining
+gap is now split into control confidence, false-token rejection, and unresolved
+nonzero spans rather than a single opaque mismatch.
+`output/tex_gap_decoder_risk_adjusted_probe/index.html` applies those same
+zero and literal decisions to every segmented operation, so false zero fills
+are counted alongside false literal copies. The broad best-by-correct tier
+still reaches 5130 correct bytes but rises to 894 false bytes; the best-net
+candidate is `priority=literal_first|zero=len64|literal=small_nonzero_next2_clean`
+with 4746 correct bytes, 249 false bytes, and net 4497. The low-false tier
+uses `priority=zero_first|zero=len64_and_u8|literal=small_nonzero_next2_clean`
+and reaches 1610 correct bytes with 57 false bytes, making it the safer next
+decoder skeleton seed.
+`output/tex_gap_decoder_seed_replay/index.html` turns that low-false tier into
+an auditable replay artifact. It reads the real fixture byte files rather than
+the truncated diagnostic hex columns, writes one decoded buffer plus known/risk
+masks for each fixture, and records every selected operation in
+`decisions.csv`. It also renders 32 Full HD diagnostic previews with expected
+bytes, selected seed output, and trust/risk masks side by side. The current
+seed selects 1667 bytes and all selected bytes match the segmented expected
+output; 1610 bytes are trusted by the current zero/literal rules and 57 bytes
+remain tagged as false-risk literal decisions.
+`output/tex_gap_decoder_control_promotion_probe/index.html` checks which of
+those trusted seed decisions can be promoted from observed control-byte
+signatures. The clean literal promotion is `pre4|next2`, covering 1034 bytes
+without false signatures; the clean zero promotion is `len64_and_u8`, covering
+576 bytes. Together they cover the full 1610 trusted-byte seed, while the 57
+remaining selected bytes stay in the risk bucket instead of being promoted.
+`output/tex_gap_decoder_false_risk_queue/index.html` turns that split into an
+actionable queue. It lists all 162 selected seed operations, keeps the 150
+promoted operations as accepted decoder coverage, rejects the 12 unpromoted
+false-literal operations for 57 bytes, records 59 safe rejector signature
+groups, and leaves 0 trusted or false bytes in review.
+`output/tex_gap_decoder_clean_replay/index.html` applies that queue as a clean
+decoder replay. It writes only promoted decisions into the decoded buffers,
+keeps accepted masks for those bytes, skips the rejected false-risk literals,
+and renders 32 Full HD previews. The result is 1610 byte-exact clean bytes, 57
+rejected false-risk bytes, 0 false bytes written, and 0 issue rows.
+`output/tex_gap_decoder_clean_gap_queue/index.html` then ranks what remains
+outside the clean replay. It keeps the 57 rejected false-risk bytes separate
+from the 15836 unresolved bytes, records 204 total spans, 192 unresolved spans,
+12 rejected spans, and shows the largest unresolved span is 459 bytes. This is
+the next target queue for adding real control-stream rules.
+`output/tex_gap_decoder_unresolved_run_probe/index.html` splits those 192
+unresolved spans into internal zero/nonzero runs. It records 729 runs total,
+including 303 zero runs / 7787 zero bytes and 426 nonzero runs / 8049 nonzero
+bytes, with the largest zero run at 111 bytes. Those zero bytes remain evidence
+for the next control rules instead of being promoted by the clean replay.
+`output/tex_gap_decoder_unresolved_zero_queue/index.html` turns the zero-run
+half of that split into a focused review queue. It keeps all 303 zero runs as
+evidence, totals 7787 zero bytes, isolates 5972 internal zero bytes, records 49
+len64 runs / 3136 bytes, and groups the queue into 19 local-context signatures.
+The top signature is `internal|len64|left_nonzero|right_nonzero`, with 44 rows
+and 2816 bytes, which is the next concrete rule target.
+`output/tex_gap_decoder_len64_internal_probe/index.html` isolates that top
+signature and writes 44 binary context snippets around the candidate runs. It
+covers 28 spans across 2 fixtures: 43 targets on `barrel.pcx` frontier 1 and 1
+target on `dinodead.pcx` frontier 49. The strongest neighbor motif is
+`prev29|zero64|next29`, with 10 rows / 640 bytes, giving a concrete local
+pattern for the next decoder rule experiment.
+`output/tex_gap_decoder_len64_source_probe/index.html` then joins those 44
+targets back to the segmentation-control operations. It verifies all 44 targets
+have matching zero operations, none has the length u8/u16/source-delta evidence
+used by the current safe selector, and the targets split across 34 source
+control refs / 34 control-window signatures. The strongest source ref is 506
+with 5 rows / 320 bytes, so the next experiment needs a stronger source-side
+signature than plain len64.
+`output/tex_gap_decoder_len64_selector_probe/index.html` scores that stronger
+source-side signature space without applying it to the clean replay yet. It
+tests target-bearing source features against all 984 segmented operations and
+finds 3235 target-bearing candidates, 1631 of them false-free. The best single
+candidate is `cw_b16=6f&len=64`: 12 target rows / 768 target bytes, 13 zero
+operation rows / 832 zero bytes, and 0 false bytes. A greedy union restricted
+to len64 control-byte pairs with at least 3 target rows uses 12 selectors and
+covers all 44 internal len64 targets / 2816 bytes with 0 false bytes across the
+current corpus.
+`output/tex_gap_decoder_len64_promoted_replay/index.html` writes those targets
+into a separate candidate buffer on top of the clean replay. It verifies no
+base/rejected overlap, all 44 writes exact zero bytes, and reduces unresolved
+bytes from 15836 to 13020 while keeping rejected false-risk bytes at 57.
+`output/tex_gap_decoder_len64_promoted_gap_queue/index.html` then rebuilds the
+remaining gap queue from that promoted mask. The queue now has 248 spans total:
+236 unresolved spans and the same 12 rejected false-risk spans. The remaining
+unresolved bytes split into 189 pure zero bytes, 2009 pure nonzero bytes, and
+10822 mixed bytes; the largest unresolved span is now 306 bytes.
+`output/tex_gap_decoder_len64_promoted_run_probe/index.html` re-splits only
+those 236 unresolved spans. It now finds 685 internal runs: 259 zero runs and
+426 nonzero runs. The post-promotion unresolved zero budget is 4971 bytes
+instead of the previous 7787, while nonzero bytes remain 8049; the largest
+zero run is still 111 bytes, so the next promotion pass should target the
+remaining shorter zero runs and mixed-span separators.
+`output/tex_gap_decoder_len64_promoted_zero_queue/index.html` ranks those 259
+remaining zero runs by local context. The len64 class has dropped from 49 rows
+/ 3136 bytes to 5 rows / 320 bytes. The strongest remaining signature is now
+`internal|large32|left_nonzero|right_nonzero` with 35 rows / 1451 bytes, so
+the next selector probe should focus on large32 internal zero runs rather than
+the already-promoted len64 family.
+`output/tex_gap_decoder_len64_promoted_zero_source_probe/index.html` joins
+those queued zero runs back to source/control operations. It joins 239 rows /
+4950 bytes and leaves only 20 tiny rows / 21 bytes without a source operation.
+The remaining selector space is now source-backed: it exposes 74 control refs
+and 80 control windows, with 22 direct length-u8 hits, so the next step is a
+selector probe over the joined large32/internal targets.
+`output/tex_gap_decoder_len64_promoted_large32_selector_probe/index.html`
+scores source-side selectors for the strongest remaining internal zero
+signature, `internal|large32|left_nonzero|right_nonzero`. It targets 35 joined
+runs / 1451 bytes, finds 1759 candidates and 463 false-free candidates. The
+best single selector is `bucket=large32&cw_b13=b6` at 291 target bytes, while
+the current 9-selector greedy union covers 25 targets / 1036 target bytes with
+0 false bytes across the segmentation operation corpus.
+`output/tex_gap_decoder_len64_promoted_large32_replay/index.html` applies that
+greedy union on top of the len64-promoted buffers. It promotes 25/25 selected
+large32 targets, writes 1036 exact zero bytes, keeps selector false bytes at
+0, raises clean coverage from 4426 to 5462 bytes, and reduces unresolved bytes
+from 13020 to 11984 while keeping the rejected false-risk budget unchanged at
+57 bytes.
+`output/tex_gap_decoder_len64_promoted_large32_gap_queue/index.html` rebuilds
+the remaining gap queue from that new known mask. The queue now has 273 spans
+total: 261 unresolved spans and the same 12 rejected false-risk spans. The
+remaining unresolved bytes split into 189 pure zero bytes, 2113 pure nonzero
+bytes, and 9682 mixed bytes; the largest unresolved span is now 301 bytes.
+`output/tex_gap_decoder_len64_promoted_large32_run_probe/index.html` re-splits
+those 261 unresolved spans. It now finds 660 internal runs: 234 zero runs and
+426 nonzero runs. The post-large32 unresolved zero budget is 3935 bytes, while
+nonzero bytes remain 8049; the largest zero run is still 111 bytes.
+`output/tex_gap_decoder_len64_promoted_large32_zero_queue/index.html` turns
+that post-large32 zero budget into the next review queue. It ranks 234 zero
+runs / 3935 bytes across 18 signatures, with 168 internal rows / 2120 bytes
+and top signature `internal|medium8|left_nonzero|right_nonzero` at 83 rows /
+1421 bytes.
+`output/tex_gap_decoder_len64_promoted_large32_zero_source_probe/index.html`
+joins that queue to the source/control operation stream. It joins 214/234
+rows and 3914/3935 bytes, leaves only 20 tiny rows / 21 bytes unjoined, and
+keeps 71 control refs plus 77 control-window signatures ready for selector
+scoring.
+`output/tex_gap_decoder_len64_promoted_medium8_selector_probe/index.html`
+scores the new top signature, `internal|medium8|left_nonzero|right_nonzero`.
+It sees 83 joined targets / 1421 bytes, 3907 selector candidates, 173
+false-free candidates, best selector `bucket=medium8&cw_b13=e7` for 91 target
+bytes, and a 3-selector greedy union covering 118 target bytes with 0 false
+bytes.
+`output/tex_gap_decoder_len64_promoted_medium8_replay/index.html` applies
+that false-free medium8 union on top of the large32-promoted buffers. It
+promotes 8/8 targets, adds 118 exact bytes, raises clean coverage from 5462 to
+5580 bytes, and reduces unresolved bytes from 11984 to 11866 while keeping the
+rejected false-risk budget unchanged at 57 bytes.
+`output/tex_gap_decoder_len64_promoted_medium8_gap_queue/index.html` rebuilds
+the remaining queue from that promoted mask. The queue now has 281 spans total:
+269 unresolved spans, 12 rejected false-risk spans, 11866 unresolved bytes,
+189 pure zero bytes, 2283 pure nonzero bytes, 9394 mixed bytes, and largest
+unresolved span 301 bytes.
+`output/tex_gap_decoder_len64_promoted_medium8_run_probe/index.html` splits
+those 269 unresolved spans into runs. It keeps 426 nonzero runs / 8049 bytes
+unchanged from the large32 stage, while the zero side drops to 226 runs / 3817
+bytes, including 189 bytes in pure-zero spans and 3628 zero bytes inside mixed
+spans. The largest zero run remains 111 bytes.
+`output/tex_gap_decoder_len64_promoted_medium8_zero_queue/index.html`
+re-queues those remaining zero runs by position and neighbor context. It now
+has 226 zero runs / 3817 bytes, 160 internal zero rows / 2002 bytes, 63
+boundary rows / 1626 bytes, 5 len64 rows / 320 bytes, and 18 signatures. The
+top remaining signature is still `internal|medium8|left_nonzero|right_nonzero`,
+now reduced to 75 rows / 1303 bytes.
+`output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe/index.html`
+joins that post-medium8 queue to the source/control operation stream. It joins
+206/226 rows and 3796/3817 bytes, leaves the same 20 tiny rows / 21 bytes
+unjoined, and keeps 69 control refs plus 75 control-window signatures ready
+for selector scoring.
+`output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe/index.html`
+scores the remaining `internal|medium8|left_nonzero|right_nonzero` targets.
+The remaining set is now too fragmented for the current grouped selector rule:
+75 targets / 1303 bytes, 3521 candidates, 4 false-free candidates, best
+single selector `length_u8_hit_offsets=4121` for only 23 bytes, and 0 greedy
+selectors at the 2-target threshold.
+`output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe/index.html`
+checks the next signature, `internal|large32|left_nonzero|right_nonzero`. It
+has only 10 targets / 415 bytes left; the best false-free selector is
+`bucket_mod=large32|19` for 46 target bytes, but no grouped selector reaches
+the 2-target threshold.
+`output/tex_gap_decoder_len64_promoted_signature_selector_probe.py` generalizes
+that selector scoring to any remaining signature. The post-medium8 grouped
+pass finds two useful families: `leading|len64|left_nonzero|right_nonzero`
+covers all 5 targets / 320 bytes with three false-free selectors, and
+`trailing|large32|left_nonzero|right_nonzero` covers 5 targets / 195 bytes
+with two false-free selectors. `trailing|medium8|left_nonzero|right_nonzero`
+adds another 34 bytes, while internal small and leading large32 remain below
+the 2-target threshold.
+`output/tex_gap_decoder_len64_promoted_remaining_replay/index.html` applies
+only that grouped post-medium8 union. It promotes 12/12 targets, writes 549
+exact zero bytes with 0 false bytes, raises clean coverage to 6129 bytes, and
+reduces unresolved bytes to 11317. Its rebuilt queue has 214 zero runs / 3268
+zero bytes, with 194/214 rows joined back to source operations.
+The `output/tex_gap_decoder_len64_promoted_micro_*_selector_probe/` reports
+then deliberately lower the greedy threshold to 1 in a separate pass. This is
+more aggressive, so it is not mixed with the grouped replay: the micro replay
+validates every write against expected zero bytes, base-mask overlap, selector
+overlap, and rejected false-risk ranges before accepting it.
+`output/tex_gap_decoder_len64_promoted_micro_replay/index.html` applies those
+micro-promotions on top of the grouped replay. It promotes 22/22 targets,
+writes 611 additional exact zero bytes with 0 false bytes, raises clean
+coverage to 6740 bytes, and reduces unresolved bytes to 10706. The current
+post-micro queue has 192 zero runs / 2657 zero bytes and 172/192 source-joined
+rows; the top remaining signatures are still fragmented internal medium8,
+internal small, and internal large32 families.
+`output/tex_gap_decoder_len64_promoted_triple_replay/index.html` applies the
+post-micro 3-source selector pass. It promotes 68/68 targets, writes 913
+additional exact zero bytes with 0 false bytes, raises clean coverage to 7653
+bytes, and reduces unresolved bytes to 9793. Its rebuilt queue has 124 zero
+runs / 1744 zero bytes and 104/124 source-joined rows.
+`output/tex_gap_decoder_len64_promoted_posttriple_micro_replay/index.html`
+applies the next micro triple pass. It promotes 72/72 targets, writes 1096
+additional exact zero bytes with 0 false bytes, raises clean coverage to 8749
+bytes, and reduces unresolved bytes to 8697. Its rebuilt queue has 52 zero
+runs / 648 zero bytes and 32/52 source-joined rows.
+`output/tex_gap_decoder_len64_promoted_residual_replay/index.html` applies the
+edge/trailing residual pass. It promotes 25/25 targets, writes 578 additional
+exact zero bytes with 0 false bytes, raises clean coverage to 9327 bytes, and
+reduces unresolved bytes to 8119. `output/tex_gap_decoder_len64_promoted_tiny_replay/index.html`
+then promotes the final 3-byte tiny span, raising clean coverage to 9330 bytes
+and reducing unresolved bytes to 8116. The non-zero fill replay promotes 17
+fill targets, writes 62 exact non-zero bytes with 0 false bytes, raises clean
+coverage to 9392 bytes, and reduces unresolved bytes to 8054. The current tiny
+queue has 26 zero runs / 67 zero bytes and 6/26 source-joined rows.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_queue/index.html` pivots
+the remaining review surface to the non-zero bytes. It records 426 non-zero
+runs / 8049 bytes, including 381 pure non-zero spans / 7559 bytes, 83 large
+runs / 4645 bytes, and 35 signatures. Its source probe joins 330/426 rows and
+6321/8049 bytes back to operations; 329 joined rows / 6317 bytes are still
+`gap` operations, while only one 4-byte row is literal source-backed.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_source_probe/index.html`
+tests those 329 joined gap rows against nearby source windows and simple
+transforms. It evaluates 827953 candidates, keeps 296 best rows, finds 88
+complete local matches, and reaches only 907 best exact bytes across 6317
+target bytes. That rules out a broad direct local-window promotion for the
+large non-zero gaps.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_pattern_probe/index.html`
+classifies those rows by expected-byte pattern: 150 noisy rows / 5149 bytes,
+112 small-palette rows / 854 bytes, 61 fill rows / 134 bytes, 6 dominant rows /
+180 bytes, and no ramp rows. The useful next surface is therefore the 988
+small-palette/fill bytes that may correlate with controls, while the 5149
+noisy bytes need a stronger grammar signal before promotion.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_control_pattern_probe/index.html`
+cross-checks that surface against control selectors and the best local
+source-window candidates. It finds 173 structured rows / 988 bytes, 1839
+selector groups, 981 pure selector groups, and 24 repeated pure groups, but 0
+strong pure groups. That means the recurrent structured cases are still too
+small/fragmented for promotion, and the next decoder work must search a
+control grammar rather than trusting the expected-byte pattern alone.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_value_probe/index.html`
+tests the actual value sources for those structured rows. Control identity
+covers unique values for 39 rows / 194 bytes; fixed transforms cover 44 rows /
+201 control-window bytes and 68 rows / 280 best-pool bytes, with 34 rows / 43
+bytes as fixed exact sequences. The wider parametric search reaches 134 rows /
+694 bytes, but those constants are too easy to overfit on small palettes, so
+the result remains evidence for grammar search rather than a decoder rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_exact_sequence_probe/index.html`
+queues the strict fixed exact-sequence matches with offsets. It finds 34 rows /
+43 bytes, 100 candidate matches, 7 singleton rows, 27 ambiguous rows, 34 tiny
+rows, 0 non-tiny rows, and max exact length 3. That rules out using these
+matches directly as a broad promotion pass.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_fill_rule_probe/index.html`
+then tests an actual fill generator: one fixed byte repeated for the full run.
+It covers 44/61 fill rows and 114/134 fill bytes, with 23 control-identity
+rows / 54 bytes, 27 control-fixed rows / 59 bytes, and 35 ambiguous covered
+rows across 162 candidates. The coverage is high enough to keep investigating,
+but the ambiguity means it cannot be promoted without a selector that identifies
+the source byte.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_fill_selector_probe/index.html`
+scores fixed selectors instead of matching the expected value first. It
+evaluates 14144 rule rows across offset-only, length-bucket, start-mod64, and
+control-ref-mod64 families. The best false-free selector covers 38 bytes, while
+the best unconstrained rule reaches 41 correct bytes with 55 false bytes. So
+the broad fill generator stays in review, while the false-free multi-row subset
+is replayed separately.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_replay/index.html`
+applies that subset on top of the tiny replay. It selects 4 rule families,
+promotes 17 fill targets / 62 exact non-zero bytes, writes 0 false bytes,
+raises clean coverage from 9330 to 9392 bytes, reduces unresolved bytes from
+8116 to 8054, and emits 32 Full HD diagnostic previews.
+The `output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_*` reports rebuild
+the downstream queue after that replay. The post-fill gap queue records 8054
+unresolved bytes; the run probe records 26 zero runs / 67 zero bytes and 409
+non-zero runs / 7987 non-zero bytes; the non-zero queue keeps 364 pure
+non-zero spans / 7497 bytes. The source join keeps 313/409 rows and 6255 gap
+bytes attached to operations, while the local source probe reaches 872 best
+exact bytes and 74 complete local matches. The pattern pass reduces the fill
+class to 44 rows / 72 bytes, and the post-fill selector finds 114 false-free
+rules but 0 false-free multi-row rules, so it blocks a second fill replay.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_selector_probe/index.html`
+does the same for the 112 small-palette rows / 854 bytes, including actual
+2-, 3-, and 4-value palettes inside the `small_palette_2` and
+`small_palette_4` classes. It evaluates 29988 fixed selector rows. Only 16
+rules are false-free, 4 cover multiple rows, and the best false-free exact
+coverage is 6 bytes, so this pass documents the weak signal and leaves palette
+decoding in the grammar-search queue.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_shape_probe/index.html`
+normalizes those palette rows into reusable sequence shapes before choosing
+source values. It finds 58 first-use shape groups and 47 run-length shape
+groups. Repeated exact normalized shapes cover 65 rows / 312 bytes, repeated
+run-length shapes cover 77 rows / 372 bytes, and the strongest groups are short
+3-byte/2-byte motifs plus two repeated 38-byte/29-byte shapes from
+`dinodead.pcx`. This makes the shape side promising, but still separate from a
+safe value selector.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_shape_control_probe/index.html`
+then scores whether fixed metadata and control-byte selectors isolate those
+shapes without oracle matching. It evaluates 5770 selector rows across 8
+families, with 3495 pure selectors and 157 repeated pure selectors. Their union
+covers 52 rows / 269 bytes, but the best wide rule is still a shape-only
+condition (`palette_size=3|length_bucket=len2_3`, 19 rows / 57 bytes), while
+control-byte selectors top out at 3 rows / 9 bytes. This keeps the shape
+grammar promising but not yet coupled to a safe palette value source.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_shape_value_probe/index.html`
+uses the repeated sequence shapes as extra conditions for fixed value
+selectors. It checks 102664 rule rows, finds 40 false-free rules and 8
+false-free multi-row rules, but the best false-free exact coverage stays at 6
+bytes. So the repeated shape vocabulary is real, but value selection still
+needs another signal.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_palette_pair_value_probe/index.html`
+then tests two independent source offsets for the 47 palette-2 rows / 392
+bytes, generating exact bytes through the first-use shape. It checks 1031650
+rule rows with `max_offset=64`, finds 466 false-free rules and 233 exact
+false-free rules, but 0 false-free multi-row rules. The best exact singleton is
+46 bytes on `dinodead.pcx`, which is strong format evidence but still not a
+general decoder rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_dominant_probe/index.html`
+handles the remaining `dominant_50` structured rows. It finds 6 targets / 180
+bytes, split into 97 dominant bytes and 83 exception bytes. Exception positions
+do not repeat, and the best false-free dominant-byte selector covers only one
+row / 26 dominant bytes. This confirms the class is useful to inspect but still
+not ready for promotion.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_noisy_shape_probe/index.html`
+isolates the largest remaining non-zero class: 150 noisy rows / 5149 bytes. It
+finds no source-like rows and no full local matches; the best source search only
+accounts for 464 exact bytes total, with 9 as the best single-row exact count.
+The useful structure is shape-side: 36 gradient-like rows / 1925 bytes, 3
+periodic rows / 72 bytes, 147 first-use shape groups, 148 delta-class shape
+groups, and 142 run-length shape groups. This keeps noisy decoding in grammar
+search rather than promotion.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_probe/index.html`
+then tests the gradient-like subset directly. It finds 1889 adjacent deltas:
+1672 small deltas, 859 zero deltas, and 569 +/-1 steps. No target reaches 50%
+or 75% as a simple linear ramp, and the best single linear score is only 22
+bytes. The useful classes are flat-run walks (17 rows / 813 bytes), banded
+small-delta walks (7 rows / 404 bytes), small-delta walks (2 rows / 48 bytes),
+and mixed gradients (10 rows / 660 bytes). This rejects a simple ramp decoder
+and points the next pass at tokenizing small signed deltas.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_repeat_context_probe/index.html`
+checks the repeated gradient shapes before the broader flat-walk split. It
+covers 4 rows / 244 bytes, finds 2 repeated shape-context groups and 2 exact
+payload groups / 244 bytes, both separated by distance 320. The later rows can
+copy 122 bytes once the first occurrences are decoded, but both groups have
+distinct control-ref phases and 0 promotion-ready bytes. This turns the
+repetition into a dependency target rather than a standalone decoder rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_unlock_probe/index.html`
+then joins those dependency targets to the palette seed evidence. It records 2
+seed rows / 122 bytes, all with control-window candidates: 58 bytes from a
+single-transform seed and 64 bytes from a mixed-transform seed. Those seeds can
+unlock their two distance-320 copies for 244 total potential bytes, but 0 bytes
+have repeated transform-set evidence, so all 122 seed bytes remain blocked.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_shift_family_probe/index.html`
+then abstracts those candidates one level higher. Both rows share the
+`control_window|identity_shift_family` source model, so 122 seed bytes and 122
+copy-unlock bytes now have a repeated family signal. The exact shift sets do
+not repeat (`-2|-1|0|1` versus `+1`), leaving 0 repeated exact-shift bytes and
+0 promotion-ready bytes until a per-value delta selector is derived.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_selector_probe/index.html`
+tests that selector directly. It expands the two seeds into 14 palette-value
+mappings weighted by 122 real bytes. Source-only selectors have 0 repeated
+deterministic bytes; the only repeated deterministic signal is target-oracle
+evidence (86 bytes), which cannot be used as a decoder rule. This narrows the
+remaining task to finding a source-side delta selector for the shared shift
+family.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_context_probe/index.html`
+then checks the immediate control-window neighborhood around each source
+offset. The same 14 mappings / 122 bytes still produce 0 repeated deterministic
+context bytes, 569 conflicted evidence-bytes, and 0 promotion-ready bytes, so
+the next pass must move to broader control grammar or source phase evidence.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_phase_probe/index.html`
+now performs that broader selector scan. It covers source-value/source-offset
+phase keys, absolute control positions, positionless byte/pair/triple n-grams,
+control profile keys, and relative windows up to radius 10. Across 902 selector
+groups it still finds 0 repeated deterministic bytes; source phase, broad
+control phase, and wide relative families are all 0, with 15425 conflicted
+evidence-bytes. This pushes the next useful pass toward a stateful control
+grammar over the two gradient seed rows instead of more stateless selector
+families.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_state_probe/index.html`
+now checks stateful prefix and parser-counter families. It records 2013 state
+groups, 0 repeated deterministic bytes in prefix/FSM/nibble/parser scopes, and
+31654 conflicted evidence-bytes. This closes the selector-scan branch; next
+pass should inspect seed-row opcode sequencing directly.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_opcode_sequence_probe/index.html`
+does that direct sequence pass over the same two seeds. It records 12 adjacent
+transitions and 187 source-side transition groups, including 43 bytes tied to
+reused source offsets, but still finds 0 repeated deterministic transition
+bytes and 1220 conflicted evidence-bytes. The next pass must derive a semantic
+opcode stream for those seed rows instead of scanning raw offset/source order.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_semantic_opcode_probe/index.html`
+checks that semantic stream against operation context, neighborhood, source
+role, control-token, and combo selectors. It records 89 semantic groups, 1046
+singleton deterministic evidence-bytes, 2004 conflicted evidence-bytes, and 0
+repeated deterministic bytes. This closes the operation-neighborhood selector
+branch and moves the next pass to payload opcode-token grammar.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_probe/index.html`
+breaks the 17 flat-run walks into plateau runs and value transitions. It
+records 813 target bytes, 537 plateau bytes, 276 value runs, 259 transitions,
+181 small transitions, 15 run-length shapes, and 15 transition shapes. The two
+repeated run-length and transition shapes cover 4 rows / 244 bytes, both local
+to repeated `dinodead.pcx` cases, so the useful rule is likely a
+plateau/transition tokenizer rather than a broad reusable run table.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_source_probe/index.html`
+tests that tokenizer against local byte and nibble streams. Length symbols only
+reach 88/276 matches, transition symbols 60/259, with best single rows of 9
+length symbols and 7 transition symbols. Only one 44-byte row reaches 50% on
+both length and transition matching. This makes the plateau source signal too
+weak for promotion and keeps the next work on grammar discovery.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_shape_control_probe/index.html`
+then checks whether fixed metadata/control selectors isolate those plateau
+shapes. It evaluates 1827 selector rows across run-length, transition, and
+run-value shape keys, with 1251 pure selectors and 30 repeated pure selectors.
+The repeated pure union covers 4 rows / 244 bytes, and the best repeated
+selector covers 2 rows / 128 bytes. This gives the plateau branch a concrete
+shape-control target, but it remains shape-only.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_value_probe/index.html`
+then tests non-oracle value producers for those same shapes. It generates
+1182664 rule rows and finds 0 exact rules, 0 false-free rules, and 0
+false-free multi-row rules; the best partial source view reaches 70 correct
+bytes with 743 false bytes. It does find 2 exact prefix-copy rows / 122 bytes
+at distance 320, which documents repetition in the output stream but still
+requires a real producer for the first occurrence before a replay can use it.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_probe/index.html`
+checks backward-copy distances for the same flat walks against the current
+known mask. Distance 320 is the only exact-copy signal: 2 rows / 122 bytes
+copy exactly, but 0 of their source bytes are known and all 122 source bytes
+remain unresolved. This turns the copy evidence into a dependency order:
+decode the first occurrence, then the copy rule can be revisited.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_seed_probe/index.html`
+looks for those first-occurrence producers in small pools. It finds exactly one
+candidate: 58 bytes from `control_window|identity_shift+1`, with one 58-byte
+copy unlock for 116 potential bytes. Because the group count is still one,
+this is a useful seed hypothesis but not a promoted rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_mix_probe/index.html`
+allows compact mixed-transform palette covers for the same flat-walk rows. With
+at most 4 transforms per row, it finds 7 candidate rows / 361 bytes, 303
+mixed-transform bytes, 259 control-window bytes, and 122 copy-unlock bytes for
+483 total potential bytes. The best transform group still has only 1 row, so
+this documents a likely dependency path without promoting a decoder rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_chain_probe/index.html`
+links the exact distance-320 copies to those first-occurrence hypotheses. The 2
+exact copy rows / 122 bytes both have a palette source candidate, yielding 244
+source+copy candidate bytes, but 0 repeated-group chain bytes. This keeps the
+copy replay blocked until a repeatable first-occurrence source rule exists.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_signature_probe/index.html`
+groups flat-walk rows by first-use palette values. It finds 15 signatures, 2
+repeated signature groups / 244 bytes, and all repeated bytes are copy-backed
+with palette candidates. The repeated signal is therefore real at the palette
+level, but still blocked at the source-producer level.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_context_probe/index.html`
+compares the repeated palette signatures against their control-side context.
+Both repeated signatures are distance-320 copy-backed, but 0 share a transform
+set, 0 share a control-ref phase, and the best unique control overlap is only 5
+values. That keeps the next search away from fixed-window context shortcuts.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_micro_token_probe/index.html`
+tokenizes all 150 noisy rows / 5149 bytes into coarse and signed delta runs.
+It records 4999 adjacent deltas, 3272 small deltas, 1019 jump deltas, 3163
+coarse token runs, 148 coarse shape groups, 148 signed shape groups, and only
+244 bytes covered by repeated signed shapes. The class split is 66 jump-mixed
+rows / 1680 bytes, 56 mixed-token rows / 2142 bytes, 19 plateau walks / 875
+bytes, 7 banded small signed walks / 404 bytes, and 2 small signed walks / 48
+bytes. This rejects a broad reusable micro-token promotion for now.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_uniqueness_probe/index.html`
+isolates the 56 mixed-token rows / 2142 bytes from the micro-token split. It
+finds 56 unique coarse shapes, 56 unique signed shapes, and 56 unique
+transition profiles, with 0 repeated token-shape bytes. The dominant recurrence
+is only top nibble `0x6`, covering 36 rows / 1619 bytes, plus repeated
+control-ref buckets over 1517 bytes. This redirects the branch toward value-band
+segmentation rather than token-shape replay.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_band_probe/index.html`
+checks whether that value-band split repeats after low-nibble profiling. It
+finds 55 low-profile groups across 56 rows; only 2 rows / 24 bytes repeat, and
+the dominant `0x6` bucket has 36 low-profile groups with 0 repeated bytes. This
+rules out a reusable low-profile replay for the main mixed-token mass.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_backref_probe/index.html`
+tests backward-copy distances for the mixed-token surface. It covers 56 rows /
+2142 bytes, checks 640 distances and 153675 rule rows, and finds 0 exact-copy
+bytes. The best broad distance is 1 with 502 correct bytes and 1640 false
+bytes, so this branch also needs grammar work rather than replay.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_control_probe/index.html`
+tests high-nibble, low-nibble, signed-delta, and exact-byte labels against the
+same control/source pools. Across 56 rows / 2142 bytes it checks 1519092
+candidate windows, finds 25 top-nibble rows >=50%, 8 top-nibble rows >=75% /
+86 top-only bytes, 0 low-nibble rows >=75%, 0 signed-delta rows >=75%, 0 byte
+rows >=75%, 0 profile-like bytes, and 0 promotion-ready bytes.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_control_context_probe/index.html`
+checks whether those mixed-token control signals repeat enough context or exact
+payload to form a rule. It covers 56 rows / 2142 bytes, finds 10 signal groups,
+5 repeated signal groups / 1894 bytes, 9 repeated signal+top-nibble groups /
+1654 bytes, and 1 repeated offset context / 95 bytes. All 56 exact payload
+signatures are unique, full-byte matches never reach 50%, and 0 bytes are
+promotion-ready, so the branch remains blocked on value grammar rather than
+control signal reuse.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_probe/index.html`
+splits the 66 jump-mixed rows / 1680 bytes into islands between large signed
+deltas. It records 1614 adjacent deltas, 637 jump deltas, a 0.394672 jump
+ratio, 703 islands, 342 single-byte islands, 28 long islands / 308 bytes, 65
+island-length shape groups, 64 signed jump-shape groups, 64 jump nibble-pair
+groups, and 66 exact jump-pair groups. Only 58 bytes repeat at signed/nibble
+shape level and 0 exact-pair bytes repeat, so this is still a split target, not
+a decoder promotion target.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_backref_probe/index.html`
+tests backward-copy distances for the jump-token surface. It covers 66 rows /
+1680 bytes, checks 640 distances and 129362 rule rows, and finds 0 exact-copy
+bytes. The best broad distance is 1 with 353 correct bytes and 1266 false
+bytes, rejecting copy replay for the repeated jump shapes.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_context_probe/index.html`
+checks whether repeated jump-token shapes share a stable surrounding decoder
+context. It covers 66 rows / 1680 bytes, finds 5 repeated groups / 134 bytes
+and 67 repeated-candidate bytes, but 0 shared-context bytes. All repeated
+groups are context-conflicted, with 134 conflicted-context bytes and 116
+copy-backed bytes, so there is still no safe promotion.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_repeated_nibble_probe/index.html`
+isolates the 6 repeated-nibble jump rows / 231 bytes. It records 66 jump
+deltas, 3 two-band ping-pong rows / 103 bytes, 3 band-pair groups, 5 rows /
+219 bytes under repeated band pairs, 2 rows / 41 bytes with repeated band
+phase, and 0 repeated exact-pair bytes. External source/control matching is
+weak: best ratio 0.500000, 1 row >=50%, 0 rows >=75%, so this remains a
+value-band grammar target rather than a byte-pair promotion.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_repeated_nibble_context_probe/index.html`
+checks whether those repeated bands carry stable payloads. It covers 6 rows /
+231 bytes, with 2 repeated band-pair groups / 219 bytes and 1 repeated phase
+context / 41 bytes. All 6 payload signatures are unique, including the repeated
+`3>6` phase pair, and only 12 bytes reach source signal >=50%, so this branch
+stays blocked on value-band grammar rather than payload replay.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_jump_probe/index.html`
+profiles the 19 mixed jump-split rows / 682 bytes. It records 230 jump deltas,
+249 islands, 107 single-byte islands, 13 long islands / 129 bytes, 8 dominant
+band groups, 14 dominant-band rows / 550 bytes, 10 zero-band rows / 438 bytes,
+and 12 multi-band rows / 452 bytes. Nibble and exact jump shapes have 0
+repeated bytes, and external source/control matching stays weak with best ratio
+0.250000, so mixed jumps need another split by dominant band before promotion.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_jump_context_probe/index.html`
+checks that dominant-band split for reusable context. Across 19 rows / 682
+bytes, it finds 8 band-pair groups, 5 repeated band-pair groups covering 566
+bytes, 19 unique payload signatures, 0 repeated payload bytes, 0 source >=50%
+bytes, and 0 promotion-ready bytes.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_control_probe/index.html`
+checks that dominant-band split against direction, magnitude, nibble-pair, and
+phase controls. Across 19 rows / 682 bytes it scans 437220 candidate windows.
+Direction and magnitude signals match many rows, but phase matches are limited
+to 1 short row / 12 bytes, with 0 long phase rows and 0 promotion-ready bytes.
+This rejects direction-only control matches as a mixed-jump decoder rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_residual_jump_probe/index.html`
+profiles the 8 remaining sparse/long-island jump rows / 166 bytes. It records
+6 sparse rows / 57 bytes, 2 long-island rows / 109 bytes, 44 jump deltas, 52
+islands, 24 single-byte islands, 6 long islands / 60 bytes, 5 dominant-band
+groups, and 4 rows / 38 bytes under one repeated band pair. Source/control
+matching remains weak with best ratio 0.500000 and 0 promotion-ready bytes, so
+these rows stay in the next control-grammar pass.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_residual_control_probe/index.html`
+tests that residual control-grammar pass. It scores the 8 residual rows / 166
+bytes against direction, magnitude, nibble-pair, and phase signals over 497232
+candidate windows. Four sparse short rows reach phase >=75% over 37 bytes, but
+the 2 long-island rows / 109 bytes have 0 long phase matches >=75% and 0
+promotion-ready bytes. This rejects short residual-control coincidences as a
+decoder rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_dense_jump_probe/index.html`
+isolates the 33 dense jump-weave rows / 601 bytes. It records 568 adjacent
+deltas, 297 jump deltas, a 0.522887 jump ratio, 187 direction switches, a
+0.708333 direction-switch ratio, 330 islands, 184 single-byte islands, 9
+alternating rows / 172 bytes, and 6 dominant-nibble rows / 108 bytes. Direction,
+magnitude, nibble-pair, island-bucket, and phase shapes all have 0 repeated
+bytes, so dense jumps still need an external control signal rather than a
+shape-only decoder.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_dense_control_probe/index.html`
+tests that external-control hypothesis. It scores directions, magnitudes,
+nibble pairs, and full phases against control windows, control prefixes,
+fragments, local source bytes, neighbors, and segment-gap bytes. Across 33 rows
+/ 601 bytes it checks 850077 candidate windows. Direction-only matches are
+common (30 rows >=75%), but full phase matches are limited to 3 short rows / 17
+bytes, with 0 long phase rows and 0 promotion-ready bytes. This rejects short
+control coincidences as a decoder rule.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_control_signal_gate_probe/index.html`
+combines the mixed, residual, and dense control reports into one promotion
+gate. Across 60 rows / 1449 bytes it checks 1784529 candidate windows, records
+53 direction matches >=75% / 1141 bytes, rejects 45 direction-only rows / 1075
+bytes, keeps 8 short phase rows / 66 bytes in review, finds 0 long phase bytes,
+and marks 0 bytes as promotion-ready.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_weak_control_value_probe/index.html`
+checks the remaining weak-control rows for value-side evidence. It covers 7
+rows / 308 bytes, finds 3 magnitude rows / 142 bytes at signal ratio >=75%, 2
+repeated signal groups / 189 bytes, 7 unique payload signatures, 0 repeated
+payload bytes, and 0 promotion-ready bytes. This blocks weak-control promotion
+on payload uniqueness rather than on signal absence.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_probe/index.html`
+checks whether those direction-only rows carry a stable value-side bucket
+signal. It covers 45 rows / 1075 bytes, finds 34 rows / 726 bytes with value
+signals >=75%, 19 rows / 213 bytes with exact value-bucket ratios, and 9
+repeated direction/value groups / 590 bytes. All repeated groups are
+offset-conflicted, so 0 bytes are promotion-ready.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_offset_probe/index.html`
+tests whether those value-side matches collapse into stable offset deltas. It
+covers the 34 value-scored rows / 726 bytes, finds 7 repeated keys / 412 bytes,
+0 same-delta bytes, 1 surface-stable delta group / 31 bytes, and 6 conflicted
+delta groups / 381 bytes. This rejects a fixed offset shortcut.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_delta_context_probe/index.html`
+tests whether local context can split those offset conflicts. It covers 34 rows
+/ 726 bytes across 10 context profiles. The best contexts
+(`surface+key+head4`, `surface+key+mod64`, and `surface+key+tail4`) stabilize
+all 726 bytes only by singleton splits: 0 repeated stable bytes, 0 repeated
+payload bytes, and 0 promotion-ready bytes.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_payload_grammar_probe/index.html`
+rechecks those 34 rows / 726 bytes against expected payload micro-grammar.
+Broad signals repeat: 565 bytes share top-token/top-nibble groups and 593 bytes
+are dominated by `JUMP`. Exact transition profiles remain unique across all
+726 bytes, repeated payload bytes stay at 0, and 0 bytes are promotion-ready.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_source_profile_probe/index.html`
+compares those payload transition profiles against fixture source profiles. The
+best source pool is `segment_gap` for all 34 rows / 726 bytes, 19 rows / 251
+bytes have >=75% profile overlap, 3 rows / 26 bytes match exact profile
+multisets, 6 rows / 52 bytes reach >=50% positional alignment, source profiles
+remain singleton-only, and 0 bytes are promotion-ready.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_source_value_probe/index.html`
+tests fixed byte transforms from those selected source-profile windows. It
+keeps 34 rows / 726 bytes under review, checks 14 transforms, finds only 29
+best exact bytes in total, 0 rows at ratio >=25%, 0 exact-match bytes, top
+transform `xor80` with 15 rows / 232 bytes but only 2 exact bytes, and 0
+promotion-ready bytes.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_source_window_probe/index.html`
+scans nearby source windows around those selected offsets. With radius 128 it
+checks 4512 offset candidates and 14 transforms for the same 34 rows / 726
+bytes. The best total rises to 95 exact bytes, but the max ratio is only
+0.428571, 12 rows / 119 bytes reach >=25%, 0 rows reach >=50%, exact-match
+bytes stay at 0, and 0 bytes are promotion-ready.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_control_context_probe/index.html`
+groups those same rows by local control context around the direction/value
+offsets. It keeps 34 rows / 726 bytes, finds 11 direction-signal groups with 8
+repeated groups / 618 bytes, but the local windows split into 34 combined
+contexts, 34 op-phase contexts, and 34 payload signatures. Repeated combined
+context bytes, repeated op-phase bytes, repeated payload bytes, and
+promotion-ready bytes all stay at 0.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_exact_context_probe/index.html`
+checks whether exact value-bucket rows repeat payloads or context. It covers 19
+rows / 213 bytes, records 4 repeated direction/value keys / 117 bytes, 4
+conflicted delta groups / 117 bytes, 19 unique payload signatures, 0 repeated
+payload bytes, and 0 promotion-ready bytes.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_direction_value_partial_context_probe/index.html`
+checks whether partial value-bucket rows repeat payloads or context. It covers
+15 rows / 513 bytes, records 2 repeated direction/value keys / 238 bytes, 4
+rows / 130 bytes with ratio >=90%, 10 rows / 294 bytes with ratio >=80%, 15
+unique payload signatures, 0 repeated payload bytes, and 0 promotion-ready
+bytes.
+`output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_noisy_review/index.html`
+condenses the core noisy reports into a promotion decision table. It keeps all
+5149 noisy bytes in review, marks 0 bytes as promotion-ready, and records 43
+blocked decision rows across gradient, gradient-repeat, flat-walk, palette, backref, micro-token,
+jump-token, jump-token-context, repeated-nibble, repeated-nibble-context, mixed, mixed-jump-context, mixed-token-control,
+mixed-token-control-context, residual,
+dense-control, control-signal gate, weak-control value, direction-value, offset,
+delta-context, payload-grammar, source-profile, source-value, source-window,
+control-context, exact-context, and partial-context branches. This is the current handoff
+point for the next decoder pass.
+`output/tex_gap_fixture_replay/index.html` separately replays the 32 fixtures through
+22 strict hypotheses: raw copy, raw after the known skip, fragment repetition,
+zero-fill, small zero-run interpretations, and the simple RLE families already
+probed. It currently finds 0 complete fixture matches. The best prefix is 64
+bytes and the best exact-byte count is 4050 on `barrel.pcx`, which points to a
+skip/fill control rule rather than a promotable decoder rule.
+
+Regenerate the newest non-zero review reports with:
+
+```bash
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_noisy_shape_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_repeat_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_unlock_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_shift_family_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_selector_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_phase_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_state_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_opcode_sequence_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_semantic_opcode_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_source_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_shape_control_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_value_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_backref_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_seed_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_mix_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_backref_chain_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_signature_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_micro_token_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_token_uniqueness_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_token_band_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_token_backref_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_token_control_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_token_control_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_jump_token_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_jump_token_backref_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_jump_token_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_repeated_nibble_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_repeated_nibble_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_jump_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_jump_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_mixed_control_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_residual_jump_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_residual_control_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_dense_jump_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_dense_control_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_control_signal_gate_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_weak_control_value_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_offset_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_delta_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_payload_grammar_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_source_profile_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_source_value_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_source_window_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_control_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_exact_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_partial_context_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_palette_shape_value_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_palette_pair_value_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_noisy_review.py
+python3 tools/lolg_hd_audit.py --fail-on-issues
+python3 tools/lolg_hd_dashboard.py
+python3 tools/lolg_hd_audit.py --fail-on-issues
+```
+
+Regenerate the false-free non-zero fill replay with:
+
+```bash
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_fill_selector_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_tiny_nonzero_fill_replay.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_gap_queue.py -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_gap_queue --promoted-fixtures output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_replay/fixtures.csv --title "Lands of Lore II .tex Post-Fill Nonzero Gap Queue"
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_run_probe.py -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_run_probe --spans output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_gap_queue/spans.csv --title "Lands of Lore II .tex Post-Fill Nonzero Run Probe"
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_queue.py -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_queue --spans output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_run_probe/by_span.csv --runs output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_run_probe/runs.csv --title "Lands of Lore II .tex Post-Fill Nonzero Queue"
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_source_probe.py --targets output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_queue/queue.csv -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_source_probe --title "Lands of Lore II .tex Post-Fill Nonzero Source Probe"
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_source_probe.py --targets output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_source_probe/targets.csv -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_gap_source_probe --title "Lands of Lore II .tex Post-Fill Nonzero Gap Source Probe"
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_pattern_probe.py --targets output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_source_probe/targets.csv -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_gap_pattern_probe --title "Lands of Lore II .tex Post-Fill Nonzero Gap Pattern Probe"
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_fill_rule_probe.py --patterns output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_gap_pattern_probe/patterns.csv -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_gap_fill_rule_probe --title "Lands of Lore II .tex Post-Fill Nonzero Fill Rule Probe"
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_fill_selector_probe.py --patterns output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_gap_pattern_probe/patterns.csv -o output/tex_gap_decoder_len64_promoted_tiny_nonzero_fill_nonzero_gap_fill_selector_probe --title "Lands of Lore II .tex Post-Fill Nonzero Fill Selector Probe"
+python3 tools/lolg_hd_audit.py --fail-on-issues
+python3 tools/lolg_hd_dashboard.py
+python3 tools/lolg_hd_audit.py --fail-on-issues
+```
+
+Regenerate the matched and full cache descriptor exports with:
+
+```sh
+python3 tools/lolg_cdcache_texture_extract.py --decode-mode all-modes \
+  --fullhd --content-crop -o output/cdcache_textures_all_modes
+python3 tools/lolg_cdcache_texture_extract.py --all --decode-mode tiled \
+  --fullhd --content-crop -o output/cdcache_textures_all_tiled
+python3 tools/lolg_cdcache_texture_extract.py --decode-mode tiled \
+  --fullhd --content-crop --export-tiles \
+  -o output/cdcache_textures_matched_tiles
+python3 tools/lolg_cdcache_texture_extract.py --all --decode-mode tiled \
+  --fullhd --content-crop --export-tiles \
+  -o output/cdcache_textures_all_tiled_tiles
+python3 tools/lolg_cdcache_texture_extract.py --decode-mode tiled \
+  --fullhd --content-crop --export-tiles --rgba \
+  -o output/cdcache_textures_matched_tiles_rgba
+python3 tools/lolg_cdcache_texture_extract.py --all --decode-mode tiled \
+  --fullhd --content-crop --export-tiles --rgba \
+  -o output/cdcache_textures_all_tiled_tiles_rgba
+python3 tools/lolg_cdcache_hd_pack.py --contact-sheets \
+  -o output/cdcache_hd_asset_pack
+python3 tools/lolg_cdcache_hd_gallery.py \
+  --pack-dir output/cdcache_hd_asset_pack
+python3 tools/lolg_tex_hd_coverage.py -o output/tex_hd_coverage
+python3 tools/lolg_tex_reference_coverage.py -o output/tex_reference_coverage
+python3 tools/lolg_tex_missing_reference_evidence.py -o output/tex_missing_reference_evidence
+python3 tools/lolg_cdcache_raw_reference_probe.py -o output/cdcache_raw_reference_probe
+python3 tools/lolg_cdcache_alias_candidates.py -o output/cdcache_alias_candidates
+python3 tools/lolg_cdcache_texture_extract.py \
+  --descriptors output/cdcache_alias_candidates/synthetic_descriptors.csv \
+  --decode-mode tiled --fullhd --content-crop --export-tiles --rgba \
+  -o output/cdcache_alias_candidate_textures
+python3 tools/lolg_cdcache_tex_alias_pack.py -o output/cdcache_tex_alias_pack
+python3 tools/lolg_tex_augmented_coverage.py -o output/tex_augmented_coverage
+python3 tools/lolg_tex_probe_render.py \
+  --names beaker4.pcx,puddle.pcx,undead.pcx,dirt.pcx,ston.pcx,death.pcx,statue.pcx,dn-dead.pcx \
+  --palette C/LOLG/LOCAL.MIX:94 --fullhd --max-samples 64 \
+  -o output/tex_unresolved_material_probe_render
+python3 tools/lolg_tex_probe_gallery.py output/tex_unresolved_material_probe_render
+python3 tools/lolg_tex_probe_analyze.py output/tex_unresolved_material_probe_render
+python3 tools/lolg_tex_material_decoder_queue.py -o output/tex_material_decoder_queue
+python3 tools/lolg_tex_exact_cdcache_compare.py -o output/tex_exact_cdcache_compare
+python3 tools/lolg_tex_exact_chunk_evidence.py -o output/tex_exact_chunk_evidence
+python3 tools/lolg_tex_exact_match_overlays.py -o output/tex_exact_match_overlays
+python3 tools/lolg_tex_decoder_seed_report.py -o output/tex_decoder_seed_report
+python3 tools/lolg_tex_exact_chunk_scan.py -o output/tex_exact_chunk_scan
+python3 tools/lolg_tex_exact_chunk_clusters.py -o output/tex_exact_chunk_clusters
+python3 tools/lolg_tex_exact_cluster_overlays.py -o output/tex_exact_cluster_overlays
+python3 tools/lolg_tex_decoder_run_corpus.py -o output/tex_decoder_run_corpus
+python3 tools/lolg_tex_partial_raw_decoder.py -o output/tex_partial_raw_decoder
+python3 tools/lolg_tex_partial_raw_coverage.py -o output/tex_partial_raw_coverage
+python3 tools/lolg_tex_gap_frontier_report.py -o output/tex_gap_frontier_report
+python3 tools/lolg_tex_gap_opcode_probe.py -o output/tex_gap_opcode_probe
+python3 tools/lolg_tex_gap_rle_probe.py -o output/tex_gap_rle_probe
+python3 tools/lolg_tex_gap_rule_queue.py -o output/tex_gap_rule_queue
+python3 tools/lolg_tex_gap_rule_fixtures.py -o output/tex_gap_rule_fixtures
+python3 tools/lolg_tex_gap_zero_run_probe.py -o output/tex_gap_zero_run_probe
+python3 tools/lolg_tex_gap_geometry_replay.py -o output/tex_gap_geometry_replay
+python3 tools/lolg_tex_gap_nonzero_stream_probe.py -o output/tex_gap_nonzero_stream_probe
+python3 tools/lolg_tex_gap_control_word_probe.py -o output/tex_gap_control_word_probe
+python3 tools/lolg_tex_gap_header_schema_probe.py -o output/tex_gap_header_schema_probe
+python3 tools/lolg_tex_gap_row_stride_probe.py -o output/tex_gap_row_stride_probe
+python3 tools/lolg_tex_gap_row_stride_mismatch_probe.py -o output/tex_gap_row_stride_mismatch_probe
+python3 tools/lolg_tex_gap_row_delta_probe.py -o output/tex_gap_row_delta_probe
+python3 tools/lolg_tex_gap_row_transform_probe.py -o output/tex_gap_row_transform_probe
+python3 tools/lolg_tex_gap_row_control_probe.py -o output/tex_gap_row_control_probe
+python3 tools/lolg_tex_gap_row_sequence_probe.py -o output/tex_gap_row_sequence_probe
+python3 tools/lolg_tex_gap_row_literal_scan_probe.py -o output/tex_gap_row_literal_scan_probe
+python3 tools/lolg_tex_gap_row_fill_run_probe.py -o output/tex_gap_row_fill_run_probe
+python3 tools/lolg_tex_gap_control_grammar_probe.py -o output/tex_gap_control_grammar_probe
+python3 tools/lolg_tex_gap_mismatch_trace_probe.py -o output/tex_gap_mismatch_trace_probe
+python3 tools/lolg_tex_gap_zero_literal_switch_probe.py -o output/tex_gap_zero_literal_switch_probe
+python3 tools/lolg_tex_gap_zero_literal_segmentation_probe.py -o output/tex_gap_zero_literal_segmentation_probe
+python3 tools/lolg_tex_gap_segmentation_control_correlation_probe.py -o output/tex_gap_segmentation_control_correlation_probe
+python3 tools/lolg_tex_gap_literal_token_probe.py -o output/tex_gap_literal_token_probe
+python3 tools/lolg_tex_gap_literal_token_classifier_probe.py -o output/tex_gap_literal_token_classifier_probe
+python3 tools/lolg_tex_gap_literal_fp_rejection_probe.py -o output/tex_gap_literal_fp_rejection_probe
+python3 tools/lolg_tex_gap_zero_run_alignment_probe.py -o output/tex_gap_zero_run_alignment_probe
+python3 tools/lolg_tex_gap_zero_control_risk_probe.py -o output/tex_gap_zero_control_risk_probe
+python3 tools/lolg_tex_gap_decoder_skeleton_candidate_probe.py -o output/tex_gap_decoder_skeleton_candidate_probe
+python3 tools/lolg_tex_gap_decoder_risk_adjusted_probe.py -o output/tex_gap_decoder_risk_adjusted_probe
+python3 tools/lolg_tex_gap_decoder_seed_replay.py -o output/tex_gap_decoder_seed_replay
+python3 tools/lolg_tex_gap_decoder_control_promotion_probe.py -o output/tex_gap_decoder_control_promotion_probe
+python3 tools/lolg_tex_gap_decoder_false_risk_queue.py -o output/tex_gap_decoder_false_risk_queue
+python3 tools/lolg_tex_gap_decoder_clean_replay.py -o output/tex_gap_decoder_clean_replay
+python3 tools/lolg_tex_gap_decoder_clean_gap_queue.py -o output/tex_gap_decoder_clean_gap_queue
+python3 tools/lolg_tex_gap_decoder_unresolved_run_probe.py -o output/tex_gap_decoder_unresolved_run_probe
+python3 tools/lolg_tex_gap_decoder_unresolved_zero_queue.py -o output/tex_gap_decoder_unresolved_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_internal_probe.py -o output/tex_gap_decoder_len64_internal_probe
+python3 tools/lolg_tex_gap_decoder_len64_source_probe.py -o output/tex_gap_decoder_len64_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_selector_probe.py -o output/tex_gap_decoder_len64_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_replay.py -o output/tex_gap_decoder_len64_promoted_replay
+python3 tools/lolg_tex_gap_decoder_len64_promoted_gap_queue.py -o output/tex_gap_decoder_len64_promoted_gap_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_run_probe.py -o output/tex_gap_decoder_len64_promoted_run_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_zero_queue.py -o output/tex_gap_decoder_len64_promoted_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_zero_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_selector_probe.py -o output/tex_gap_decoder_len64_promoted_large32_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_replay.py -o output/tex_gap_decoder_len64_promoted_large32_replay
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_gap_queue.py -o output/tex_gap_decoder_len64_promoted_large32_gap_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_run_probe.py -o output/tex_gap_decoder_len64_promoted_large32_run_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_zero_queue.py -o output/tex_gap_decoder_len64_promoted_large32_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_large32_zero_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_selector_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_replay.py -o output/tex_gap_decoder_len64_promoted_medium8_replay
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_gap_queue.py -o output/tex_gap_decoder_len64_promoted_medium8_gap_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_run_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_run_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_queue.py -o output/tex_gap_decoder_len64_promoted_medium8_zero_queue
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_zero_source_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_zero_source_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe.py -o output/tex_gap_decoder_len64_promoted_medium8_remaining_selector_probe
+python3 tools/lolg_tex_gap_decoder_len64_promoted_large32_remaining_selector_probe.py -o output/tex_gap_decoder_len64_promoted_large32_remaining_selector_probe
+python3 tools/lolg_tex_gap_fixture_replay.py -o output/tex_gap_fixture_replay
+```
+
+Verify those exports with:
+
+```sh
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_all_modes --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_all_tiled --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_matched_tiles \
+  --manifest output/cdcache_textures_matched_tiles/tiles_manifest.csv \
+  --report output/cdcache_textures_matched_tiles/tiles_verification.csv \
+  --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_all_tiled_tiles \
+  --manifest output/cdcache_textures_all_tiled_tiles/tiles_manifest.csv \
+  --report output/cdcache_textures_all_tiled_tiles/tiles_verification.csv \
+  --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_matched_tiles_rgba --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_matched_tiles_rgba \
+  --manifest output/cdcache_textures_matched_tiles_rgba/tiles_manifest.csv \
+  --report output/cdcache_textures_matched_tiles_rgba/tiles_verification.csv \
+  --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_all_tiled_tiles_rgba --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_verify_export.py \
+  output/cdcache_textures_all_tiled_tiles_rgba \
+  --manifest output/cdcache_textures_all_tiled_tiles_rgba/tiles_manifest.csv \
+  --report output/cdcache_textures_all_tiled_tiles_rgba/tiles_verification.csv \
+  --require-crops --fail-on-issues
+python3 tools/lolg_cdcache_hd_pack_verify.py \
+  output/cdcache_hd_asset_pack --require-contact-sheets --fail-on-issues
+```
+
+The current CDCACHE verification result is:
+
+- `output/cdcache_textures_all_modes`: 42 entries, 0 issues.
+- `output/cdcache_textures_all_tiled`: 266 entries, 0 issues.
+- `output/cdcache_textures_matched_tiles/tiles_manifest.csv`: 180 entries,
+  0 issues.
+- `output/cdcache_textures_all_tiled_tiles/tiles_manifest.csv`: 2838 entries,
+  0 issues.
+- `output/cdcache_textures_matched_tiles_rgba`: 14 RGBA entries, 0 issues.
+- `output/cdcache_textures_matched_tiles_rgba/tiles_manifest.csv`: 180 RGBA
+  entries, 0 issues.
+- `output/cdcache_textures_all_tiled_tiles_rgba`: 266 RGBA entries, 0 issues.
+- `output/cdcache_textures_all_tiled_tiles_rgba/tiles_manifest.csv`: 2838
+  RGBA entries, 0 issues.
+- `output/cdcache_hd_asset_pack`: 3104 selected CDCACHE Full HD RGBA assets,
+  3298 symlinks, 194 assets linked to `.tex` archives, 0 issue rows.
+- `output/cdcache_hd_asset_pack/verification.csv`: 3104 assets verified, 3104
+  `all` symlinks targeting the selected source PNGs, 194 `linked_tex`
+  symlinks targeting the selected source PNGs, 0 issues.
+- `output/cdcache_hd_asset_pack/index.html`: 3104 gallery assets, 194 linked
+  to `.tex` archives, 0 missing image/source paths.
+- `output/tex_hd_coverage`: 194 `.tex`-linked Full HD pack assets verified,
+  including 14 descriptors, 180 tiles, 8 material-link rows, and 0 missing
+  source or pack paths.
+
+- No standalone `.tex`, `.te_`, or `.pcx` source files were found under `C/`.
+- 11 PCX-like byte signatures seen inside packed data.
+- 0 readable embedded PCX images found with the standard PCX decoder; the
+  signature offsets are listed in `pcx_signatures.csv`.
+- 0 direct LCW matches found at the standard probe offsets; the payloads are
+  not simply a size header followed by one raw LCW stream.
+- 0 windowed LCW matches found at the same offsets; all 135 window probes end
+  before the expected decoded size.
+- 0 per-segment LCW matches found after PCX string terminators; all 121 segment
+  body probes fail standard LCW and all 121 window probes end before a complete
+  stream.
+
+The original level `.tex` payloads remain proprietary packed payloads, so the
+direct `.tex` record/compression layout is still not fully decoded. The
+`CDCACHE.MIX` descriptor path is the current practical decoder route: it emits
+real native and Full HD PNGs for descriptor-backed cache entries and links 14
+of them back to names seen in level `.tex` payloads. Some outputs are complete
+textures or sprites, while others are cache atlases/composites that still need
+per-record interpretation before they can become drop-in game replacements.
+
+## Full HD VQA frame exports
+
+`tools/lolg_vqa_decode.py` can now render VQA frames to native PNGs and
+1920x1080 PNGs:
+
+```sh
+python3 tools/lolg_vqa_decode.py C/LOLG/ALTAR.MIX --entry 4 \
+  -o output/vqa_decode/ALTAR_0004_RENDER \
+  --max-frames 3 \
+  --dump-payloads \
+  --fullhd
+```
+
+The rendered Full HD frames are written to:
+
+```text
+output/vqa_decode/*/frames_fullhd/
+```
+
+For archive-level runs, use:
+
+```sh
+python3 tools/lolg_vqa_batch_export.py C/LOLG/*.MIX \
+  -o output/vqa_batch \
+  --max-frames 1 \
+  --quiet
+```
+
+To render every frame from each selected VQA entry, use `--all-frames` instead
+of `--max-frames`:
+
+```sh
+python3 tools/lolg_vqa_batch_export.py C/LOLG/L10_DCI.MIX \
+  -o output/vqa_batch_allframes_probe \
+  --all-frames \
+  --limit 1 \
+  --quiet \
+  --experimental-window-lcw \
+  --transparent-index 0
+```
+
+For very large all-frame exports, add `--fast-png` to reduce write time at the
+cost of larger PNG files. Add `--skip-existing` when resuming a long export so
+completed entry directories are reused. The batch manifest is written after
+each VQA entry, so interrupted exports leave a partial `manifest.csv`. Add
+`--progress-every 25` to print periodic progress during long runs. Add
+`--rerender-incomplete` with `--skip-existing` when repairing an export so only
+entries whose native and Full HD PNG counts match the expected frame count are
+skipped. The skip check also requires continuous `rendered_frames.csv` frame
+indices, output-producing row statuses (`rendered` or `held_frame`), and
+existing referenced PNG files.
+
+After a full export finishes, verify actual PNG counts against the final
+manifest:
+
+```sh
+python3 tools/lolg_vqa_verify_export.py output/vqa_batch_allframes_probe --expect-all
+```
+
+The verifier writes `verification.csv` with native/Full HD counts, missing
+directories, render-row counts, held-frame counts, missing output paths/files,
+frame index gaps, count mismatches, and entries whose PNG count differs from
+the declared frame count.
+
+For a broader experimental sweep that tries the 64K-window LCW pointer fallback:
+
+```sh
+python3 tools/lolg_vqa_batch_export.py C/LOLG/*.MIX \
+  -o output/vqa_batch_window_lcw_firstframes \
+  --max-frames 1 \
+  --quiet \
+  --experimental-window-lcw
+```
+
+For overlay-style VQA frames where palette index 0 is a key color rather than
+black, add `--transparent-index 0` to preserve previous pixels wherever decoded
+codebook vectors contain index 0.
+
+Frames declared by the VQA stream but lacking a pointer chunk are exported as
+`held_frame` rows. The renderer saves the current frame buffer for those rows,
+so all-frame exports can still produce one native PNG and one Full HD PNG per
+declared frame.
+
+The batch exporter writes one directory per VQA entry and a global manifest at:
+
+```text
+output/vqa_batch/manifest.csv
+```
+
+The global manifest includes each entry's declared frame count, native
+dimensions, block grid, first frame render status, pointer chunk, pointer decode
+diagnostics, codebook vector count, CBP decode/update status, pointer index
+statistics, draw/skip counts, per-entry render status counts, held-frame
+counts, output counts, and render note for direct filtering.
+
+A first-frame sweep has been generated at:
+
+```text
+output/vqa_batch_firstframes/
+```
+
+That sweep scanned all 1955 detected VQA entries and exported 999 first frames
+as 1920x1080 PNGs. It also decoded 1954 first-frame `CBFZ` codebooks, decoded
+960 `CBPZ` payloads plus one stored `CBP0` payload, and applied 961 CBP append
+updates to active codebooks. Those updates append 131465 vectors across the
+sweep. The remaining non-rendered entries are listed in the manifest and are
+blocked on additional `VPTZ`/`VPRZ` compression forms.
+
+The enriched manifest currently identifies 935 failed first-frame `VPTZ`
+pointer streams and 21 failed `VPRZ` pointer streams. The dominant failed
+`VPTZ` families start with `8100fe...` and reference absolute copy sources
+around `0x8200`/`0x8300`/`0x8400` after writing one byte.
+
+An experimental sweep has also been generated at:
+
+```text
+output/vqa_batch_window_lcw_firstframes/
+```
+
+That sweep uses `--experimental-window-lcw` and exports 1955 first frames as
+1920x1080 PNGs. It converts the 956 stable `no_vpt` entries to rendered frames,
+but those newly recovered pointer decodes remain marked experimental in the
+manifest.
+
+A transparent experimental sweep has also been generated at:
+
+```text
+output/vqa_batch_window_lcw_transparent0_firstframes/
+```
+
+That sweep uses `--experimental-window-lcw --transparent-index 0` and exports
+1955 first frames as 1920x1080 PNGs. It keeps the same coverage as the
+non-transparent experimental sweep while preserving previous pixels wherever a
+codebook vector contains palette index 0.
+
+The current all-frame Full HD export is:
+
+```text
+output/vqa_batch_window_lcw_transparent0_allframes/
+output/vqa_batch_window_lcw_transparent0_allframes/manifest.csv
+output/vqa_batch_window_lcw_transparent0_allframes/verification.csv
+output/vqa_batch_window_lcw_transparent0_allframes/gallery_manifest.csv
+output/vqa_batch_window_lcw_transparent0_allframes/index.html
+output/vqa_batch_window_lcw_transparent0_allframes/status.html
+output/vqa_batch_window_lcw_transparent0_allframes/status_summary.csv
+output/vqa_batch_window_lcw_transparent0_allframes/status_by_archive.csv
+output/vqa_batch_window_lcw_transparent0_allframes/status_by_resolution.csv
+output/vqa_batch_window_lcw_transparent0_allframes/status_by_pointer.csv
+```
+
+It was generated with `--all-frames --experimental-window-lcw
+--transparent-index 0` and verified with `--expect-all --fail-on-issues`: 1955
+VQA entries, 171167 native PNGs, 171167 Full HD PNGs, 171167 render rows, and 0
+verification issues. The manifest records 13 `held_frame` rows across 4 entries
+and no rows without PNG output.
+
+`tools/lolg_vqa_hd_gallery.py` writes a static gallery over that all-frame VQA
+export. It stores one representative Full HD frame per rendered entry in
+`gallery_manifest.csv` and writes `index.html` with search, archive filtering,
+frame-count filtering, and links to each entry's full `frames_fullhd`
+directory.
+
+Regenerate the VQA gallery with:
+
+```sh
+python3 tools/lolg_vqa_hd_gallery.py \
+  --batch-dir output/vqa_batch_window_lcw_transparent0_allframes
+```
+
+The current VQA gallery result is 1955 entries, 171167 covered Full HD frames,
+66 archive filters, and 0 missing image/frame-directory paths.
+
+`tools/lolg_vqa_status_report.py` writes a compact frame-by-frame coverage
+report for the same all-frame export. It summarizes VQA render status by
+source archive, native resolution, and pointer chunk/decode path without
+reopening the PNG frames.
+
+Regenerate the VQA status report with:
+
+```sh
+python3 tools/lolg_vqa_status_report.py \
+  output/vqa_batch_window_lcw_transparent0_allframes
+```
+
+The current VQA status report covers 1955 entries, 66 source archives, 384
+native resolutions, 11 pointer/decode groups, 171167 Full HD frames, 13 held
+frame rows, and 0 issue rows.
+
+The current renderer handles `VPTZ`/`VPT0` frames against full codebooks,
+including delta pointer tables that copy from the previous frame. It also
+exports experimental `VPRZ`/`VPTR` frames by expanding their run-length pointer
+streams. Vector-aligned `CBPZ`/`CBP0` append updates are applied to the active
+codebook when a full base codebook is available. With
+`--experimental-window-lcw`, later compact `CBPZ` chunks may be decoded for
+inspection, but non-append CBP replacement mapping still needs more
+reverse-engineering before it is applied to rendered frames.
