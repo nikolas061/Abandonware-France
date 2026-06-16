@@ -365,6 +365,29 @@ longueurs attendues, et ses longueurs ont une evidence locale. Il manque encore
 la lecture fiable de cette sequence de longueurs depuis le flux, donc la regle
 reste en revue.
 
+La recherche de la sequence de longueurs dans le flux local reduit cet oracle:
+
+```text
+output/tex_micro_stable_length_sequences/index.html
+output/tex_micro_stable_length_sequences/sequences.csv
+```
+
+Etat courant:
+
+```text
+Segment bytes: 68
+Ordered sequence bytes: 52
+Compact sequence bytes: 0
+Unique ordered sequence bytes: 0
+Suffix ordered bytes: 23
+Suffix compact bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les longueurs du suffixe alterne apparaissent bien dans le flux en
+ordre, mais elles sont dispersees et non uniques. La prochaine etape est donc de
+trouver le selecteur d'offsets de longueurs, pas seulement leur presence.
+
 Etat courant du noisy review:
 
 ```text
