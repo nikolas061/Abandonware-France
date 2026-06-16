@@ -127,6 +127,29 @@ Repeated bucket bytes: 909
 Promotion-ready bytes: 0
 ```
 
+La passe suivante analyse les positions normalisees des sauts dans les buckets
+repetees:
+
+```text
+output/tex_micro_jump_positions/index.html
+output/tex_micro_jump_positions/buckets.csv
+```
+
+Etat courant:
+
+```text
+Position targets: 27
+Target bytes: 909
+Repeated position signature bytes: 0
+Rows with repeated bucket bins: 27
+Bytes with repeated bucket bins: 909
+Promotion-ready bytes: 0
+```
+
+Conclusion: les buckets repetes partagent des zones de sauts, mais pas de
+signature exacte stable. La piste reste utile pour separer les familles, pas
+pour promouvoir une regle de replay.
+
 Etat courant du noisy review:
 
 ```text
