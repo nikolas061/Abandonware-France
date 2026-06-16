@@ -153,6 +153,31 @@ la classe existante. Le seul cas ambigu est un `mixed_value` de 63 bytes sans
 reference de controle; il doit rester en revue pendant que les familles nettes
 sont traitees separement.
 
+La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
+bande de longueur et presence du controle:
+
+```text
+output/tex_micro_mixed_value_subfamily/index.html
+output/tex_micro_mixed_value_subfamily/subfamilies.csv
+output/tex_micro_mixed_value_subfamily/signals.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 2142
+Clean bytes: 2079
+Repeated subfamily bytes: 2079
+Dominant subfamily: 0x6|medium|control_known|strong
+Ambiguous bytes: 63
+Promotion-ready bytes: 0
+```
+
+Conclusion: les bytes propres de `mixed_value` tombent tous dans des
+sous-familles repetees; le cas faible reste le meme `0x6|medium|control_missing`
+de 63 bytes. La prochaine passe peut donc attaquer le dominant
+`0x6|medium|control_known|strong` separement du reste.
+
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
 
