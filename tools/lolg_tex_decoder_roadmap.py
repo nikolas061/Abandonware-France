@@ -38,6 +38,9 @@ DEFAULT_MICRO_MIXED_VALUE_DOMINANT_CONTROL_SUMMARY = Path(
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_LOCAL_GRAMMAR_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_local_grammar/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_PREDICTOR_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_predictor/summary.csv"
+)
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -164,6 +167,7 @@ def build_queue(
     micro_mixed_value_subfamily_summary: dict[str, str] | None = None,
     micro_mixed_value_dominant_control_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_local_grammar_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_predictor_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
     enriched: list[dict[str, object]] = []
     for row in decisions:
@@ -253,6 +257,30 @@ def build_queue(
                     f"{micro_mixed_value_payload_local_grammar_summary.get('byte_ngram8_repeated_slots', '0')}",
                     f"mixed_value_payload_promotion_ready="
                     f"{micro_mixed_value_payload_local_grammar_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_predictor_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_predictor_high_correct="
+                    f"{micro_mixed_value_payload_predictor_summary.get('best_high_correct_slots', '0')}",
+                    f"mixed_value_predictor_high_precision="
+                    f"{micro_mixed_value_payload_predictor_summary.get('best_high_precision', '0')}",
+                    f"mixed_value_predictor_high6_baseline="
+                    f"{micro_mixed_value_payload_predictor_summary.get('high6_baseline_precision', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_predictor_byte_correct="
+                    f"{micro_mixed_value_payload_predictor_summary.get('best_byte_correct_slots', '0')}",
+                    f"mixed_value_predictor_byte_false="
+                    f"{micro_mixed_value_payload_predictor_summary.get('best_byte_false_slots', '0')}",
+                    f"mixed_value_predictor_promotion_ready="
+                    f"{micro_mixed_value_payload_predictor_summary.get('promotion_ready_bytes', '0')}",
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
@@ -583,6 +611,11 @@ def main() -> None:
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_LOCAL_GRAMMAR_SUMMARY,
     )
+    parser.add_argument(
+        "--micro-mixed-value-payload-predictor-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_PREDICTOR_SUMMARY,
+    )
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -633,12 +666,21 @@ def main() -> None:
     micro_mixed_value_payload_local_grammar_summary = (
         micro_mixed_value_payload_local_grammar_rows[0] if micro_mixed_value_payload_local_grammar_rows else None
     )
+    micro_mixed_value_payload_predictor_rows = (
+        read_rows(args.micro_mixed_value_payload_predictor_summary)
+        if args.micro_mixed_value_payload_predictor_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_predictor_summary = (
+        micro_mixed_value_payload_predictor_rows[0] if micro_mixed_value_payload_predictor_rows else None
+    )
     queue = build_queue(
         decisions,
         micro_token_family_split_summary,
         micro_mixed_value_subfamily_summary,
         micro_mixed_value_dominant_control_summary,
         micro_mixed_value_payload_local_grammar_summary,
+        micro_mixed_value_payload_predictor_summary,
     )
     summary = build_summary(queue, review_summary)
 

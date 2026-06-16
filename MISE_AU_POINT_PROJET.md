@@ -229,6 +229,29 @@ et aucun n-gramme byte de longueur 8 ne se repete. La prochaine passe doit donc
 chercher une grammaire positionnelle/courte ou un etat externe, pas une copie
 longue directe.
 
+La passe predictive teste ensuite des contextes courts (`prev1`, `prev2`,
+position normalisee, signal et controle) en validation leave-one-row-out:
+
+```text
+output/tex_micro_mixed_value_payload_predictor/index.html
+output/tex_micro_mixed_value_payload_predictor/candidates.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Best byte predictor: prev1_pos16 26/122
+Best high predictor: prev1_pos16 165/74
+High6 baseline precision: 0.626102
+Promotion-ready bytes: 0
+```
+
+Conclusion: un contexte gauche/position ne predit pas le byte complet
+(beaucoup plus de faux que de corrects). Le high nibble a un signal partiel,
+mais il reste proche du biais global `0x6*`. Il faut donc eviter de promouvoir
+un predicteur local et chercher une source d'etat plus externe.
+
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
 

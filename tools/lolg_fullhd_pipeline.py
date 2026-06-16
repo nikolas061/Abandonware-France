@@ -98,6 +98,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             "grammaire locale payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_local_grammar_probe.py"],
         ),
+        Step(
+            "prediction payload mixed-value micro-token .tex",
+            [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_predictor_probe.py"],
+        ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
         Step("inventaire historique projet", [sys.executable, "tools/lolg_project_legacy_inventory.py"]),
     ]
