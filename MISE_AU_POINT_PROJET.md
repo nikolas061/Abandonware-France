@@ -444,6 +444,31 @@ observes sont conflictuels: les memes offsets servent a expliquer des valeurs
 differentes selon le segment. Il faut donc chercher un decodeur d'etat plus
 large que le voisinage immediat longueur/valeur.
 
+L'analyse des intervalles entre longueurs candidates confirme que les sauts ne
+forment pas encore une signature d'etat reutilisable:
+
+```text
+output/tex_micro_stable_length_interval/index.html
+output/tex_micro_stable_length_interval/transitions.csv
+output/tex_micro_stable_length_interval/offset_groups.csv
+```
+
+Etat courant:
+
+```text
+Transition bytes: 42
+Compact transition bytes: 14
+Marker transition bytes: 34
+Stable signature bytes: 0
+Conflicted offset bytes: 20
+Promotion-ready bytes: 0
+```
+
+Conclusion: les intervalles contiennent bien des marqueurs (`fc`, `00`, `20`,
+etc.), mais aucune signature repetee stable. Les seuls offsets reutilises
+(`822`, `1108`) sont conflictuels entre segments, ce qui confirme qu'un offset
+brut du `segment_gap` ne suffit pas a decrire la transition.
+
 Etat courant du noisy review:
 
 ```text

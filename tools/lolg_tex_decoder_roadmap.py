@@ -29,6 +29,7 @@ DEFAULT_STABLE_ALTERNATION_REPLAY_SUMMARY = Path("output/tex_micro_stable_altern
 DEFAULT_STABLE_LENGTH_SEQUENCE_SUMMARY = Path("output/tex_micro_stable_length_sequences/summary.csv")
 DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY = Path("output/tex_micro_stable_length_control/summary.csv")
 DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY = Path("output/tex_micro_stable_length_opcode/summary.csv")
+DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_interval/summary.csv")
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -194,6 +195,7 @@ def build_stable_walk_decision(
     length_sequence_summary: dict[str, str] | None,
     length_control_summary: dict[str, str] | None,
     length_opcode_summary: dict[str, str] | None,
+    length_interval_summary: dict[str, str] | None,
 ) -> dict[str, str] | None:
     repeated_bytes = int_value(summary, "repeated_signature_bytes")
     copy_bytes = int_value(summary, "copy_distance_320_bytes")
@@ -266,6 +268,11 @@ def build_stable_walk_decision(
         blocking.append(f"length_opcode_direct_after_bytes={length_opcode_summary.get('direct_after_bytes', '0')}")
         blocking.append(f"length_opcode_nearby_value_run_bytes={length_opcode_summary.get('nearby_value_run_bytes', '0')}")
         blocking.append(f"length_opcode_repeated_context_bytes={length_opcode_summary.get('repeated_context_bytes', '0')}")
+    if length_interval_summary:
+        positive.append(f"length_interval_transition_bytes={length_interval_summary.get('transition_bytes', '0')}")
+        positive.append(f"length_interval_marker_bytes={length_interval_summary.get('marker_transition_bytes', '0')}")
+        blocking.append(f"length_interval_stable_signature_bytes={length_interval_summary.get('stable_signature_bytes', '0')}")
+        blocking.append(f"length_interval_conflicted_offset_bytes={length_interval_summary.get('conflicted_offset_bytes', '0')}")
 
     return {
         "surface": "micro_token_stable_walks",
@@ -293,6 +300,7 @@ def append_optional_stable_walk_decision(
     length_sequence_summary_path: Path,
     length_control_summary_path: Path,
     length_opcode_summary_path: Path,
+    length_interval_summary_path: Path,
 ) -> list[dict[str, str]]:
     if not summary_path.exists() or not groups_path.exists():
         return decisions
@@ -325,6 +333,8 @@ def append_optional_stable_walk_decision(
     length_control_summary = length_control_summary_rows[0] if length_control_summary_rows else None
     length_opcode_summary_rows = read_rows(length_opcode_summary_path) if length_opcode_summary_path.exists() else []
     length_opcode_summary = length_opcode_summary_rows[0] if length_opcode_summary_rows else None
+    length_interval_summary_rows = read_rows(length_interval_summary_path) if length_interval_summary_path.exists() else []
+    length_interval_summary = length_interval_summary_rows[0] if length_interval_summary_rows else None
     decision = build_stable_walk_decision(
         summary_rows[0],
         read_rows(groups_path),
@@ -339,6 +349,7 @@ def append_optional_stable_walk_decision(
         length_sequence_summary,
         length_control_summary,
         length_opcode_summary,
+        length_interval_summary,
     )
     if decision is None:
         return decisions
@@ -449,6 +460,7 @@ def main() -> None:
     parser.add_argument("--stable-length-sequence-summary", type=Path, default=DEFAULT_STABLE_LENGTH_SEQUENCE_SUMMARY)
     parser.add_argument("--stable-length-control-summary", type=Path, default=DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY)
     parser.add_argument("--stable-length-opcode-summary", type=Path, default=DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY)
+    parser.add_argument("--stable-length-interval-summary", type=Path, default=DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -468,6 +480,7 @@ def main() -> None:
         args.stable_length_sequence_summary,
         args.stable_length_control_summary,
         args.stable_length_opcode_summary,
+        args.stable_length_interval_summary,
     )
     review_summary = read_rows(args.review_summary)[0]
     queue = build_queue(decisions)
