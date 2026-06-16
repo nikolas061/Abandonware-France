@@ -96,6 +96,18 @@ tokens, les controles et les cas non resolus. Les promotions automatiques sont
 conservatrices: quand une hypothese ne produit pas une regle robuste, elle reste
 en revue.
 
+Roadmap de travail:
+
+```text
+output/tex_decoder_roadmap/index.html
+output/tex_decoder_roadmap/queue.csv
+```
+
+Elle classe les 51 decisions du noisy review en pistes actionnables. Etat
+actuel: 0 byte promotable automatiquement; la piste dominante reste
+`gradient`, puis les familles `mixed_token`, `jump`, `direction_value` et
+`flat_walk`.
+
 Etat courant du noisy review:
 
 ```text

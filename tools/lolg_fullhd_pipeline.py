@@ -73,6 +73,7 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         ),
         Step("couverture textures .tex HD", [sys.executable, "tools/lolg_tex_hd_coverage.py"]),
         Step("couverture references .tex", [sys.executable, "tools/lolg_tex_reference_coverage.py"]),
+        Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
         Step("inventaire historique projet", [sys.executable, "tools/lolg_project_legacy_inventory.py"]),
     ]
     return steps + quick_steps(fail_on_issues)
