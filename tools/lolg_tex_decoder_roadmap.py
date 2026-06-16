@@ -16,6 +16,8 @@ DEFAULT_DECISIONS = Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap
 DEFAULT_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_noisy_review/summary.csv"
 )
+DEFAULT_STABLE_WALKS_SUMMARY = Path("output/tex_micro_stable_walks/summary.csv")
+DEFAULT_STABLE_WALKS_GROUPS = Path("output/tex_micro_stable_walks/groups.csv")
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -167,6 +169,49 @@ def build_queue(decisions: list[dict[str, str]]) -> list[dict[str, object]]:
     return enriched
 
 
+def build_stable_walk_decision(summary: dict[str, str], groups: list[dict[str, str]]) -> dict[str, str] | None:
+    repeated_bytes = int_value(summary, "repeated_signature_bytes")
+    copy_bytes = int_value(summary, "copy_distance_320_bytes")
+    if repeated_bytes <= 0:
+        return None
+
+    strongest = groups[0] if groups else {}
+    positive = [
+        f"repeated_signature_bytes={repeated_bytes}",
+        f"exact_repeat_bytes={int_value(summary, 'exact_repeat_bytes')}",
+        f"copy_distance_320_bytes={copy_bytes}",
+    ]
+    if strongest:
+        positive.append(f"top_signature={strongest.get('signed_shape_key', '')}")
+        positive.append(f"top_offsets={strongest.get('start_offsets', '')}")
+
+    return {
+        "surface": "micro_token_stable_walks",
+        "rows": summary.get("repeated_signature_rows", "0"),
+        "bytes": str(repeated_bytes),
+        "promotion_ready_bytes": "0",
+        "next_action": "map the +320 exact repeats to a source/control pair before promoting a copy rule",
+        "positive_evidence": "; ".join(value for value in positive if value),
+        "blocking_evidence": "source_control_unresolved; promotion_ready=0",
+    }
+
+
+def append_optional_stable_walk_decision(
+    decisions: list[dict[str, str]],
+    summary_path: Path,
+    groups_path: Path,
+) -> list[dict[str, str]]:
+    if not summary_path.exists() or not groups_path.exists():
+        return decisions
+    summary_rows = read_rows(summary_path)
+    if not summary_rows:
+        return decisions
+    decision = build_stable_walk_decision(summary_rows[0], read_rows(groups_path))
+    if decision is None:
+        return decisions
+    return [*decisions, decision]
+
+
 def build_summary(queue: list[dict[str, object]], review_summary: dict[str, str]) -> dict[str, object]:
     tracks = Counter(str(row["track"]) for row in queue)
     bytes_by_track = Counter()
@@ -254,11 +299,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build a prioritized .tex decoder roadmap.")
     parser.add_argument("--decisions", type=Path, default=DEFAULT_DECISIONS)
     parser.add_argument("--review-summary", type=Path, default=DEFAULT_REVIEW_SUMMARY)
+    parser.add_argument("--stable-walks-summary", type=Path, default=DEFAULT_STABLE_WALKS_SUMMARY)
+    parser.add_argument("--stable-walks-groups", type=Path, default=DEFAULT_STABLE_WALKS_GROUPS)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
 
-    decisions = read_rows(args.decisions)
+    decisions = append_optional_stable_walk_decision(
+        read_rows(args.decisions),
+        args.stable_walks_summary,
+        args.stable_walks_groups,
+    )
     review_summary = read_rows(args.review_summary)[0]
     queue = build_queue(decisions)
     summary = build_summary(queue, review_summary)

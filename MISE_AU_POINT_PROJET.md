@@ -103,10 +103,10 @@ output/tex_decoder_roadmap/index.html
 output/tex_decoder_roadmap/queue.csv
 ```
 
-Elle classe les 51 decisions du noisy review en pistes actionnables. Etat
-actuel: 0 byte promotable automatiquement; la piste dominante reste
-`gradient`, puis les familles `mixed_token`, `jump`, `direction_value` et
-`flat_walk`.
+Elle classe les 51 decisions du noisy review, plus la preuve stable-walk
+`+320`, en pistes actionnables. Etat actuel: 52 decisions, 0 byte promotable
+automatiquement; la piste dominante reste `gradient`, puis les familles
+`mixed_token`, `jump`, `direction_value`, `flat_walk` et `control`.
 
 La premiere reduction de la piste `micro_token` isole les lignes
 `jump_mixed_walk`:
