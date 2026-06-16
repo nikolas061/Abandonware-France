@@ -196,6 +196,29 @@ sources `67..131` et `349..407` ne sont pas encore marquees comme connues par
 le replay. La prochaine etape est donc de decoder ces sources, pas de promouvoir
 une copie +320 globale.
 
+La sonde suivante attaque directement ces deux sources non connues:
+
+```text
+output/tex_micro_stable_sources/index.html
+output/tex_micro_stable_sources/sources.csv
+```
+
+Etat courant:
+
+```text
+Source rows: 2
+Source bytes: 122
+Full source matches: 0
+Best exact bytes total: 16
+Known-source bytes before probe: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les sources de la copie +320 ne sont pas des fenetres brutes de
+`segment_gap`, `control_prefix` ou `fragment`, ni une transformation simple de
+ces fenetres. Elles sont elles-memes encodees et doivent etre traitees comme
+un sous-probleme de grammaire, pas comme une source disponible.
+
 Etat courant du noisy review:
 
 ```text
