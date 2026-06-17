@@ -153,6 +153,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ALIGNMENT_SUMMARY = Path(
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ALIGNMENT_REVIEW_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_alignment_review/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ROW_FAMILY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_row_family/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -816,6 +819,21 @@ def gradient_sequence_high_safe_low_exception_alignment_review_action(summary: d
     return "reject peer exception selector families and seek corpus support"
 
 
+def gradient_sequence_high_safe_low_exception_row_family_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient sequence low-exception row-family probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote gradient sequence low-exception row-family candidates"
+    if int_value(summary, "robust_family_rows") > 0:
+        return "review robust low-exception row-family candidates"
+    if (
+        int_value(summary, "best_false_free_correct_slots") <= 6
+        and int_value(summary, "robust_family_rows") == 0
+    ):
+        return "reject row-family exception support and seek external corpus state"
+    return "inspect low-exception row-family support"
+
+
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
     if int_value(summary, "false_free_byte_slots") > 0:
         return "replay false-free mixed-value payload byte combos"
@@ -1311,6 +1329,7 @@ def build_queue(
     gradient_sequence_high_safe_low_exception_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_alignment_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_alignment_review_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_exception_row_family_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -3004,6 +3023,42 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_high_safe_low_exception_alignment_review_action(
                     gradient_sequence_high_safe_low_exception_alignment_review_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_row_family_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_row_family_ff="
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('best_false_free_correct_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('best_false_free_alignments', '0')}",
+                    f"gradient_sequence_low_exception_row_family_robust="
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('robust_family_rows', '0')}",
+                    f"gradient_sequence_low_exception_row_family_narrow="
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('narrow_family_rows', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_row_family_best="
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('best_false_free_family_kind', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('best_false_free_family_key', '')}",
+                    f"gradient_sequence_low_exception_row_family_promotion_ready="
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('promotion_ready_bytes', '0')}",
+                    f"gradient_sequence_low_exception_row_family_issues="
+                    f"{gradient_sequence_high_safe_low_exception_row_family_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_row_family_action(
+                    gradient_sequence_high_safe_low_exception_row_family_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -6705,6 +6760,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_sequence_high_safe_low_exception_row_family_summary:
+                    next_action = gradient_sequence_high_safe_low_exception_row_family_action(
+                        gradient_sequence_high_safe_low_exception_row_family_summary
+                    )
                 elif gradient_sequence_high_safe_low_exception_alignment_review_summary:
                     next_action = gradient_sequence_high_safe_low_exception_alignment_review_action(
                         gradient_sequence_high_safe_low_exception_alignment_review_summary
@@ -7518,6 +7577,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ALIGNMENT_REVIEW_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-row-family-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ROW_FAMILY_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -8110,6 +8174,16 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_alignment_review_summary = (
         gradient_sequence_high_safe_low_exception_alignment_review_rows[0]
         if gradient_sequence_high_safe_low_exception_alignment_review_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_row_family_rows = (
+        read_rows(args.gradient_sequence_high_safe_low_exception_row_family_summary)
+        if args.gradient_sequence_high_safe_low_exception_row_family_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_row_family_summary = (
+        gradient_sequence_high_safe_low_exception_row_family_rows[0]
+        if gradient_sequence_high_safe_low_exception_row_family_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -8897,6 +8971,7 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_summary,
         gradient_sequence_high_safe_low_exception_alignment_summary,
         gradient_sequence_high_safe_low_exception_alignment_review_summary,
+        gradient_sequence_high_safe_low_exception_row_family_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

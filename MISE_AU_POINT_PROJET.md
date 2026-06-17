@@ -797,6 +797,37 @@ Conclusion: les alignements false-free sont reels mais restent etroits. Aucun
 selecteur large non-row ne survit au replay global; la suite doit chercher un
 support de famille de rows/corpus avant de convertir ces 6 bytes en candidats.
 
+La passe familles row exceptions low teste ensuite ce support explicitement en
+regroupant les alignements `same_bucket` par signatures de row: frontier,
+`start_mod320`, bandes de start, paires cible/source et shift.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_row_family/index.html
+output/tex_gradient_sequence_high_safe_low_exception_row_family/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_row_family/families.csv
+output/tex_gradient_sequence_high_safe_low_exception_row_family/false_free_families.csv
+```
+
+Etat courant:
+
+```text
+Same-bucket alignments: 2141
+False-free alignments: 165
+Family kinds: 10
+Family rows: 1217
+Best row-family false-free: frontier_band_pair_shift / 18|640-959->28|0-319|sh=8 = 6 slots
+Best row-family alignments: 1
+Robust row families: 0
+Narrow row families: 277
+Promotion candidate bytes: 6
+Promotion-ready bytes: 0
+```
+
+Conclusion: les familles de rows confirment que le signal reste trop etroit:
+aucune famille robuste multi-row ne couvre les exceptions sans faux. La suite
+doit chercher un etat externe corpus/source plutot que prolonger les selecteurs
+pair-row.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
