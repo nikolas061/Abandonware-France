@@ -732,6 +732,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_source_profile_high_low/index.html"),
         ),
         (
+            "Bas apres high-safe source-profile gradient .tex",
+            Path("output/tex_gradient_source_profile_high_safe_low/index.html"),
+        ),
+        (
             "Etat opcode payload gradient .tex",
             Path("output/tex_gradient_payload_state_opcode/index.html"),
         ),

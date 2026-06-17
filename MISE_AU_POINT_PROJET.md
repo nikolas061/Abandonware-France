@@ -1058,6 +1058,33 @@ Conclusion: le source-profile produit un signal partiel utile sur le nibble
 haut, mais aucun chemin full-byte ou low-nibble false-free. Il doit donc rester
 un indice de phase/etat pour une passe suivante, pas une promotion du decodeur.
 
+La passe focalisee high-safe low applique ensuite la meilleure regle
+high-nibble false-free (`offset_delta_bucket + length_band8 + source_high +
+rel_mod4`) puis cherche uniquement un resolveur low-nibble dans les slots
+ainsi bornes:
+
+```text
+output/tex_gradient_source_profile_high_safe_low/index.html
+output/tex_gradient_source_profile_high_safe_low/slots.csv
+output/tex_gradient_source_profile_high_safe_low/rules.csv
+```
+
+Etat courant:
+
+```text
+High-safe slots: 108
+High-safe rows: 2
+Target-low false-free sets: 0
+Best target-low rule: rel_mod16 + high_context = 12 exact / 21 false
+Delta-low false-free sets: 0
+Best delta-low rule: source_byte + rel_mod16 = 10 exact / 20 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: meme quand le high nibble est borne sans faux, le low nibble reste
+bruite et ne couvre que deux lignes. Cette sous-piste doit etre abandonnee au
+profit d'un etat gradient plus riche.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

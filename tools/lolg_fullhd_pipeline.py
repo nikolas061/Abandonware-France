@@ -184,6 +184,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),
         Step(
+            "bas apres high-safe source-profile gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_source_profile_high_safe_low_probe.py"],
+        ),
+        Step(
             "etat opcode payload gradient .tex",
             [sys.executable, "tools/lolg_tex_gradient_payload_state_opcode_probe.py"],
         ),
