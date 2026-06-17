@@ -1175,6 +1175,33 @@ les contextes locaux (14 slots false-free), mais le byte complet reste trop
 clairseme (2 slots seulement). La prochaine passe doit inspecter le low-nibble
 de ces 14 slots externes avant toute promotion.
 
+La passe external high/low isole ces 14 slots high-nibble, puis teste les
+resolvers low-nibble sur les memes sources externes en validation
+leave-one-row-out:
+
+```text
+output/tex_micro_mixed_value_payload_external_high_low/index.html
+output/tex_micro_mixed_value_payload_external_high_low/rows.csv
+output/tex_micro_mixed_value_payload_external_high_low/candidates.csv
+```
+
+Etat courant:
+
+```text
+High feature set: best_pool+best_d2
+Selected high slots: 14
+Selected low values: a:3|d:2|9:2|c:2|5:1|f:1|8:1|b:1|e:1
+Low feature sets: 377
+Best low resolver: best_b2+profile_b1 0/2, unknown 12
+False-free low slots: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: le signal high externe ne suffit pas a reconstruire le byte. Le
+meilleur resolver low ne produit aucun vrai positif en LOO, et aucune
+combinaison low false-free n'est disponible. Cette branche est donc rejetee
+avant promotion; la suite doit chercher un etat de byte plus riche.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
