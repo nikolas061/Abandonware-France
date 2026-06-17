@@ -60,6 +60,9 @@ DEFAULT_FLAT_WALK_PALETTE_COMPRESSED_FORMULA_SUMMARY = Path(
 DEFAULT_FLAT_WALK_PALETTE_CORPUS_FORMULA_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_corpus_formula_probe/summary.csv"
 )
+DEFAULT_FLAT_WALK_PALETTE_PROMOTION_CANDIDATE_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_promotion_candidate_probe/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -275,6 +278,14 @@ def flat_walk_corpus_formula_action(summary: dict[str, str]) -> str:
     return "split corpus flat-walk palette formula mismatches"
 
 
+def flat_walk_palette_promotion_candidate_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote replayed flat-walk palette formula candidates"
+    if int_value(summary, "candidate_ready_bytes") > 0 and int_value(summary, "issue_rows") == 0:
+        return "replay guarded flat-walk palette formula promotion candidates"
+    return "fix flat-walk palette promotion candidate issues"
+
+
 def build_queue(
     decisions: list[dict[str, str]],
     gradient_payload_profile_summary: dict[str, str] | None = None,
@@ -301,6 +312,7 @@ def build_queue(
     flat_walk_palette_compressed_combo_summary: dict[str, str] | None = None,
     flat_walk_palette_compressed_formula_summary: dict[str, str] | None = None,
     flat_walk_palette_corpus_formula_summary: dict[str, str] | None = None,
+    flat_walk_palette_promotion_candidate_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -1115,6 +1127,40 @@ def build_queue(
             row = {
                 **row,
                 "next_action": flat_walk_corpus_formula_action(flat_walk_palette_corpus_formula_summary),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and flat_walk_palette_promotion_candidate_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"flat_walk_palette_candidate_targets="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
+                    f"flat_walk_palette_candidate_bytes="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_bytes', '0')}",
+                    f"flat_walk_palette_candidate_plus_unlock="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('total_candidate_plus_unlock_bytes', '0')}",
+                    f"flat_walk_palette_candidate_values="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('formula_exact_value_rows', '0')}/"
+                    f"{flat_walk_palette_promotion_candidate_summary.get('formula_value_rows', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"flat_walk_palette_candidate_replay_needed="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
+                    f"flat_walk_palette_candidate_promotion_ready="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('promotion_ready_bytes', '0')}",
+                    f"flat_walk_palette_candidate_issues="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": flat_walk_palette_promotion_candidate_action(
+                    flat_walk_palette_promotion_candidate_summary
+                ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -2228,6 +2274,35 @@ def build_queue(
                     ],
                 )
                 next_action = flat_walk_corpus_formula_action(flat_walk_palette_corpus_formula_summary)
+            if flat_walk_palette_promotion_candidate_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"flat_walk_palette_candidate_targets="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
+                        f"flat_walk_palette_candidate_bytes="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_bytes', '0')}",
+                        f"flat_walk_palette_candidate_plus_unlock="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('total_candidate_plus_unlock_bytes', '0')}",
+                        f"flat_walk_palette_candidate_values="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('formula_exact_value_rows', '0')}/"
+                        f"{flat_walk_palette_promotion_candidate_summary.get('formula_value_rows', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"flat_walk_palette_candidate_replay_needed="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
+                        f"flat_walk_palette_candidate_promotion_ready="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('promotion_ready_bytes', '0')}",
+                        f"flat_walk_palette_candidate_issues="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('issue_rows', '0')}",
+                    ],
+                )
+                next_action = flat_walk_palette_promotion_candidate_action(
+                    flat_walk_palette_promotion_candidate_summary
+                )
             row = {
                 **row,
                 "next_action": next_action,
@@ -2592,6 +2667,11 @@ def main() -> None:
         default=DEFAULT_FLAT_WALK_PALETTE_CORPUS_FORMULA_SUMMARY,
     )
     parser.add_argument(
+        "--flat-walk-palette-promotion-candidate-summary",
+        type=Path,
+        default=DEFAULT_FLAT_WALK_PALETTE_PROMOTION_CANDIDATE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-payload-profile-summary",
         type=Path,
         default=DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY,
@@ -2914,6 +2994,14 @@ def main() -> None:
     flat_walk_palette_corpus_formula_summary = (
         flat_walk_palette_corpus_formula_rows[0] if flat_walk_palette_corpus_formula_rows else None
     )
+    flat_walk_palette_promotion_candidate_rows = (
+        read_rows(args.flat_walk_palette_promotion_candidate_summary)
+        if args.flat_walk_palette_promotion_candidate_summary.exists()
+        else []
+    )
+    flat_walk_palette_promotion_candidate_summary = (
+        flat_walk_palette_promotion_candidate_rows[0] if flat_walk_palette_promotion_candidate_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -3020,6 +3108,7 @@ def main() -> None:
         flat_walk_palette_compressed_combo_summary,
         flat_walk_palette_compressed_formula_summary,
         flat_walk_palette_corpus_formula_summary,
+        flat_walk_palette_promotion_candidate_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

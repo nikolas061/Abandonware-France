@@ -900,6 +900,39 @@ ensembles de transforms et les 17 occurrences de valeurs conflictuelles connues.
 La prochaine passe peut preparer une promotion candidate limitee aux lignes
 palette qui ont deja un `candidate_plan`.
 
+La sonde de promotion candidate regroupe ensuite les valeurs exactes par cible
+`palette_mix` et produit une liste de cibles pretes a rejouer. Elle ne marque
+pas encore de `promotion_ready_bytes`, car aucun replay garde n'a applique la
+formule dans un masque de decodeur:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_promotion_candidate_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_promotion_candidate_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_promotion_candidate_probe/values.csv
+```
+
+Etat courant:
+
+```text
+Candidate target rows: 7
+Formula value rows: 49
+Formula exact value rows: 49
+Known conflicted value rows: 17
+Candidate-ready target rows: 7
+Candidate-ready bytes: 361
+Backref unlock bytes: 122
+Total candidate plus unlock bytes: 483
+Candidate pools: 2
+Transform sets: 7
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: les 7 cibles `candidate_plan` sont pretes pour un replay garde de
+la formule palette. Le gain direct attendu est 361 octets, ou 483 octets en
+comptant les backrefs deja reliees, mais la prochaine passe doit encore rejouer
+ces candidats contre les masques/segments avant promotion effective.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
