@@ -315,6 +315,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SMALL_NONZER
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SMALL_NONZERO_SOURCE_REVIEW_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SMALL_NONZERO_BROADER_EVIDENCE_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1304,6 +1307,16 @@ def gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_so
     return summary.get("next_probe", "") or "derive broader evidence for final small-nonzero external terminal source"
 
 
+def gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix delta-guard promoted final small-nonzero broader evidence issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote final guarded relative small-nonzero external terminal source byte"
+    return summary.get("next_probe", "") or "derive guard separating relative previous-literal repeat reference-false rows"
+
+
 def gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
     summary: dict[str, str],
 ) -> str:
@@ -2246,6 +2259,10 @@ def build_queue(
     ]
     | None = None,
     gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary: dict[
         str, str
     ]
     | None = None,
@@ -5861,6 +5878,37 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay_action(
                     gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_final_broader_formula="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary.get('best_formula', '')}",
+                    f"gradient_sequence_low_exception_delta_guard_final_broader_known="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary.get('best_guard_known_exact_rows', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary.get('best_guard_known_false_rows', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_final_broader_guard_false="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary.get('best_guard_reference_false_rows', '0')}",
+                    f"gradient_sequence_low_exception_delta_guard_final_broader_review="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary.get('review_verdict', '')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -9563,6 +9611,12 @@ def build_queue(
                         flat_walk_palette_promotion_candidate_summary,
                     )
                 elif (
+                    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary
+                    )
+                elif (
                     gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay_summary
                 ):
                     next_action = gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay_action(
@@ -10770,6 +10824,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SMALL_NONZERO_SOURCE_REVIEW_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-external-terminal-small-nonzero-broader-evidence-delta-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SMALL_NONZERO_BROADER_EVIDENCE_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -11789,6 +11848,20 @@ def main() -> None:
             0
         ]
         if gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_rows
         else None
     )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
@@ -12907,6 +12980,7 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_source_review_delta_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_source_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary,

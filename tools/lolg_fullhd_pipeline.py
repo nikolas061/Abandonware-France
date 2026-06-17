@@ -954,6 +954,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "preuve elargie small nonzero finale apres promotion delta-guard .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_probe.py",
+                "--targets",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay/targets.csv",
+                "--small-gaps",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay/small_gaps.csv",
+                "-o",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_broader_evidence_delta_guard_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Final Small Nonzero Broader Evidence Delta Guard Promoted Replay",
+            ],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),
