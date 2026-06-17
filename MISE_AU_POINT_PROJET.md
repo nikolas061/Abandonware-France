@@ -364,6 +364,38 @@ spatiales non locales sont massivement fausses. La suite doit chercher un etat
 de sequence plus large, pas une distance/transform spatiale locale ou
 semi-locale.
 
+La passe etat sequence connue utilise ensuite uniquement les bytes deja connus
+autour de chaque slot gradient: voisins immediats, dernier/prochain byte connu,
+phase dans la ligne, compteurs prefix et position:
+
+```text
+output/tex_gradient_sequence_known_state/index.html
+output/tex_gradient_sequence_known_state/rules.csv
+output/tex_gradient_sequence_known_state/slots.csv
+```
+
+Etat courant:
+
+```text
+Sequence slots: 1564
+Feature sets: 2047
+Full false-free feature sets: 0
+Best full rule: top_nibble + rel_mod16 + prev_gap_bucket = 34 exact / 42 false
+High false-free feature sets: 106
+Best high false-free slots: 320
+Best high false-free rule: gradient_class + top_nibble + prev_known_byte
+Best high broad rule: top_nibble + prev_gap_bucket + next_gap_bucket = 491 exact / 24 false
+Best high low-false rule: top_nibble + prev_known_byte + next_known_byte = 351 exact / 3 false
+Low false-free feature sets: 0
+Best low rule: top_nibble + rel_mod16 + prev_gap_bucket = 36 exact / 40 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: l'etat de sequence connu donne un signal high-nibble net et plus
+large que les copies spatiales, mais il ne resout ni le byte complet ni le
+low-nibble. Il faut garder ce high comme indice de phase et chercher un
+resolveur low/full distinct.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

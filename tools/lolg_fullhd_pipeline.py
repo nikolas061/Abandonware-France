@@ -254,6 +254,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_gradient_nonlocal_known_spatial_probe.py"],
         ),
         Step(
+            "etat sequence connue gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_sequence_known_state_probe.py"],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),

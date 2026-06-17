@@ -111,6 +111,9 @@ DEFAULT_GRADIENT_SEED_DELTA_PAYLOAD_OPCODE_SUMMARY = Path(
 DEFAULT_GRADIENT_NONLOCAL_KNOWN_SPATIAL_SUMMARY = Path(
     "output/tex_gradient_nonlocal_known_spatial/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_KNOWN_STATE_SUMMARY = Path(
+    "output/tex_gradient_sequence_known_state/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -572,6 +575,20 @@ def gradient_nonlocal_known_spatial_action(summary: dict[str, str]) -> str:
     ):
         return "reject known-spatial nonlocal gradient copies and search sequence-level state"
     return "inspect gradient known-spatial residuals"
+
+
+def gradient_sequence_known_state_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient sequence known-state probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote gradient sequence known-state candidates"
+    if (
+        int_value(summary, "high_best_false_free_slots") > 0
+        and int_value(summary, "full_false_free_feature_sets") == 0
+        and int_value(summary, "low_false_free_feature_sets") == 0
+    ):
+        return "keep sequence high nibble as partial signal and seek low/full gradient resolver"
+    return "inspect gradient sequence known-state residuals"
 
 
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
@@ -1055,6 +1072,7 @@ def build_queue(
     gradient_macro_source_profile_state_summary: dict[str, str] | None = None,
     gradient_seed_delta_payload_opcode_summary: dict[str, str] | None = None,
     gradient_nonlocal_known_spatial_summary: dict[str, str] | None = None,
+    gradient_sequence_known_state_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -1581,6 +1599,40 @@ def build_queue(
                 **row,
                 "next_action": gradient_nonlocal_known_spatial_action(
                     gradient_nonlocal_known_spatial_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_sequence_known_state_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_high_false_free="
+                    f"{gradient_sequence_known_state_summary.get('high_best_false_free_slots', '0')}",
+                    f"gradient_sequence_high_sets="
+                    f"{gradient_sequence_known_state_summary.get('high_false_free_feature_sets', '0')}",
+                    f"gradient_sequence_high_best="
+                    f"{gradient_sequence_known_state_summary.get('high_best_exact_slots', '0')}/"
+                    f"{gradient_sequence_known_state_summary.get('high_best_false_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_full_false_free="
+                    f"{gradient_sequence_known_state_summary.get('full_false_free_feature_sets', '0')}",
+                    f"gradient_sequence_low_false_free="
+                    f"{gradient_sequence_known_state_summary.get('low_false_free_feature_sets', '0')}",
+                    f"gradient_sequence_full_best_false="
+                    f"{gradient_sequence_known_state_summary.get('full_best_false_slots', '0')}",
+                    f"gradient_sequence_low_best_false="
+                    f"{gradient_sequence_known_state_summary.get('low_best_false_slots', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_known_state_action(
+                    gradient_sequence_known_state_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -5947,6 +5999,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_sequence_known_state_summary:
+                    next_action = gradient_sequence_known_state_action(
+                        gradient_sequence_known_state_summary
+                    )
                 elif gradient_nonlocal_known_spatial_summary:
                     next_action = gradient_nonlocal_known_spatial_action(
                         gradient_nonlocal_known_spatial_summary
@@ -6634,6 +6690,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_NONLOCAL_KNOWN_SPATIAL_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-known-state-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_KNOWN_STATE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -7086,6 +7147,16 @@ def main() -> None:
     gradient_nonlocal_known_spatial_summary = (
         gradient_nonlocal_known_spatial_rows[0]
         if gradient_nonlocal_known_spatial_rows
+        else None
+    )
+    gradient_sequence_known_state_rows = (
+        read_rows(args.gradient_sequence_known_state_summary)
+        if args.gradient_sequence_known_state_summary.exists()
+        else []
+    )
+    gradient_sequence_known_state_summary = (
+        gradient_sequence_known_state_rows[0]
+        if gradient_sequence_known_state_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -7859,6 +7930,7 @@ def main() -> None:
         gradient_macro_source_profile_state_summary,
         gradient_seed_delta_payload_opcode_summary,
         gradient_nonlocal_known_spatial_summary,
+        gradient_sequence_known_state_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,
