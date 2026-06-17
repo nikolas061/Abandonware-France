@@ -250,6 +250,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step(
+            "spatial connu nonlocal gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_nonlocal_known_spatial_probe.py"],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),

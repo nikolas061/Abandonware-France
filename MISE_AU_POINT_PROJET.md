@@ -334,6 +334,36 @@ oracle-only, soit singletons, soit conflictuels. Meme le payload opcode ne
 stabilise que 46 octets repetes avec 122 octets conflictuels; cette piste doit
 donc rester un indice de structure, pas une promotion.
 
+La passe spatial connu nonlocal durcit ensuite la recherche: elle ne copie que
+depuis les bytes deja marques connus dans le replay palette/formule, puis teste
+les distances spatiales larges et transforms simples:
+
+```text
+output/tex_gradient_nonlocal_known_spatial/index.html
+output/tex_gradient_nonlocal_known_spatial/rules.csv
+output/tex_gradient_nonlocal_known_spatial/slots.csv
+```
+
+Etat courant:
+
+```text
+Unknown gradient slots: 1564
+Known spatial source samples: 8047
+Candidate predictions: 56329
+Distance/transform rules: 224
+False-free rules: 0
+Best known-spatial rule: +128 / sub1 = 25 exact / 634 false
+Identity -320: 2 exact / 110 false
+Identity +320: 3 exact / 104 false
+Slots with any exact candidate: 326
+Promotion candidate bytes: 0
+```
+
+Conclusion: meme avec des sources non-oracle deja connues, les copies
+spatiales non locales sont massivement fausses. La suite doit chercher un etat
+de sequence plus large, pas une distance/transform spatiale locale ou
+semi-locale.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

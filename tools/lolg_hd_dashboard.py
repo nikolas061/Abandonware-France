@@ -838,6 +838,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Profil payload gradient .tex",
+            Path("output/tex_gradient_payload_profile/index.html"),
+        ),
+        (
+            "Spatial connu nonlocal gradient .tex",
+            Path("output/tex_gradient_nonlocal_known_spatial/index.html"),
+        ),
+        (
             "Plateaux noisy gaps nonzero tiny .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_probe/index.html"),
         ),
