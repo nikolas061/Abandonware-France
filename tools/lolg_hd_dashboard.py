@@ -870,6 +870,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_sequence_high_safe_source_window/index.html"),
         ),
         (
+            "Controle/opcode residuel high-safe gradient .tex",
+            Path("output/tex_gradient_sequence_high_safe_control_opcode/index.html"),
+        ),
+        (
             "Plateaux noisy gaps nonzero tiny .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_probe/index.html"),
         ),

@@ -547,6 +547,39 @@ le meilleur offset fixe touche 119 slots tout en produisant 201 faux, et le
 meilleur gating hors-ligne reste equilibre a 30/30. La suite doit revenir a un
 etat residuel controle/opcode gradient plutot qu'a une copie de fenetre source.
 
+La passe controle/opcode high-safe projette alors les 320 slots residuels sur
+les ancres `control_ref_offset`, l'ancre de depart reconstruite, les bytes
+`control_prefix`/`fragment`, les signatures de fenetre et les bins
+`span_index`/`op_index`:
+
+```text
+output/tex_gradient_sequence_high_safe_control_opcode/index.html
+output/tex_gradient_sequence_high_safe_control_opcode/summary.csv
+output/tex_gradient_sequence_high_safe_control_opcode/candidates.csv
+output/tex_gradient_sequence_high_safe_control_opcode/contexts.csv
+output/tex_gradient_sequence_high_safe_control_opcode/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Slot rows: 10
+Control/start low exact: 22 / 20
+Prefix/fragment low exact: 9 / 30
+Best low opcode context: state_source_mix = 30 correct / 34 false
+Best byte opcode context: state_source_mix = 30 correct / 34 false
+Best high context: control_delta_pos16 = 297 correct / 0 false
+Best low false-free slots: 0
+Promotion candidate bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les contextes controle/opcode gardent surtout le signal high deja
+borne par le high-safe; le low reste bruite et aucun contexte low false-free
+n'apparait. La prochaine piste doit viser une grammaire de transition low
+cross-row plutot qu'une ancre controle/opcode directe.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
