@@ -949,6 +949,31 @@ Conclusion: le graphe high-safe est acyclique, mais les terminaux ne se
 resolvent pas par propagation low/source locale. La suite doit chercher un
 unlock externe des terminaux, pas propager directement les lows.
 
+La passe terminaux source exceptions low teste alors les contextes externes des
+43 slots terminaux. Elle combine jusqu'a trois champs de contexte et valide les
+predictions en leave-one-row-out, sans promouvoir automatiquement les bytes.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal/terminals.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal/candidates.csv
+```
+
+Etat courant:
+
+```text
+Terminal slots: 43
+Feature sets: 1159
+Best terminal context: rel_mod4+control_low+low_bucket = 13 correct / 3 false
+Best false-free terminal context: target_mod32+terminal_state+low_bucket = 10 slots
+Combined false-free slots: 10
+Promotion-ready bytes: 0
+```
+
+Conclusion: il existe maintenant une piste terminale faux-free mais encore
+etroite. La suite doit relire/rejouer ces 10 slots avant toute promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

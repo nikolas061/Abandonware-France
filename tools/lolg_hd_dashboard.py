@@ -918,6 +918,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_sequence_high_safe_low_exception_source_chain/index.html"),
         ),
         (
+            "Terminaux source exceptions low high-safe gradient .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_terminal/index.html"),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
