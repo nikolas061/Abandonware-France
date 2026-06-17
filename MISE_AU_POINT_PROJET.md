@@ -631,6 +631,32 @@ Conclusion: les transformations litterales et la geometrie large ne donnent pas
 de regle promotable. La seule piste concrete est d'isoler la ligne exacte a
 distance -320, puis de verifier si elle cache une sous-classe stricte.
 
+La sonde backref des clusters macro-state elargit ce cas a toutes les lignes du
+cluster et recherche une source de meme longueur situee exactement 320 bytes
+avant:
+
+```text
+output/tex_gradient_macro_state_cluster_backref/index.html
+output/tex_gradient_macro_state_cluster_backref/pairs.csv
+output/tex_gradient_macro_state_cluster_backref/rules.csv
+```
+
+Etat courant:
+
+```text
+Back320 same-length rows: 4
+Exact back320 bytes: 122
+False back320 bytes: 175
+Best rule: same_length_back320_flat_walk exact=122 false=0
+Literal target exact bytes: 64
+Promotion-ready bytes: 0
+```
+
+Conclusion: le cas exact `dinodead.pcx` fait partie d'une petite sous-classe
+`flat_run_walk` a copie verticale -320. Le signal est propre dans ces clusters,
+mais trop etroit pour une promotion: il faut maintenant tester cette grammaire
+`flat_run_walk` hors des clusters macro-state.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

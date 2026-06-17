@@ -63,6 +63,9 @@ DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_SOURCE_SUMMARY = Path(
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_LITERAL_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_literal/summary.csv"
 )
+DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_BACKREF_SUMMARY = Path(
+    "output/tex_gradient_macro_state_cluster_backref/summary.csv"
+)
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
@@ -223,6 +226,7 @@ def build_queue(
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
+    gradient_macro_state_cluster_backref_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -691,6 +695,35 @@ def build_queue(
                 "next_action": (
                     "isolate the lone -320 exact spatial row; broad literal/geometric transforms remain non-promotable"
                 ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_macro_state_cluster_backref_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_cluster_backref_best="
+                    f"{gradient_macro_state_cluster_backref_summary.get('best_rule', '')}",
+                    f"gradient_cluster_backref_exact="
+                    f"{gradient_macro_state_cluster_backref_summary.get('exact_back320_bytes', '0')}",
+                    f"gradient_cluster_backref_candidate="
+                    f"{gradient_macro_state_cluster_backref_summary.get('candidate_review_bytes', '0')}",
+                    f"gradient_cluster_backref_literal_exact="
+                    f"{gradient_macro_state_cluster_backref_summary.get('literal_target_exact_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_cluster_backref_false="
+                    f"{gradient_macro_state_cluster_backref_summary.get('false_back320_bytes', '0')}",
+                    f"gradient_cluster_backref_promotion_ready="
+                    f"{gradient_macro_state_cluster_backref_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "broaden flat-walk -320 backref probe outside macro clusters before promotion",
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -1413,6 +1446,46 @@ def build_queue(
                 next_action = (
                     "isolate the lone -320 exact spatial row; broad literal/geometric transforms remain non-promotable"
                 )
+            if (
+                gradient_macro_state_cluster_backref_summary
+                and gradient_macro_state_cluster_literal_summary
+                and gradient_macro_state_cluster_source_summary
+                and gradient_macro_state_cluster_payload_summary
+                and gradient_macro_state_cluster_summary
+                and gradient_macro_fixture_transition_summary
+                and gradient_macro_phase_sequence_summary
+                and gradient_macro_phase_conflict_split_summary
+                and gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_cluster_backref_best="
+                        f"{gradient_macro_state_cluster_backref_summary.get('best_rule', '')}",
+                        f"gradient_cluster_backref_exact="
+                        f"{gradient_macro_state_cluster_backref_summary.get('exact_back320_bytes', '0')}",
+                        f"gradient_cluster_backref_candidate="
+                        f"{gradient_macro_state_cluster_backref_summary.get('candidate_review_bytes', '0')}",
+                        f"gradient_cluster_backref_literal_exact="
+                        f"{gradient_macro_state_cluster_backref_summary.get('literal_target_exact_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_cluster_backref_false="
+                        f"{gradient_macro_state_cluster_backref_summary.get('false_back320_bytes', '0')}",
+                        f"gradient_cluster_backref_promotion_ready="
+                        f"{gradient_macro_state_cluster_backref_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = "broaden flat-walk -320 backref probe outside macro clusters before promotion"
             row = {
                 **row,
                 "next_action": next_action,
@@ -1796,6 +1869,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_LITERAL_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-macro-state-cluster-backref-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_BACKREF_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-jump-mixed-payload-summary",
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
@@ -1964,6 +2042,14 @@ def main() -> None:
     gradient_macro_state_cluster_literal_summary = (
         gradient_macro_state_cluster_literal_rows[0] if gradient_macro_state_cluster_literal_rows else None
     )
+    gradient_macro_state_cluster_backref_rows = (
+        read_rows(args.gradient_macro_state_cluster_backref_summary)
+        if args.gradient_macro_state_cluster_backref_summary.exists()
+        else []
+    )
+    gradient_macro_state_cluster_backref_summary = (
+        gradient_macro_state_cluster_backref_rows[0] if gradient_macro_state_cluster_backref_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -2059,6 +2145,7 @@ def main() -> None:
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,
+        gradient_macro_state_cluster_backref_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,
