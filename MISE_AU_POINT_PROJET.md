@@ -202,6 +202,35 @@ la classe existante. Le seul cas ambigu est un `mixed_value` de 63 bytes sans
 reference de controle; il doit rester en revue pendant que les familles nettes
 sont traitees separement.
 
+Le profil direct des lignes `gradient_like` rassemble les preuves payload,
+source et spatiales avant de descendre dans les sous-problemes:
+
+```text
+output/tex_gradient_payload_profile/index.html
+output/tex_gradient_payload_profile/rows.csv
+output/tex_gradient_payload_profile/groups.csv
+output/tex_gradient_payload_profile/distances.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1925
+Small-delta walk bytes: 452
+Flat-run walk bytes: 813
+Repeated payload signature bytes: 244
+Class-peer >=50 bytes: 395
+Source profile >=75 bytes: 701
+External best exact bytes: 156
+Spatial exact copy bytes: 122
+Promotion-ready bytes: 0
+```
+
+Conclusion: le profil confirme les deux copies exactes a distance 320 deja
+isolees, mais l'exact source direct reste trop faible et les profils source
+eleves sont trop larges. Les lignes `gradient_like` restent donc bloquees sur
+un decodeur d'etat/opcode, pas sur une source ou copie directe generalisable.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

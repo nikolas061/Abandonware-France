@@ -73,6 +73,12 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         ),
         Step("couverture textures .tex HD", [sys.executable, "tools/lolg_tex_hd_coverage.py"]),
         Step("couverture references .tex", [sys.executable, "tools/lolg_tex_reference_coverage.py"]),
+        Step(
+            "gradient-like noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
+            requires_pillow=True,
+        ),
+        Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step("split micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_split.py"]),
         Step("positions micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_positions.py"]),
         Step("payload jump-mixed micro .tex", [sys.executable, "tools/lolg_tex_micro_jump_mixed_payload_probe.py"]),
