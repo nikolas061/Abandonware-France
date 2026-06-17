@@ -674,6 +674,38 @@ un signal superieur au low exact. La piste suivante doit scinder le probleme en
 bucket low puis resolver intra-bucket, au lieu de chercher directement le low
 exact.
 
+La passe split bucket low teste donc le meilleur cas apres split grossier:
+bucket reel connu (`lo=6/7/8`, `mid=9/a`, `hi=b/c`), puis resolution du low
+exact avec les memes contextes leave-one-row-out et quelques contextes
+sequence/source dedies:
+
+```text
+output/tex_gradient_sequence_high_safe_low_bucket_split/index.html
+output/tex_gradient_sequence_high_safe_low_bucket_split/summary.csv
+output/tex_gradient_sequence_high_safe_low_bucket_split/buckets.csv
+output/tex_gradient_sequence_high_safe_low_bucket_split/candidates.csv
+output/tex_gradient_sequence_high_safe_low_bucket_split/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Buckets: lo|mid|hi
+Context families: 36
+Combined best split: 150 correct / 60 false / 110 unknown
+Combined baseline inside buckets: 234 correct / 320 slots
+Best bucket resolver: mid / bucket_prev_low_seq = 69 correct / 41 false
+Combined false-free slots: 30
+Promotion candidate bytes: 30
+Promotion-ready bytes: 0
+```
+
+Conclusion: le split par bucket confirme que le bucket grossier porte du
+signal, mais le resolver exact local ne bat pas la baseline majoritaire par
+bucket. La suite doit modeliser les exceptions minoritaires (`7/6`, `a`, `c`)
+plutot qu'un resolver exact general par bucket.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
