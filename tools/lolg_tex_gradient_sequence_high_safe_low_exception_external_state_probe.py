@@ -74,9 +74,23 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def source_actual_offset(row: dict[str, object]) -> int:
+    return int_value(row, "source_profile_offset") + int_value(row, "relative_offset")
+
+
 def context_functions():
     return {
         "source_profile_offset_seq": lambda row: (row["source_profile_offset"], row["seq_index"]),
+        "source_actual_offset_seq": lambda row: (source_actual_offset(row), row["seq_index"]),
+        "source_actual_target_delta_mod32_seq": lambda row: (
+            (int_value(row, "target_offset") - source_actual_offset(row)) % 32,
+            row["seq_index"],
+        ),
+        "corpus_actual_position_seq": lambda row: (
+            row["archive_key"],
+            source_actual_offset(row),
+            row["seq_index"],
+        ),
         "offset_delta_bucket_seq": lambda row: (row["offset_delta_bucket"], row["seq_index"]),
         "source_byte_seq": lambda row: (row["source_byte"], row["seq_index"]),
         "source_low_seq": lambda row: (row["source_low"], row["seq_index"]),

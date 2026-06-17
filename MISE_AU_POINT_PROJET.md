@@ -844,7 +844,7 @@ output/tex_gradient_sequence_high_safe_low_exception_external_state/candidates.c
 Etat courant:
 
 ```text
-Context families: 24
+Context families: 27
 Best external target: mid:a / prefix_low_seq = 18 correct / 21 false
 Combined external-state best: 20 correct / 24 false
 Combined false-free slots: 0
@@ -874,9 +874,10 @@ Etat courant:
 ```text
 Fixture matched slots: 320
 Target known slots: 0 / 320
+Source known slots: 125 / 320
 Target exact slots: 0
-Best prerequisite target: mid:a / target_source_known_seq = 23 correct / 14 false
-Combined prerequisite-state best: 23 correct / 18 false
+Best prerequisite target: mid:a / target_source_known_seq = 21 correct / 15 false
+Combined prerequisite-state best: 21 correct / 19 false
 Combined false-free slots: 0
 Promotion-ready bytes: 0
 ```

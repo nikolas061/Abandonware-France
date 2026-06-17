@@ -48,6 +48,8 @@ SUMMARY_FIELDNAMES = [
     "target_known_slots",
     "target_exact_slots",
     "target_decoded_nonzero_slots",
+    "source_known_slots",
+    "source_base_known_slots",
     "context_families",
     "candidate_rows",
     "best_target",
@@ -78,6 +80,7 @@ SLOT_FIELDNAMES = [
     "prerequisite_target_known",
     "prerequisite_target_decoded_byte",
     "prerequisite_target_exact",
+    "prerequisite_source_actual_offset",
     "prerequisite_known_left_delta",
     "prerequisite_known_right_delta",
     "prerequisite_known_left_bucket",
@@ -88,6 +91,7 @@ SLOT_FIELDNAMES = [
     "prerequisite_known_count16",
     "prerequisite_left_known_byte",
     "prerequisite_right_known_byte",
+    "prerequisite_source_base_known",
     "prerequisite_source_known",
     "prerequisite_control_known",
     "prerequisite_start_known",
@@ -185,6 +189,7 @@ def annotate_prerequisite_state(
                     "prerequisite_target_known": "0",
                     "prerequisite_target_decoded_byte": "",
                     "prerequisite_target_exact": "0",
+                    "prerequisite_source_actual_offset": "",
                     "prerequisite_known_left_delta": "none",
                     "prerequisite_known_right_delta": "none",
                     "prerequisite_known_left_bucket": "none",
@@ -195,6 +200,7 @@ def annotate_prerequisite_state(
                     "prerequisite_known_count16": "0",
                     "prerequisite_left_known_byte": "none",
                     "prerequisite_right_known_byte": "none",
+                    "prerequisite_source_base_known": "0",
                     "prerequisite_source_known": "0",
                     "prerequisite_control_known": "0",
                     "prerequisite_start_known": "0",
@@ -214,6 +220,8 @@ def annotate_prerequisite_state(
         right_byte = byte_text(decoded, right_pos) if right_pos is not None else "none"
         known_window8 = "".join(known_at(mask, offset + delta) for delta in range(-4, 5) if delta)
         known_window16 = "".join(known_at(mask, offset + delta) for delta in range(-8, 9) if delta)
+        source_base_offset = int_value(row, "source_profile_offset")
+        source_actual_offset = source_base_offset + int_value(row, "relative_offset")
         annotated.update(
             {
                 "prerequisite_fixture_present": "1",
@@ -221,6 +229,7 @@ def annotate_prerequisite_state(
                 "prerequisite_target_known": known_at(mask, offset),
                 "prerequisite_target_decoded_byte": decoded_byte,
                 "prerequisite_target_exact": "1" if decoded_byte == target_byte else "0",
+                "prerequisite_source_actual_offset": str(source_actual_offset),
                 "prerequisite_known_left_delta": left_delta,
                 "prerequisite_known_right_delta": right_delta,
                 "prerequisite_known_left_bucket": delta_bucket(left_delta),
@@ -231,7 +240,8 @@ def annotate_prerequisite_state(
                 "prerequisite_known_count16": str(known_window16.count("1")),
                 "prerequisite_left_known_byte": left_byte,
                 "prerequisite_right_known_byte": right_byte,
-                "prerequisite_source_known": known_at(mask, int_value(row, "source_profile_offset")),
+                "prerequisite_source_base_known": known_at(mask, source_base_offset),
+                "prerequisite_source_known": known_at(mask, source_actual_offset),
                 "prerequisite_control_known": known_at(mask, int_value(row, "control_ref_offset")),
                 "prerequisite_start_known": known_at(mask, int_value(row, "start")),
             }
@@ -533,6 +543,8 @@ def build_summary(
             for row in rows
             if row.get("prerequisite_target_decoded_byte") not in {"", "00", "out"}
         ),
+        "source_known_slots": sum(int_value(row, "prerequisite_source_known") for row in rows),
+        "source_base_known_slots": sum(int_value(row, "prerequisite_source_base_known") for row in rows),
         "context_families": len(context_functions()),
         "candidate_rows": len(candidates),
         "best_target": best.get("target_key", ""),
