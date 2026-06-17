@@ -2052,8 +2052,36 @@ Residual adjacent-known candidate/false/conflict slots: 0/0/0
 
 Conclusion: il ne reste plus de slot sequence replayable dans cette piste; les
 2 derniers slots sequence sont bloques par des prerequis entierement inconnus.
-La prochaine piste doit cibler les prerequis bloques au-dela de
-low-copy/corpus/adjacent-known.
+
+Une passe role-transform sur les prerequis bloques teste ensuite les memes
+prerequis comme roles `first/second` avant une cible a +2/+1, avec validation
+leave-one-fixture-out sur les fixtures attendues:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform/index.html
+output/tex_micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform/slots.csv
+output/tex_micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform/rules.csv
+```
+
+Etat courant:
+
+```text
+Blocked sequence slots: 2
+Unknown prerequisite slots: 4
+Training role entries: 34910
+False-free full-byte rule sets: 0
+Partial high slots: 2
+Partial low slots: 2
+Combined nibble candidate slots: 0
+Promotion candidate bytes: 0
+Best partial high: target_pos4 + target_pos32 + target_low + rule_type -> 2/0
+Best partial low: pre_pos16 + pre_pos32 + target_low + opcode1 -> 2/0
+```
+
+Conclusion: les roles donnent seulement des nibbles partiels (`5` pour la
+paire `5a`, `b` pour la paire `5b`). Les supports hors fixture cible restent
+des bytes complets differents (`56` et `6b`), donc aucune promotion full-byte
+n'est sure. Ces prerequis restent en attente d'un producteur non-oracle.
 
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:

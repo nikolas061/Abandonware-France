@@ -274,6 +274,9 @@ DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_LOW_COPY_CORPUS_EXPANSION_SUMMARY = P
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_LOW_COPY_ADJACENT_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_sequence_low_copy_adjacent/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_BLOCKED_PREREQUISITE_ROLE_TRANSFORM_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform/summary.csv"
+)
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_spatial/summary.csv"
 )
@@ -901,6 +904,16 @@ def mixed_value_sequence_low_copy_adjacent_action(summary: dict[str, str]) -> st
     return "add blocked-prerequisite feature family beyond low-copy/corpus/adjacent-known"
 
 
+def mixed_value_sequence_blocked_prerequisite_role_transform_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix blocked-prerequisite role-transform report issues"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay full-byte blocked-prerequisite role-transform candidates"
+    if int_value(summary, "partial_high_slots") > 0 or int_value(summary, "partial_low_slots") > 0:
+        return "leave mixed-value blocked prerequisites until a non-oracle full-byte producer emerges"
+    return "move mixed-value sequence residuals behind broader gradient/flat-walk probes"
+
+
 def flat_walk_palette_formula_replay_consumed(
     summary: dict[str, str],
     candidate_summary: dict[str, str] | None = None,
@@ -1001,6 +1014,7 @@ def build_queue(
     micro_mixed_value_payload_sequence_low_copy_low_split_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_low_copy_corpus_expansion_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_low_copy_adjacent_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_spatial_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_state_opcode_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
@@ -3532,6 +3546,38 @@ def build_queue(
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_blocked_prereq_role_partial_high="
+                    f"{micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary.get('partial_high_slots', '0')}",
+                    f"mixed_value_blocked_prereq_role_partial_low="
+                    f"{micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary.get('partial_low_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_blocked_prereq_role_full_byte_sets="
+                    f"{micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary.get('false_free_full_byte_sets', '0')}",
+                    f"mixed_value_blocked_prereq_role_candidates="
+                    f"{micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary.get('promotion_candidate_bytes', '0')}",
+                    f"mixed_value_blocked_prereq_role_oracle_low_features="
+                    f"{micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary.get('oracle_target_low_feature_sets', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_blocked_prerequisite_role_transform_action(
+                    micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_spatial_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -5564,6 +5610,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary:
+                    next_action = mixed_value_sequence_blocked_prerequisite_role_transform_action(
+                        micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary
+                    )
                 elif micro_mixed_value_payload_sequence_low_copy_adjacent_summary:
                     next_action = mixed_value_sequence_low_copy_adjacent_action(
                         micro_mixed_value_payload_sequence_low_copy_adjacent_summary
@@ -6502,6 +6552,11 @@ def main() -> None:
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_LOW_COPY_ADJACENT_SUMMARY,
     )
     parser.add_argument(
+        "--micro-mixed-value-payload-sequence-blocked-prerequisite-role-transform-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_BLOCKED_PREREQUISITE_ROLE_TRANSFORM_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-mixed-value-payload-spatial-summary",
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY,
@@ -7299,6 +7354,16 @@ def main() -> None:
         if micro_mixed_value_payload_sequence_low_copy_adjacent_rows
         else None
     )
+    micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary)
+        if args.micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary = (
+        micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_rows[0]
+        if micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_rows
+        else None
+    )
     micro_mixed_value_payload_spatial_rows = (
         read_rows(args.micro_mixed_value_payload_spatial_summary)
         if args.micro_mixed_value_payload_spatial_summary.exists()
@@ -7403,6 +7468,7 @@ def main() -> None:
         micro_mixed_value_payload_sequence_low_copy_low_split_summary,
         micro_mixed_value_payload_sequence_low_copy_corpus_expansion_summary,
         micro_mixed_value_payload_sequence_low_copy_adjacent_summary,
+        micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary,
         micro_mixed_value_payload_spatial_summary,
         micro_mixed_value_payload_state_opcode_summary,
     )

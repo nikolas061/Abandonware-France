@@ -1154,6 +1154,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_low_copy_adjacent/index.html"),
         ),
         (
+            "Transform roles prerequis bloques sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),
