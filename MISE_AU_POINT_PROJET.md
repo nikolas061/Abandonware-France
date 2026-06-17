@@ -522,6 +522,34 @@ le meilleur signal utile reste soit conflictuel, soit trop singleton-heavy. La
 prochaine passe doit donc chercher des clusters d'etat macro cross-frontier
 plutot qu'une transition locale fixture/op.
 
+La sonde de clusters d'etat macro teste ensuite les combinaisons cross-frontier
+de longueur, skip fixture, phase `op`, controle, ancre de depart et contexte de
+frontier:
+
+```text
+output/tex_gradient_macro_state_cluster/index.html
+output/tex_gradient_macro_state_cluster/rows.csv
+output/tex_gradient_macro_state_cluster/groups.csv
+output/tex_gradient_macro_state_cluster/families.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1925
+Selector families: 30
+Best macro cluster: dominant_delta / fixture_rule_length 1490 / 263 / 172 singleton
+Lowest conflict cluster: dominant_delta / fixture_skip_phase8 1404 / 0 / 521 singleton
+Best payload cluster: band_shape / fixture_rule_skip_length 257 / 1195 / 473 singleton
+Length baseline: 1526 / 301 / 98 singleton
+Promotion-ready bytes: 0
+```
+
+Conclusion: `fixture_skip_phase8` isole un vrai cluster sans conflit pour le
+delta dominant, mais il ne fournit pas encore la forme payload. La prochaine
+passe doit donc sonder le payload a l'interieur des clusters `skip/op8` avant
+toute promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

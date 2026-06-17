@@ -748,6 +748,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_macro_fixture_transition/index.html"),
         ),
         (
+            "Cluster etat macro opcode gradient .tex",
+            Path("output/tex_gradient_macro_state_cluster/index.html"),
+        ),
+        (
             "Contexte gradients repetes .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_repeat_context_probe/index.html"),
         ),
