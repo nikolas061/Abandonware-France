@@ -1229,8 +1229,36 @@ Issue rows: 0
 ```
 
 Conclusion: les 25 bytes de la garde compacte sont maintenant promus proprement
-dans un replay separe. La suite doit consommer ce replay comme nouvelle base
-gradient, puis relancer les probes aval pour mesurer le deblocage reel.
+dans un replay separe. La passe suivante consomme ce replay comme nouvelle base
+gradient et mesure le deblocage reel des dependances source.
+
+La passe dependances source base replay promue relance `source_dependency` en
+utilisant ce replay promu comme fixtures d'entree. Elle mesure donc l'effet
+reel des 25 bytes ajoutes sur le graphe high-safe, sans changer les probes
+amont ni creer de dependance circulaire dans la pipeline.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay/slots.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay/edges.csv
+```
+
+Etat courant:
+
+```text
+Source available slots: 164/320
+Source unknown slots: 156
+Unknown high-safe source slots: 94 (101 avant replay promu)
+Unknown outside source slots: 62
+Top unknown edge: 78|195->80|204 (22 slots, 28 avant replay promu)
+Issue rows: 0
+```
+
+Conclusion: le replay promu est maintenant consomme par une passe aval et
+debloque 7 sources high-safe, dont 2 sources inconnues d'exception. La piste
+suivante reste la resolution des 94 dependances high-safe restantes, avec le
+top edge `78|195->80|204` reduit a 22 slots.
 
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
