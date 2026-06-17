@@ -209,6 +209,36 @@ Conclusion: les profils source eleves couvrent une partie notable des
 repete, et les distances spatiales restent fausses. Cette piste doit donc
 continuer par grammaire de sauts/etat, pas par replay ou source directe.
 
+La passe etat/opcode `jump-token` teste les ancres `control_ref_offset`
+disponibles, l'ancre reconstruite via `start_mod64`, les signatures de fenetre
+controle, le `control_prefix` et le fragment:
+
+```text
+output/tex_jump_token_payload_state_opcode/index.html
+output/tex_jump_token_payload_state_opcode/rows.csv
+output/tex_jump_token_payload_state_opcode/groups.csv
+output/tex_jump_token_payload_state_opcode/candidates.csv
+output/tex_jump_token_payload_state_opcode/contexts.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1680
+Control anchor rows: 51
+Raw exact control/start: 19 / 16
+Best byte state: prefix_byte_pos16 46 / 311
+Best high state: prefix_byte_pos16 136 / 311
+High baseline precision: 0.345833
+Source-state rejected: 1
+Promotion-ready bytes: 0
+```
+
+Conclusion: meme avec 51 ancres controle, les etats locaux ne produisent ni le
+byte complet ni un high nibble superieur au biais global. Les `jump-token`
+restent donc bloques sur une grammaire de sauts plus haute, pas sur une
+promotion via fenetre controle/source locale.
+
 Le split conservateur par familles micro-token donne maintenant une file plus
 propre pour les passes suivantes:
 

@@ -88,6 +88,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step("profil payload jump-token .tex", [sys.executable, "tools/lolg_tex_jump_token_payload_profile_probe.py"]),
+        Step(
+            "etat opcode payload jump-token .tex",
+            [sys.executable, "tools/lolg_tex_jump_token_payload_state_opcode_probe.py"],
+        ),
         Step("stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_walks.py"]),
         Step("backrefs stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_backref_probe.py"]),
         Step("sources stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_source_probe.py"]),

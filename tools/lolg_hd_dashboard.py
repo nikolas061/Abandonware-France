@@ -828,6 +828,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_probe/index.html"),
         ),
         (
+            "Etat opcode payload jumps .tex",
+            Path("output/tex_jump_token_payload_state_opcode/index.html"),
+        ),
+        (
             "Copies jumps noisy .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_backref_probe/index.html"),
         ),
