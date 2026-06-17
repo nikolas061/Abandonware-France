@@ -1354,6 +1354,38 @@ promotion. Il se reduit a trois petits spans non-zero (`80:7-12`, `80:0-3`,
 `58:9-10`). La prochaine piste concrete est donc un selecteur small unresolved
 nonzero cible sur ces spans, avec validation avant promotion.
 
+La sonde du selecteur small non-zero externe compare ces trois spans aux gaps
+courts deja connus, puis teste des fenetres source non-oracle:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector/source_candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector/context_candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector/small_gaps.csv
+```
+
+Etat courant:
+
+```text
+Target spans: 3
+Target bytes: 9
+Joined target spans: 3
+Small gap rows: 188
+Known small gaps: 15
+False-free contexts: 0
+Full source candidate spans: 1
+Covered target bytes: 1
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le span `58:9-10` a des candidats source triviaux sur un seul
+octet, mais les spans `80:0-3` et `80:7-12` ne sont pas couverts par une source
+non-oracle fiable. La prochaine piste concrete devient la grammaire
+compact-control des petits gaps non-zero externes, pas une promotion directe.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
