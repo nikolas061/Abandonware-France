@@ -2041,6 +2041,42 @@ en support indirect: la cible est portee par la famille `29`, tandis que le
 switch mesure `29,54` contre `29,55`. La prochaine piste concrete est donc de
 splitter le target-overlap par famille porteuse avant toute promotion.
 
+La sonde split carrier-family separe ensuite les familles qui portent la cible
+des familles qui portent le switch:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_split/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_split/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_split/splits.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_split/carriers.csv
+```
+
+Etat courant:
+
+```text
+Switch position: 2
+Switch map: 29,54:s+1+0;29,55:s+6+2
+Target-overlap shape rows: 4
+Carrier split rows: 4
+Target carrier family rows: 5
+Switch support family rows: 2
+Direct carrier switch rows: 0
+Indirect carrier split rows: 1
+Carrier shape mismatch rows: 3
+Target switch mismatch family rows: 1
+Best carrier shape: a|s|s|s|s
+Best target carriers: 29
+Best carrier atom sets: 29:s-4+0,s-4-1
+Best switch support: 29,54;29,55
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: la seule piste compatible avec la position 2 est un split indirect:
+la cible `29` a ses propres atomes `s-4+0/s-4-1`, tandis que le support switch
+reste sur `29,54` et `29,55`. La prochaine piste concrete est donc de deriver
+un switch local a la famille porteuse `29`.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
