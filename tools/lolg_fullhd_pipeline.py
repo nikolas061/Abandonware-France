@@ -1023,6 +1023,13 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "etat prerequis exceptions low gradient apres low-copy .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_prerequisite_state_probe.py",
+            ],
+        ),
+        Step(
             "generalisation apres low-copy sequence mixed-value micro-token .tex",
             [
                 sys.executable,

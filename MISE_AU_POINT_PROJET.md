@@ -857,6 +857,35 @@ minoritaires sans faux, ils bornent plutot un manque de pre-requis. La suite
 doit chercher un resolveur payload/corpus plus amont avant de relancer les
 exceptions low.
 
+La passe etat prerequis exceptions low joint ensuite ces memes slots aux
+fixtures du replay `sequence_low_copy_promoted_replay`. Elle ne regarde pas le
+byte cible attendu comme predicteur; elle mesure si le `known_mask` ou les
+voisins deja connus fournissent un etat corpus exploitable.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html
+output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/candidates.csv
+```
+
+Etat courant:
+
+```text
+Fixture matched slots: 320
+Target known slots: 0 / 320
+Target exact slots: 0
+Best prerequisite target: mid:a / target_source_known_seq = 23 correct / 14 false
+Combined prerequisite-state best: 23 correct / 18 false
+Combined false-free slots: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: le replay promu couvre les offsets dans son mask mais ne debloque
+aucun des bytes cible `gradient_like`; les voisins connus donnent seulement un
+indice bruite. La suite doit chercher un unlock payload/corpus plus amont, pas
+un selecteur d'exception supplementaire.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
