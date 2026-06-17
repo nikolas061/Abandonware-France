@@ -613,6 +613,37 @@ controle/opcode, mais reste trop fausse en contexte large et trop faible en
 false-free. La suite doit chercher une grammaire low locale/Markov propre aux
 rows plutot qu'une propagation directe depuis une autre row.
 
+La passe Markov low row-local teste ensuite les transitions internes d'une row:
+`prev_low`, paire precedente, delta precedent, position de sequence, bins
+`target_x`/quart/tiers et etat opcode, toujours en leave-one-row-out:
+
+```text
+output/tex_gradient_sequence_high_safe_row_markov/index.html
+output/tex_gradient_sequence_high_safe_row_markov/summary.csv
+output/tex_gradient_sequence_high_safe_row_markov/candidates.csv
+output/tex_gradient_sequence_high_safe_row_markov/contexts.csv
+output/tex_gradient_sequence_high_safe_row_markov/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Slot rows: 10
+Context families: 23
+Best low Markov: prev_delta_seq_gradient = 49 correct / 92 false
+Best delta Markov: prev_pair_seq = 50 correct / 60 false
+Best step Markov: prev_pair_seq = 54 correct / 57 false
+Best delta false-free: prev_low_quarter_third_offset = 9 slots
+Promotion candidate bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: le Markov local capte quelques transitions recurrentes, mais le
+meilleur contexte large reste plus faux que correct et le false-free est trop
+faible. La suite doit viser un modele low par templates de row ou une grammaire
+de forme plus globale, pas seulement un etat Markov court.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

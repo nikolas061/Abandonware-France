@@ -286,6 +286,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_gradient_sequence_high_safe_row_transition_probe.py"],
         ),
         Step(
+            "markov low row-local high-safe gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_sequence_high_safe_row_markov_probe.py"],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),
