@@ -1119,6 +1119,36 @@ meilleure piste locale actuelle, mais elle reste trop fragmente pour une
 promotion directe. La suite doit deriver un garde plus large ou transformer ces
 selecteurs en replay verifiable.
 
+La passe garde union replay terminaux source exceptions low scanne ensuite les
+features stables deja calculees pour isoler les racines couvertes par l'union
+sans inclure de racines hors union. Elle mesure la compacite de cette garde
+avant toute promotion.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard/contexts.csv
+```
+
+Etat courant:
+
+```text
+Union roots: 25
+Feature sets: 7175
+Candidate rows: 6518
+Best full-cover guard: 25 roots / 21 contexts
+Best compact guard: 19 roots / 9 contexts
+Full-cover candidates: 621
+Promotion-ready bytes: 0
+```
+
+Conclusion: une garde exacte existe, mais elle reste trop fragmentee
+(`21` contextes pour `25` racines) pour servir de promotion robuste. Avec le
+seuil compact actuel (`9` contextes), la meilleure garde ne couvre que `19`
+racines; la suite doit analyser les 6 misses ou trouver un signal plus stable
+que `terminal_context+root_target_y_mod8+root_shape_start_key`.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
