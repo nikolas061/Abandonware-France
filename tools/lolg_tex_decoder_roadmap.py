@@ -258,6 +258,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRID
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_FORMULA_VARIANT_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_TAIL_CONTEXT_GATE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1387,6 +1390,27 @@ def gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_f
     return "expand compact-control five-byte formula atoms beyond current anchor/segment family"
 
 
+def gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix external terminal five-byte bridge tail-context gate issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote locally gated compact-control five-byte formula variant"
+    if int_value(summary, "local_context_candidate_rows") > 0:
+        return "review local-context compact-control five-byte tail gate candidates"
+    if int_value(summary, "non_tail_candidate_rows") > 0:
+        return "review non-tail compact-control five-byte full-window candidates"
+    if (
+        int_value(summary, "gated_candidate_rows") > 0
+        and int_value(summary, "tail_only_candidate_rows") == int_value(summary, "gated_candidate_rows")
+    ):
+        return summary.get("next_probe", "") or "derive non-tail compact-control five-byte formula support beyond tail candidates"
+    if int_value(summary, "gated_candidate_rows") > 0:
+        return "split compact-control five-byte full-window candidates by context"
+    return "expand compact-control five-byte tail-context gate inputs"
+
+
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
     if int_value(summary, "false_free_byte_slots") > 0:
         return "replay false-free mixed-value payload byte combos"
@@ -1944,6 +1968,10 @@ def build_queue(
     ]
     | None = None,
     gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary: dict[
         str, str
     ]
     | None = None,
@@ -4837,85 +4865,118 @@ def build_queue(
                         f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary.get('issue_rows', '0')}",
                     ],
                 )
+            if (
+                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_sequence_low_exception_external_spatial_five_tail_gate_candidates="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.get('gated_candidate_rows', '0')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_tail_gate_tail_only="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.get('tail_only_candidate_rows', '0')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_tail_gate_best="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.get('best_tail_template', '')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_sequence_low_exception_external_spatial_five_tail_gate_non_tail="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.get('non_tail_candidate_rows', '0')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_tail_gate_local="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.get('local_context_candidate_rows', '0')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_tail_gate_next="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.get('next_probe', '')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_tail_gate_issues="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.get('issue_rows', '0')}",
+                    ],
+                )
             row = {
                 **row,
                 "next_action": (
-                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_action(
-                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
+                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
                     )
-                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
+                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
                     else (
-                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_action(
-                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_action(
+                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
                         )
-                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
+                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
                         else (
-                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_action(
-                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_summary
+                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_action(
+                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
                             )
-                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_summary
+                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
                             else (
-                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_action(
-                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_summary
+                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_action(
+                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_summary
                                 )
-                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_summary
+                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_summary
                                 else (
-                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence_action(
-                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence_summary
+                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_action(
+                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_summary
                                     )
-                                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence_summary
+                                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_summary
                                     else (
-                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review_action(
-                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review_summary
+                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence_action(
+                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence_summary
                                         )
-                                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review_summary
+                                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence_summary
                                         else (
-                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support_action(
-                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support_summary
+                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review_action(
+                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review_summary
                                             )
-                                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support_summary
+                                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review_summary
                                             else (
-                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard_action(
-                                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard_summary
+                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support_action(
+                                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support_summary
                                                 )
-                                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard_summary
+                                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support_summary
                                                 else (
-                                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator_action(
-                                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator_summary
+                                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard_action(
+                                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard_summary
                                                     )
-                                                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator_summary
+                                                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard_summary
                                                     else (
-                                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_action(
-                                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_summary
+                                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator_action(
+                                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator_summary
                                                         )
-                                                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_summary
+                                                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator_summary
                                                         else (
-                                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector_action(
-                                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector_summary
+                                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_action(
+                                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_summary
                                                             )
-                                                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector_summary
+                                                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_summary
                                                             else (
-                                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge_action(
-                                                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge_summary
+                                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector_action(
+                                                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector_summary
                                                                 )
-                                                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge_summary
+                                                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector_summary
                                                                 else (
-                                                                    gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar_action(
-                                                                        gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar_summary
+                                                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge_action(
+                                                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge_summary
                                                                     )
-                                                                    if gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar_summary
+                                                                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge_summary
                                                                     else (
-                                                                        gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_action(
-                                                                            gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary
+                                                                        gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar_action(
+                                                                            gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar_summary
                                                                         )
-                                                                        if gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary
+                                                                        if gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar_summary
                                                                         else (
-                                                                            gradient_sequence_high_safe_low_exception_external_terminal_source_action(
-                                                                                gradient_sequence_high_safe_low_exception_external_terminal_source_summary
+                                                                            gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_action(
+                                                                                gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary
                                                                             )
-                                                                            if gradient_sequence_high_safe_low_exception_external_terminal_source_summary
-                                                                            else gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
-                                                                                gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary
+                                                                            if gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary
+                                                                            else (
+                                                                                gradient_sequence_high_safe_low_exception_external_terminal_source_action(
+                                                                                    gradient_sequence_high_safe_low_exception_external_terminal_source_summary
+                                                                                )
+                                                                                if gradient_sequence_high_safe_low_exception_external_terminal_source_summary
+                                                                                else gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
+                                                                                    gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary
+                                                                                )
                                                                             )
                                                                         )
                                                                     )
@@ -8633,6 +8694,12 @@ def build_queue(
                         flat_walk_palette_promotion_candidate_summary,
                     )
                 elif (
+                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
+                    )
+                elif (
                     gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
                 ):
                     next_action = gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_action(
@@ -9772,6 +9839,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_FORMULA_VARIANT_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-external-terminal-spatial-bridge-five-byte-tail-context-gate-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_TAIL_CONTEXT_GATE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -10734,6 +10806,18 @@ def main() -> None:
         if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_rows
         else None
     )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary = (
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_rows[0]
+        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_rows
+        else None
+    )
     gradient_macro_state_cluster_payload_rows = (
         read_rows(args.gradient_macro_state_cluster_payload_summary)
         if args.gradient_macro_state_cluster_payload_summary.exists()
@@ -11554,6 +11638,7 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary,
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

@@ -1821,6 +1821,41 @@ compact-control. Les variantes qui couvrent `29`, `54` et `55` existent
 uniquement dans les fenetres plein-gap/tail et doivent donc etre gatees par leur
 contexte local/tail avant toute promotion.
 
+La sonde gate contexte tail classe ensuite les 113 variantes plein-gap qui
+couvrent les trois non-cibles compact-control:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate/contexts.csv
+```
+
+Etat courant:
+
+```text
+Formula variant rows: 4395
+Full all non-target rows: 113
+Gated candidate rows: 113
+Tail-only candidate rows: 113
+Non-tail candidate rows: 0
+Local-context candidate rows: 0
+Target-overlap candidate rows: 0
+Unique tail distance groups: 2
+Best tail template: ar+0|a+0|s+1+0|c53|c54|s+4+0
+Best tail distances: 27,9,15
+Best ref distances: 501,244,241
+Best samples: 29:586-591:6854535457;54:283-288:5555535454;55:276-281:6caa535459
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: les 113 candidats plein-gap sont tous bloques comme `tail_only`:
+aucun ne revient pres du `ref_offset`, aucun ne touche le contexte local, et
+aucun ne recoupe la cible. La prochaine piste concrete est donc de chercher un
+support formule cinq octets non-tail, plutot que de promouvoir ces coincidences
+de queue.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
