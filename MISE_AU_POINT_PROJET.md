@@ -1324,6 +1324,36 @@ terminale depuis des sources connues. La prochaine piste doit donc cibler les
 bytes sources externes terminaux ou une transform terminale plus forte, pas une
 troisieme promotion de la meme couverture.
 
+La revue des sources terminales externes recalcule les spans inconnus depuis la
+seconde base promue et rattache les 7 bytes sources externes aux terminaux qui
+bloquent le noyau residuel:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source/bytes.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source/spans.csv
+```
+
+Etat courant:
+
+```text
+External terminal bytes: 7
+Blocked root chains: 10
+Blocker spans: 3
+Blocker span bytes: 9
+Small nonzero blocker spans: 3
+Top blocker span: 80:7-12 (4 chains, expected 5554555356)
+Other blocker spans: 80:0-3 (6a6c6a), 58:9-10 (33)
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le blocage externe n'est plus un grand span ambigu apres la seconde
+promotion. Il se reduit a trois petits spans non-zero (`80:7-12`, `80:0-3`,
+`58:9-10`). La prochaine piste concrete est donc un selecteur small unresolved
+nonzero cible sur ces spans, avec validation avant promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
