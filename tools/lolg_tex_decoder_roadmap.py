@@ -35,6 +35,9 @@ DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
 )
 DEFAULT_GRADIENT_MACRO_OPCODE_SUMMARY = Path("output/tex_gradient_macro_opcode/summary.csv")
+DEFAULT_GRADIENT_MACRO_CONFLICT_SPLIT_SUMMARY = Path(
+    "output/tex_gradient_macro_conflict_split/summary.csv"
+)
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
@@ -185,6 +188,7 @@ def build_queue(
     gradient_payload_profile_summary: dict[str, str] | None = None,
     gradient_payload_state_opcode_summary: dict[str, str] | None = None,
     gradient_macro_opcode_summary: dict[str, str] | None = None,
+    gradient_macro_conflict_split_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -313,6 +317,37 @@ def build_queue(
             row = {
                 **row,
                 "next_action": "split macro selectors by dominant-delta conflicts before opcode promotion",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_macro_conflict_split_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_macro_split_best="
+                    f"{gradient_macro_conflict_split_summary.get('best_split_family', '')}",
+                    f"gradient_macro_split_deterministic="
+                    f"{gradient_macro_conflict_split_summary.get('best_split_deterministic_bytes', '0')}",
+                    f"gradient_macro_split_reduction="
+                    f"{gradient_macro_conflict_split_summary.get('best_split_conflict_reduction_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_macro_split_remaining="
+                    f"{gradient_macro_conflict_split_summary.get('best_split_conflicted_bytes', '0')}",
+                    f"gradient_macro_split_singleton="
+                    f"{gradient_macro_conflict_split_summary.get('best_split_singleton_bytes', '0')}",
+                    f"gradient_macro_split_low_conflict_singleton="
+                    f"{gradient_macro_conflict_split_summary.get('low_conflict_singleton_bytes', '0')}",
+                    f"gradient_macro_split_promotion_ready="
+                    f"{gradient_macro_conflict_split_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "resolve residual control-anchor macro conflict before gradient opcode promotion",
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -674,6 +709,34 @@ def build_queue(
                     "split gradient macro-opcode selectors by dominant-delta conflicts; "
                     "local state remains rejected"
                 )
+            if (
+                gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_macro_split_best="
+                        f"{gradient_macro_conflict_split_summary.get('best_split_family', '')}",
+                        f"gradient_macro_split_deterministic="
+                        f"{gradient_macro_conflict_split_summary.get('best_split_deterministic_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_macro_split_remaining="
+                        f"{gradient_macro_conflict_split_summary.get('best_split_conflicted_bytes', '0')}",
+                        f"gradient_macro_split_low_conflict_singleton="
+                        f"{gradient_macro_conflict_split_summary.get('low_conflict_singleton_bytes', '0')}",
+                    ],
+                )
+                next_action = (
+                    "resolve residual gradient control-anchor macro conflict; local state remains rejected"
+                )
             row = {
                 **row,
                 "next_action": next_action,
@@ -1007,6 +1070,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_OPCODE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-macro-conflict-split-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_MACRO_CONFLICT_SPLIT_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-jump-mixed-payload-summary",
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
@@ -1099,6 +1167,14 @@ def main() -> None:
         else []
     )
     gradient_macro_opcode_summary = gradient_macro_opcode_rows[0] if gradient_macro_opcode_rows else None
+    gradient_macro_conflict_split_rows = (
+        read_rows(args.gradient_macro_conflict_split_summary)
+        if args.gradient_macro_conflict_split_summary.exists()
+        else []
+    )
+    gradient_macro_conflict_split_summary = (
+        gradient_macro_conflict_split_rows[0] if gradient_macro_conflict_split_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -1184,6 +1260,7 @@ def main() -> None:
         gradient_payload_profile_summary,
         gradient_payload_state_opcode_summary,
         gradient_macro_opcode_summary,
+        gradient_macro_conflict_split_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

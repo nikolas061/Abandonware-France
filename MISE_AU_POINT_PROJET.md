@@ -359,6 +359,35 @@ les preuves payload/forme exactes sont trop faibles. La prochaine passe doit
 donc scinder les conflits du selecteur `dominant_delta / fixture_rule_length`
 avant toute promotion opcode.
 
+Le split de ces conflits isole les deux groupes `dominant_delta` non resolus
+du macro-selecteur et teste des sous-selecteurs source: ancre controle,
+fenetre controle, paire ancre/fenetre, modulo controle/depart, longueur exacte
+et position d'operation:
+
+```text
+output/tex_gradient_macro_conflict_split/index.html
+output/tex_gradient_macro_conflict_split/rows.csv
+output/tex_gradient_macro_conflict_split/splits.csv
+output/tex_gradient_macro_conflict_split/families.csv
+```
+
+Etat courant:
+
+```text
+Conflict groups: 2
+Conflict bytes: 528
+Best repeated split: control_anchor_class 280 / 213
+Best split singleton bytes: 35
+Best split conflict reduction bytes: 315
+Lowest conflict split: exact_length 128 / 0 / 400 singleton
+Promotion-ready bytes: 0
+```
+
+Conclusion: l'ancre controle stabilise 280 bytes repetes et reduit le conflit
+restant a 213 bytes, mais le meilleur split sans conflit (`exact_length`)
+isole 400 bytes en singletons. La prochaine passe doit donc resoudre le groupe
+residuel `mod64=23` par un signal source supplementaire avant promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
