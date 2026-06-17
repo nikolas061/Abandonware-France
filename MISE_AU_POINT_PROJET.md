@@ -1347,6 +1347,34 @@ le replay simule ajoute 14 bytes sans faux. La prochaine etape est de
 promouvoir ce replay garde dans la chaine de decodeur, ou de le transformer en
 regles plus generales avant promotion.
 
+Le replay garde est maintenant promu dans des buffers de fixtures regeneres:
+
+```text
+output/tex_micro_mixed_value_payload_prefix_sequence_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_prefix_sequence_promoted_replay/fixtures.csv
+output/tex_micro_mixed_value_payload_prefix_sequence_promoted_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Replay rows: 14
+Promoted rows: 14
+Mixed-value added bytes: 14
+Mixed-value exact bytes: 14
+Mixed-value false bytes: 0
+Skipped known bytes: 0
+Skipped rejected bytes: 0
+Issue rows: 0
+Total clean bytes: 9406
+Remaining unresolved bytes: 8040
+Full HD previews: 32
+```
+
+Conclusion: la promotion stricte ecrit les 12 prefixes et les 2 bytes sequence
+dans les masques connus sans recouvrement ni faux positif. La prochaine etape
+est de generaliser ces regles au-dela des lignes garde deja prouvees.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
