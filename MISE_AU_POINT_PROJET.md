@@ -968,6 +968,32 @@ false-free. Les deux backrefs distance 320 reliees sont deja couvertes par les
 candidats directs (`67-131 -> 387-451` et `349-407 -> 669-727`), donc aucun
 octet supplementaire n'est a rejouer pour cette chaine.
 
+Une passe post-formula verifie ensuite si les nouveaux octets connus ouvrent
+des copies verticales source-connue a distance 320 sur les cibles encore
+inconnues:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_post_formula_vertical_copy_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_post_formula_vertical_copy_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_post_formula_vertical_copy_probe/rules.csv
+```
+
+Etat courant:
+
+```text
+Source-known unknown slots: 197
+Copy-exact bytes: 22
+Copy-false bytes: 175
+Copy precision: 0.111675
+Best false-free repeated feature set: x_bucket32 + y + offset_mod16
+Best false-free repeated bytes: 5
+Promotion candidate bytes: 0
+```
+
+Conclusion: les copies verticales post-formula restent trop bruitees. Les
+petits contextes false-free sont positionnels et ne couvrent que 5 bytes au
+mieux; aucune promotion de copie verticale n'est sure.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

@@ -716,6 +716,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_probe/index.html"),
         ),
         (
+            "Copies verticales post-formule palette flat-walk .tex",
+            Path(
+                "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_post_formula_vertical_copy_probe/index.html"
+            ),
+        ),
+        (
             "Etat opcode payload gradient .tex",
             Path("output/tex_gradient_payload_state_opcode/index.html"),
         ),
