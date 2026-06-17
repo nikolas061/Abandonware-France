@@ -743,6 +743,13 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "promotion contexte carrier cible garde cinq octets pont spatial sources terminales externes exceptions low high-safe gradient .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay.py",
+            ],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),

@@ -2178,6 +2178,39 @@ Conclusion: le seuil `span_start <= 253` est pret pour promotion. La prochaine
 piste concrete est de promouvoir ce split start-threshold carrier-local dans le
 replay compact-control cinq octets.
 
+La promotion carrier-local applique ensuite ce garde sur le span cible
+`80:7-12` et ajoute la sortie compact-control `5554555356` dans la base de
+fixtures promue:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay/fixtures.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay/bytes.csv
+```
+
+Etat courant:
+
+```text
+Target rows: 1
+Promoted rows: 1
+Context candidate bytes: 5
+Context added bytes: 5
+Context exact bytes: 5
+Context false bytes: 0
+Skipped known bytes: 0
+Skipped rejected bytes: 0
+Total clean bytes: 9787
+Remaining unresolved bytes: 7659
+Promotion-ready bytes: 5
+Issue rows: 0
+```
+
+Conclusion: le replay promu carrier-local remplit les offsets `7..11` de
+`dinodead.pcx` frontier `80` sans conflit. La prochaine piste concrete est de
+consommer cette base promue comme nouvelle base gradient.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

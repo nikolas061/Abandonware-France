@@ -1162,6 +1162,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Promotion contexte carrier cible garde cinq octets pont spatial sources terminales externes exceptions low high-safe gradient .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
