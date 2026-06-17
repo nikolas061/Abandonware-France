@@ -316,6 +316,18 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "expansion prerequis sequence mixed-value micro-token .tex",
+            [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_sequence_prerequisite_expansion_probe.py"],
+        ),
+        Step(
+            "promotion expansion prerequis sequence mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay.py",
+            ],
+            requires_pillow=True,
+        ),
+        Step(
             "spatial payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_spatial_probe.py"],
         ),

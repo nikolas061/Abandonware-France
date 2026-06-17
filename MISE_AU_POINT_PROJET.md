@@ -1454,6 +1454,62 @@ Conclusion: le byte `6f` de `dinodead.pcx` frontier 26 offset absolu 412 est
 maintenant promu via `compressed_b-1=b6`. La prochaine etape est d'elargir les
 prefixes connus pour debloquer les 18 slots sequence encore bloques.
 
+L'expansion de prerequis sequence sonde ensuite les bytes inconnus qui bloquent
+ces slots, en repartant du replay promu low-split:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion/rules.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion/slots.csv
+```
+
+Etat courant:
+
+```text
+Selected high slots: 22
+Blocked sequence slots: 18
+Prerequisite slots: 30
+Unknown prerequisite slots: 26
+Features: 84
+Feature sets: 3570
+False-free rule sets: 511
+Best feature set: prev2
+Best correct/unknown: 10/16
+Union candidate slots: 10
+Union conflict slots: 0
+Unlocked sequence slots: 7
+Promotion-candidate bytes: 10
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Le replay promu applique ces candidats de prerequis gardes:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay/fixtures.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Candidate rows: 10
+Promoted rows: 10
+Prerequisite added/exact bytes: 10/10
+Prerequisite false bytes: 0
+Skipped known/rejected bytes: 0/0
+Issue rows: 0
+Total clean bytes: 9417
+Remaining unresolved bytes: 8029
+Full HD previews: 32
+```
+
+Conclusion: 10 bytes de prerequis `6f` dans `dinodead.pcx` frontier 26 sont
+maintenant promus sans conflit ni faux positif. Ils debloquent 7 slots sequence;
+la prochaine etape est de reevaluer la generalisation sequence sur ce replay
+enrichi.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 

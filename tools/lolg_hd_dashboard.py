@@ -974,6 +974,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_low_split_promoted_replay/index.html"),
         ),
         (
+            "Expansion prerequis sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion/index.html"),
+        ),
+        (
+            "Promotion prerequis sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),
