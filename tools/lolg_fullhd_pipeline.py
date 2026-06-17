@@ -224,6 +224,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_gradient_macro_state_cluster_probe.py"],
         ),
         Step(
+            "etat macro + source-profile gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_macro_source_profile_state_probe.py"],
+        ),
+        Step(
             "payload cluster etat macro opcode gradient .tex",
             [sys.executable, "tools/lolg_tex_gradient_macro_state_cluster_payload_probe.py"],
         ),

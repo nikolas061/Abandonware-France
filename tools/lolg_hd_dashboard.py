@@ -772,6 +772,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_macro_state_cluster/index.html"),
         ),
         (
+            "Etat macro + source-profile gradient .tex",
+            Path("output/tex_gradient_macro_source_profile_state/index.html"),
+        ),
+        (
             "Payload cluster etat macro opcode gradient .tex",
             Path("output/tex_gradient_macro_state_cluster_payload/index.html"),
         ),

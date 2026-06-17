@@ -102,6 +102,9 @@ DEFAULT_GRADIENT_MACRO_FIXTURE_TRANSITION_SUMMARY = Path(
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster/summary.csv"
 )
+DEFAULT_GRADIENT_MACRO_SOURCE_PROFILE_STATE_SUMMARY = Path(
+    "output/tex_gradient_macro_source_profile_state/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -520,6 +523,22 @@ def gradient_source_profile_high_safe_low_action(summary: dict[str, str]) -> str
     ):
         return "reject high-safe low shortcuts and seek richer gradient state"
     return "inspect high-safe gradient low residuals"
+
+
+def gradient_macro_source_profile_state_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient macro/source-profile state probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote gradient macro/source-profile state candidates"
+    if (
+        int_value(summary, "full_best_false_free_slots") <= 2
+        and int_value(summary, "target_low_best_false_free_slots") <= 2
+        and int_value(summary, "low_delta_best_false_free_slots") <= 2
+        and int_value(summary, "full_best_false_slots") > 0
+        and int_value(summary, "low_delta_best_false_slots") > 0
+    ):
+        return "reject overfit macro/source-profile gradient state and search nonlocal payload state"
+    return "inspect macro/source-profile gradient state residuals"
 
 
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
@@ -1000,6 +1019,7 @@ def build_queue(
     gradient_macro_phase_sequence_summary: dict[str, str] | None = None,
     gradient_macro_fixture_transition_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_summary: dict[str, str] | None = None,
+    gradient_macro_source_profile_state_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -1429,6 +1449,39 @@ def build_queue(
             row = {
                 **row,
                 "next_action": "probe payload inside skip/op8 macro-state clusters before promotion",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_macro_source_profile_state_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_macro_source_profile_joined="
+                    f"{gradient_macro_source_profile_state_summary.get('joined_slots', '0')}",
+                    f"gradient_macro_source_profile_full_ff_slots="
+                    f"{gradient_macro_source_profile_state_summary.get('full_best_false_free_slots', '0')}",
+                    f"gradient_macro_source_profile_low_ff_slots="
+                    f"{gradient_macro_source_profile_state_summary.get('low_delta_best_false_free_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_macro_source_profile_full_best_false="
+                    f"{gradient_macro_source_profile_state_summary.get('full_best_false_slots', '0')}",
+                    f"gradient_macro_source_profile_target_low_false="
+                    f"{gradient_macro_source_profile_state_summary.get('target_low_best_false_slots', '0')}",
+                    f"gradient_macro_source_profile_low_delta_false="
+                    f"{gradient_macro_source_profile_state_summary.get('low_delta_best_false_slots', '0')}",
+                    f"gradient_macro_source_profile_promotion_ready="
+                    f"{gradient_macro_source_profile_state_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_macro_source_profile_state_action(
+                    gradient_macro_source_profile_state_summary
+                ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -5794,6 +5847,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_macro_source_profile_state_summary:
+                    next_action = gradient_macro_source_profile_state_action(
+                        gradient_macro_source_profile_state_summary
+                    )
                 elif gradient_source_profile_high_safe_low_summary:
                     next_action = gradient_source_profile_high_safe_low_action(
                         gradient_source_profile_high_safe_low_summary
@@ -6454,6 +6511,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-macro-source-profile-state-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_MACRO_SOURCE_PROFILE_STATE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -6877,6 +6939,16 @@ def main() -> None:
     )
     gradient_macro_state_cluster_summary = (
         gradient_macro_state_cluster_rows[0] if gradient_macro_state_cluster_rows else None
+    )
+    gradient_macro_source_profile_state_rows = (
+        read_rows(args.gradient_macro_source_profile_state_summary)
+        if args.gradient_macro_source_profile_state_summary.exists()
+        else []
+    )
+    gradient_macro_source_profile_state_summary = (
+        gradient_macro_source_profile_state_rows[0]
+        if gradient_macro_source_profile_state_rows
+        else None
     )
     gradient_macro_state_cluster_payload_rows = (
         read_rows(args.gradient_macro_state_cluster_payload_summary)
@@ -7646,6 +7718,7 @@ def main() -> None:
         gradient_macro_phase_sequence_summary,
         gradient_macro_fixture_transition_summary,
         gradient_macro_state_cluster_summary,
+        gradient_macro_source_profile_state_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

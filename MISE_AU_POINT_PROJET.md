@@ -1085,6 +1085,43 @@ Conclusion: meme quand le high nibble est borne sans faux, le low nibble reste
 bruite et ne couvre que deux lignes. Cette sous-piste doit etre abandonnee au
 profit d'un etat gradient plus riche.
 
+La passe macro/source-profile croise ensuite les 1 564 slots source-profile
+avec l'etat macro clusterise (phase/opcode/fixture/ancrages) et rejoue les
+contextes mixtes jusqu'a 3 features, plus les meilleurs contextes a 4 features
+issus du scan large:
+
+```text
+output/tex_gradient_macro_source_profile_state/index.html
+output/tex_gradient_macro_source_profile_state/slots.csv
+output/tex_gradient_macro_source_profile_state/rules.csv
+```
+
+Etat courant:
+
+```text
+Joined slots: 1564
+Source-profile rows: 29
+Macro rows: 36
+Feature sets: 3264 focused
+Full false-free feature sets: 8
+Best full false-free slots: 2
+Best full rule: macro_fixture_hi_pair + macro_gradient_class + source_high + rel_mod16 = 55 exact / 191 false
+Target-low false-free feature sets: 3
+Best target-low false-free slots: 2
+Best target-low rule: macro_fixture_hi_pair + macro_gradient_class + source_high + rel_mod16 = 74 exact / 183 false
+Best low-false target-low rule: macro_next_op_gap + macro_fixture_opcode_pair + source_high = 10 exact / 2 false
+Low-delta false-free feature sets: 10
+Best low-delta false-free slots: 2
+Best low-delta rule: macro_fixture_hi_pair + macro_gradient_class + source_low + rel_mod16 = 63 exact / 171 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: l'etat macro enrichi confirme seulement des contextes false-free
+minuscules (2 slots) et les meilleurs contextes reutilisables restent trop
+faux. Cette piste est donc bornee comme sur-apprise; la suite doit chercher un
+etat payload/sequence non local plutot qu'une combinaison locale
+macro/source-profile.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
