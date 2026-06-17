@@ -921,7 +921,10 @@ Known conflicted value rows: 17
 Candidate-ready target rows: 7
 Candidate-ready bytes: 361
 Backref unlock bytes: 122
-Total candidate plus unlock bytes: 483
+Unique backref unlock bytes: 0
+Backref candidate overlap bytes: 122
+Raw candidate plus unlock bytes: 483
+Total candidate plus unlock bytes: 361
 Candidate pools: 2
 Transform sets: 7
 Promotion-ready bytes: 0
@@ -929,8 +932,10 @@ Issue rows: 0
 ```
 
 Conclusion: les 7 cibles `candidate_plan` sont pretes pour un replay garde de
-la formule palette. Le gain direct attendu est 361 octets, ou 483 octets en
-comptant les backrefs deja reliees.
+la formule palette. Le gain direct attendu est 361 octets. Les 122 octets de
+backrefs deja reliees sont un potentiel brut, mais ils recouvrent deux cibles
+qui ont elles-memes un `candidate_plan`, donc ils ne forment pas un gain unique
+additionnel.
 
 Le replay garde reconstruit ensuite les octets depuis les formes de runs et la
 palette unique, puis les applique au-dessus de `tiny_nonzero_fill` seulement si
@@ -959,8 +964,9 @@ Issue rows: 0
 ```
 
 Conclusion: la promotion directe des cibles palette formula est effective et
-false-free. La prochaine passe peut rejouer les backrefs que ces 361 octets
-deverrouillent, afin de convertir les 122 octets additionnels deja identifies.
+false-free. Les deux backrefs distance 320 reliees sont deja couvertes par les
+candidats directs (`67-131 -> 387-451` et `349-407 -> 669-727`), donc aucun
+octet supplementaire n'est a rejouer pour cette chaine.
 
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:

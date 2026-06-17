@@ -14,6 +14,9 @@ from lolg_tex_gap_decoder_len64_promoted_nonzero_gap_fill_selector_probe import 
 from lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_corpus_formula_probe import (
     DEFAULT_OUTPUT as DEFAULT_CORPUS_FORMULA_OUTPUT,
 )
+from lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_backref_probe import (
+    DEFAULT_OUTPUT as DEFAULT_BACKREF_OUTPUT,
+)
 from lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_mix_probe import (
     DEFAULT_OUTPUT as DEFAULT_MIX_OUTPUT,
 )
@@ -22,6 +25,7 @@ from lolg_tex_gap_opcode_probe import int_value, write_csv
 
 DEFAULT_FORMULA_ROWS = DEFAULT_CORPUS_FORMULA_OUTPUT / "rows.csv"
 DEFAULT_MIX_TARGETS = DEFAULT_MIX_OUTPUT / "targets.csv"
+DEFAULT_BACKREF_TARGETS = DEFAULT_BACKREF_OUTPUT / "targets.csv"
 DEFAULT_OUTPUT = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_promotion_candidate_probe"
 )
@@ -37,6 +41,9 @@ SUMMARY_FIELDNAMES = [
     "candidate_ready_target_rows",
     "candidate_ready_bytes",
     "backref_unlock_bytes",
+    "unique_backref_unlock_bytes",
+    "backref_candidate_overlap_bytes",
+    "raw_candidate_plus_unlock_bytes",
     "total_candidate_plus_unlock_bytes",
     "candidate_pools",
     "transform_sets",
@@ -66,6 +73,11 @@ TARGET_FIELDNAMES = [
     "candidate_ready_bytes",
     "backref_unlock_rows",
     "backref_unlock_bytes",
+    "unique_backref_unlock_rows",
+    "unique_backref_unlock_bytes",
+    "backref_candidate_overlap_rows",
+    "backref_candidate_overlap_bytes",
+    "raw_candidate_plus_unlock_bytes",
     "total_candidate_plus_unlock_bytes",
     "promotion_selector",
     "replay_status",
@@ -97,6 +109,31 @@ def target_key(row: dict[str, str]) -> tuple[str, str, str, str, str]:
     )
 
 
+def backref_source_key(row: dict[str, str]) -> tuple[str, str, str, str, str]:
+    return (
+        row.get("archive", ""),
+        row.get("pcx_name", ""),
+        row.get("frontier_id", ""),
+        row.get("best_source_start", ""),
+        row.get("best_source_end", ""),
+    )
+
+
+def backref_copy_key(row: dict[str, str]) -> tuple[str, str, str, str, str]:
+    return target_key(row)
+
+
+def unlock_targets_by_source(
+    backref_rows: list[dict[str, str]],
+) -> dict[tuple[str, str, str, str, str], list[dict[str, str]]]:
+    unlocks: dict[tuple[str, str, str, str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in backref_rows:
+        if row.get("best_exact") != "1":
+            continue
+        unlocks[backref_source_key(row)].append(row)
+    return unlocks
+
+
 def formula_groups(rows: list[dict[str, str]]) -> dict[tuple[str, str, str, str, str], list[dict[str, str]]]:
     groups: dict[tuple[str, str, str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -116,8 +153,10 @@ def selector_for(row: dict[str, str]) -> str:
 def build_target_rows(
     mix_targets: list[dict[str, str]],
     formula_rows: list[dict[str, str]],
+    backref_rows: list[dict[str, str]],
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
     grouped_formula = formula_groups(formula_rows)
+    unlocks = unlock_targets_by_source(backref_rows)
     target_rows: list[dict[str, object]] = []
     value_rows: list[dict[str, object]] = []
     for mix in mix_targets:
@@ -161,9 +200,14 @@ def build_target_rows(
             "candidate_ready_bytes": int_value(mix, "length") if candidate_ready else 0,
             "backref_unlock_rows": mix.get("copy_unlock_rows", "0"),
             "backref_unlock_bytes": mix.get("copy_unlock_bytes", "0"),
-            "total_candidate_plus_unlock_bytes": (
+            "unique_backref_unlock_rows": 0,
+            "unique_backref_unlock_bytes": 0,
+            "backref_candidate_overlap_rows": 0,
+            "backref_candidate_overlap_bytes": 0,
+            "raw_candidate_plus_unlock_bytes": (
                 int_value(mix, "length") + int_value(mix, "copy_unlock_bytes") if candidate_ready else 0
             ),
+            "total_candidate_plus_unlock_bytes": int_value(mix, "length") if candidate_ready else 0,
             "promotion_selector": selector_for(mix) if candidate_ready else "",
             "replay_status": "needs_guarded_replay" if candidate_ready else "blocked_review",
             "verdict": verdict,
@@ -185,6 +229,27 @@ def build_target_rows(
                     "issues": row.get("issues", ""),
                 }
             )
+    ready_keys = {target_key(row) for row in target_rows if row.get("verdict") == "formula_promotion_candidate_ready"}
+    for target in target_rows:
+        if target.get("verdict") != "formula_promotion_candidate_ready":
+            continue
+        unique_rows = 0
+        unique_bytes = 0
+        overlap_rows = 0
+        overlap_bytes = 0
+        for backref in unlocks.get(target_key(target), []):
+            length = int_value(backref, "length")
+            if backref_copy_key(backref) in ready_keys:
+                overlap_rows += 1
+                overlap_bytes += length
+            else:
+                unique_rows += 1
+                unique_bytes += length
+        target["unique_backref_unlock_rows"] = unique_rows
+        target["unique_backref_unlock_bytes"] = unique_bytes
+        target["backref_candidate_overlap_rows"] = overlap_rows
+        target["backref_candidate_overlap_bytes"] = overlap_bytes
+        target["total_candidate_plus_unlock_bytes"] = int_value(target, "candidate_ready_bytes") + unique_bytes
     target_rows.sort(key=lambda row: (str(row.get("pcx_name", "")), int_value(row, "start")))
     return target_rows, value_rows
 
@@ -208,6 +273,13 @@ def build_summary(
         "candidate_ready_target_rows": len(ready_rows),
         "candidate_ready_bytes": sum(int_value(row, "candidate_ready_bytes") for row in ready_rows),
         "backref_unlock_bytes": sum(int_value(row, "backref_unlock_bytes") for row in ready_rows),
+        "unique_backref_unlock_bytes": sum(int_value(row, "unique_backref_unlock_bytes") for row in ready_rows),
+        "backref_candidate_overlap_bytes": sum(
+            int_value(row, "backref_candidate_overlap_bytes") for row in ready_rows
+        ),
+        "raw_candidate_plus_unlock_bytes": sum(
+            int_value(row, "raw_candidate_plus_unlock_bytes") for row in ready_rows
+        ),
         "total_candidate_plus_unlock_bytes": sum(
             int_value(row, "total_candidate_plus_unlock_bytes") for row in ready_rows
         ),
@@ -261,6 +333,7 @@ th {{ color: #9dafb5; background: #172023; text-align: left; }}
   <div class="box"><div class="num">{summary['candidate_ready_target_rows']}</div><div class="muted">candidate-ready targets</div></div>
   <div class="box"><div class="num">{summary['candidate_ready_bytes']}</div><div class="muted">candidate-ready bytes</div></div>
   <div class="box"><div class="num">{summary['total_candidate_plus_unlock_bytes']}</div><div class="muted">candidate plus unlock bytes</div></div>
+  <div class="box"><div class="num">{summary['backref_candidate_overlap_bytes']}</div><div class="muted">backref overlap bytes</div></div>
   <div class="box"><div class="num">{summary['formula_exact_value_rows']}</div><div class="muted">formula exact value rows</div></div>
   <div class="box"><div class="num">{summary['issue_rows']}</div><div class="muted">issue rows</div></div>
   <div class="box"><div class="num">{summary['promotion_ready_bytes']}</div><div class="muted">promotion-ready bytes</div></div>
@@ -277,6 +350,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build flat-walk palette formula promotion candidates.")
     parser.add_argument("--mix-targets", type=Path, default=DEFAULT_MIX_TARGETS)
     parser.add_argument("--formula-rows", type=Path, default=DEFAULT_FORMULA_ROWS)
+    parser.add_argument("--backref-targets", type=Path, default=DEFAULT_BACKREF_TARGETS)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument(
         "--title",
@@ -285,7 +359,11 @@ def main() -> None:
     args = parser.parse_args()
 
     mix_targets = read_csv(args.mix_targets)
-    target_rows, value_rows = build_target_rows(mix_targets, read_csv(args.formula_rows))
+    target_rows, value_rows = build_target_rows(
+        mix_targets,
+        read_csv(args.formula_rows),
+        read_csv(args.backref_targets),
+    )
     summary = build_summary(mix_targets, target_rows, value_rows)
 
     args.output.mkdir(parents=True, exist_ok=True)
@@ -297,6 +375,8 @@ def main() -> None:
 
     print(f"Candidate-ready targets: {summary['candidate_ready_target_rows']}")
     print(f"Candidate-ready bytes: {summary['candidate_ready_bytes']}")
+    print(f"Unique backref unlock bytes: {summary['unique_backref_unlock_bytes']}")
+    print(f"Backref overlap bytes: {summary['backref_candidate_overlap_bytes']}")
     print(f"Candidate plus unlock bytes: {summary['total_candidate_plus_unlock_bytes']}")
     print(f"Promotion-ready bytes: {summary['promotion_ready_bytes']}")
     print(f"HTML: {html_path}")

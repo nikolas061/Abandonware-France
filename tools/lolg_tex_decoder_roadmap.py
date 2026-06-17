@@ -289,10 +289,15 @@ def flat_walk_palette_promotion_candidate_action(summary: dict[str, str]) -> str
     return "fix flat-walk palette promotion candidate issues"
 
 
-def flat_walk_palette_formula_replay_action(summary: dict[str, str]) -> str:
+def flat_walk_palette_formula_replay_action(
+    summary: dict[str, str],
+    candidate_summary: dict[str, str] | None = None,
+) -> str:
     if int_value(summary, "formula_false_bytes") > 0 or int_value(summary, "issue_rows") > 0:
         return "fix guarded flat-walk palette formula replay issues"
     if int_value(summary, "formula_added_bytes") > 0:
+        if candidate_summary and int_value(candidate_summary, "unique_backref_unlock_bytes") == 0:
+            return "continue unresolved decoder probes after deduped flat-walk palette replay"
         return "replay flat-walk palette backref unlocks after formula promotion"
     if int_value(summary, "target_rows") > 0:
         return "replay guarded flat-walk palette formula promotion candidates"
@@ -1154,6 +1159,12 @@ def build_queue(
                     f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_bytes', '0')}",
                     f"flat_walk_palette_candidate_plus_unlock="
                     f"{flat_walk_palette_promotion_candidate_summary.get('total_candidate_plus_unlock_bytes', '0')}",
+                    f"flat_walk_palette_candidate_raw_plus_unlock="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('raw_candidate_plus_unlock_bytes', '0')}",
+                    f"flat_walk_palette_candidate_overlap="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('backref_candidate_overlap_bytes', '0')}",
+                    f"flat_walk_palette_candidate_unique_unlock="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('unique_backref_unlock_bytes', '0')}",
                     f"flat_walk_palette_candidate_values="
                     f"{flat_walk_palette_promotion_candidate_summary.get('formula_exact_value_rows', '0')}/"
                     f"{flat_walk_palette_promotion_candidate_summary.get('formula_value_rows', '0')}",
@@ -1214,7 +1225,10 @@ def build_queue(
             )
             row = {
                 **row,
-                "next_action": flat_walk_palette_formula_replay_action(flat_walk_palette_formula_replay_summary),
+                "next_action": flat_walk_palette_formula_replay_action(
+                    flat_walk_palette_formula_replay_summary,
+                    flat_walk_palette_promotion_candidate_summary,
+                ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -2338,6 +2352,12 @@ def build_queue(
                         f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_bytes', '0')}",
                         f"flat_walk_palette_candidate_plus_unlock="
                         f"{flat_walk_palette_promotion_candidate_summary.get('total_candidate_plus_unlock_bytes', '0')}",
+                        f"flat_walk_palette_candidate_raw_plus_unlock="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('raw_candidate_plus_unlock_bytes', '0')}",
+                        f"flat_walk_palette_candidate_overlap="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('backref_candidate_overlap_bytes', '0')}",
+                        f"flat_walk_palette_candidate_unique_unlock="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('unique_backref_unlock_bytes', '0')}",
                         f"flat_walk_palette_candidate_values="
                         f"{flat_walk_palette_promotion_candidate_summary.get('formula_exact_value_rows', '0')}/"
                         f"{flat_walk_palette_promotion_candidate_summary.get('formula_value_rows', '0')}",
@@ -2392,7 +2412,8 @@ def build_queue(
                     ],
                 )
                 next_action = flat_walk_palette_formula_replay_action(
-                    flat_walk_palette_formula_replay_summary
+                    flat_walk_palette_formula_replay_summary,
+                    flat_walk_palette_promotion_candidate_summary,
                 )
             row = {
                 **row,
