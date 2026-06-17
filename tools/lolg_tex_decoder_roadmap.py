@@ -172,6 +172,15 @@ DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_LOW_SPLIT_SUMMARY = Path
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_LOW_SPLIT_PROMOTED_REPLAY_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_LOW_SPLIT_GENERALIZATION_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_generalization/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_SECOND_LOW_SPLIT_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_second_low_split_max3/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_SECOND_EXPANSION_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_second_expansion_max3/summary.csv"
+)
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_spatial/summary.csv"
 )
@@ -519,6 +528,42 @@ def mixed_value_sequence_prerequisite_low_split_promoted_action(summary: dict[st
     return "expand mixed-value sequence prerequisite low-split promoted replay coverage"
 
 
+def mixed_value_sequence_prerequisite_low_split_generalization_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix mixed-value sequence prerequisite low-split generalization issues"
+    if int_value(summary, "false_free_feature_sets") > 0:
+        return "review residual mixed-value sequence generalization candidates"
+    if int_value(summary, "replayable_unknown_slots") > 0 and int_value(summary, "best_false_slots") > 0:
+        return "probe residual mixed-value sequence low splits beyond prerequisite low-split promotion"
+    if int_value(summary, "blocked_prerequisite_slots") > 0:
+        return "probe residual mixed-value sequence prerequisite expansion"
+    return "expand mixed-value sequence prerequisite low-split generalization search"
+
+
+def mixed_value_sequence_prerequisite_second_low_split_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix residual mixed-value sequence low split issues"
+    if int_value(summary, "false_free_split_sets") > 0 and int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay residual mixed-value sequence low-split candidates"
+    if int_value(summary, "replayable_unknown_slots") > 0:
+        return "inspect residual mixed-value sequence 6d lows beyond current low-split features"
+    if int_value(summary, "blocked_prerequisite_slots") > 0:
+        return "probe residual mixed-value sequence prerequisites beyond current low-split features"
+    return "expand residual mixed-value sequence low-split search"
+
+
+def mixed_value_sequence_prerequisite_second_expansion_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix residual mixed-value sequence prerequisite expansion issues"
+    if int_value(summary, "union_conflict_slots") > 0:
+        return "split residual mixed-value sequence prerequisite conflicts"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay residual mixed-value sequence prerequisite candidates"
+    if int_value(summary, "unknown_prerequisite_slots") > 0:
+        return "add new mixed-value sequence prerequisite feature family"
+    return "inspect residual mixed-value sequence 6d lows"
+
+
 def flat_walk_palette_formula_replay_consumed(
     summary: dict[str, str],
     candidate_summary: dict[str, str] | None = None,
@@ -585,6 +630,9 @@ def build_queue(
     micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_prerequisite_low_split_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_spatial_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_state_opcode_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
@@ -2193,6 +2241,93 @@ def build_queue(
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_low_split_gen_known="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('target_known_slots', '0')}",
+                    f"mixed_value_prereq_low_split_gen_replayable="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('replayable_unknown_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_low_split_gen_false_free="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('false_free_feature_sets', '0')}",
+                    f"mixed_value_prereq_low_split_gen_best="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('best_correct_slots', '0')}/"
+                    f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('best_false_slots', '0')}",
+                    f"mixed_value_prereq_low_split_gen_blocked="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('blocked_prerequisite_slots', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_low_split_generalization_action(
+                    micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_second_low_split_features="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('feature_sets', '0')}",
+                    f"mixed_value_prereq_second_low_split_replayable="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('replayable_unknown_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_second_low_split_false_free="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('false_free_split_sets', '0')}",
+                    f"mixed_value_prereq_second_low_split_candidates="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_second_low_split_action(
+                    micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_second_expansion_features="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('feature_sets', '0')}",
+                    f"mixed_value_prereq_second_expansion_blocked="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('blocked_sequence_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_second_expansion_unknown="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('unknown_prerequisite_slots', '0')}",
+                    f"mixed_value_prereq_second_expansion_candidates="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_second_expansion_action(
+                    micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_spatial_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -2668,6 +2803,75 @@ def build_queue(
                 )
                 next_action = mixed_value_sequence_prerequisite_low_split_promoted_action(
                     micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_low_split_gen_known="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('target_known_slots', '0')}",
+                        f"mixed_value_prereq_low_split_gen_replayable="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('replayable_unknown_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_low_split_gen_false_free="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('false_free_feature_sets', '0')}",
+                        f"mixed_value_prereq_low_split_gen_best="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('best_correct_slots', '0')}/"
+                        f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('best_false_slots', '0')}",
+                        f"mixed_value_prereq_low_split_gen_blocked="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.get('blocked_prerequisite_slots', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_low_split_generalization_action(
+                    micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_second_low_split_features="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('feature_sets', '0')}",
+                        f"mixed_value_prereq_second_low_split_replayable="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('replayable_unknown_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_second_low_split_false_free="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('false_free_split_sets', '0')}",
+                        f"mixed_value_prereq_second_low_split_candidates="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.get('promotion_candidate_bytes', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_second_low_split_action(
+                    micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_second_expansion_features="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('feature_sets', '0')}",
+                        f"mixed_value_prereq_second_expansion_blocked="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('blocked_sequence_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_second_expansion_unknown="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('unknown_prerequisite_slots', '0')}",
+                        f"mixed_value_prereq_second_expansion_candidates="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.get('promotion_candidate_bytes', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_second_expansion_action(
+                    micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary
                 )
             if micro_mixed_value_payload_state_opcode_summary and jump_token_payload_state_opcode_summary:
                 positive_evidence = append_evidence(
@@ -3576,6 +3780,18 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary:
+                    next_action = mixed_value_sequence_prerequisite_second_expansion_action(
+                        micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary:
+                    next_action = mixed_value_sequence_prerequisite_second_low_split_action(
+                        micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary:
+                    next_action = mixed_value_sequence_prerequisite_low_split_generalization_action(
+                        micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary
+                    )
                 elif micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay_summary:
                     next_action = mixed_value_sequence_prerequisite_low_split_promoted_action(
                         micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay_summary
@@ -4208,6 +4424,21 @@ def main() -> None:
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_LOW_SPLIT_PROMOTED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-low-split-generalization-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_LOW_SPLIT_GENERALIZATION_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-second-low-split-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_SECOND_LOW_SPLIT_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-second-expansion-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_SECOND_EXPANSION_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-mixed-value-payload-spatial-summary",
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY,
@@ -4665,6 +4896,36 @@ def main() -> None:
         if micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay_rows
         else None
     )
+    micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_second_low_split_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_second_low_split_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_second_low_split_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_second_expansion_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_second_expansion_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_second_expansion_rows
+        else None
+    )
     micro_mixed_value_payload_spatial_rows = (
         read_rows(args.micro_mixed_value_payload_spatial_summary)
         if args.micro_mixed_value_payload_spatial_summary.exists()
@@ -4735,6 +4996,9 @@ def main() -> None:
         micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay_summary,
         micro_mixed_value_payload_sequence_prerequisite_low_split_summary,
         micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay_summary,
+        micro_mixed_value_payload_sequence_prerequisite_low_split_generalization_summary,
+        micro_mixed_value_payload_sequence_prerequisite_second_low_split_summary,
+        micro_mixed_value_payload_sequence_prerequisite_second_expansion_summary,
         micro_mixed_value_payload_spatial_summary,
         micro_mixed_value_payload_state_opcode_summary,
     )

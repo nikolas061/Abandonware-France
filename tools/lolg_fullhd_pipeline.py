@@ -353,6 +353,43 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "generalisation sequence apres split low prerequis mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_promoted_generalization_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_generalization",
+            ],
+        ),
+        Step(
+            "split low residuel sequence apres prerequis mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_low_split_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/fixtures.csv",
+                "--max-features",
+                "3",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_second_low_split_max3",
+            ],
+        ),
+        Step(
+            "expansion residuelle prerequis sequence mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_prerequisite_expansion_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/fixtures.csv",
+                "--max-features",
+                "3",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_second_expansion_max3",
+            ],
+        ),
+        Step(
             "spatial payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_spatial_probe.py"],
         ),

@@ -990,6 +990,18 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/index.html"),
         ),
         (
+            "Generalisation apres split low prerequis sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_generalization/index.html"),
+        ),
+        (
+            "Split low residuel prerequis sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_second_low_split_max3/index.html"),
+        ),
+        (
+            "Expansion residuelle prerequis sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_second_expansion_max3/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),

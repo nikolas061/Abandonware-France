@@ -1561,6 +1561,82 @@ Conclusion: les bytes `6e` de `dinodead.pcx` frontier 26 offsets absolus 99 et
 417 sont maintenant promus via `best_b-1+compressed_d1=00|+j`. La prochaine
 etape est de reevaluer la sequence avec ces deux valeurs connues.
 
+La generalisation residuelle apres ce split low mesure ensuite le nouvel etat:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_generalization/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_generalization/slots.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_generalization/rules.csv
+```
+
+Etat courant:
+
+```text
+Selected high slots: 22
+Replayable unknown slots: 2
+Target already known slots: 9
+Blocked prerequisite slots: 11
+Selected low feature sets: 1561
+False-free feature sets: 0
+Best feature set: control
+Best correct/false/unknown: 0/1/1
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Le split low residuel elargit alors la recherche a 3 features:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_second_low_split_max3/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_second_low_split_max3/rules.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_second_low_split_max3/slots.csv
+```
+
+Etat courant:
+
+```text
+Features: 75
+Feature sets: 70375
+Replayable unknown slots: 2
+Target known slots: 9
+Blocked prerequisite slots: 11
+False-free split sets: 0
+Promotion-candidate bytes: 0
+Issue rows: 0
+```
+
+L'expansion residuelle de prerequis pousse aussi les combinaisons a 3 features:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_second_expansion_max3/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_second_expansion_max3/rules.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_second_expansion_max3/slots.csv
+```
+
+Etat courant:
+
+```text
+Selected high slots: 22
+Blocked sequence slots: 11
+Prerequisite slots: 20
+Unknown prerequisite slots: 16
+Features: 84
+Feature sets: 98854
+False-free rule sets: 0
+Union candidate slots: 0
+Union conflict slots: 0
+Unlocked sequence slots: 0
+Promotion-candidate bytes: 0
+Issue rows: 0
+```
+
+Conclusion: les deux slots replayables restants sont des `6d` sur
+`dinodead.pcx` frontier 26 offset absolu 443 et frontier 50 offset absolu 218.
+Les splits low jusqu'a 3 features et les prerequis jusqu'a 3 features ne
+donnent plus de candidat false-free. La prochaine piste doit ajouter une
+nouvelle famille de features de prerequis/sequence au lieu de recombiner les
+features actuelles.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
