@@ -766,6 +766,37 @@ row source/cible specifique et ne suffit pas pour promouvoir. La suite doit
 revoir ces alignements false-free et chercher une regle de famille de rows avant
 toute injection.
 
+La passe revue alignement exceptions low regroupe ensuite les 165 alignements
+`same_bucket` false-free et rejoue leurs familles de selecteurs contre tous les
+alignements `same_bucket`: shift, frontiers, deltas de start, mods de start,
+low predit, ainsi que les cles row-keyed exactes.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_alignment_review/index.html
+output/tex_gradient_sequence_high_safe_low_exception_alignment_review/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_alignment_review/selectors.csv
+output/tex_gradient_sequence_high_safe_low_exception_alignment_review/false_free_selectors.csv
+```
+
+Etat courant:
+
+```text
+Same-bucket alignments: 2141
+False-free alignments: 165
+False-free alignment slots: 269
+Selector families: 17
+Selector rows: 1783
+Best non-row false-free selector: start_delta_shift / 811|sh=8 = 6 slots
+Best non-row selector alignments: 1
+Broad false-free selectors: 0
+Promotion candidate bytes: 6
+Promotion-ready bytes: 0
+```
+
+Conclusion: les alignements false-free sont reels mais restent etroits. Aucun
+selecteur large non-row ne survit au replay global; la suite doit chercher un
+support de famille de rows/corpus avant de convertir ces 6 bytes en candidats.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

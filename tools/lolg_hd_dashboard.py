@@ -898,6 +898,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_sequence_high_safe_low_exception_alignment/index.html"),
         ),
         (
+            "Revue alignement exceptions low high-safe gradient .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_alignment_review/index.html"),
+        ),
+        (
             "Plateaux noisy gaps nonzero tiny .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_probe/index.html"),
         ),
