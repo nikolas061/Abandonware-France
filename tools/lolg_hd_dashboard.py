@@ -1058,6 +1058,34 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth/index.html"),
         ),
         (
+            "Transform residuel adjacent-known sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform/index.html"),
+        ),
+        (
+            "Promotion transform adjacent-known sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay/index.html"),
+        ),
+        (
+            "Generalisation apres transform sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization/index.html"),
+        ),
+        (
+            "Second transform residuel sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second/index.html"),
+        ),
+        (
+            "Split low residuel apres transform sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split/index.html"),
+        ),
+        (
+            "Expansion corpus residuelle apres transform sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion/index.html"),
+        ),
+        (
+            "Prerequis adjacent-known residuel apres transform sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),

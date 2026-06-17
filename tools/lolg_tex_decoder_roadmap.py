@@ -214,6 +214,27 @@ DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_CORPUS_EX
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_FOURTH_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_GENERALIZATION_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_SECOND_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_LOW_SPLIT_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_CORPUS_EXPANSION_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion/summary.csv"
+)
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_ADJACENT_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent/summary.csv"
+)
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_spatial/summary.csv"
 )
@@ -705,6 +726,74 @@ def mixed_value_sequence_prerequisite_adjacent_known_fourth_action(summary: dict
     return "add new mixed-value sequence feature family beyond corpus and adjacent-known"
 
 
+def mixed_value_sequence_prerequisite_adjacent_known_transform_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix residual mixed-value sequence transform issues"
+    if int_value(summary, "false_free_transform_sets") > 0 and int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay residual mixed-value sequence transform candidates"
+    if int_value(summary, "replayable_unknown_slots") > 0:
+        return "expand residual mixed-value sequence transform family"
+    return "probe residual mixed-value sequence prerequisites after transform"
+
+
+def mixed_value_sequence_prerequisite_adjacent_known_transform_promoted_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "low_split_false_bytes") > 0 or int_value(summary, "issue_rows") > 0:
+        return "fix promoted mixed-value sequence transform replay issues"
+    if int_value(summary, "low_split_added_bytes") > 0:
+        return "re-evaluate mixed-value sequence after transform promotion"
+    return "expand residual mixed-value sequence transform promoted replay coverage"
+
+
+def mixed_value_sequence_prerequisite_adjacent_known_transform_generalization_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix mixed-value sequence transform generalization issues"
+    if int_value(summary, "false_free_feature_sets") > 0:
+        return "review residual mixed-value sequence transform generalization candidates"
+    if int_value(summary, "replayable_unknown_slots") > 0:
+        return "probe second residual mixed-value sequence transform"
+    return "probe residual mixed-value sequence prerequisites after transform"
+
+
+def mixed_value_sequence_prerequisite_adjacent_known_transform_second_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix second residual mixed-value sequence transform issues"
+    if int_value(summary, "false_free_transform_sets") > 0 and int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay second residual mixed-value sequence transform candidates"
+    if int_value(summary, "replayable_unknown_slots") > 0:
+        return "probe residual mixed-value sequence low-split after transform"
+    return "probe residual mixed-value sequence prerequisites after transform"
+
+
+def mixed_value_sequence_prerequisite_adjacent_known_transform_low_split_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix residual mixed-value sequence low-split after transform issues"
+    if int_value(summary, "false_free_split_sets") > 0 and int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay residual mixed-value sequence low-split after transform candidates"
+    if int_value(summary, "replayable_unknown_slots") > 0:
+        return "probe residual mixed-value sequence corpus prerequisites after transform"
+    return "probe residual mixed-value sequence prerequisites after transform"
+
+
+def mixed_value_sequence_prerequisite_adjacent_known_transform_corpus_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix residual mixed-value sequence corpus after transform issues"
+    if int_value(summary, "union_conflict_slots") > 0:
+        return "split residual mixed-value sequence corpus after transform conflicts"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay residual mixed-value sequence corpus after transform candidates"
+    if int_value(summary, "unknown_prerequisite_slots") > 0:
+        return "probe adjacent-known prerequisites after transform"
+    return "inspect residual mixed-value sequence lows after transform"
+
+
+def mixed_value_sequence_prerequisite_adjacent_known_transform_adjacent_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix residual adjacent-known after transform issues"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay residual adjacent-known prerequisite candidates after transform"
+    return "add next mixed-value sequence feature family beyond transform/corpus/adjacent-known"
+
+
 def flat_walk_palette_formula_replay_consumed(
     summary: dict[str, str],
     candidate_summary: dict[str, str] | None = None,
@@ -785,6 +874,13 @@ def build_queue(
     micro_mixed_value_payload_sequence_prerequisite_adjacent_known_low_split_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_prerequisite_adjacent_known_corpus_expansion_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_spatial_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_state_opcode_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
@@ -2795,6 +2891,214 @@ def build_queue(
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_false_free="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('false_free_transform_sets', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_candidates="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_unknown="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('replayable_unknown_slots', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_issues="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_adjacent_known_transform_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_promoted="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('low_split_added_bytes', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_clean_total="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('total_clean_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_false="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('low_split_false_bytes', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_promoted_issues="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_adjacent_known_transform_promoted_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_gen_known="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('target_known_slots', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_gen_replayable="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('replayable_unknown_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_gen_false_free="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('false_free_feature_sets', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_gen_blocked="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('blocked_prerequisite_slots', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_adjacent_known_transform_generalization_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_second_false_free="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('false_free_transform_sets', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_second_candidates="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_second_unknown="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('replayable_unknown_slots', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_second_issues="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_adjacent_known_transform_second_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_low_split_features="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('feature_sets', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_low_split_replayable="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('replayable_unknown_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_low_split_false_free="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('false_free_split_sets', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_low_split_candidates="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_adjacent_known_transform_low_split_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_corpus_features="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('feature_sets', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_corpus_unknown="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('unknown_prerequisite_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_corpus_false_free="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('false_free_rule_sets', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_corpus_candidates="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_adjacent_known_transform_corpus_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "").startswith("mixed_token")
+            and micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_adjacent_unknown="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary.get('unknown_prerequisite_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prereq_adjacent_transform_adjacent_candidates="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary.get('promotion_candidate_bytes', '0')}",
+                    f"mixed_value_prereq_adjacent_transform_adjacent_false="
+                    f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary.get('adjacent_false_slots', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_sequence_prerequisite_adjacent_known_transform_adjacent_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_spatial_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -3581,6 +3885,158 @@ def build_queue(
                 )
                 next_action = mixed_value_sequence_prerequisite_adjacent_known_fourth_action(
                     micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_false_free="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('false_free_transform_sets', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_candidates="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('promotion_candidate_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_unknown="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('replayable_unknown_slots', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_issues="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.get('issue_rows', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_promoted="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('low_split_added_bytes', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_clean_total="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('total_clean_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_false="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('low_split_false_bytes', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_promoted_issues="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.get('issue_rows', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_promoted_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_gen_known="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('target_known_slots', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_gen_replayable="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('replayable_unknown_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_gen_false_free="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('false_free_feature_sets', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_gen_blocked="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.get('blocked_prerequisite_slots', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_generalization_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_second_false_free="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('false_free_transform_sets', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_second_candidates="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('promotion_candidate_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_second_unknown="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('replayable_unknown_slots', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_second_issues="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.get('issue_rows', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_second_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_low_split_features="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('feature_sets', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_low_split_replayable="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('replayable_unknown_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_low_split_false_free="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('false_free_split_sets', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_low_split_candidates="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.get('promotion_candidate_bytes', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_low_split_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_corpus_features="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('feature_sets', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_corpus_unknown="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('unknown_prerequisite_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_corpus_false_free="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('false_free_rule_sets', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_corpus_candidates="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.get('promotion_candidate_bytes', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_corpus_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary
+                )
+            if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_adjacent_unknown="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary.get('unknown_prerequisite_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prereq_adjacent_transform_adjacent_candidates="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary.get('promotion_candidate_bytes', '0')}",
+                        f"mixed_value_prereq_adjacent_transform_adjacent_false="
+                        f"{micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary.get('adjacent_false_slots', '0')}",
+                    ],
+                )
+                next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_adjacent_action(
+                    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary
                 )
             if micro_mixed_value_payload_state_opcode_summary and jump_token_payload_state_opcode_summary:
                 positive_evidence = append_evidence(
@@ -4489,6 +4945,34 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary:
+                    next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_adjacent_action(
+                        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary:
+                    next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_corpus_action(
+                        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary:
+                    next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_low_split_action(
+                        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary:
+                    next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_second_action(
+                        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary:
+                    next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_generalization_action(
+                        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary:
+                    next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_promoted_action(
+                        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary
+                    )
+                elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary:
+                    next_action = mixed_value_sequence_prerequisite_adjacent_known_transform_action(
+                        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary
+                    )
                 elif micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth_summary:
                     next_action = mixed_value_sequence_prerequisite_adjacent_known_fourth_action(
                         micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth_summary
@@ -5247,6 +5731,41 @@ def main() -> None:
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_FOURTH_SUMMARY,
     )
     parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-adjacent-known-transform-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-adjacent-known-transform-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-adjacent-known-transform-generalization-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_GENERALIZATION_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-adjacent-known-transform-second-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_SECOND_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-adjacent-known-transform-low-split-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_LOW_SPLIT_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-adjacent-known-transform-corpus-expansion-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_CORPUS_EXPANSION_SUMMARY,
+    )
+    parser.add_argument(
+        "--micro-mixed-value-payload-sequence-prerequisite-adjacent-known-transform-adjacent-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_PREREQUISITE_ADJACENT_KNOWN_TRANSFORM_ADJACENT_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-mixed-value-payload-spatial-summary",
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY,
@@ -5844,6 +6363,76 @@ def main() -> None:
         if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth_rows
         else None
     )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_rows
+        else None
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_rows = (
+        read_rows(args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary)
+        if args.micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary = (
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_rows[0]
+        if micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_rows
+        else None
+    )
     micro_mixed_value_payload_spatial_rows = (
         read_rows(args.micro_mixed_value_payload_spatial_summary)
         if args.micro_mixed_value_payload_spatial_summary.exists()
@@ -5928,6 +6517,13 @@ def main() -> None:
         micro_mixed_value_payload_sequence_prerequisite_adjacent_known_low_split_summary,
         micro_mixed_value_payload_sequence_prerequisite_adjacent_known_corpus_expansion_summary,
         micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth_summary,
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_summary,
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay_summary,
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization_summary,
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second_summary,
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split_summary,
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion_summary,
+        micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent_summary,
         micro_mixed_value_payload_spatial_summary,
         micro_mixed_value_payload_state_opcode_summary,
     )

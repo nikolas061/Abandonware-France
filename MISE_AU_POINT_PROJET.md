@@ -1882,6 +1882,61 @@ epuisees a 9435 bytes propres. Il reste 5 slots sequence replayables et 2 slots
 bloques; la prochaine piste doit ajouter une nouvelle famille de features au
 dela de corpus/adjacent-known.
 
+La nouvelle famille transform teste ensuite les lows comme transformation des
+bytes precedents connus, plutot que comme valeur absolue:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform/slots.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform/rules.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_promoted_replay/index.html
+```
+
+Etat courant:
+
+```text
+Transform feature sets: 3576
+False-free transform sets: 8
+Best transform: low_xor_prev1 + dominant
+Transform promotion candidates: 1
+Promoted transform rows: 1/1
+Transform added/exact/false bytes: 1/1/0
+Total clean bytes after transform: 9436
+Remaining unresolved bytes: 8010
+```
+
+La promotion est propre: le slot `row 9 / frontier 22 / offset 2` est promu en
+`68` par `low_xor_prev1 + dominant`, sans faux positif ni issue.
+
+Les checks residuels apres cette promotion bornent le nouvel etat:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_generalization/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_second/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_low_split/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_expansion/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent/index.html
+```
+
+Etat courant:
+
+```text
+Post-transform replayable unknown slots: 4
+Post-transform target-known slots: 16
+Post-transform blocked prerequisite slots: 2
+Second transform false-free sets: 0
+Residual low-split false-free sets: 0
+Residual low-split promotion-candidate bytes: 0
+Residual corpus false-free rule sets: 0
+Residual corpus promotion-candidate bytes: 0
+Residual adjacent-known candidate/false/conflict slots: 0/0/0
+```
+
+Conclusion: la famille transform ajoute 1 byte propre et epuise aussitot ses
+propres suites simples. Il reste 4 slots sequence replayables et 2 slots
+bloques; la prochaine piste doit ajouter une autre famille au dela de
+transform/corpus/adjacent-known.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
