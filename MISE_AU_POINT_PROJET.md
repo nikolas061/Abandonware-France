@@ -1510,6 +1510,57 @@ maintenant promus sans conflit ni faux positif. Ils debloquent 7 slots sequence;
 la prochaine etape est de reevaluer la generalisation sequence sur ce replay
 enrichi.
 
+Le split low post-prerequis reprend alors le replay enrichi:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split/rules.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split/slots.csv
+```
+
+Etat courant:
+
+```text
+Features: 75
+Feature sets: 2850
+Replayable unknown slots: 4
+Target known slots: 7
+Blocked prerequisite slots: 11
+False-free split sets: 120
+Best false-free split: best_b-1+compressed_d1
+Best false-free split correct/unknown: 2/2
+Best conflicted correct/false: 2/1
+Promotion-candidate bytes: 2
+Issue rows: 0
+```
+
+Le replay promu ecrit ces 2 candidats supplementaires:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/fixtures.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Split candidate rows: 2
+Promoted rows: 2
+Low-split added bytes: 2
+Low-split exact bytes: 2
+Low-split false bytes: 0
+Skipped known/rejected bytes: 0/0
+Issue rows: 0
+Total clean bytes: 9419
+Remaining unresolved bytes: 8027
+Full HD previews: 32
+```
+
+Conclusion: les bytes `6e` de `dinodead.pcx` frontier 26 offsets absolus 99 et
+417 sont maintenant promus via `best_b-1+compressed_d1=00|+j`. La prochaine
+etape est de reevaluer la sequence avec ces deux valeurs connues.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
