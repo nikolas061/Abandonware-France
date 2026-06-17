@@ -2211,6 +2211,38 @@ Conclusion: le replay promu carrier-local remplit les offsets `7..11` de
 `dinodead.pcx` frontier `80` sans conflit. La prochaine piste concrete est de
 consommer cette base promue comme nouvelle base gradient.
 
+La sonde de dependances source consomme ensuite cette base promue pour mesurer
+l'effet sur les slots exceptions:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Exception slots: 86
+Source available slots: 170
+Source unknown slots: 150
+Source unknown in high-safe slots: 93
+Source unknown outside high-safe slots: 57
+Exception source unknown slots: 33
+Exception source unknown in high-safe slots: 22
+Exception source unknown outside high-safe slots: 11
+Top unknown dependency edge: 78|195->80|204
+Top unknown dependency edge slots: 21
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: la base carrier-context promue ajoute cinq sources disponibles
+(`165 -> 170`) et reduit les exceptions source unknown (`36 -> 33`), mais le
+noyau high-safe reste bloque a `93` sources inconnues. La prochaine piste
+concrete est de resoudre ces dependances high-safe restantes.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

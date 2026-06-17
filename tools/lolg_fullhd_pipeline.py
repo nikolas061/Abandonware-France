@@ -750,6 +750,19 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "dependances source exceptions low high-safe gradient base carrier-context promue .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_probe.py",
+                "--replay-fixtures",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Gradient Source-Dependency Carrier-Context Promoted Replay Probe",
+            ],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),
