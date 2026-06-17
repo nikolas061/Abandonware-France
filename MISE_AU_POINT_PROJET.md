@@ -127,6 +127,55 @@ Repeated bucket bytes: 909
 Promotion-ready bytes: 0
 ```
 
+La passe de positions montre que les buckets repetes partagent des bins de
+sauts, mais pas une signature de positions reusable:
+
+```text
+output/tex_micro_jump_positions/index.html
+output/tex_micro_jump_positions/buckets.csv
+output/tex_micro_jump_positions/targets.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 909
+Position signature groups: 27
+Repeated position signature bytes: 0
+Bucket-bin repeat bytes: 909
+Promotion-ready bytes: 0
+```
+
+La sonde payload pousse le test sur les 9 buckets `jump_mixed` repetes:
+
+```text
+output/tex_micro_jump_mixed_payload/index.html
+output/tex_micro_jump_mixed_payload/rows.csv
+output/tex_micro_jump_mixed_payload/groups.csv
+output/tex_micro_jump_mixed_payload/distances.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 909
+Repeated payload signature bytes: 0
+Repeated value histogram bytes: 0
+Repeated signed profile bytes: 0
+Source profile >=75 bytes: 209
+External best exact bytes: 48
+Spatial best distance: 1
+Spatial best correct bytes: 169 / 875
+Spatial exact copy bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les 909 bytes des buckets repetes ne cachent ni payload exact
+repete, ni profil signed repete, ni copie spatiale exacte. Les 209 bytes de
+profil source eleve restent un indice trop large, car l'exact source plafonne a
+48 bytes. La piste `jump_mixed` reste donc une grammaire de sauts a decoder,
+pas une promotion par repetition directe.
+
 Le split conservateur par familles micro-token donne maintenant une file plus
 propre pour les passes suivantes:
 

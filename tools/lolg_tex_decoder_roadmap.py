@@ -30,6 +30,7 @@ DEFAULT_STABLE_LENGTH_SEQUENCE_SUMMARY = Path("output/tex_micro_stable_length_se
 DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY = Path("output/tex_micro_stable_length_control/summary.csv")
 DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY = Path("output/tex_micro_stable_length_opcode/summary.csv")
 DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_interval/summary.csv")
+DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_MICRO_TOKEN_FAMILY_SPLIT_SUMMARY = Path("output/tex_micro_token_family_split/summary.csv")
 DEFAULT_MICRO_MIXED_VALUE_SUBFAMILY_SUMMARY = Path("output/tex_micro_mixed_value_subfamily/summary.csv")
 DEFAULT_MICRO_MIXED_VALUE_DOMINANT_CONTROL_SUMMARY = Path(
@@ -169,6 +170,7 @@ def append_evidence(existing: str, extra: list[str]) -> str:
 
 def build_queue(
     decisions: list[dict[str, str]],
+    micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     micro_token_family_split_summary: dict[str, str] | None = None,
     micro_mixed_value_subfamily_summary: dict[str, str] | None = None,
     micro_mixed_value_dominant_control_summary: dict[str, str] | None = None,
@@ -198,6 +200,34 @@ def build_queue(
                     f"family_split_ambiguous_bytes={micro_token_family_split_summary.get('ambiguous_bytes', '0')}",
                     f"family_split_disagreement_bytes="
                     f"{micro_token_family_split_summary.get('existing_disagreement_bytes', '0')}",
+                ],
+            )
+            row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if row.get("surface", "") == "micro_token" and micro_jump_mixed_payload_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"jump_payload_repeated_bucket_bytes="
+                    f"{micro_jump_mixed_payload_summary.get('repeated_bucket_bytes', '0')}",
+                    f"jump_payload_source_profile_ge75="
+                    f"{micro_jump_mixed_payload_summary.get('source_profile_ge75_bytes', '0')}",
+                    f"jump_payload_spatial_best="
+                    f"{micro_jump_mixed_payload_summary.get('spatial_best_correct_bytes', '0')}/"
+                    f"{micro_jump_mixed_payload_summary.get('spatial_best_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"jump_payload_repeated_signature_bytes="
+                    f"{micro_jump_mixed_payload_summary.get('repeated_payload_signature_bytes', '0')}",
+                    f"jump_payload_pair_ge50={micro_jump_mixed_payload_summary.get('pair_overlap_ge50_bytes', '0')}",
+                    f"jump_payload_external_exact="
+                    f"{micro_jump_mixed_payload_summary.get('external_best_exact_bytes', '0')}",
+                    f"jump_payload_spatial_exact="
+                    f"{micro_jump_mixed_payload_summary.get('spatial_exact_copy_bytes', '0')}",
+                    f"jump_payload_promotion_ready="
+                    f"{micro_jump_mixed_payload_summary.get('promotion_ready_bytes', '0')}",
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
@@ -649,6 +679,11 @@ def main() -> None:
     parser.add_argument("--stable-length-control-summary", type=Path, default=DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY)
     parser.add_argument("--stable-length-opcode-summary", type=Path, default=DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY)
     parser.add_argument("--stable-length-interval-summary", type=Path, default=DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY)
+    parser.add_argument(
+        "--micro-jump-mixed-payload-summary",
+        type=Path,
+        default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
+    )
     parser.add_argument("--micro-token-family-split-summary", type=Path, default=DEFAULT_MICRO_TOKEN_FAMILY_SPLIT_SUMMARY)
     parser.add_argument(
         "--micro-mixed-value-subfamily-summary",
@@ -706,6 +741,12 @@ def main() -> None:
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
     micro_token_family_split_summary = micro_token_family_split_rows[0] if micro_token_family_split_rows else None
+    micro_jump_mixed_payload_rows = (
+        read_rows(args.micro_jump_mixed_payload_summary)
+        if args.micro_jump_mixed_payload_summary.exists()
+        else []
+    )
+    micro_jump_mixed_payload_summary = micro_jump_mixed_payload_rows[0] if micro_jump_mixed_payload_rows else None
     micro_mixed_value_subfamily_rows = (
         read_rows(args.micro_mixed_value_subfamily_summary)
         if args.micro_mixed_value_subfamily_summary.exists()
@@ -756,6 +797,7 @@ def main() -> None:
     )
     queue = build_queue(
         decisions,
+        micro_jump_mixed_payload_summary,
         micro_token_family_split_summary,
         micro_mixed_value_subfamily_summary,
         micro_mixed_value_dominant_control_summary,

@@ -75,6 +75,7 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step("couverture references .tex", [sys.executable, "tools/lolg_tex_reference_coverage.py"]),
         Step("split micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_split.py"]),
         Step("positions micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_positions.py"]),
+        Step("payload jump-mixed micro .tex", [sys.executable, "tools/lolg_tex_micro_jump_mixed_payload_probe.py"]),
         Step("stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_walks.py"]),
         Step("backrefs stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_backref_probe.py"]),
         Step("sources stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_source_probe.py"]),
