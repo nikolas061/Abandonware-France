@@ -1021,15 +1021,15 @@ Etat courant:
 Edge rows: 157
 Review chains: 28
 Review edges: 28
-Feature sets: 3303
-Best delta replay: source_actual_mod32+fragment_low = 5 exact / 10 false
-Best false-free delta replay: source_availability+source_actual_mod32+window_head_byte = 2 exact
+Feature sets: 17343
+Best delta replay: rel_mod4+fragment_low+source_control_low = 6 exact / 1 false
+Best false-free delta replay: target_y_mod8+fragment_low+source_control_low = 3 exact
 Promotion-ready bytes: 0
 ```
 
 Conclusion: les contextes non-oracle actuels ne generalisent pas le replay
 terminal. La meilleure couverture brute est bruitee, et le meilleur faux-free
-ne couvre que 2 racines; il faut chercher des features de delta plus fortes
+ne couvre que 3 racines; il faut chercher des features de delta plus fortes
 avant de promouvoir cette piste.
 
 La passe etat/opcode `gradient_like` teste ensuite les ancres

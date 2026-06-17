@@ -47,6 +47,26 @@ FEATURES = [
     "gradient_class",
     "shape_len_key",
     "shape_start_key",
+    "source_relative_offset",
+    "source_rel_mod4",
+    "source_rel_mod8",
+    "source_rel_mod16",
+    "source_seq_index",
+    "source_target_mod32",
+    "source_target_mod64",
+    "source_target_x_mod32",
+    "source_target_y_mod8",
+    "source_control_low",
+    "source_control_class",
+    "source_prefix_low",
+    "source_fragment_low",
+    "source_window_head_byte",
+    "source_window_tail_byte",
+    "source_gradient_class",
+    "source_shape_len_key",
+    "source_shape_start_key",
+    "source_start_mod32",
+    "source_length_mod16",
 ]
 
 SUMMARY_FIELDNAMES = [
@@ -122,11 +142,37 @@ def source_actual_mod32(row: dict[str, str]) -> str:
 
 
 def enrich_edges(slot_rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    slots_by_rank = {row["rank"]: row for row in slot_rows}
+    source_feature_fields = [
+        "relative_offset",
+        "rel_mod4",
+        "rel_mod8",
+        "rel_mod16",
+        "seq_index",
+        "target_mod32",
+        "target_mod64",
+        "target_x_mod32",
+        "target_y_mod8",
+        "control_low",
+        "control_class",
+        "prefix_low",
+        "fragment_low",
+        "window_head_byte",
+        "window_tail_byte",
+        "gradient_class",
+        "shape_len_key",
+        "shape_start_key",
+        "start_mod32",
+        "length_mod16",
+    ]
     output: list[dict[str, str]] = []
     for row in slot_rows:
         if row.get("source_location") != "in_highsafe" or row.get("source_low_delta", "") == "":
             continue
         enriched = dict(row)
+        source_slot = slots_by_rank.get(row.get("source_slot_rank", ""), {})
+        for field in source_feature_fields:
+            enriched[f"source_{field}"] = source_slot.get(field, "")
         enriched["source_actual_mod32"] = source_actual_mod32(row)
         output.append(enriched)
     return output
