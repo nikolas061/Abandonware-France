@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Probe external state/opcode contexts for jump-token payloads."""
+"""Probe external state/opcode contexts for gradient-like payloads."""
 
 from __future__ import annotations
 
@@ -31,9 +31,9 @@ from lolg_tex_micro_mixed_value_payload_state_opcode_probe import (
 )
 
 
-DEFAULT_INPUT_ROWS = Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_jump_token_probe/targets.csv")
+DEFAULT_INPUT_ROWS = Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_probe/targets.csv")
 DEFAULT_FIXTURES = Path("output/tex_gap_rule_fixtures/manifest.csv")
-DEFAULT_OUTPUT = Path("output/tex_jump_token_payload_state_opcode")
+DEFAULT_OUTPUT = Path("output/tex_gradient_payload_state_opcode")
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -41,7 +41,7 @@ SUMMARY_FIELDNAMES = [
     "target_bytes",
     "entry_slots",
     "state_candidate_rows",
-    "structure_classes",
+    "gradient_classes",
     "control_anchor_rows",
     "start_anchor_rows",
     "control_slot_bytes",
@@ -87,7 +87,7 @@ ROW_FIELDNAMES = [
     "length",
     "start",
     "end",
-    "jump_structure_class",
+    "gradient_class",
     "control_ref_offset",
     "control_ref_mod64",
     "start_anchor",
@@ -100,9 +100,12 @@ ROW_FIELDNAMES = [
     "start_raw_exact_bytes",
     "control_high_exact_bytes",
     "start_high_exact_bytes",
-    "jump_delta_ratio",
-    "long_island_bytes",
-    "top_jump_nibble_pair",
+    "small_delta_ratio",
+    "zero_delta_ratio",
+    "step_delta_ratio",
+    "dominant_delta",
+    "linear_exact_bytes",
+    "top_nibble",
     "payload_head_hex",
     "payload_tail_hex",
     "verdict",
@@ -191,12 +194,27 @@ def parse_window_signature(text: str) -> tuple[bytes, bytes]:
     return head, tail
 
 
+def ratio_bin(text: str) -> str:
+    try:
+        value = float(text or 0)
+    except ValueError:
+        value = 0.0
+    if value >= 0.90:
+        return "ge90"
+    if value >= 0.75:
+        return "ge75"
+    if value >= 0.50:
+        return "ge50"
+    if value > 0:
+        return "lt50"
+    return "zero"
+
+
 def context_functions():
     return {
         "control_ref_pos16": lambda row: (row["control_ref_mod64"], row["pos16"]),
         "control_byte_pos16": lambda row: (row["control_byte"], row["pos16"]),
         "control_high_pos16": lambda row: (row["control_high"], row["pos16"]),
-        "control_low_pos16": lambda row: (row["control_low"], row["pos16"]),
         "control_class_pos16": lambda row: (row["control_class"], row["pos16"]),
         "control_delta_pos16": lambda row: (row["control_delta"], row["pos16"]),
         "start_byte_pos16": lambda row: (row["start_byte"], row["pos16"]),
@@ -310,8 +328,12 @@ def build_entries(
                     "pos8": str(offset % 8),
                     "pos16": str((offset * 16) // len(payload)) if payload else "0",
                     "tail8": str(len(payload) - 1 - offset) if len(payload) - 1 - offset < 8 else "body",
-                    "structure_class": input_row.get("jump_structure_class", ""),
-                    "top_jump_pair": input_row.get("top_jump_nibble_pair", ""),
+                    "gradient_class": input_row.get("gradient_class", ""),
+                    "dominant_delta": input_row.get("dominant_delta", ""),
+                    "top_nibble": input_row.get("top_nibble", ""),
+                    "small_delta_bin": ratio_bin(input_row.get("small_delta_ratio", "")),
+                    "zero_delta_bin": ratio_bin(input_row.get("zero_delta_ratio", "")),
+                    "step_delta_bin": ratio_bin(input_row.get("step_delta_ratio", "")),
                     "control_ref_mod64": input_row.get("control_ref_mod64", ""),
                     "control_byte": hex_value(control_byte),
                     "control_high": high_value(control_byte),
@@ -356,7 +378,7 @@ def build_entries(
                 "length": len(payload),
                 "start": input_row.get("start", ""),
                 "end": input_row.get("end", ""),
-                "jump_structure_class": input_row.get("jump_structure_class", ""),
+                "gradient_class": input_row.get("gradient_class", ""),
                 "control_ref_offset": control_ref_offset if control_ref_offset >= 0 else "",
                 "control_ref_mod64": input_row.get("control_ref_mod64", ""),
                 "start_anchor": start_anchor if start_anchor >= 0 else "",
@@ -369,9 +391,12 @@ def build_entries(
                 "start_raw_exact_bytes": start_raw_exact,
                 "control_high_exact_bytes": control_high_exact,
                 "start_high_exact_bytes": start_high_exact,
-                "jump_delta_ratio": input_row.get("jump_delta_ratio", ""),
-                "long_island_bytes": input_row.get("long_island_bytes", ""),
-                "top_jump_nibble_pair": input_row.get("top_jump_nibble_pair", ""),
+                "small_delta_ratio": input_row.get("small_delta_ratio", ""),
+                "zero_delta_ratio": input_row.get("zero_delta_ratio", ""),
+                "step_delta_ratio": input_row.get("step_delta_ratio", ""),
+                "dominant_delta": input_row.get("dominant_delta", ""),
+                "linear_exact_bytes": input_row.get("linear_exact_bytes", ""),
+                "top_nibble": input_row.get("top_nibble", ""),
                 "payload_head_hex": payload[:18].hex(),
                 "payload_tail_hex": payload[-18:].hex() if payload else "",
                 "verdict": "state_context_available" if control_slot_bytes else "state_context_incomplete",
@@ -385,7 +410,7 @@ def build_entries(
         "target_rows": len(rows),
         "target_bytes": sum(int_value(row, "length") for row in rows),
         "entry_slots": len(entries),
-        "structure_classes": len({str(row.get("jump_structure_class", "")) for row in rows}),
+        "gradient_classes": len({str(row.get("gradient_class", "")) for row in rows}),
         "control_anchor_rows": sum(1 for row in rows if str(row.get("control_ref_offset", "")) != ""),
         "start_anchor_rows": sum(1 for row in rows if str(row.get("start_anchor", "")) != ""),
         "control_slot_bytes": sum(int_value(row, "control_slot_bytes") for row in rows),
@@ -402,13 +427,13 @@ def build_entries(
 def build_groups(rows: list[dict[str, object]]) -> list[dict[str, object]]:
     grouped: dict[str, list[dict[str, object]]] = defaultdict(list)
     for row in rows:
-        grouped[str(row.get("jump_structure_class", ""))].append(row)
+        grouped[str(row.get("gradient_class", ""))].append(row)
     output: list[dict[str, object]] = []
     for key, group in grouped.items():
         output.append(
             {
                 "rank": 0,
-                "group_kind": "jump_structure_class",
+                "group_kind": "gradient_class",
                 "group_key": key,
                 "rows": len(group),
                 "bytes": sum(int_value(row, "length") for row in group),
@@ -608,25 +633,25 @@ th {{ color: #9dafb5; background: #172023; text-align: left; }}
   <div class="box"><div class="num">{summary['control_anchor_rows']}</div><div class="muted">control anchor rows</div></div>
   <div class="box"><div class="num">{summary['control_raw_exact_bytes']}/{summary['start_raw_exact_bytes']}</div><div class="muted">raw exact control/start</div></div>
   <div class="box"><div class="num">{summary['best_byte_correct_slots']}/{summary['best_byte_false_slots']}</div><div class="muted">best byte correct/false</div></div>
-  <div class="box"><div class="num">{summary['best_high_correct_slots']}/{summary['best_high_false_slots']}</div><div class="muted">best high correct/false</div></div>
+  <div class="box"><div class="num">{summary['best_step_correct_slots']}/{summary['best_step_false_slots']}</div><div class="muted">best step correct/false</div></div>
   <div class="box"><div class="num">{summary['promotion_ready_bytes']}</div><div class="muted">promotion-ready bytes</div></div>
 </div>
 <div class="panel"><h2>Rows</h2>{render_table(rows, ROW_FIELDNAMES)}</div>
 <div class="panel"><h2>Groups</h2>{render_table(groups, GROUP_FIELDNAMES)}</div>
 <div class="panel"><h2>Candidates</h2>{render_table(candidates, CANDIDATE_FIELDNAMES)}</div>
 <div class="panel"><h2>Contexts</h2>{render_table(contexts, CONTEXT_FIELDNAMES)}</div>
-<script type="application/json" id="jump-token-state-opcode-data">{html.escape(data_json)}</script>
+<script type="application/json" id="gradient-state-opcode-data">{html.escape(data_json)}</script>
 </body>
 </html>
 """
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Probe source state/opcode contexts for jump-token payloads.")
+    parser = argparse.ArgumentParser(description="Probe source state/opcode contexts for gradient-like payloads.")
     parser.add_argument("--input-rows", type=Path, default=DEFAULT_INPUT_ROWS)
     parser.add_argument("--fixtures", type=Path, default=DEFAULT_FIXTURES)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--title", default="Lands of Lore II .tex Jump Token Payload State Opcode")
+    parser.add_argument("--title", default="Lands of Lore II .tex Gradient Payload State Opcode")
     args = parser.parse_args()
 
     summary, rows, candidates, contexts, groups = build(read_csv(args.input_rows), read_csv(args.fixtures))
@@ -647,8 +672,8 @@ def main() -> None:
         f"{summary['best_byte_correct_slots']}/{summary['best_byte_false_slots']}"
     )
     print(
-        f"Best high state: {summary['best_high_context']} "
-        f"{summary['best_high_correct_slots']}/{summary['best_high_false_slots']}"
+        f"Best step state: {summary['best_step_context']} "
+        f"{summary['best_step_correct_slots']}/{summary['best_step_false_slots']}"
     )
     print(f"High baseline precision: {summary['best_high_baseline_precision']}")
     print(f"Source-state rejected: {summary['source_state_rejected']}")

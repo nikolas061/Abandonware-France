@@ -79,6 +79,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
+        Step(
+            "etat opcode payload gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_payload_state_opcode_probe.py"],
+        ),
         Step("split micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_split.py"]),
         Step("positions micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_positions.py"]),
         Step("payload jump-mixed micro .tex", [sys.executable, "tools/lolg_tex_micro_jump_mixed_payload_probe.py"]),

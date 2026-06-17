@@ -294,6 +294,37 @@ isolees, mais l'exact source direct reste trop faible et les profils source
 eleves sont trop larges. Les lignes `gradient_like` restent donc bloquees sur
 un decodeur d'etat/opcode, pas sur une source ou copie directe generalisable.
 
+La passe etat/opcode `gradient_like` teste ensuite les ancres
+`control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
+fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
+payload comme predicteurs:
+
+```text
+output/tex_gradient_payload_state_opcode/index.html
+output/tex_gradient_payload_state_opcode/rows.csv
+output/tex_gradient_payload_state_opcode/groups.csv
+output/tex_gradient_payload_state_opcode/candidates.csv
+output/tex_gradient_payload_state_opcode/contexts.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1925
+Control anchor rows: 32
+Raw exact control/start: 27 / 21
+Best byte state: prefix_byte_pos16 60 / 252
+Best step state: window_head_pos16 187 / 298
+High baseline precision: 0.530390
+Source-state rejected: 1
+Promotion-ready bytes: 0
+```
+
+Conclusion: les contextes locaux donnent des indices de bande/forme, mais ils
+ne produisent pas le byte complet ni une transition fiable. Les
+`gradient_like` doivent donc passer par une grammaire opcode plus haute, pas
+par une promotion de fenetre controle/source locale.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

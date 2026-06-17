@@ -31,6 +31,9 @@ DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY = Path("output/tex_micro_stable_length_con
 DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY = Path("output/tex_micro_stable_length_opcode/summary.csv")
 DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_interval/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
+DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
+    "output/tex_gradient_payload_state_opcode/summary.csv"
+)
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
@@ -179,6 +182,7 @@ def append_evidence(existing: str, extra: list[str]) -> str:
 def build_queue(
     decisions: list[dict[str, str]],
     gradient_payload_profile_summary: dict[str, str] | None = None,
+    gradient_payload_state_opcode_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -241,6 +245,41 @@ def build_queue(
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if row.get("surface", "") == "gradient_like" and gradient_payload_state_opcode_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_state_control_anchors="
+                    f"{gradient_payload_state_opcode_summary.get('control_anchor_rows', '0')}",
+                    f"gradient_state_best_band="
+                    f"{gradient_payload_state_opcode_summary.get('best_band_correct_slots', '0')}/"
+                    f"{gradient_payload_state_opcode_summary.get('best_band_false_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_state_raw_exact="
+                    f"{gradient_payload_state_opcode_summary.get('control_raw_exact_bytes', '0')}/"
+                    f"{gradient_payload_state_opcode_summary.get('start_raw_exact_bytes', '0')}",
+                    f"gradient_state_best_byte="
+                    f"{gradient_payload_state_opcode_summary.get('best_byte_correct_slots', '0')}/"
+                    f"{gradient_payload_state_opcode_summary.get('best_byte_false_slots', '0')}",
+                    f"gradient_state_best_step="
+                    f"{gradient_payload_state_opcode_summary.get('best_step_correct_slots', '0')}/"
+                    f"{gradient_payload_state_opcode_summary.get('best_step_false_slots', '0')}",
+                    f"gradient_state_rejected="
+                    f"{gradient_payload_state_opcode_summary.get('source_state_rejected', '0')}",
+                    f"gradient_state_promotion_ready="
+                    f"{gradient_payload_state_opcode_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "derive higher-order gradient opcode grammar after local source-state rejection",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "") == "micro_token" and micro_jump_mixed_payload_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -543,6 +582,32 @@ def build_queue(
                 next_action = (
                     "extend state/opcode search to gradient payloads; mixed-value and jump-token "
                     "source-state contexts are rejected"
+                )
+            if (
+                gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_state_control_anchors="
+                        f"{gradient_payload_state_opcode_summary.get('control_anchor_rows', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_state_best_byte="
+                        f"{gradient_payload_state_opcode_summary.get('best_byte_correct_slots', '0')}/"
+                        f"{gradient_payload_state_opcode_summary.get('best_byte_false_slots', '0')}",
+                        f"gradient_state_rejected="
+                        f"{gradient_payload_state_opcode_summary.get('source_state_rejected', '0')}",
+                    ],
+                )
+                next_action = (
+                    "derive higher-order gradient opcode grammar; local source-state contexts are rejected "
+                    "for mixed-value, jump-token and gradient payloads"
                 )
             row = {
                 **row,
@@ -867,6 +932,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-payload-state-opcode-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-jump-mixed-payload-summary",
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
@@ -945,6 +1015,14 @@ def main() -> None:
         else []
     )
     gradient_payload_profile_summary = gradient_payload_profile_rows[0] if gradient_payload_profile_rows else None
+    gradient_payload_state_opcode_rows = (
+        read_rows(args.gradient_payload_state_opcode_summary)
+        if args.gradient_payload_state_opcode_summary.exists()
+        else []
+    )
+    gradient_payload_state_opcode_summary = (
+        gradient_payload_state_opcode_rows[0] if gradient_payload_state_opcode_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -1028,6 +1106,7 @@ def main() -> None:
     queue = build_queue(
         decisions,
         gradient_payload_profile_summary,
+        gradient_payload_state_opcode_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,
