@@ -1751,6 +1751,40 @@ puisqu'elle apparait aussi avec le couple `5354` sur les frontiers `29`, `54` et
 concrete est donc de chercher un support independant pour ce raffinement
 compact-control avant toute promotion.
 
+La sonde de support raffine teste ensuite ce guard
+`rule_type=compact_control_stream` sur les quatre hits compact-control du couple
+`5354`:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support/hits.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support/windows.csv
+```
+
+Etat courant:
+
+```text
+Refined guard: rule_type=compact_control_stream
+Refined pair rows: 4
+Refined non-target rows: 3
+Refined pair+mod rows: 1
+Refined pair+mod non-target rows: 0
+Reference window rows: 1457
+Reference exact rows: 1
+Reference exact non-target rows: 0
+Target-only exact rows: 1
+Non-target frontiers: 29,54,55
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: les frontiers `29`, `54` et `55` confirment que le raffinement n'est
+pas une signature cible unique, mais la formule `anchor-1, seg_ref+3, anchor-1,
+seg_ref+2, anchor` ne matche toujours qu'en cible. La prochaine piste concrete
+est donc de deriver une variante de formule pour les lignes compact-control
+non-cibles avant de reconsiderer la promotion du guard cinq octets.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
