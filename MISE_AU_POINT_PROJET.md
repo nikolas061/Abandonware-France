@@ -1713,6 +1713,44 @@ la formule exacte reste limitee au span cible `80:7-12`. La prochaine piste
 concrete est donc d'inspecter ces deux lignes `pair+mod` non-cibles pour trouver
 une garde alternative qui generalise sans promouvoir une regle target-only.
 
+La revue pair-mod inspecte ensuite les 323 occurrences `segment_pair=5354` du
+corpus etendu et classe les features non-oracle qui gardent la cible tout en
+rejetant les deux faux avec `control_ref_mod64=22`:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review/hit_features.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review/features.csv
+```
+
+Etat courant:
+
+```text
+Pair any rows: 323
+Pair+mod rows: 3
+Pair+mod non-target rows: 2
+Feature rows: 27
+Pair+mod false-free feature rows: 23
+Best refined guard: rule_type=compact_control_stream
+Best pair+mod rows: 1
+Best pair+mod non-target rows: 0
+Best pair any rows: 4
+Best pair any non-target rows: 3
+Best pair any frontiers: 29,54,55,80
+Target-only refined rows: 1
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le raffinement le plus sain ajoute
+`rule_type=compact_control_stream` a la garde cinq octets. Cette feature rejette
+les deux faux `pair+mod` et reste plus large qu'une signature de bytes locale
+puisqu'elle apparait aussi avec le couple `5354` sur les frontiers `29`, `54` et
+`55`. Sous modulo `22`, elle reste toutefois target-only: la prochaine piste
+concrete est donc de chercher un support independant pour ce raffinement
+compact-control avant toute promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
