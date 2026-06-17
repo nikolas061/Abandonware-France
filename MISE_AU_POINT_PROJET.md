@@ -1292,6 +1292,38 @@ bytes, dont 1 source high-safe utile au graphe. Une tentative de troisieme
 promotion sur la meme couverture n'ajoute plus aucun byte; la suite doit donc
 attaquer les 93 dependances high-safe restantes avec un autre signal.
 
+La revue du noyau residuel classe ces 93 dependances high-safe par edge et par
+terminal de chaine. Elle separe les racines qui terminent sur une source connue
+des racines bloquees par une source externe encore inconnue, afin d'eviter de
+relancer indefiniment la meme promotion saturee.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core/edges.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core/terminals.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core/roots.csv
+```
+
+Etat courant:
+
+```text
+Unknown high-safe slots: 93
+Dependency edges: 12
+Terminal slots: 39
+Terminal known chains: 83
+External terminal chains: 10
+Top unknown edge: 78|195->80|204 (21 slots)
+Dominant blocker: resolve external terminal source bytes
+Issue rows: 0
+```
+
+Conclusion: les edges 1 a 3 restent bloques par des terminaux externes
+inconnus, alors que les autres edges demandent une meilleure transform
+terminale depuis des sources connues. La prochaine piste doit donc cibler les
+bytes sources externes terminaux ou une transform terminale plus forte, pas une
+troisieme promotion de la meme couverture.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

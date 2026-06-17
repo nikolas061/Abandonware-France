@@ -210,6 +210,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_G
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SECOND_PROMOTED_REPLAY_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1114,6 +1117,20 @@ def gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_
     return "rerun downstream gradient probes with second promoted replay base"
 
 
+def gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix residual high-safe source dependency core review issues"
+    if int_value(summary, "terminal_unknown_outside_chains") > 0:
+        return "resolve residual external terminal source bytes for high-safe dependency core"
+    if int_value(summary, "terminal_known_chains") > 0:
+        return "derive stronger terminal transform for residual high-safe dependency core"
+    if int_value(summary, "unknown_highsafe_slots") > 0:
+        return "inspect residual high-safe dependency core tails"
+    return "rerun downstream gradient probes after residual core is clear"
+
+
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
     if int_value(summary, "false_free_byte_slots") > 0:
         return "replay false-free mixed-value payload byte combos"
@@ -1628,6 +1645,7 @@ def build_queue(
     gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -4085,6 +4103,45 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_action(
                     gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_residual_core_edges="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('dependency_edges', '0')}",
+                    f"gradient_sequence_low_exception_residual_core_known_terminal_chains="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('terminal_known_chains', '0')}",
+                    f"gradient_sequence_low_exception_residual_core_terminal_slots="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('terminal_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_residual_core_highsafe_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('unknown_highsafe_slots', '0')}",
+                    f"gradient_sequence_low_exception_residual_core_external_terminal_chains="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('terminal_unknown_outside_chains', '0')}",
+                    f"gradient_sequence_low_exception_residual_core_top_edge="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('top_unknown_edge', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('top_unknown_edge_unknown_slots', '0')}",
+                    f"gradient_sequence_low_exception_residual_core_blocker="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('dominant_blocker', '')}",
+                    f"gradient_sequence_low_exception_residual_core_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
+                    gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -7786,6 +7843,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary:
+                    next_action = gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
+                        gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary
+                    )
                 elif gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary:
                     next_action = gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_action(
                         gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary
@@ -8770,6 +8831,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SECOND_PROMOTED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -9558,6 +9624,16 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary = (
         gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_rows[0]
         if gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
+        read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows[0]
+        if gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -10364,6 +10440,7 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary,
         gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

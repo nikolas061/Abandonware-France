@@ -1008,6 +1008,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay/index.html"),
         ),
         (
+            "Revue noyau residuel dependances source low high-safe gradient .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core/index.html"),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
