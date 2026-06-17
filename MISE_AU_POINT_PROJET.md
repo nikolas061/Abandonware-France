@@ -1089,6 +1089,36 @@ prix de nombreux faux. Sans `low_bucket`, le meilleur replay faux-free reste a
 6 chaines; la suite doit chercher un support terminal non-bucket plus large ou
 revenir a une source de delta moins bruitee.
 
+La passe union replay terminaux source exceptions low combine ensuite les
+candidats faux-free sans `low_bucket` issus du replay terminal et du contexte
+direct de chaine. Elle ajoute les candidats par gain de couverture sans conflit
+de prediction, mais garde le resultat en revue parce qu'il s'agit d'une union de
+selecteurs etroits.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union/selected.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union/roots.csv
+```
+
+Etat courant:
+
+```text
+Candidate rows: 1755
+Selected candidates: 9
+Covered roots: 25
+Chain-context candidates: 1743
+Terminal-replay candidates: 12
+Conflict roots: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: l'union sans conflit couvre 25 racines high-safe, ce qui est la
+meilleure piste locale actuelle, mais elle reste trop fragmente pour une
+promotion directe. La suite doit deriver un garde plus large ou transformer ces
+selecteurs en replay verifiable.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
