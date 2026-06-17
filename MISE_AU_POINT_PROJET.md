@@ -1149,6 +1149,34 @@ seuil compact actuel (`9` contextes), la meilleure garde ne couvre que `19`
 racines; la suite doit analyser les 6 misses ou trouver un signal plus stable
 que `terminal_context+root_target_y_mod8+root_shape_start_key`.
 
+La passe split garde union replay reprend alors la meilleure garde compacte
+(`terminal_context+root_gradient_class`), isole ses trois groupes mixtes et
+cherche un champ additionnel capable de couvrir les 6 misses sans faux. Le
+meilleur split ajoute `root_length_mod16`.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_split/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_split/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_split/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_split/misses.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_split/contexts.csv
+```
+
+Etat courant:
+
+```text
+Base guard: 19 roots / 9 contexts
+Miss roots: 6
+Best split: 6 roots / 5 contexts
+Combined guard: 25 roots / 14 contexts
+Promotion-ready bytes: 0
+```
+
+Conclusion: le split reduit fortement la fragmentation (`14` contextes au lieu
+de `21`) et couvre toutes les racines de l'union, mais reste au-dessus du seuil
+compact de `9` contextes. La suite doit reduire ces 5 contextes additionnels ou
+transformer la garde deux niveaux en replay verifie avant promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
