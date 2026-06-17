@@ -1513,6 +1513,39 @@ exact; il ne reste pour lui que le template spatial cible `56 + [-1,-2,-1,-3,0]`
 La prochaine piste concrete est donc d'etendre le producteur compact/control du
 pont cinq octets `80:7-12`.
 
+La sonde combinator cinq octets teste ensuite des compositions locales entre
+l'ancre spatiale et deux bytes du segment compresse (`seg_ref+2`, `seg_ref+3`):
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator/templates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_combinator/diagnostics.csv
+```
+
+Etat courant:
+
+```text
+Target spans: 1
+Target bytes: 5
+Compact exact bytes: 5
+Known reference len5 rows: 0
+Diagnostic eval rows: 12
+Diagnostic false rows: 9
+Diagnostic false spans: 1
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: `80:7-12` est reconstruit par le combinator compact
+`anchor-1, seg_ref+3, anchor-1, seg_ref+2, anchor` avec `anchor=56`,
+`seg_ref+2=53` et `seg_ref+3=54`. Le meme type de template produit cependant
+des faux sur le span diagnostic `21:281-286`, et aucune reference connue de
+longueur 5 ne permet encore une garde de promotion. La prochaine piste concrete
+est donc une garde non-oracle qui separe le pont cinq octets du frontier `80`
+du faux diagnostic `21:281-286`.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
