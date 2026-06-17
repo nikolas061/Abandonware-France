@@ -1404,6 +1404,56 @@ replayables mais restent en conflit low (`6f` correct sur frontier 26,
 `6e` faux contre `6d` sur frontier 50). Il faut maintenant splitter ce
 contexte low ou debloquer plus de prefixes avant une autre promotion.
 
+Le split low source-enriched teste ensuite les features sequence + source sur
+les slots replayables:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_low_split/index.html
+output/tex_micro_mixed_value_payload_sequence_low_split/rules.csv
+output/tex_micro_mixed_value_payload_sequence_low_split/slots.csv
+```
+
+Etat courant:
+
+```text
+Features: 75
+Feature sets: 2850
+Replayable unknown slots: 2
+False-free split sets: 409
+Best false-free split: compressed_b-1
+Best false-free split correct/unknown: 1/1
+Best conflicted correct/false: 1/1
+Promotion-candidate bytes: 1
+Issue rows: 0
+```
+
+Le replay promu ecrit ce candidat unique:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_low_split_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_low_split_promoted_replay/fixtures.csv
+output/tex_micro_mixed_value_payload_sequence_low_split_promoted_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Split candidate rows: 1
+Promoted rows: 1
+Low-split added bytes: 1
+Low-split exact bytes: 1
+Low-split false bytes: 0
+Skipped known/rejected bytes: 0/0
+Issue rows: 0
+Total clean bytes: 9407
+Remaining unresolved bytes: 8039
+Full HD previews: 32
+```
+
+Conclusion: le byte `6f` de `dinodead.pcx` frontier 26 offset absolu 412 est
+maintenant promu via `compressed_b-1=b6`. La prochaine etape est d'elargir les
+prefixes connus pour debloquer les 18 slots sequence encore bloques.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 

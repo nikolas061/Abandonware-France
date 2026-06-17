@@ -307,6 +307,15 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_sequence_promoted_generalization_probe.py"],
         ),
         Step(
+            "split low sequence mixed-value micro-token .tex",
+            [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_sequence_low_split_probe.py"],
+        ),
+        Step(
+            "promotion split low sequence mixed-value micro-token .tex",
+            [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_sequence_low_split_promoted_replay.py"],
+            requires_pillow=True,
+        ),
+        Step(
             "spatial payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_spatial_probe.py"],
         ),
