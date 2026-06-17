@@ -132,6 +132,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_SOURCE_WINDOW_SUMMARY = Path(
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_CONTROL_OPCODE_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_control_opcode/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_ROW_TRANSITION_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_row_transition/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -695,6 +698,21 @@ def gradient_sequence_high_safe_control_opcode_action(summary: dict[str, str]) -
     return "inspect sequence control/opcode residuals"
 
 
+def gradient_sequence_high_safe_row_transition_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient sequence row-transition probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote gradient sequence row-transition candidates"
+    if (
+        int_value(summary, "slots") > 0
+        and int_value(summary, "fixed_best_false_slots") > int_value(summary, "fixed_best_exact_slots")
+        and int_value(summary, "gate_best_false_slots") >= int_value(summary, "gate_best_exact_slots")
+        and int_value(summary, "gate_best_false_free_slots") <= 8
+    ):
+        return "reject cross-row low transitions and seek row-local low Markov grammar"
+    return "inspect sequence row-transition residuals"
+
+
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
     if int_value(summary, "false_free_byte_slots") > 0:
         return "replay false-free mixed-value payload byte combos"
@@ -1183,6 +1201,7 @@ def build_queue(
     gradient_sequence_high_safe_transform_low_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_source_window_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_control_opcode_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_row_transition_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -2621,6 +2640,43 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_high_safe_control_opcode_action(
                     gradient_sequence_high_safe_control_opcode_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_row_transition_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_row_transition_fixed="
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('fixed_best_exact_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('fixed_best_false_slots', '0')}",
+                    f"gradient_sequence_row_transition_gate="
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('gate_best_exact_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('gate_best_false_slots', '0')}",
+                    f"gradient_sequence_row_transition_ff_slots="
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('gate_best_false_free_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_row_transition_fixed_candidate="
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('fixed_best_candidate', '')}",
+                    f"gradient_sequence_row_transition_gate_candidate="
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('gate_best_candidate', '')}/"
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('gate_best_feature_set', '')}",
+                    f"gradient_sequence_row_transition_promotion_ready="
+                    f"{gradient_sequence_high_safe_row_transition_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_row_transition_action(
+                    gradient_sequence_high_safe_row_transition_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -6322,6 +6378,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_sequence_high_safe_row_transition_summary:
+                    next_action = gradient_sequence_high_safe_row_transition_action(
+                        gradient_sequence_high_safe_row_transition_summary
+                    )
                 elif gradient_sequence_high_safe_control_opcode_summary:
                     next_action = gradient_sequence_high_safe_control_opcode_action(
                         gradient_sequence_high_safe_control_opcode_summary
@@ -7072,6 +7132,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_CONTROL_OPCODE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-row-transition-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_ROW_TRANSITION_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -7594,6 +7659,16 @@ def main() -> None:
     gradient_sequence_high_safe_control_opcode_summary = (
         gradient_sequence_high_safe_control_opcode_rows[0]
         if gradient_sequence_high_safe_control_opcode_rows
+        else None
+    )
+    gradient_sequence_high_safe_row_transition_rows = (
+        read_rows(args.gradient_sequence_high_safe_row_transition_summary)
+        if args.gradient_sequence_high_safe_row_transition_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_row_transition_summary = (
+        gradient_sequence_high_safe_row_transition_rows[0]
+        if gradient_sequence_high_safe_row_transition_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -8374,6 +8449,7 @@ def main() -> None:
         gradient_sequence_high_safe_transform_low_summary,
         gradient_sequence_high_safe_source_window_summary,
         gradient_sequence_high_safe_control_opcode_summary,
+        gradient_sequence_high_safe_row_transition_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

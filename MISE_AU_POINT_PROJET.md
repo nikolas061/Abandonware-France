@@ -580,6 +580,39 @@ borne par le high-safe; le low reste bruite et aucun contexte low false-free
 n'apparait. La prochaine piste doit viser une grammaire de transition low
 cross-row plutot qu'une ancre controle/opcode directe.
 
+La passe de transition low cross-row compare ensuite les sequences de 32 lows
+entre rows (`prev_file`, `next_file`, `dist+320`, `dist-320` et variantes meme
+frontier), avec offsets relatifs voisins et transforms `id`, `+n`, `xor n`:
+
+```text
+output/tex_gradient_sequence_high_safe_row_transition/index.html
+output/tex_gradient_sequence_high_safe_row_transition/summary.csv
+output/tex_gradient_sequence_high_safe_row_transition/fixed_candidates.csv
+output/tex_gradient_sequence_high_safe_row_transition/gated_rules.csv
+output/tex_gradient_sequence_high_safe_row_transition/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Slot rows: 10
+Relations: 6
+Fixed candidates: 990
+Best fixed transition: prev_file:+1:xor0 = 75 exact / 204 false
+Gate candidates: 14
+Gate feature sets: 379
+Best gated transition: same_frontier-320:-2:xor1 + target_x_mod32 + gradient_class = 18 exact / 20 false
+Best gated false-free: same_frontier-320:-2:xor1 + rel_mod16 + row_quarter + source_low = 8 slots
+Promotion candidate bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: la transition cross-row apporte plus de signal brut que les ancres
+controle/opcode, mais reste trop fausse en contexte large et trop faible en
+false-free. La suite doit chercher une grammaire low locale/Markov propre aux
+rows plutot qu'une propagation directe depuis une autre row.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
