@@ -887,6 +887,37 @@ aucun des bytes cible `gradient_like`; les voisins connus donnent seulement un
 indice bruite. La suite doit chercher un unlock payload/corpus plus amont, pas
 un selecteur d'exception supplementaire.
 
+La passe dependances source exceptions low remonte alors au `source_profile`
+effectif de ces 320 slots. Elle calcule l'offset source reel
+`source_profile_offset + relative_offset`, verifie si la source est deja connue
+dans le replay formule ou directement disponible dans `segment_gap`, puis
+construit les aretes quand cette source pointe vers un autre slot high-safe.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency/slots.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency/edges.csv
+```
+
+Etat courant:
+
+```text
+Source available slots: 157 / 320
+Source unknown slots: 163
+Unknown source in high-safe graph: 101
+Unknown source outside high-safe graph: 62
+Exception source unknown slots: 38
+Exception source unknown in high-safe graph: 24
+Dependency edges: 12
+Top unknown dependency edge: 78|195->80|204 = 28 slots
+Promotion-ready bytes: 0
+```
+
+Conclusion: l'unlock amont est maintenant localise. Une partie du blocage est
+un graphe high-safe interne a resoudre avant de revenir aux lows minoritaires;
+le reste depend encore de sources externes au sous-graphe.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
