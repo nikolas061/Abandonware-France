@@ -605,6 +605,32 @@ nibble haut et presque aucun replay raw. La prochaine passe doit donc chercher
 une transformation litterale/geometrique dans les clusters `skip/op8`, pas une
 copie directe de fenetre source.
 
+La sonde litterale/geometrique des clusters `skip/op8` teste ensuite les pools
+source (`segment_gap`, `control_prefix`, `fragment`, `decoded_replay`) avec des
+transformations simples, puis les copies spatiales avant/arriere jusqu'a 700
+pixels:
+
+```text
+output/tex_gradient_macro_state_cluster_literal/index.html
+output/tex_gradient_macro_state_cluster_literal/rows.csv
+output/tex_gradient_macro_state_cluster_literal/sources.csv
+output/tex_gradient_macro_state_cluster_literal/distances.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1404
+Best source total: 93 / 1404
+Best spatial: fwd 1 identity 608 / 1338, exact rows 0
+Back distance 320: 188 / 540, exact rows 1
+Promotion-ready bytes: 0
+```
+
+Conclusion: les transformations litterales et la geometrie large ne donnent pas
+de regle promotable. La seule piste concrete est d'isoler la ligne exacte a
+distance -320, puis de verifier si elle cache une sous-classe stricte.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

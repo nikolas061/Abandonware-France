@@ -123,6 +123,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             "source cluster etat macro opcode gradient .tex",
             [sys.executable, "tools/lolg_tex_gradient_macro_state_cluster_source_probe.py"],
         ),
+        Step(
+            "literal/geometrie cluster etat macro opcode gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_macro_state_cluster_literal_probe.py"],
+        ),
         Step("split micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_split.py"]),
         Step("positions micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_positions.py"]),
         Step("payload jump-mixed micro .tex", [sys.executable, "tools/lolg_tex_micro_jump_mixed_payload_probe.py"]),
