@@ -1132,6 +1132,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Gating target-overlap garde cinq octets pont spatial sources terminales externes exceptions low high-safe gradient .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_overlap_gate/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),

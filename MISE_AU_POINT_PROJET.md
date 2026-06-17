@@ -2008,6 +2008,39 @@ grand pont `s|s|a|s|s` reste trop ambigu pour promotion. La prochaine piste
 concrete est donc de gater ce switch d'atome contre les templates qui recoupent
 la cible.
 
+La sonde de gating target-overlap teste ensuite si ce switch single-axis est
+directement porte par les templates qui recoupent la cible:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_overlap_gate/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_overlap_gate/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_overlap_gate/gates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_overlap_gate/families.csv
+```
+
+Etat courant:
+
+```text
+Switch position: 2
+Switch map: 29,54:s+1+0;29,55:s+6+2
+Target-overlap shape rows: 4
+Switch-applicable shape rows: 1
+Exact switch shape rows: 0
+Loose switch shape rows: 1
+Target direct switch rows: 0
+Target indirect switch rows: 1
+Shape mismatch rows: 3
+Best switch shape: a|s|s|s|s
+Best switch shape verdict: target_overlap_switch_indirect_only
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le switch existe bien dans une forme target-overlap, mais seulement
+en support indirect: la cible est portee par la famille `29`, tandis que le
+switch mesure `29,54` contre `29,55`. La prochaine piste concrete est donc de
+splitter le target-overlap par famille porteuse avant toute promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
