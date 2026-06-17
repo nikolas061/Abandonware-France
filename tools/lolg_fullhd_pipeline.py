@@ -294,6 +294,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_prefix_bootstrap_probe.py"],
         ),
         Step(
+            "replay prefixes/sequence payload mixed-value micro-token .tex",
+            [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_prefix_sequence_replay.py"],
+        ),
+        Step(
             "spatial payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_spatial_probe.py"],
         ),

@@ -1318,6 +1318,35 @@ bloquent les 2 candidats sequence, sans conflit entre predictions. C'est le
 premier pont non-oracle vers la piste sequence; il faut maintenant revoir cette
 union et la rejouer avec garde avant toute promotion.
 
+Le replay prefix/sequence applique ensuite les 12 prefixes candidats, puis les
+2 bytes sequence une fois leurs prerequis disponibles dans le replay simule:
+
+```text
+output/tex_micro_mixed_value_payload_prefix_sequence_replay/index.html
+output/tex_micro_mixed_value_payload_prefix_sequence_replay/rows.csv
+```
+
+Etat courant:
+
+```text
+Prefix candidate bytes: 12
+Prefix added bytes: 12
+Prefix false bytes: 0
+Sequence candidate bytes: 2
+Sequence unlocked bytes: 2
+Sequence added bytes: 2
+Sequence false bytes: 0
+Total added bytes: 14
+Total false bytes: 0
+Guarded replay bytes: 14
+Promotion-ready bytes: 0
+```
+
+Conclusion: le pont prefix non-oracle debloque bien les 2 bytes sequence et
+le replay simule ajoute 14 bytes sans faux. La prochaine etape est de
+promouvoir ce replay garde dans la chaine de decodeur, ou de le transformer en
+regles plus generales avant promotion.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
