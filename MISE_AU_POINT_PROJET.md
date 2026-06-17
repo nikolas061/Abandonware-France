@@ -469,6 +469,33 @@ Conclusion: `fixture_control_mod` retire le conflit, mais seulement en gardant
 donc pas une grammaire opcode suffisante; il faut elargir la grammaire de phase
 avant promotion.
 
+La sonde de sequence locale elargit ensuite la phase avec la position dans la
+frontier, les ecarts `op/span/start`, les longueurs voisines et les relations
+fixture/controle, sans utiliser les valeurs cible des voisins:
+
+```text
+output/tex_gradient_macro_phase_sequence/index.html
+output/tex_gradient_macro_phase_sequence/rows.csv
+output/tex_gradient_macro_phase_sequence/groups.csv
+output/tex_gradient_macro_phase_sequence/families.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1925
+Selector families: 24
+Best sequence phase: dominant_delta / neighbor_op_gap 936 / 522 / 467 singleton
+Lowest conflict sequence: dominant_delta / frontier_op_position 869 / 0 / 1056 singleton
+Best payload sequence: band_shape / sequence_signature 26 / 159 / 1740 singleton
+Promotion-ready bytes: 0
+```
+
+Conclusion: la sequence locale n'ameliore pas le signal global
+`op_index_band4` et les variantes sans conflit deviennent trop
+singleton-heavy. La prochaine passe doit donc chercher une grammaire de
+transition fixture/op plus large que la sequence locale d'une frontier.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
