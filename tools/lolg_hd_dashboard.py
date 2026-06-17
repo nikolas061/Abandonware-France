@@ -930,6 +930,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_high_low/index.html"),
         ),
         (
+            "Combinaisons sources mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_external_source_combo/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),

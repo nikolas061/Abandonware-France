@@ -1146,6 +1146,35 @@ des zones zero transformees par `xor_prefix` reproduisent le byte dominant; ce
 n'est pas une source promotable. La piste suivante doit chercher un etat de
 decodeur plus structurel que copie/source locale.
 
+La passe external-source combo reutilise ensuite les offsets `best`,
+`compressed` et `profile` de la sonde source, puis teste les bytes/high/low et
+deltas voisins en validation leave-one-row-out:
+
+```text
+output/tex_micro_mixed_value_payload_external_source_combo/index.html
+output/tex_micro_mixed_value_payload_external_source_combo/candidates.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Feature sets: 2211
+Candidate rows: 6633
+Best byte source combo: profile_b0+prev1 27/106
+Best false-free byte slots: 2
+Best false-free byte unknown slots: 565
+Best false-free high feature set: best_pool+best_d2
+Best false-free high slots: 14
+Best false-free high unknown slots: 553
+Promotion-ready bytes: 0
+```
+
+Conclusion: la source externe simple donne un meilleur indice high-nibble que
+les contextes locaux (14 slots false-free), mais le byte complet reste trop
+clairseme (2 slots seulement). La prochaine passe doit inspecter le low-nibble
+de ces 14 slots externes avant toute promotion.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
