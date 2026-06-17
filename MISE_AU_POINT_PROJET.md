@@ -443,6 +443,32 @@ Conclusion: le signal de phase se generalise bien pour le delta dominant, avec
 conflictuels et ne predit aucune forme payload repetee. La prochaine passe
 doit donc scinder les conflits `op_index` avant toute promotion opcode.
 
+Le split des conflits `op_index_band4` isole ensuite les quatre bins encore
+ambigus et teste fixture, longueur, ancres, fenetres controle et phases plus
+fines:
+
+```text
+output/tex_gradient_macro_phase_conflict_split/index.html
+output/tex_gradient_macro_phase_conflict_split/rows.csv
+output/tex_gradient_macro_phase_conflict_split/splits.csv
+output/tex_gradient_macro_phase_conflict_split/families.csv
+```
+
+Etat courant:
+
+```text
+Conflict groups: 4
+Conflict bytes: 530
+Best split: fixture_control_mod 138 / 0 / 392 singleton
+Lowest conflict split: fixture_control_mod 138 / 0 / 392 singleton
+Promotion-ready bytes: 0
+```
+
+Conclusion: `fixture_control_mod` retire le conflit, mais seulement en gardant
+138 bytes repetes et en isolant 392 bytes. La phase `op_index` seule n'est
+donc pas une grammaire opcode suffisante; il faut elargir la grammaire de phase
+avant promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

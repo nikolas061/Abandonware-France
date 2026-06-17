@@ -42,6 +42,9 @@ DEFAULT_GRADIENT_MACRO_RESIDUAL_STATE_SUMMARY = Path(
     "output/tex_gradient_macro_residual_state/summary.csv"
 )
 DEFAULT_GRADIENT_MACRO_PHASE_SUMMARY = Path("output/tex_gradient_macro_phase/summary.csv")
+DEFAULT_GRADIENT_MACRO_PHASE_CONFLICT_SPLIT_SUMMARY = Path(
+    "output/tex_gradient_macro_phase_conflict_split/summary.csv"
+)
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
@@ -195,6 +198,7 @@ def build_queue(
     gradient_macro_conflict_split_summary: dict[str, str] | None = None,
     gradient_macro_residual_state_summary: dict[str, str] | None = None,
     gradient_macro_phase_summary: dict[str, str] | None = None,
+    gradient_macro_phase_conflict_split_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -413,6 +417,33 @@ def build_queue(
             row = {
                 **row,
                 "next_action": "split op-index phase conflicts before gradient macro opcode promotion",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_macro_phase_conflict_split_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_phase_split_best="
+                    f"{gradient_macro_phase_conflict_split_summary.get('best_split_family', '')}",
+                    f"gradient_phase_split_deterministic="
+                    f"{gradient_macro_phase_conflict_split_summary.get('best_split_deterministic_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_phase_split_conflicted="
+                    f"{gradient_macro_phase_conflict_split_summary.get('best_split_conflicted_bytes', '0')}",
+                    f"gradient_phase_split_singleton="
+                    f"{gradient_macro_phase_conflict_split_summary.get('best_split_singleton_bytes', '0')}",
+                    f"gradient_phase_split_promotion_ready="
+                    f"{gradient_macro_phase_conflict_split_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "broaden gradient phase grammar; op-index conflict split leaves mostly singletons",
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -862,6 +893,37 @@ def build_queue(
                 next_action = (
                     "split gradient op-index phase conflicts; local source windows remain conflicted"
                 )
+            if (
+                gradient_macro_phase_conflict_split_summary
+                and gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_phase_split_best="
+                        f"{gradient_macro_phase_conflict_split_summary.get('best_split_family', '')}",
+                        f"gradient_phase_split_deterministic="
+                        f"{gradient_macro_phase_conflict_split_summary.get('best_split_deterministic_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_phase_split_singleton="
+                        f"{gradient_macro_phase_conflict_split_summary.get('best_split_singleton_bytes', '0')}",
+                        f"gradient_phase_split_promotion_ready="
+                        f"{gradient_macro_phase_conflict_split_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = (
+                    "broaden gradient phase grammar; op-index split collapses to singletons"
+                )
             row = {
                 **row,
                 "next_action": next_action,
@@ -1210,6 +1272,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_PHASE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-macro-phase-conflict-split-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_MACRO_PHASE_CONFLICT_SPLIT_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-jump-mixed-payload-summary",
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
@@ -1322,6 +1389,14 @@ def main() -> None:
         read_rows(args.gradient_macro_phase_summary) if args.gradient_macro_phase_summary.exists() else []
     )
     gradient_macro_phase_summary = gradient_macro_phase_rows[0] if gradient_macro_phase_rows else None
+    gradient_macro_phase_conflict_split_rows = (
+        read_rows(args.gradient_macro_phase_conflict_split_summary)
+        if args.gradient_macro_phase_conflict_split_summary.exists()
+        else []
+    )
+    gradient_macro_phase_conflict_split_summary = (
+        gradient_macro_phase_conflict_split_rows[0] if gradient_macro_phase_conflict_split_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -1410,6 +1485,7 @@ def main() -> None:
         gradient_macro_conflict_split_summary,
         gradient_macro_residual_state_summary,
         gradient_macro_phase_summary,
+        gradient_macro_phase_conflict_split_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,
