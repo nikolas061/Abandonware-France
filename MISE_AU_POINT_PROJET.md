@@ -2243,6 +2243,81 @@ Conclusion: la base carrier-context promue ajoute cinq sources disponibles
 noyau high-safe reste bloque a `93` sources inconnues. La prochaine piste
 concrete est de resoudre ces dependances high-safe restantes.
 
+Le coeur residuel carrier-context a isole des terminaux externes encore
+bloquants. La garde `delta_producer` valide le span `80:0-3` par le producteur
+`seg_abs@1,22:aba:low2_signed` et une garde non-oracle
+`span_length=3|anchor_side=right`, `anchor_rel <= 9`.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay/targets.csv
+```
+
+Etat de la garde:
+
+```text
+Rejected target bytes: 3
+Guard rows: 292
+False-free guard rows: 100
+Best target span: 80:0-3
+Best selector: seg_abs@1,22:aba:low2_signed
+Best known exact rows: 5
+Best known false rows: 0
+Best rejected false rows: 1
+Promotion-ready bytes: 3
+Issue rows: 0
+```
+
+Le replay promu applique ces trois octets sur la base carrier-context:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted/fixtures.csv
+```
+
+Etat du replay promu:
+
+```text
+Target rows: 1
+Guard candidate bytes: 3
+Guard added bytes: 3
+Guard exact bytes: 3
+Guard false bytes: 0
+Total clean bytes: 9790
+Promotion-ready bytes: 3
+Issue rows: 0
+```
+
+La consommation source-dependency de cette base montre le gain reel:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay/index.html
+```
+
+Etat apres promotion delta-guard:
+
+```text
+Source available slots: 173
+Source unknown slots: 147
+Source unknown in high-safe slots: 93
+Source unknown outside high-safe slots: 54
+Exception source unknown slots: 32
+Terminal known chains: 90
+Terminal unknown outside chains: 3
+Remaining external blocker: 58:9-10
+```
+
+Conclusion: la promotion delta-guard ajoute trois sources disponibles
+(`170 -> 173`) et reduit les chaines terminales externes (`6 -> 3`). Le dernier
+blocker terminal externe est le span `58:9-10` (`33`), couvert par
+`control_prefix@5:add_const=02`; la prochaine piste concrete est de revoir ce
+source candidate avant promotion gardee.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

@@ -294,6 +294,24 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRID
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_CARRIER_CONTEXT_PROMOTED_REPLAY_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_DELTA_PRODUCER_GUARD_CARRIER_CONTEXT_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_DELTA_PRODUCER_GUARD_CARRIER_CONTEXT_PROMOTED_REPLAY_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_DELTA_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SOURCE_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SMALL_NONZERO_SELECTOR_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1210,6 +1228,67 @@ def gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_
     if int_value(summary, "source_unknown_outside_highsafe_slots") > 0:
         return "seek external source unlock after carrier-context promoted replay consumption"
     return "rerun downstream gradient probes with carrier-context promoted replay base"
+
+
+def gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix guarded compact/control bridge delta producer guard issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote guarded compact/control bridge delta producer bytes"
+    return "expand non-oracle guard thresholds for compact/control bridge delta producers"
+
+
+def gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_promoted_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix guarded compact/control bridge delta promoted replay issues"
+    if int_value(summary, "guard_false_bytes") > 0:
+        return "reject guarded compact/control bridge delta promotion false bytes"
+    if int_value(summary, "guard_added_bytes") > 0:
+        return "consume guarded compact/control bridge delta promoted replay as gradient base"
+    return "expand guarded compact/control bridge delta promotion targets"
+
+
+def gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix delta-guard promoted source-dependency probe issues"
+    if int_value(summary, "source_unknown_outside_highsafe_slots") > 0:
+        return "resolve remaining external terminal source after delta-guard promotion"
+    if int_value(summary, "source_unknown_in_highsafe_slots") > 0:
+        return "derive terminal transforms from delta-guard promoted known chains"
+    return "rerun downstream gradient probes with delta-guard promoted replay base"
+
+
+def gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix delta-guard promoted external terminal source review issues"
+    if int_value(summary, "small_nonzero_blocker_spans") > 0:
+        return "probe final small unresolved nonzero external terminal source span"
+    if int_value(summary, "blocker_source_bytes") > 0:
+        return "split remaining external terminal source blocker spans"
+    return "rerun residual source-dependency core after delta-guard terminal cleanup"
+
+
+def gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix delta-guard promoted final small-nonzero selector issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote final guarded small-nonzero external terminal source bytes"
+    if (
+        int_value(summary, "covered_target_bytes") == int_value(summary, "target_bytes")
+        and int_value(summary, "target_bytes") > 0
+    ):
+        return "review final small-nonzero source candidates before guarded promotion"
+    return "derive final small-nonzero external terminal selector"
 
 
 def gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
@@ -2131,6 +2210,28 @@ def build_queue(
     gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary: dict[str, str]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_external_terminal_source_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary: dict[str, str]
@@ -5604,6 +5705,123 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_action(
                     gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_ready="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary.get('promotion_ready_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary.get('rejected_target_bytes', '0')}",
+                    f"gradient_sequence_low_exception_delta_guard_known_exact="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary.get('best_known_exact_rows', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_false="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary.get('best_known_false_rows', '0')}",
+                    f"gradient_sequence_low_exception_delta_guard_issues="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_added="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary.get('guard_added_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary.get('guard_candidate_bytes', '0')}",
+                    f"gradient_sequence_low_exception_delta_guard_total_clean="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary.get('total_clean_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_promoted_false="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary.get('guard_false_bytes', '0')}",
+                    f"gradient_sequence_low_exception_delta_guard_promoted_issues="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary.get('issue_rows', '0')}",
+                ],
+            )
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_source_available="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary.get('source_available_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary.get('slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_source_outside_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary.get('source_unknown_outside_highsafe_slots', '0')}",
+                    f"gradient_sequence_low_exception_delta_guard_source_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_terminal_known="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary.get('terminal_known_chains', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_terminal_external="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary.get('terminal_unknown_outside_chains', '0')}",
+                ],
+            )
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary
+        ):
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_final_blocker="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary.get('top_blocker_span', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary.get('top_blocker_span_source_bytes', '0')}",
+                ],
+            )
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_delta_guard_final_selector_cover="
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary.get('covered_target_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary.get('target_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -9306,6 +9524,36 @@ def build_queue(
                         flat_walk_palette_promotion_candidate_summary,
                     )
                 elif (
+                    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_promoted_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary
+                    )
+                elif (
                     gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_summary
                 ):
                     next_action = gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_action(
@@ -10442,6 +10690,36 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_CARRIER_CONTEXT_PROMOTED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-external-terminal-spatial-bridge-delta-producer-guard-carrier-context-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_DELTA_PRODUCER_GUARD_CARRIER_CONTEXT_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-external-terminal-spatial-bridge-delta-producer-guard-carrier-context-promoted-replay-promoted-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_DELTA_PRODUCER_GUARD_CARRIER_CONTEXT_PROMOTED_REPLAY_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-delta-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-delta-guard-promoted-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_DELTA_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-external-terminal-source-delta-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SOURCE_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-external-terminal-small-nonzero-selector-delta-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SMALL_NONZERO_SELECTOR_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -11375,6 +11653,78 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_summary = (
         gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_rows[0]
         if gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary = (
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_rows = (
+        read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary)
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_rows[0]
+        if gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_rows[0]
+        if gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_rows = (
+        read_rows(args.gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary)
+        if args.gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_rows[0]
+        if gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_rows[0]
+        if gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_rows
         else None
     )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
@@ -12486,6 +12836,12 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_carrier_context_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core_summary,
+        gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_source_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary,

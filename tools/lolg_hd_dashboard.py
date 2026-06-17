@@ -1174,6 +1174,36 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Garde producteur delta pont spatial base carrier-context promue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion garde producteur delta pont spatial base carrier-context promue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres promotion delta-guard .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_replay/index.html"),
+        ),
+        (
+            "Coeur residuel dependances source apres promotion delta-guard .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_dependency_delta_guard_promoted_residual_core/index.html"),
+        ),
+        (
+            "Sources terminales externes apres promotion delta-guard .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source_delta_guard_promoted_replay/index.html"),
+        ),
+        (
+            "Selecteur small nonzero final apres promotion delta-guard .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_delta_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
