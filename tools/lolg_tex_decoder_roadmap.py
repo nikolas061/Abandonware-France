@@ -114,6 +114,9 @@ DEFAULT_GRADIENT_NONLOCAL_KNOWN_SPATIAL_SUMMARY = Path(
 DEFAULT_GRADIENT_SEQUENCE_KNOWN_STATE_SUMMARY = Path(
     "output/tex_gradient_sequence_known_state/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -589,6 +592,20 @@ def gradient_sequence_known_state_action(summary: dict[str, str]) -> str:
     ):
         return "keep sequence high nibble as partial signal and seek low/full gradient resolver"
     return "inspect gradient sequence known-state residuals"
+
+
+def gradient_sequence_high_safe_low_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient sequence high-safe low probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote gradient sequence high-safe low candidates"
+    if (
+        int_value(summary, "high_safe_slots") > 0
+        and int_value(summary, "target_low_best_false_free_slots") <= 5
+        and int_value(summary, "target_low_best_false_slots") > 0
+    ):
+        return "reject sparse sequence high-safe low shortcuts and search richer gradient low state"
+    return "inspect sequence high-safe low residuals"
 
 
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
@@ -1073,6 +1090,7 @@ def build_queue(
     gradient_seed_delta_payload_opcode_summary: dict[str, str] | None = None,
     gradient_nonlocal_known_spatial_summary: dict[str, str] | None = None,
     gradient_sequence_known_state_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -1633,6 +1651,37 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_known_state_action(
                     gradient_sequence_known_state_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_sequence_high_safe_low_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_high_safe_slots="
+                    f"{gradient_sequence_high_safe_low_summary.get('high_safe_slots', '0')}",
+                    f"gradient_sequence_high_safe_rows="
+                    f"{gradient_sequence_high_safe_low_summary.get('high_safe_rows', '0')}",
+                    f"gradient_sequence_low_false_free_slots="
+                    f"{gradient_sequence_high_safe_low_summary.get('target_low_best_false_free_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_best_false="
+                    f"{gradient_sequence_high_safe_low_summary.get('target_low_best_false_slots', '0')}",
+                    f"gradient_sequence_full_best_false="
+                    f"{gradient_sequence_high_safe_low_summary.get('full_best_false_slots', '0')}",
+                    f"gradient_sequence_high_safe_promotion_ready="
+                    f"{gradient_sequence_high_safe_low_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_action(
+                    gradient_sequence_high_safe_low_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -5999,6 +6048,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_sequence_high_safe_low_summary:
+                    next_action = gradient_sequence_high_safe_low_action(
+                        gradient_sequence_high_safe_low_summary
+                    )
                 elif gradient_sequence_known_state_summary:
                     next_action = gradient_sequence_known_state_action(
                         gradient_sequence_known_state_summary
@@ -6695,6 +6748,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_KNOWN_STATE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -7157,6 +7215,16 @@ def main() -> None:
     gradient_sequence_known_state_summary = (
         gradient_sequence_known_state_rows[0]
         if gradient_sequence_known_state_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_rows = (
+        read_rows(args.gradient_sequence_high_safe_low_summary)
+        if args.gradient_sequence_high_safe_low_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_summary = (
+        gradient_sequence_high_safe_low_rows[0]
+        if gradient_sequence_high_safe_low_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -7931,6 +7999,7 @@ def main() -> None:
         gradient_seed_delta_payload_opcode_summary,
         gradient_nonlocal_known_spatial_summary,
         gradient_sequence_known_state_summary,
+        gradient_sequence_high_safe_low_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

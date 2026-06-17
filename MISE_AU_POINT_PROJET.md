@@ -396,6 +396,35 @@ large que les copies spatiales, mais il ne resout ni le byte complet ni le
 low-nibble. Il faut garder ce high comme indice de phase et chercher un
 resolveur low/full distinct.
 
+La passe high-safe low de sequence applique ensuite la meilleure regle
+high-nibble false-free (`gradient_class + top_nibble + prev_known_byte`) puis
+cherche le low/full uniquement dans les slots high-safe:
+
+```text
+output/tex_gradient_sequence_high_safe_low/index.html
+output/tex_gradient_sequence_high_safe_low/rules.csv
+output/tex_gradient_sequence_high_safe_low/slots.csv
+```
+
+Etat courant:
+
+```text
+High-safe slots: 320
+High-safe rows: 10
+Low feature sets: 2601
+Full false-free sets: 18
+Best full false-free slots: 5
+Best full rule: x_mod8 + prev_gap_bucket + unknown_before_mod16 = 50 exact / 102 false
+Target-low false-free sets: 18
+Best target-low false-free slots: 5
+Best target-low rule: x_mod8 + prev_gap_bucket + unknown_before_mod16 = 50 exact / 102 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: le high-safe de sequence ne suffit pas; les false-free low/full ne
+couvrent que 5 slots et les meilleurs contextes reutilisables restent faux. La
+suite doit enrichir l'etat low, pas promouvoir cette sous-piste.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
