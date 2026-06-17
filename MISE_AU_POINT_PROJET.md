@@ -1202,6 +1202,34 @@ meilleur resolver low ne produit aucun vrai positif en LOO, et aucune
 combinaison low false-free n'est disponible. Cette branche est donc rejetee
 avant promotion; la suite doit chercher un etat de byte plus riche.
 
+La passe state/external combo croise ensuite les meilleurs signaux d'etat
+opcode (`signal_*`, `prefix_*`, `fragment_*`) avec les sources externes et les
+features locales (`pos8`, `pos16`, `step`):
+
+```text
+output/tex_micro_mixed_value_payload_state_external_combo/index.html
+output/tex_micro_mixed_value_payload_state_external_combo/candidates.csv
+```
+
+Etat courant:
+
+```text
+Feature sets: 3627
+Candidate rows: 10881
+Best byte state/external combo: signal_byte+fragment_byte+best_pool 33/140
+Best false-free byte slots: 0
+Best high state/external combo: prefix_high+pos16+step 182/69
+Best false-free high feature set: fragment_class+best_pool+best_d2
+Best false-free high slots: 14
+Promotion-ready bytes: 0
+```
+
+Conclusion: le croisement etat/source ameliore le high-nibble global mais ne
+donne aucun resolver byte complet. Les meilleurs bytes restent massivement
+faux et les 14 slots high false-free retombent sur la meme limite que la
+passe high/low externe. La suite doit quitter les combos statiques et chercher
+un etat sequentiel du flux.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 

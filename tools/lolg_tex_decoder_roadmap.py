@@ -133,6 +133,9 @@ DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_EXTERNAL_SOURCE_COMBO_SUMMARY = Path(
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_EXTERNAL_HIGH_LOW_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_external_high_low/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_STATE_EXTERNAL_COMBO_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_state_external_combo/summary.csv"
+)
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_spatial/summary.csv"
 )
@@ -348,6 +351,16 @@ def mixed_value_external_high_low_action(summary: dict[str, str]) -> str:
     return "expand external mixed-value low-nibble resolver candidates"
 
 
+def mixed_value_state_external_combo_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote mixed-value state/external byte resolver"
+    if int_value(summary, "best_false_free_byte_slots") > 0:
+        return "review false-free mixed-value state/external byte slots"
+    if int_value(summary, "best_byte_false_slots") >= int_value(summary, "best_byte_correct_slots"):
+        return "discard crossed mixed-value state/external byte combos and search sequence state"
+    return "expand crossed mixed-value state/external combo features"
+
+
 def flat_walk_palette_formula_replay_consumed(
     summary: dict[str, str],
     candidate_summary: dict[str, str] | None = None,
@@ -401,6 +414,7 @@ def build_queue(
     micro_mixed_value_payload_source_profile_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_external_source_combo_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_external_high_low_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_state_external_combo_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_spatial_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_state_opcode_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
@@ -1625,6 +1639,37 @@ def build_queue(
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_state_external_combo_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_state_external_best_byte="
+                    f"{micro_mixed_value_payload_state_external_combo_summary.get('best_byte_feature_set', '')}/"
+                    f"{micro_mixed_value_payload_state_external_combo_summary.get('best_byte_correct_slots', '0')}"
+                    f"_{micro_mixed_value_payload_state_external_combo_summary.get('best_byte_false_slots', '0')}",
+                    f"mixed_value_state_external_best_high="
+                    f"{micro_mixed_value_payload_state_external_combo_summary.get('best_high_feature_set', '')}/"
+                    f"{micro_mixed_value_payload_state_external_combo_summary.get('best_high_correct_slots', '0')}"
+                    f"_{micro_mixed_value_payload_state_external_combo_summary.get('best_high_false_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_state_external_false_free_byte="
+                    f"{micro_mixed_value_payload_state_external_combo_summary.get('best_false_free_byte_slots', '0')}",
+                    f"mixed_value_state_external_promotion_ready="
+                    f"{micro_mixed_value_payload_state_external_combo_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_state_external_combo_action(
+                    micro_mixed_value_payload_state_external_combo_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_spatial_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -1804,6 +1849,32 @@ def build_queue(
                 )
                 next_action = mixed_value_external_high_low_action(
                     micro_mixed_value_payload_external_high_low_summary
+                )
+            if micro_mixed_value_payload_state_external_combo_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_state_external_best_byte="
+                        f"{micro_mixed_value_payload_state_external_combo_summary.get('best_byte_feature_set', '')}/"
+                        f"{micro_mixed_value_payload_state_external_combo_summary.get('best_byte_correct_slots', '0')}"
+                        f"_{micro_mixed_value_payload_state_external_combo_summary.get('best_byte_false_slots', '0')}",
+                        f"mixed_value_state_external_best_high="
+                        f"{micro_mixed_value_payload_state_external_combo_summary.get('best_high_feature_set', '')}/"
+                        f"{micro_mixed_value_payload_state_external_combo_summary.get('best_high_correct_slots', '0')}"
+                        f"_{micro_mixed_value_payload_state_external_combo_summary.get('best_high_false_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_state_external_false_free_byte="
+                        f"{micro_mixed_value_payload_state_external_combo_summary.get('best_false_free_byte_slots', '0')}",
+                        f"mixed_value_state_external_promotion_ready="
+                        f"{micro_mixed_value_payload_state_external_combo_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = mixed_value_state_external_combo_action(
+                    micro_mixed_value_payload_state_external_combo_summary
                 )
             if micro_mixed_value_payload_state_opcode_summary and jump_token_payload_state_opcode_summary:
                 positive_evidence = append_evidence(
@@ -2712,6 +2783,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif micro_mixed_value_payload_state_external_combo_summary:
+                    next_action = mixed_value_state_external_combo_action(
+                        micro_mixed_value_payload_state_external_combo_summary
+                    )
                 elif micro_mixed_value_payload_external_high_low_summary:
                     next_action = mixed_value_external_high_low_action(
                         micro_mixed_value_payload_external_high_low_summary
@@ -3231,6 +3306,11 @@ def main() -> None:
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_EXTERNAL_HIGH_LOW_SUMMARY,
     )
     parser.add_argument(
+        "--micro-mixed-value-payload-state-external-combo-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_STATE_EXTERNAL_COMBO_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-mixed-value-payload-spatial-summary",
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY,
@@ -3558,6 +3638,16 @@ def main() -> None:
         if micro_mixed_value_payload_external_high_low_rows
         else None
     )
+    micro_mixed_value_payload_state_external_combo_rows = (
+        read_rows(args.micro_mixed_value_payload_state_external_combo_summary)
+        if args.micro_mixed_value_payload_state_external_combo_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_state_external_combo_summary = (
+        micro_mixed_value_payload_state_external_combo_rows[0]
+        if micro_mixed_value_payload_state_external_combo_rows
+        else None
+    )
     micro_mixed_value_payload_spatial_rows = (
         read_rows(args.micro_mixed_value_payload_spatial_summary)
         if args.micro_mixed_value_payload_spatial_summary.exists()
@@ -3615,6 +3705,7 @@ def main() -> None:
         micro_mixed_value_payload_source_profile_summary,
         micro_mixed_value_payload_external_source_combo_summary,
         micro_mixed_value_payload_external_high_low_summary,
+        micro_mixed_value_payload_state_external_combo_summary,
         micro_mixed_value_payload_spatial_summary,
         micro_mixed_value_payload_state_opcode_summary,
     )
