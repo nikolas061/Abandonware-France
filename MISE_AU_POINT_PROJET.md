@@ -737,6 +737,35 @@ Conclusion: les selecteurs locaux d'exceptions sont trop bruites et ne
 produisent aucun slot false-free. La suite doit chercher un alignement
 cross-row/corpus des exceptions, pas une selection locale par position/source.
 
+La passe alignement exceptions low teste ensuite les masques d'exceptions entre
+rows: chaque row source peut predire ses exceptions vers une row cible avec un
+shift de sequence `-12..12`, en mode exact ou en mode contraint `same_bucket`.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_alignment/index.html
+output/tex_gradient_sequence_high_safe_low_exception_alignment/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_alignment/alignments.csv
+output/tex_gradient_sequence_high_safe_low_exception_alignment/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Exception slots: 86
+Alignments: 4391
+Best alignment: same_bucket shift 8 = 6 correct / 0 false
+Best false-free alignment: same_bucket shift 8 = 6 slots
+Same-bucket false-free alignments: 165
+Promotion candidate bytes: 6
+Promotion-ready bytes: 0
+```
+
+Conclusion: il existe un petit signal pair-row propre, mais il est lie a une
+row source/cible specifique et ne suffit pas pour promouvoir. La suite doit
+revoir ces alignements false-free et chercher une regle de famille de rows avant
+toute injection.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
