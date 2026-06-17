@@ -706,6 +706,37 @@ signal, mais le resolver exact local ne bat pas la baseline majoritaire par
 bucket. La suite doit modeliser les exceptions minoritaires (`7/6`, `a`, `c`)
 plutot qu'un resolver exact general par bucket.
 
+La passe exceptions low isole ensuite uniquement les valeurs minoritaires de
+chaque bucket (`lo:7`, `lo:6`, `mid:a`, `hi:c`) et teste des selecteurs locaux
+qui ne predisent une exception que si le contexte d'entrainement est strictement
+cette exception:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception/index.html
+output/tex_gradient_sequence_high_safe_low_exception/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Majority slots: 234
+Exception slots: 86
+Exception targets: lo:7|lo:6|mid:a|hi:c
+Best exception target: mid:a / bucket_frontier_source = 15 correct / 14 false
+Combined exception best: 16 correct / 17 false / 287 unknown
+Combined false-free slots: 0
+Promotion candidate bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les selecteurs locaux d'exceptions sont trop bruites et ne
+produisent aucun slot false-free. La suite doit chercher un alignement
+cross-row/corpus des exceptions, pas une selection locale par position/source.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
