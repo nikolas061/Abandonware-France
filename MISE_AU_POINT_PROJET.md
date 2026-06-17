@@ -455,6 +455,38 @@ Conclusion: l'ajout source-profile ne transforme pas le high-safe de sequence
 en resolveur low/full. La couverture false-free gagne seulement un slot (6 au
 lieu de 5) et les meilleurs contextes reutilisables restent bruites.
 
+La passe row/corpus ajoute ensuite les positions absolues/modulo, la position
+dans la plage, la forme de ligne et les cles archive/fichier aux 320 slots
+sequence high-safe + source-profile:
+
+```text
+output/tex_gradient_sequence_high_safe_row_corpus_low/index.html
+output/tex_gradient_sequence_high_safe_row_corpus_low/rules.csv
+output/tex_gradient_sequence_high_safe_row_corpus_low/slots.csv
+```
+
+Etat courant:
+
+```text
+Row/corpus slots: 320
+High-safe rows: 10
+Feature sets: 59737 row_corpus_focused
+Full false-free sets: 656
+Best full false-free slots: 10
+Best full rule: end_mod16 + source_target_delta_mod32 = 56 exact / 136 false
+Best near-full rule: x_mod8 + src_rel_mod8 + offset_delta_bucket + row_third = 17 exact / 5 false
+Target-low false-free sets: 656
+Best target-low false-free slots: 10
+Best target-low rule: end_mod16 + source_target_delta_mod32 = 56 exact / 136 false
+Best near-low rule: x_mod8 + src_rel_mod8 + offset_delta_bucket + row_third = 17 exact / 5 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: row/corpus donne une petite borne false-free supplementaire (10
+slots) mais reste trop sparse, et le meilleur contexte large est encore plus
+bruite que le source-profile seul. La suite doit chercher un transform/low-split
+gradient plutot qu'une cle positionnelle directe.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
