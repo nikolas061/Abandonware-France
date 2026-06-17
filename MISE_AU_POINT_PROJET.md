@@ -837,6 +837,34 @@ elle est trop dependante de singletons: 5 conflits sur 6 seraient appris comme
 cas uniques. La prochaine passe doit generaliser ces `raw_pair` en familles
 d'offsets avant promotion.
 
+La sonde formule remplace ensuite l'apprentissage par paire brute par deux
+relations arithmetiques directes:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_formula_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_formula_probe/rows.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_formula_probe/groups.csv
+```
+
+Etat courant:
+
+```text
+Raw-delta groups: 4
+Transform formula exact rows: 14 / 14
+Transform formula exact conflicted rows: 6 / 6
+Offset formula exact rows: 14 / 14
+Offset formula exact conflicted rows: 6 / 6
+Pair formula exact rows: 14 / 14
+Pair formula exact conflicted rows: 6 / 6
+Pair formula mismatch rows: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: sur ce corpus, `transform_delta = -raw_delta_signed` resout les
+conflits sans table `raw_pair`, et `offset_delta = copy_offset - source_offset`
+reconstruit la paire exacte. La prochaine passe doit valider cette formule sur
+un corpus flat-walk palette plus large avant de convertir en promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
