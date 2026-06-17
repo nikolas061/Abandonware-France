@@ -57,6 +57,9 @@ DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_SUMMARY = Path(
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
+DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_SOURCE_SUMMARY = Path(
+    "output/tex_gradient_macro_state_cluster_source/summary.csv"
+)
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
@@ -215,6 +218,7 @@ def build_queue(
     gradient_macro_fixture_transition_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
+    gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -608,6 +612,40 @@ def build_queue(
                 **row,
                 "next_action": (
                     "probe source-window transforms inside skip/op8 clusters; payload exact does not repeat"
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_macro_state_cluster_source_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_cluster_source_linear="
+                    f"{gradient_macro_state_cluster_source_summary.get('linear_exact_bytes', '0')}",
+                    f"gradient_cluster_source_control_high="
+                    f"{gradient_macro_state_cluster_source_summary.get('control_high_exact_bytes', '0')}",
+                    f"gradient_cluster_source_start_high="
+                    f"{gradient_macro_state_cluster_source_summary.get('start_high_exact_bytes', '0')}",
+                    f"gradient_cluster_source_best="
+                    f"{gradient_macro_state_cluster_source_summary.get('best_source_target_kind', '')}/"
+                    f"{gradient_macro_state_cluster_source_summary.get('best_source_selector_family', '')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_cluster_source_control_raw="
+                    f"{gradient_macro_state_cluster_source_summary.get('control_raw_exact_bytes', '0')}",
+                    f"gradient_cluster_source_start_raw="
+                    f"{gradient_macro_state_cluster_source_summary.get('start_raw_exact_bytes', '0')}",
+                    f"gradient_cluster_source_promotion_ready="
+                    f"{gradient_macro_state_cluster_source_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": (
+                    "probe literal/geometric transforms inside skip/op8 clusters; source-window replay is weak"
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -1244,6 +1282,46 @@ def build_queue(
                 next_action = (
                     "probe source-window transforms inside skip/op8 clusters; payload exact does not repeat"
                 )
+            if (
+                gradient_macro_state_cluster_source_summary
+                and gradient_macro_state_cluster_payload_summary
+                and gradient_macro_state_cluster_summary
+                and gradient_macro_fixture_transition_summary
+                and gradient_macro_phase_sequence_summary
+                and gradient_macro_phase_conflict_split_summary
+                and gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_cluster_source_linear="
+                        f"{gradient_macro_state_cluster_source_summary.get('linear_exact_bytes', '0')}",
+                        f"gradient_cluster_source_control_high="
+                        f"{gradient_macro_state_cluster_source_summary.get('control_high_exact_bytes', '0')}",
+                        f"gradient_cluster_source_start_high="
+                        f"{gradient_macro_state_cluster_source_summary.get('start_high_exact_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_cluster_source_control_raw="
+                        f"{gradient_macro_state_cluster_source_summary.get('control_raw_exact_bytes', '0')}",
+                        f"gradient_cluster_source_start_raw="
+                        f"{gradient_macro_state_cluster_source_summary.get('start_raw_exact_bytes', '0')}",
+                        f"gradient_cluster_source_promotion_ready="
+                        f"{gradient_macro_state_cluster_source_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = (
+                    "probe literal/geometric transforms inside skip/op8 clusters; source-window replay is weak"
+                )
             row = {
                 **row,
                 "next_action": next_action,
@@ -1617,6 +1695,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-macro-state-cluster-source-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_SOURCE_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-jump-mixed-payload-summary",
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
@@ -1769,6 +1852,14 @@ def main() -> None:
     gradient_macro_state_cluster_payload_summary = (
         gradient_macro_state_cluster_payload_rows[0] if gradient_macro_state_cluster_payload_rows else None
     )
+    gradient_macro_state_cluster_source_rows = (
+        read_rows(args.gradient_macro_state_cluster_source_summary)
+        if args.gradient_macro_state_cluster_source_summary.exists()
+        else []
+    )
+    gradient_macro_state_cluster_source_summary = (
+        gradient_macro_state_cluster_source_rows[0] if gradient_macro_state_cluster_source_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -1862,6 +1953,7 @@ def main() -> None:
         gradient_macro_fixture_transition_summary,
         gradient_macro_state_cluster_summary,
         gradient_macro_state_cluster_payload_summary,
+        gradient_macro_state_cluster_source_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

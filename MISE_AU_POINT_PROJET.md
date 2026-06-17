@@ -577,6 +577,34 @@ ne se repete pas. La prochaine passe doit inspecter les transformations de
 fenetre/source a l'interieur de ces clusters plutot qu'une promotion par
 signature payload.
 
+La sonde source-window des clusters `skip/op8` croise ensuite ces memes lignes
+avec les compteurs de `tex_gradient_payload_state_opcode`:
+
+```text
+output/tex_gradient_macro_state_cluster_source/index.html
+output/tex_gradient_macro_state_cluster_source/rows.csv
+output/tex_gradient_macro_state_cluster_source/groups.csv
+output/tex_gradient_macro_state_cluster_source/families.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1404
+Cluster groups: 9
+Control raw exact bytes: 15
+Start raw exact bytes: 13
+Control high exact bytes: 102
+Start high exact bytes: 107
+Linear exact bytes: 194
+Promotion-ready bytes: 0
+```
+
+Conclusion: les fenetres controle/depart donnent seulement un faible signal de
+nibble haut et presque aucun replay raw. La prochaine passe doit donc chercher
+une transformation litterale/geometrique dans les clusters `skip/op8`, pas une
+copie directe de fenetre source.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
