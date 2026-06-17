@@ -865,6 +865,41 @@ conflits sans table `raw_pair`, et `offset_delta = copy_offset - source_offset`
 reconstruit la paire exacte. La prochaine passe doit valider cette formule sur
 un corpus flat-walk palette plus large avant de convertir en promotion.
 
+La validation corpus reprend enfin tous les `candidate_plan` produits par
+`palette_mix`, pas seulement les paires de signatures repetees. Pour chaque
+valeur du plan, elle relit l'octet brut du pool compresse et verifie directement
+`plan_shift = signed_delta(raw_byte, value)`:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_corpus_formula_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_corpus_formula_probe/rows.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_corpus_formula_probe/groups.csv
+```
+
+Etat courant:
+
+```text
+Target rows: 17
+Candidate target rows: 7
+Value rows: 49
+Known multi-signature value rows: 28
+Known conflicted value rows: 17
+Candidate pools: 2
+Transform sets: 7
+Shift formula exact rows: 49 / 49
+Shift formula exact known-multi rows: 28 / 28
+Shift formula exact conflicted rows: 17 / 17
+Shift formula mismatch rows: 0
+Missing raw rows: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: la formule se generalise sur tout le corpus actuellement couvert
+par un plan candidat, y compris `control_window`, `control_prefix`, les 7
+ensembles de transforms et les 17 occurrences de valeurs conflictuelles connues.
+La prochaine passe peut preparer une promotion candidate limitee aux lignes
+palette qui ont deja un `candidate_plan`.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

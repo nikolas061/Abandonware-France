@@ -57,6 +57,9 @@ DEFAULT_FLAT_WALK_PALETTE_COMPRESSED_COMBO_SUMMARY = Path(
 DEFAULT_FLAT_WALK_PALETTE_COMPRESSED_FORMULA_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_formula_probe/summary.csv"
 )
+DEFAULT_FLAT_WALK_PALETTE_CORPUS_FORMULA_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_corpus_formula_probe/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -264,6 +267,14 @@ def flat_walk_compressed_formula_action(summary: dict[str, str]) -> str:
     return "split raw-delta formula mismatches for flat-walk palette values"
 
 
+def flat_walk_corpus_formula_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote corpus-validated flat-walk palette formula"
+    if int_value(summary, "shift_formula_mismatch_rows") == 0 and int_value(summary, "shift_formula_exact_rows") > 0:
+        return "prepare promotion candidate from corpus-validated flat-walk palette formula"
+    return "split corpus flat-walk palette formula mismatches"
+
+
 def build_queue(
     decisions: list[dict[str, str]],
     gradient_payload_profile_summary: dict[str, str] | None = None,
@@ -289,6 +300,7 @@ def build_queue(
     flat_walk_palette_compressed_selector_summary: dict[str, str] | None = None,
     flat_walk_palette_compressed_combo_summary: dict[str, str] | None = None,
     flat_walk_palette_compressed_formula_summary: dict[str, str] | None = None,
+    flat_walk_palette_corpus_formula_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -1066,6 +1078,43 @@ def build_queue(
             row = {
                 **row,
                 "next_action": flat_walk_compressed_formula_action(flat_walk_palette_compressed_formula_summary),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and flat_walk_palette_corpus_formula_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"flat_walk_corpus_formula_exact="
+                    f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_exact_rows', '0')}/"
+                    f"{flat_walk_palette_corpus_formula_summary.get('value_rows', '0')}",
+                    f"flat_walk_corpus_formula_conflicted_exact="
+                    f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_exact_conflicted_rows', '0')}/"
+                    f"{flat_walk_palette_corpus_formula_summary.get('known_conflicted_value_rows', '0')}",
+                    f"flat_walk_corpus_formula_multi_exact="
+                    f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_exact_known_multi_rows', '0')}/"
+                    f"{flat_walk_palette_corpus_formula_summary.get('known_multi_signature_value_rows', '0')}",
+                    f"flat_walk_corpus_formula_pools="
+                    f"{flat_walk_palette_corpus_formula_summary.get('candidate_pools', '0')}",
+                    f"flat_walk_corpus_formula_transform_sets="
+                    f"{flat_walk_palette_corpus_formula_summary.get('transform_sets', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"flat_walk_corpus_formula_candidate_scope="
+                    f"{flat_walk_palette_corpus_formula_summary.get('candidate_target_rows', '0')}/"
+                    f"{flat_walk_palette_corpus_formula_summary.get('target_rows', '0')}",
+                    f"flat_walk_corpus_formula_mismatches="
+                    f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_mismatch_rows', '0')}",
+                    f"flat_walk_corpus_formula_promotion_ready="
+                    f"{flat_walk_palette_corpus_formula_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": flat_walk_corpus_formula_action(flat_walk_palette_corpus_formula_summary),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -2147,6 +2196,38 @@ def build_queue(
                     ],
                 )
                 next_action = flat_walk_compressed_formula_action(flat_walk_palette_compressed_formula_summary)
+            if flat_walk_palette_corpus_formula_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"flat_walk_corpus_formula_exact="
+                        f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_exact_rows', '0')}/"
+                        f"{flat_walk_palette_corpus_formula_summary.get('value_rows', '0')}",
+                        f"flat_walk_corpus_formula_conflicted_exact="
+                        f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_exact_conflicted_rows', '0')}/"
+                        f"{flat_walk_palette_corpus_formula_summary.get('known_conflicted_value_rows', '0')}",
+                        f"flat_walk_corpus_formula_multi_exact="
+                        f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_exact_known_multi_rows', '0')}/"
+                        f"{flat_walk_palette_corpus_formula_summary.get('known_multi_signature_value_rows', '0')}",
+                        f"flat_walk_corpus_formula_pools="
+                        f"{flat_walk_palette_corpus_formula_summary.get('candidate_pools', '0')}",
+                        f"flat_walk_corpus_formula_transform_sets="
+                        f"{flat_walk_palette_corpus_formula_summary.get('transform_sets', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"flat_walk_corpus_formula_candidate_scope="
+                        f"{flat_walk_palette_corpus_formula_summary.get('candidate_target_rows', '0')}/"
+                        f"{flat_walk_palette_corpus_formula_summary.get('target_rows', '0')}",
+                        f"flat_walk_corpus_formula_mismatches="
+                        f"{flat_walk_palette_corpus_formula_summary.get('shift_formula_mismatch_rows', '0')}",
+                        f"flat_walk_corpus_formula_promotion_ready="
+                        f"{flat_walk_palette_corpus_formula_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = flat_walk_corpus_formula_action(flat_walk_palette_corpus_formula_summary)
             row = {
                 **row,
                 "next_action": next_action,
@@ -2506,6 +2587,11 @@ def main() -> None:
         default=DEFAULT_FLAT_WALK_PALETTE_COMPRESSED_FORMULA_SUMMARY,
     )
     parser.add_argument(
+        "--flat-walk-palette-corpus-formula-summary",
+        type=Path,
+        default=DEFAULT_FLAT_WALK_PALETTE_CORPUS_FORMULA_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-payload-profile-summary",
         type=Path,
         default=DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY,
@@ -2820,6 +2906,14 @@ def main() -> None:
     flat_walk_palette_compressed_formula_summary = (
         flat_walk_palette_compressed_formula_rows[0] if flat_walk_palette_compressed_formula_rows else None
     )
+    flat_walk_palette_corpus_formula_rows = (
+        read_rows(args.flat_walk_palette_corpus_formula_summary)
+        if args.flat_walk_palette_corpus_formula_summary.exists()
+        else []
+    )
+    flat_walk_palette_corpus_formula_summary = (
+        flat_walk_palette_corpus_formula_rows[0] if flat_walk_palette_corpus_formula_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -2925,6 +3019,7 @@ def main() -> None:
         flat_walk_palette_compressed_selector_summary,
         flat_walk_palette_compressed_combo_summary,
         flat_walk_palette_compressed_formula_summary,
+        flat_walk_palette_corpus_formula_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,
