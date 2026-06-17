@@ -1230,6 +1230,36 @@ faux et les 14 slots high false-free retombent sur la meme limite que la
 passe high/low externe. La suite doit quitter les combos statiques et chercher
 un etat sequentiel du flux.
 
+La passe sequence-state teste ensuite les octets precedents, les deltas
+precedents, la forme locale du flux et les longueurs de run:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_state/index.html
+output/tex_micro_mixed_value_payload_sequence_state/candidates.csv
+output/tex_micro_mixed_value_payload_sequence_state/selected_rows.csv
+output/tex_micro_mixed_value_payload_sequence_state/selected_low_candidates.csv
+```
+
+Etat courant:
+
+```text
+Feature sets: 1498
+Candidate rows: 5992
+Best byte sequence state: prev1+pos4+pos16 33/125
+Best false-free byte slots: 0
+Best false-free high feature set: prev_delta_bucket+prev_shape+run_len_bucket
+Best false-free high slots: 22
+Selected low values: f:6|e:4|d:3|8:3|b:3|7:2|9:1
+Best selected low resolver: prev2+prev1_high+pos4 3/2, unknown 17
+Best false-free selected low resolver: signal+dominant 2, unknown 20
+Promotion-candidate bytes: 2
+Promotion-ready bytes: 0
+```
+
+Conclusion: l'etat sequentiel produit un petit signal high/low, mais il reste
+trop rare pour une promotion automatique. Les 2 bytes candidats doivent etre
+revus avec traces avant d'entrer dans un replay garde.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
