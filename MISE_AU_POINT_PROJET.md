@@ -1546,6 +1546,37 @@ longueur 5 ne permet encore une garde de promotion. La prochaine piste concrete
 est donc une garde non-oracle qui separe le pont cinq octets du frontier `80`
 du faux diagnostic `21:281-286`.
 
+La sonde de garde cinq octets classe ensuite les signaux non-oracle qui
+conservent `80:7-12` tout en rejetant les faux diagnostics:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard/guards.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_guard/diagnostics.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 5
+Diagnostic false rows: 9
+Diagnostic false spans: 1
+Diagnostic false-free guard rows: 10
+Compact/control guard rows: 4
+Best guard: compact_pair_control
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: la meilleure garde diagnostique est
+`gap_role=between_literal_zero | span_length=5 | control_ref_mod64=22 |
+anchor_rel=-2 | segment_pair=5354`. Elle rejette les 9 faux diagnostics et
+garde le pont `80:7-12`, mais elle manque encore de support connu/reference
+pour etre promue. La prochaine piste concrete est donc de trouver un support
+connu ou reference pour cette garde cinq octets.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
