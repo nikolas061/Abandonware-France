@@ -657,6 +657,30 @@ Conclusion: le cas exact `dinodead.pcx` fait partie d'une petite sous-classe
 mais trop etroit pour une promotion: il faut maintenant tester cette grammaire
 `flat_run_walk` hors des clusters macro-state.
 
+Le rapport large `flat_walk_backref` couvre deja cette extension:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_probe/targets.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_probe/rule_candidates.csv
+```
+
+Etat courant:
+
+```text
+Flat-walk targets: 17 / 813 bytes
+Exact copy bytes: 122
+Known-source exact bytes: 0
+Unresolved-source exact bytes: 122
+Best distance: 320
+Best rule false bytes: 267
+```
+
+Conclusion: l'elargissement confirme les 122 bytes exacts a distance -320,
+mais aucune source n'est encore connue par le replay actuel. La prochaine etape
+doit decoder les premieres occurrences `flat_walk` ou leur source de palette
+avant toute promotion de copie verticale.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

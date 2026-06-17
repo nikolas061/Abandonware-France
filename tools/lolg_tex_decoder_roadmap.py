@@ -30,6 +30,9 @@ DEFAULT_STABLE_LENGTH_SEQUENCE_SUMMARY = Path("output/tex_micro_stable_length_se
 DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY = Path("output/tex_micro_stable_length_control/summary.csv")
 DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY = Path("output/tex_micro_stable_length_opcode/summary.csv")
 DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_interval/summary.csv")
+DEFAULT_FLAT_WALK_BACKREF_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_probe/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -227,6 +230,7 @@ def build_queue(
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_backref_summary: dict[str, str] | None = None,
+    flat_walk_backref_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -724,6 +728,36 @@ def build_queue(
             row = {
                 **row,
                 "next_action": "broaden flat-walk -320 backref probe outside macro clusters before promotion",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_macro_state_cluster_backref_summary
+            and flat_walk_backref_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"flat_walk_backref_broad_exact={flat_walk_backref_summary.get('exact_copy_bytes', '0')}",
+                    f"flat_walk_backref_broad_distance={flat_walk_backref_summary.get('best_distance', '0')}",
+                    f"flat_walk_backref_broad_best_rule={flat_walk_backref_summary.get('best_rule', '')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"flat_walk_backref_broad_known_source="
+                    f"{flat_walk_backref_summary.get('exact_known_source_bytes', '0')}",
+                    f"flat_walk_backref_broad_unresolved="
+                    f"{flat_walk_backref_summary.get('exact_unresolved_source_bytes', '0')}",
+                    f"flat_walk_backref_broad_rule_false="
+                    f"{flat_walk_backref_summary.get('best_rule_false_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "decode flat-walk first occurrences/source coverage before -320 replay promotion",
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -1486,6 +1520,44 @@ def build_queue(
                     ],
                 )
                 next_action = "broaden flat-walk -320 backref probe outside macro clusters before promotion"
+            if (
+                flat_walk_backref_summary
+                and gradient_macro_state_cluster_backref_summary
+                and gradient_macro_state_cluster_literal_summary
+                and gradient_macro_state_cluster_source_summary
+                and gradient_macro_state_cluster_payload_summary
+                and gradient_macro_state_cluster_summary
+                and gradient_macro_fixture_transition_summary
+                and gradient_macro_phase_sequence_summary
+                and gradient_macro_phase_conflict_split_summary
+                and gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"flat_walk_backref_broad_exact={flat_walk_backref_summary.get('exact_copy_bytes', '0')}",
+                        f"flat_walk_backref_broad_distance={flat_walk_backref_summary.get('best_distance', '0')}",
+                        f"flat_walk_backref_broad_best_rule={flat_walk_backref_summary.get('best_rule', '')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"flat_walk_backref_broad_known_source="
+                        f"{flat_walk_backref_summary.get('exact_known_source_bytes', '0')}",
+                        f"flat_walk_backref_broad_unresolved="
+                        f"{flat_walk_backref_summary.get('exact_unresolved_source_bytes', '0')}",
+                        f"flat_walk_backref_broad_rule_false="
+                        f"{flat_walk_backref_summary.get('best_rule_false_bytes', '0')}",
+                    ],
+                )
+                next_action = "decode flat-walk first occurrences/source coverage before -320 replay promotion"
             row = {
                 **row,
                 "next_action": next_action,
@@ -1803,6 +1875,7 @@ def main() -> None:
     parser.add_argument("--stable-length-control-summary", type=Path, default=DEFAULT_STABLE_LENGTH_CONTROL_SUMMARY)
     parser.add_argument("--stable-length-opcode-summary", type=Path, default=DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY)
     parser.add_argument("--stable-length-interval-summary", type=Path, default=DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY)
+    parser.add_argument("--flat-walk-backref-summary", type=Path, default=DEFAULT_FLAT_WALK_BACKREF_SUMMARY)
     parser.add_argument(
         "--gradient-payload-profile-summary",
         type=Path,
@@ -2050,6 +2123,10 @@ def main() -> None:
     gradient_macro_state_cluster_backref_summary = (
         gradient_macro_state_cluster_backref_rows[0] if gradient_macro_state_cluster_backref_rows else None
     )
+    flat_walk_backref_rows = (
+        read_rows(args.flat_walk_backref_summary) if args.flat_walk_backref_summary.exists() else []
+    )
+    flat_walk_backref_summary = flat_walk_backref_rows[0] if flat_walk_backref_rows else None
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -2146,6 +2223,7 @@ def main() -> None:
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,
         gradient_macro_state_cluster_backref_summary,
+        flat_walk_backref_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

@@ -78,6 +78,14 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,
         ),
+        Step(
+            "flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_probe.py"],
+        ),
+        Step(
+            "backrefs flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_backref_probe.py"],
+        ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step(
             "etat opcode payload gradient .tex",
