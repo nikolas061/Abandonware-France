@@ -550,6 +550,33 @@ delta dominant, mais il ne fournit pas encore la forme payload. La prochaine
 passe doit donc sonder le payload a l'interieur des clusters `skip/op8` avant
 toute promotion.
 
+La sonde payload des clusters `skip/op8` ne garde que les groupes repetes et
+deterministes en delta, puis teste payload exact, formes `band/step`, nibble
+haut et classe:
+
+```text
+output/tex_gradient_macro_state_cluster_payload/index.html
+output/tex_gradient_macro_state_cluster_payload/rows.csv
+output/tex_gradient_macro_state_cluster_payload/groups.csv
+output/tex_gradient_macro_state_cluster_payload/families.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1404
+Cluster groups: 9
+Best payload: band_shape / cluster_rule_length 94 / 125 / 1185 singleton
+Exact payload deterministic bytes: 0
+Best coarse: gradient_class / cluster_hi 524 / 0 / 880 singleton
+Promotion-ready bytes: 0
+```
+
+Conclusion: le cluster `skip/op8` est utile pour le delta, mais le payload exact
+ne se repete pas. La prochaine passe doit inspecter les transformations de
+fenetre/source a l'interieur de ces clusters plutot qu'une promotion par
+signature payload.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
