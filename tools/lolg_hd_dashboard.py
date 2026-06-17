@@ -848,6 +848,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_context_probe/index.html"),
         ),
         (
+            "Normalisation contexte palette plateaux .tex",
+            Path(
+                "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_normalized_context_probe/index.html"
+            ),
+        ),
+        (
             "Micro-tokens noisy gaps .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_micro_token_probe/index.html"),
         ),

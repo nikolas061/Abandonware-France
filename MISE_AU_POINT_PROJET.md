@@ -706,6 +706,29 @@ Conclusion: les producteurs palette existent pour les deux sources, mais restent
 singleton et changent de contexte. La prochaine sonde doit normaliser les
 contextes/transformations palette autour des premieres occurrences `flat_walk`.
 
+La sonde de normalisation compare ensuite les paires de signatures repetees et
+cherche un delta uniforme de transform ou d'offset entre source et copie:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_normalized_context_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_normalized_context_probe/groups.csv
+```
+
+Etat courant:
+
+```text
+Repeated signature groups: 2
+Matched palette values: 14
+Uniform transform delta groups: 0
+Uniform offset delta groups: 0
+Best transform delta value hits: 6
+Promotion-ready bytes: 0
+```
+
+Conclusion: la normalisation globale par signature ne suffit pas. Il faut
+maintenant descendre au niveau des valeurs palette individuelles dans les deux
+signatures repetees.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
