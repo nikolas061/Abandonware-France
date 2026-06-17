@@ -156,6 +156,14 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_promotion_candidate_probe.py",
             ],
         ),
+        Step(
+            "replay formule palette flat-walk noisy .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_formula_replay.py",
+            ],
+            requires_pillow=True,
+        ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step(
             "etat opcode payload gradient .tex",

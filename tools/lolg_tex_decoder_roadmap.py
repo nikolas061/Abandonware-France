@@ -63,6 +63,9 @@ DEFAULT_FLAT_WALK_PALETTE_CORPUS_FORMULA_SUMMARY = Path(
 DEFAULT_FLAT_WALK_PALETTE_PROMOTION_CANDIDATE_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_promotion_candidate_probe/summary.csv"
 )
+DEFAULT_FLAT_WALK_PALETTE_FORMULA_REPLAY_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_formula_replay/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -286,6 +289,16 @@ def flat_walk_palette_promotion_candidate_action(summary: dict[str, str]) -> str
     return "fix flat-walk palette promotion candidate issues"
 
 
+def flat_walk_palette_formula_replay_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "formula_false_bytes") > 0 or int_value(summary, "issue_rows") > 0:
+        return "fix guarded flat-walk palette formula replay issues"
+    if int_value(summary, "formula_added_bytes") > 0:
+        return "replay flat-walk palette backref unlocks after formula promotion"
+    if int_value(summary, "target_rows") > 0:
+        return "replay guarded flat-walk palette formula promotion candidates"
+    return "prepare flat-walk palette formula replay inputs"
+
+
 def build_queue(
     decisions: list[dict[str, str]],
     gradient_payload_profile_summary: dict[str, str] | None = None,
@@ -313,6 +326,7 @@ def build_queue(
     flat_walk_palette_compressed_formula_summary: dict[str, str] | None = None,
     flat_walk_palette_corpus_formula_summary: dict[str, str] | None = None,
     flat_walk_palette_promotion_candidate_summary: dict[str, str] | None = None,
+    flat_walk_palette_formula_replay_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -1145,22 +1159,62 @@ def build_queue(
                     f"{flat_walk_palette_promotion_candidate_summary.get('formula_value_rows', '0')}",
                 ],
             )
-            blocking_evidence = append_evidence(
-                blocking_evidence,
-                [
+            candidate_blocking = [
+                f"flat_walk_palette_candidate_promotion_ready="
+                f"{flat_walk_palette_promotion_candidate_summary.get('promotion_ready_bytes', '0')}",
+                f"flat_walk_palette_candidate_issues="
+                f"{flat_walk_palette_promotion_candidate_summary.get('issue_rows', '0')}",
+            ]
+            if flat_walk_palette_formula_replay_summary:
+                candidate_blocking.insert(
+                    0,
+                    f"flat_walk_palette_candidate_replayed="
+                    f"{flat_walk_palette_formula_replay_summary.get('replayed_target_rows', '0')}/"
+                    f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
+                )
+            else:
+                candidate_blocking.insert(
+                    0,
                     f"flat_walk_palette_candidate_replay_needed="
                     f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
-                    f"flat_walk_palette_candidate_promotion_ready="
-                    f"{flat_walk_palette_promotion_candidate_summary.get('promotion_ready_bytes', '0')}",
-                    f"flat_walk_palette_candidate_issues="
-                    f"{flat_walk_palette_promotion_candidate_summary.get('issue_rows', '0')}",
-                ],
-            )
+                )
+            blocking_evidence = append_evidence(blocking_evidence, candidate_blocking)
             row = {
                 **row,
                 "next_action": flat_walk_palette_promotion_candidate_action(
                     flat_walk_palette_promotion_candidate_summary
                 ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and flat_walk_palette_formula_replay_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"flat_walk_palette_replay_targets="
+                    f"{flat_walk_palette_formula_replay_summary.get('replayed_target_rows', '0')}/"
+                    f"{flat_walk_palette_formula_replay_summary.get('target_rows', '0')}",
+                    f"flat_walk_palette_replay_added="
+                    f"{flat_walk_palette_formula_replay_summary.get('formula_added_bytes', '0')}",
+                    f"flat_walk_palette_replay_exact="
+                    f"{flat_walk_palette_formula_replay_summary.get('formula_exact_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"flat_walk_palette_replay_false="
+                    f"{flat_walk_palette_formula_replay_summary.get('formula_false_bytes', '0')}",
+                    f"flat_walk_palette_replay_skipped="
+                    f"{flat_walk_palette_formula_replay_summary.get('skipped_known_bytes', '0')}/"
+                    f"{flat_walk_palette_formula_replay_summary.get('skipped_rejected_bytes', '0')}",
+                    f"flat_walk_palette_replay_issues="
+                    f"{flat_walk_palette_formula_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": flat_walk_palette_formula_replay_action(flat_walk_palette_formula_replay_summary),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -2289,19 +2343,56 @@ def build_queue(
                         f"{flat_walk_palette_promotion_candidate_summary.get('formula_value_rows', '0')}",
                     ],
                 )
+                candidate_blocking = [
+                    f"flat_walk_palette_candidate_promotion_ready="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('promotion_ready_bytes', '0')}",
+                    f"flat_walk_palette_candidate_issues="
+                    f"{flat_walk_palette_promotion_candidate_summary.get('issue_rows', '0')}",
+                ]
+                if flat_walk_palette_formula_replay_summary:
+                    candidate_blocking.insert(
+                        0,
+                        f"flat_walk_palette_candidate_replayed="
+                        f"{flat_walk_palette_formula_replay_summary.get('replayed_target_rows', '0')}/"
+                        f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
+                    )
+                else:
+                    candidate_blocking.insert(
+                        0,
+                        f"flat_walk_palette_candidate_replay_needed="
+                        f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
+                    )
+                blocking_evidence = append_evidence(blocking_evidence, candidate_blocking)
+                next_action = flat_walk_palette_promotion_candidate_action(
+                    flat_walk_palette_promotion_candidate_summary
+                )
+            if flat_walk_palette_formula_replay_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"flat_walk_palette_replay_targets="
+                        f"{flat_walk_palette_formula_replay_summary.get('replayed_target_rows', '0')}/"
+                        f"{flat_walk_palette_formula_replay_summary.get('target_rows', '0')}",
+                        f"flat_walk_palette_replay_added="
+                        f"{flat_walk_palette_formula_replay_summary.get('formula_added_bytes', '0')}",
+                        f"flat_walk_palette_replay_exact="
+                        f"{flat_walk_palette_formula_replay_summary.get('formula_exact_bytes', '0')}",
+                    ],
+                )
                 blocking_evidence = append_evidence(
                     blocking_evidence,
                     [
-                        f"flat_walk_palette_candidate_replay_needed="
-                        f"{flat_walk_palette_promotion_candidate_summary.get('candidate_ready_target_rows', '0')}",
-                        f"flat_walk_palette_candidate_promotion_ready="
-                        f"{flat_walk_palette_promotion_candidate_summary.get('promotion_ready_bytes', '0')}",
-                        f"flat_walk_palette_candidate_issues="
-                        f"{flat_walk_palette_promotion_candidate_summary.get('issue_rows', '0')}",
+                        f"flat_walk_palette_replay_false="
+                        f"{flat_walk_palette_formula_replay_summary.get('formula_false_bytes', '0')}",
+                        f"flat_walk_palette_replay_skipped="
+                        f"{flat_walk_palette_formula_replay_summary.get('skipped_known_bytes', '0')}/"
+                        f"{flat_walk_palette_formula_replay_summary.get('skipped_rejected_bytes', '0')}",
+                        f"flat_walk_palette_replay_issues="
+                        f"{flat_walk_palette_formula_replay_summary.get('issue_rows', '0')}",
                     ],
                 )
-                next_action = flat_walk_palette_promotion_candidate_action(
-                    flat_walk_palette_promotion_candidate_summary
+                next_action = flat_walk_palette_formula_replay_action(
+                    flat_walk_palette_formula_replay_summary
                 )
             row = {
                 **row,
@@ -2672,6 +2763,11 @@ def main() -> None:
         default=DEFAULT_FLAT_WALK_PALETTE_PROMOTION_CANDIDATE_SUMMARY,
     )
     parser.add_argument(
+        "--flat-walk-palette-formula-replay-summary",
+        type=Path,
+        default=DEFAULT_FLAT_WALK_PALETTE_FORMULA_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-payload-profile-summary",
         type=Path,
         default=DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY,
@@ -3002,6 +3098,14 @@ def main() -> None:
     flat_walk_palette_promotion_candidate_summary = (
         flat_walk_palette_promotion_candidate_rows[0] if flat_walk_palette_promotion_candidate_rows else None
     )
+    flat_walk_palette_formula_replay_rows = (
+        read_rows(args.flat_walk_palette_formula_replay_summary)
+        if args.flat_walk_palette_formula_replay_summary.exists()
+        else []
+    )
+    flat_walk_palette_formula_replay_summary = (
+        flat_walk_palette_formula_replay_rows[0] if flat_walk_palette_formula_replay_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -3109,6 +3213,7 @@ def main() -> None:
         flat_walk_palette_compressed_formula_summary,
         flat_walk_palette_corpus_formula_summary,
         flat_walk_palette_promotion_candidate_summary,
+        flat_walk_palette_formula_replay_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

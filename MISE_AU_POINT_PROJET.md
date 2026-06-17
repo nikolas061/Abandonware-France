@@ -930,8 +930,37 @@ Issue rows: 0
 
 Conclusion: les 7 cibles `candidate_plan` sont pretes pour un replay garde de
 la formule palette. Le gain direct attendu est 361 octets, ou 483 octets en
-comptant les backrefs deja reliees, mais la prochaine passe doit encore rejouer
-ces candidats contre les masques/segments avant promotion effective.
+comptant les backrefs deja reliees.
+
+Le replay garde reconstruit ensuite les octets depuis les formes de runs et la
+palette unique, puis les applique au-dessus de `tiny_nonzero_fill` seulement si
+les masques connus/refuses le permettent:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_formula_replay/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_formula_replay/fixtures.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_formula_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Fixture rows: 32
+Target rows: 7
+Replayed target rows: 7
+Formula-added bytes: 361
+Formula-exact bytes: 361
+Formula-false bytes: 0
+Skipped known bytes: 0
+Skipped rejected bytes: 0
+Total clean bytes: 9753
+Remaining unresolved bytes: 7693
+Issue rows: 0
+```
+
+Conclusion: la promotion directe des cibles palette formula est effective et
+false-free. La prochaine passe peut rejouer les backrefs que ces 361 octets
+deverrouillent, afin de convertir les 122 octets additionnels deja identifies.
 
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
