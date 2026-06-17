@@ -1891,6 +1891,46 @@ cible a `55`, et aucune formule non-tail ne couvre simultanement `29`, `54` et
 `55`. La prochaine piste concrete est donc de splitter ce support par famille de
 frontiers avant de chercher une promotion.
 
+La sonde split familles pair regroupe ensuite ce support non-tail par frontiers
+non-cibles et mesure les recouvrements exacts entre familles:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split/families.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split/overlaps.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split/atoms.csv
+```
+
+Etat courant:
+
+```text
+Non-tail support rows: 2744
+Family rows: 5
+Partial family rows: 3
+Target-overlap family rows: 1
+Local family rows: 1
+All non-target family rows: 0
+Required non-target frontiers: 29,54,55
+Dominant family: 29,54
+Dominant family rows: 2661
+Dominant family missing frontiers: 55
+Weak pair families: 29,55;54,55
+Exact template overlap rows: 1
+Shape overlap rows: 21
+Cross-family exact all non-target rows: 0
+Best exact overlap template: s+5+0|a+0|a+0|a-2|a-2
+Best exact overlap families: 29,55;55
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le split confirme que la famille dominante `29,54` ne touche pas
+`55`, tandis que les familles `29,55` et `54,55` restent faibles. Le seul
+recouvrement exact de template relie `55` et `29,55`, pas `29,54,55`. La piste
+concrete suivante est donc de deriver un pont entre la famille dominante
+`29,54` et le frontier manquant `55`.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
