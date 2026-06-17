@@ -1260,6 +1260,38 @@ debloque 7 sources high-safe, dont 2 sources inconnues d'exception. La piste
 suivante reste la resolution des 94 dependances high-safe restantes, avec le
 top edge `78|195->80|204` reduit a 22 slots.
 
+La branche base replay promue relance ensuite les chaines, terminaux, support
+replay et union sur ces `slots.csv` consommes. La couverture garde obtenue sur
+la base promue couvre les 20 racines restantes de cette branche, puis la
+seconde promotion applique uniquement les bytes encore inconnus de la base
+precedente.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay/summary.csv
+```
+
+Etat courant:
+
+```text
+Promoted-base cover: 20/20 roots
+Second promoted rows: 4/20
+Second added guard bytes: 4
+Second false bytes: 0
+Second issue rows: 0
+Source available slots after second replay: 165/320
+Unknown high-safe source slots: 93 (94 avant second replay)
+Top unknown edge: 78|195->80|204 (21 slots, 22 avant second replay)
+```
+
+Conclusion: la seconde promotion est propre mais marginale: elle ajoute 4
+bytes, dont 1 source high-safe utile au graphe. Une tentative de troisieme
+promotion sur la meme couverture n'ajoute plus aucun byte; la suite doit donc
+attaquer les 93 dependances high-safe restantes avec un autre signal.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

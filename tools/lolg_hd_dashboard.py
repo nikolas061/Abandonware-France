@@ -964,6 +964,50 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay/index.html"),
         ),
         (
+            "Chaines source exceptions low high-safe gradient base replay promue .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_chain_promoted_replay/index.html"),
+        ),
+        (
+            "Terminaux source exceptions low high-safe gradient base replay promue .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_terminal_promoted_replay/index.html"),
+        ),
+        (
+            "Revue terminaux source exceptions low high-safe gradient base replay promue .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review_promoted_replay/index.html"),
+        ),
+        (
+            "Contexte chaines terminaux source exceptions low high-safe gradient base replay promue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_chain_context_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Support replay terminaux source exceptions low high-safe gradient base replay promue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_support_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Union replay terminaux source exceptions low high-safe gradient base replay promue .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_promoted_replay/index.html"),
+        ),
+        (
+            "Couverture garde union replay terminaux source exceptions low high-safe gradient base replay promue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base/index.html"
+            ),
+        ),
+        (
+            "Seconde promotion couverture garde union replay terminaux source exceptions low high-safe gradient .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Dependances source exceptions low high-safe gradient seconde base replay promue .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay/index.html"),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),

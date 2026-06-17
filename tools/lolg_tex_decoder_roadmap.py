@@ -201,6 +201,15 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_G
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_PROMOTED_REPLAY_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_PROMOTED_BASE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_SECOND_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SECOND_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1067,6 +1076,44 @@ def gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_
     return "rerun downstream gradient probes with promoted replay base"
 
 
+def gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix promoted-base compact replay-union guard cover issues"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "promote promoted-base compact replay-union guard cover candidates"
+    if int_value(summary, "covered_roots") > 0:
+        return "review promoted-base compact replay-union guard cover before promotion"
+    return "reject promoted-base compact replay-union guard cover and seek another support signal"
+
+
+def gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix second compact replay-union guard promoted replay issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "consume second compact replay-union guard promoted replay as the next gradient base"
+    if int_value(summary, "guard_candidate_rows") > 0:
+        return "stop promoted replay iteration and seek another high-safe dependency signal"
+    return "reject second compact replay-union guard promoted replay and seek another terminal support signal"
+
+
+def gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix second promoted-replay source-dependency probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote second promoted-replay source-dependency candidates"
+    if int_value(summary, "source_unknown_in_highsafe_slots") > 0:
+        return "resolve remaining high-safe source dependencies after second promoted replay consumption"
+    if int_value(summary, "source_unknown_outside_highsafe_slots") > 0:
+        return "seek external source unlock after second promoted replay consumption"
+    return "rerun downstream gradient probes with second promoted replay base"
+
+
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
     if int_value(summary, "false_free_byte_slots") > 0:
         return "replay false-free mixed-value payload byte combos"
@@ -1578,6 +1625,9 @@ def build_queue(
     gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_replay_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -3908,6 +3958,133 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_action(
                     gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_promoted_cover="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.get('covered_roots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.get('union_roots', '0')}",
+                    f"gradient_sequence_low_exception_source_promoted_cover_contexts="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.get('selected_contexts', '0')}",
+                    f"gradient_sequence_low_exception_source_promoted_cover_candidate="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_promoted_cover_items="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.get('candidate_rows', '0')}",
+                    f"gradient_sequence_low_exception_source_promoted_cover_missed="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.get('missed_roots', '0')}",
+                    f"gradient_sequence_low_exception_source_promoted_cover_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_action(
+                    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_second_promoted="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('guard_added_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('guard_candidate_rows', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_ready="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('promotion_ready_bytes', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_total_clean="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('total_clean_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_second_promoted_false="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('guard_false_bytes', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_skipped="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('skipped_known_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('skipped_rejected_bytes', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary
+        ):
+            promoted_highsafe_unknown = (
+                int_value(
+                    gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary,
+                    "source_unknown_in_highsafe_slots",
+                )
+                if gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary
+                else None
+            )
+            second_highsafe_unknown = int_value(
+                gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary,
+                "source_unknown_in_highsafe_slots",
+            )
+            second_highsafe_delta = (
+                f"{promoted_highsafe_unknown}->{second_highsafe_unknown}"
+                if promoted_highsafe_unknown is not None
+                else str(second_highsafe_unknown)
+            )
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_second_promoted_available="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('source_available_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('slots', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_highsafe_unknown="
+                    f"{second_highsafe_delta}",
+                    f"gradient_sequence_low_exception_source_second_promoted_edges="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('dependency_edges', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_second_promoted_top_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('top_unknown_dependency_edge', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('top_unknown_dependency_edge_slots', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_exception_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('exception_source_unknown_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('exception_source_unknown_in_highsafe_slots', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_outside_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('source_unknown_outside_highsafe_slots', '0')}",
+                    f"gradient_sequence_low_exception_source_second_promoted_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -7609,6 +7786,18 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary:
+                    next_action = gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary
+                    )
+                elif gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary:
+                    next_action = gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary
+                    )
+                elif gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary:
+                    next_action = gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_action(
+                        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary
+                    )
                 elif gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary:
                     next_action = gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_action(
                         gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary
@@ -8566,6 +8755,21 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_PROMOTED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-replay-union-guard-cover-promoted-base-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_PROMOTED_BASE_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-replay-union-guard-cover-second-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_SECOND_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-second-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SECOND_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -9320,6 +9524,40 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary = (
         gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_rows[0]
         if gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary = (
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_rows[0]
+        if gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_rows[0]
+        if gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_rows = (
+        read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary)
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_rows[0]
+        if gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -10123,6 +10361,9 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_summary,
         gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_base_summary,
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_second_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_second_promoted_replay_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,
