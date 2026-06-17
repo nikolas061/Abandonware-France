@@ -176,6 +176,39 @@ profil source eleve restent un indice trop large, car l'exact source plafonne a
 48 bytes. La piste `jump_mixed` reste donc une grammaire de sauts a decoder,
 pas une promotion par repetition directe.
 
+Le profil direct des 66 lignes `jump_token` generalise ce controle aux classes
+`dense_jump_weave`, `mixed_jump_split`, `repeated_nibble_jump`,
+`long_island_split` et `sparse_jump_split`:
+
+```text
+output/tex_jump_token_payload_profile/index.html
+output/tex_jump_token_payload_profile/rows.csv
+output/tex_jump_token_payload_profile/groups.csv
+output/tex_jump_token_payload_profile/distances.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1680
+Dense jump bytes: 601
+Mixed jump bytes: 682
+Repeated nibble bytes: 231
+Repeated payload signature bytes: 0
+Class-peer >=50 bytes: 69
+Source profile >=75 bytes: 631
+External best exact bytes: 166
+Spatial best distance: 1
+Spatial best correct bytes: 353 / 1619
+Spatial exact copy bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les profils source eleves couvrent une partie notable des
+`jump_token`, mais aucune signature payload, histogramme ou profil signed ne se
+repete, et les distances spatiales restent fausses. Cette piste doit donc
+continuer par grammaire de sauts/etat, pas par replay ou source directe.
+
 Le split conservateur par familles micro-token donne maintenant une file plus
 propre pour les passes suivantes:
 

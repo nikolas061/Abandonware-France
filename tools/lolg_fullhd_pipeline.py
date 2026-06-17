@@ -82,6 +82,12 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step("split micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_split.py"]),
         Step("positions micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_positions.py"]),
         Step("payload jump-mixed micro .tex", [sys.executable, "tools/lolg_tex_micro_jump_mixed_payload_probe.py"]),
+        Step(
+            "jump-token noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_jump_token_probe.py"],
+            requires_pillow=True,
+        ),
+        Step("profil payload jump-token .tex", [sys.executable, "tools/lolg_tex_jump_token_payload_profile_probe.py"]),
         Step("stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_walks.py"]),
         Step("backrefs stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_backref_probe.py"]),
         Step("sources stable walks micro .tex", [sys.executable, "tools/lolg_tex_micro_stable_source_probe.py"]),

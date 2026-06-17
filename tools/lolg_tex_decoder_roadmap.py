@@ -32,6 +32,7 @@ DEFAULT_STABLE_LENGTH_OPCODE_SUMMARY = Path("output/tex_micro_stable_length_opco
 DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_interval/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
+DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_MICRO_TOKEN_FAMILY_SPLIT_SUMMARY = Path("output/tex_micro_token_family_split/summary.csv")
 DEFAULT_MICRO_MIXED_VALUE_SUBFAMILY_SUMMARY = Path("output/tex_micro_mixed_value_subfamily/summary.csv")
 DEFAULT_MICRO_MIXED_VALUE_DOMINANT_CONTROL_SUMMARY = Path(
@@ -173,6 +174,7 @@ def build_queue(
     decisions: list[dict[str, str]],
     gradient_payload_profile_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
+    jump_token_payload_profile_summary: dict[str, str] | None = None,
     micro_token_family_split_summary: dict[str, str] | None = None,
     micro_mixed_value_subfamily_summary: dict[str, str] | None = None,
     micro_mixed_value_dominant_control_summary: dict[str, str] | None = None,
@@ -256,6 +258,33 @@ def build_queue(
                     f"{micro_jump_mixed_payload_summary.get('spatial_exact_copy_bytes', '0')}",
                     f"jump_payload_promotion_ready="
                     f"{micro_jump_mixed_payload_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if row.get("surface", "").startswith("jump_token") and jump_token_payload_profile_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"jump_token_payload_source_profile_ge75="
+                    f"{jump_token_payload_profile_summary.get('source_profile_ge75_bytes', '0')}",
+                    f"jump_token_payload_class_pair_ge50="
+                    f"{jump_token_payload_profile_summary.get('class_pair_ge50_bytes', '0')}",
+                    f"jump_token_payload_spatial_best="
+                    f"{jump_token_payload_profile_summary.get('spatial_best_correct_bytes', '0')}/"
+                    f"{jump_token_payload_profile_summary.get('spatial_best_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"jump_token_payload_repeated_signature_bytes="
+                    f"{jump_token_payload_profile_summary.get('repeated_payload_signature_bytes', '0')}",
+                    f"jump_token_payload_external_exact="
+                    f"{jump_token_payload_profile_summary.get('external_best_exact_bytes', '0')}",
+                    f"jump_token_payload_spatial_exact="
+                    f"{jump_token_payload_profile_summary.get('spatial_exact_copy_bytes', '0')}",
+                    f"jump_token_payload_promotion_ready="
+                    f"{jump_token_payload_profile_summary.get('promotion_ready_bytes', '0')}",
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
@@ -717,6 +746,11 @@ def main() -> None:
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
     )
+    parser.add_argument(
+        "--jump-token-payload-profile-summary",
+        type=Path,
+        default=DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY,
+    )
     parser.add_argument("--micro-token-family-split-summary", type=Path, default=DEFAULT_MICRO_TOKEN_FAMILY_SPLIT_SUMMARY)
     parser.add_argument(
         "--micro-mixed-value-subfamily-summary",
@@ -786,6 +820,12 @@ def main() -> None:
         else []
     )
     micro_jump_mixed_payload_summary = micro_jump_mixed_payload_rows[0] if micro_jump_mixed_payload_rows else None
+    jump_token_payload_profile_rows = (
+        read_rows(args.jump_token_payload_profile_summary)
+        if args.jump_token_payload_profile_summary.exists()
+        else []
+    )
+    jump_token_payload_profile_summary = jump_token_payload_profile_rows[0] if jump_token_payload_profile_rows else None
     micro_mixed_value_subfamily_rows = (
         read_rows(args.micro_mixed_value_subfamily_summary)
         if args.micro_mixed_value_subfamily_summary.exists()
@@ -838,6 +878,7 @@ def main() -> None:
         decisions,
         gradient_payload_profile_summary,
         micro_jump_mixed_payload_summary,
+        jump_token_payload_profile_summary,
         micro_token_family_split_summary,
         micro_mixed_value_subfamily_summary,
         micro_mixed_value_dominant_control_summary,
