@@ -1375,6 +1375,35 @@ Conclusion: la promotion stricte ecrit les 12 prefixes et les 2 bytes sequence
 dans les masques connus sans recouvrement ni faux positif. La prochaine etape
 est de generaliser ces regles au-dela des lignes garde deja prouvees.
 
+La generalisation post-promotion sonde ensuite les 22 slots high sequence avec
+les nouveaux masques connus:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_promoted_generalization/index.html
+output/tex_micro_mixed_value_payload_sequence_promoted_generalization/slots.csv
+output/tex_micro_mixed_value_payload_sequence_promoted_generalization/rules.csv
+```
+
+Etat courant:
+
+```text
+Selected high slots: 22
+Replayable unknown slots: 2
+Target already known slots: 2
+Blocked prerequisite slots: 18
+Selected low feature sets: 1561
+False-free feature sets: 0
+Best feature set: pos16+dominant
+Best correct/false: 1/1
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: apres promotion, deux slots sequence supplementaires sont
+replayables mais restent en conflit low (`6f` correct sur frontier 26,
+`6e` faux contre `6d` sur frontier 50). Il faut maintenant splitter ce
+contexte low ou debloquer plus de prefixes avant une autre promotion.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
