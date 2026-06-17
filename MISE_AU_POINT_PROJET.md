@@ -2077,6 +2077,41 @@ la cible `29` a ses propres atomes `s-4+0/s-4-1`, tandis que le support switch
 reste sur `29,54` et `29,55`. La prochaine piste concrete est donc de deriver
 un switch local a la famille porteuse `29`.
 
+La sonde switch local carrier inspecte ensuite les templates de la famille
+porteuse `29` pour la forme `a|s|s|s|s`:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_local_switch/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_local_switch/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_local_switch/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_local_switch/samples.csv
+```
+
+Etat courant:
+
+```text
+Carrier shape: a|s|s|s|s
+Target carrier: 29
+Switch position: 2
+Carrier candidate rows: 2
+Carrier target rows: 3
+Carrier non-target rows: 2
+Carrier switch atom rows: 2
+Carrier switch atoms: s-4+0;s-4-1
+Target switch atom rows: 2
+Non-target switch atom rows: 2
+Shared target/non-target atom rows: 2
+Target-only switch atom rows: 0
+Best target atom: s-4+0
+Best target template: ar+0|a+0|s-4+0|s-3+0|s-4-1|s-4-2
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: les deux atomes carrier-local `s-4+0` et `s-4-1` restent partages
+entre samples cible et non-cible. Il faut donc splitter le contexte local de la
+famille `29` avant de promouvoir quoi que ce soit.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
