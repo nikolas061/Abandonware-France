@@ -1386,6 +1386,37 @@ octet, mais les spans `80:0-3` et `80:7-12` ne sont pas couverts par une source
 non-oracle fiable. La prochaine piste concrete devient la grammaire
 compact-control des petits gaps non-zero externes, pas une promotion directe.
 
+La sonde compact-control locale teste des slices, repetitions et motifs `ABA`
+autour de `control_ref_offset`, puis rejette les candidats qui contredisent les
+gaps courts deja connus:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_compact_control_grammar/groups.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 9
+Known reference rows: 15
+Full target match bytes: 4
+Guarded full match bytes: 0
+Rejected full-match spans: 2
+Neighbor value cover bytes: 9
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: la copie compact-control directe explique seulement des candidats
+locaux rejetes (`80:0-3`, `58:9-10`). Le span `80:7-12` n'a pas de sortie
+deterministe, mais tous ses octets sont dans l'alphabet voisin elargi. La
+prochaine piste concrete est donc l'ordre spatial/gradient de ces valeurs
+compact-control locales.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
