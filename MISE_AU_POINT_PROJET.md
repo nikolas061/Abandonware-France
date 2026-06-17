@@ -1856,6 +1856,41 @@ aucun ne recoupe la cible. La prochaine piste concrete est donc de chercher un
 support formule cinq octets non-tail, plutot que de promouvoir ces coincidences
 de queue.
 
+La sonde support non-tail filtre ensuite les variantes formule non-nulles qui
+ont au moins un match hors queue:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support/groups.csv
+```
+
+Etat courant:
+
+```text
+Formula variant rows: 4501
+Non-tail support rows: 2744
+Non-tail all non-target rows: 0
+Non-tail partial non-target rows: 2681
+Non-tail target+non-target rows: 63
+Local nonzero rows: 2
+Dominant partial group: 29,54
+Dominant partial rows: 2661
+Best local template: ar+1|s+5+0|a+0|a+0|a-2|a-2
+Best local frontiers: 55
+Best partial template: ar+0|a+0|a+0|s+5+2|s+5+2|s+5+2
+Best partial frontiers: 29,54
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le support non-tail existe, mais il reste en familles partielles:
+la plus forte relie `29` et `54`, deux lignes locales non-nulles relient la
+cible a `55`, et aucune formule non-tail ne couvre simultanement `29`, `54` et
+`55`. La prochaine piste concrete est donc de splitter ce support par famille de
+frontiers avant de chercher une promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
