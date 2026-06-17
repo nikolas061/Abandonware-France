@@ -1837,6 +1837,51 @@ Conclusion: la propagation adjacent-known ajoute 4 prerequis propres dans les
 runs de `dinodead.pcx` frontier 80 et debloque 4 slots sequence au total. La
 prochaine etape est de reevaluer la sequence sur le replay a 9435 bytes propres.
 
+La generalisation residuelle apres adjacent-known borne ensuite le nouvel etat:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_generalization/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_generalization/slots.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_generalization/rules.csv
+```
+
+Etat courant:
+
+```text
+Selected high slots: 22
+Replayable unknown slots: 5
+Target already known slots: 15
+Blocked prerequisite slots: 2
+False-free feature sets: 0
+Best correct/false/unknown: 0/1/4
+Issue rows: 0
+```
+
+Les trois checks residuels ne trouvent plus de candidat:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_low_split/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_corpus_expansion/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth/index.html
+```
+
+Etat courant:
+
+```text
+Residual low-split feature sets: 70375
+Residual low-split false-free sets: 0
+Residual low-split promotion-candidate bytes: 0
+Residual corpus feature sets: 98854
+Residual corpus false-free rule sets: 0
+Residual corpus promotion-candidate bytes: 0
+Fourth adjacent-known candidate/false/conflict slots: 0/0/0
+```
+
+Conclusion: les combinaisons low-split, corpus et adjacent-known actuelles sont
+epuisees a 9435 bytes propres. Il reste 5 slots sequence replayables et 2 slots
+bloques; la prochaine piste doit ajouter une nouvelle famille de features au
+dela de corpus/adjacent-known.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 

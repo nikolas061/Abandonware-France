@@ -536,6 +536,52 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "generalisation sequence apres adjacent-known mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_promoted_generalization_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_third_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_generalization",
+            ],
+        ),
+        Step(
+            "split low residuel apres adjacent-known mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_low_split_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_third_promoted_replay/fixtures.csv",
+                "--max-features",
+                "3",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_low_split",
+            ],
+        ),
+        Step(
+            "expansion corpus residuelle apres adjacent-known mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_third_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_corpus_expansion",
+            ],
+        ),
+        Step(
+            "quatrieme prerequis adjacent-known sequence mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_third_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth",
+            ],
+        ),
+        Step(
             "spatial payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_spatial_probe.py"],
         ),

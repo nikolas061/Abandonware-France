@@ -1042,6 +1042,22 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_third_promoted_replay/index.html"),
         ),
         (
+            "Generalisation apres adjacent-known sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_generalization/index.html"),
+        ),
+        (
+            "Split low residuel adjacent-known sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_low_split/index.html"),
+        ),
+        (
+            "Expansion corpus residuelle adjacent-known sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_corpus_expansion/index.html"),
+        ),
+        (
+            "Quatrieme prerequis adjacent-known sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_fourth/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),
