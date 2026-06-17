@@ -1931,6 +1931,42 @@ recouvrement exact de template relie `55` et `29,55`, pas `29,54,55`. La piste
 concrete suivante est donc de deriver un pont entre la famille dominante
 `29,54` et le frontier manquant `55`.
 
+La sonde pont familles isole ensuite les recouvrements de forme qui couvrent
+l'union non-cible `29,54,55`:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge/bridges.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge/examples.csv
+```
+
+Etat courant:
+
+```text
+Required non-target frontiers: 29,54,55
+Dominant family: 29,54
+Dominant family missing frontiers: 55
+Shape bridge rows: 8
+Target-free shape bridge rows: 4
+Target-overlap shape bridge rows: 4
+Exact bridge rows: 0
+Dominant-to-missing shape rows: 8
+Dominant-to-missing target-free rows: 4
+Best shape bridge: s|s|a|s|s
+Best shape bridge families: 29,54;29,55
+Best shape bridge candidate rows: 137
+Best exact overlap template: s+5+0|a+0|a+0|a-2|a-2
+Best exact overlap frontiers: 29,55
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: quatre ponts de forme target-free existent, mais aucun n'est encore
+un template exact. Le meilleur pont `s|s|a|s|s` relie la famille dominante
+`29,54` a `29,55` sans recouper la cible. La prochaine piste concrete est donc
+de deriver un resolveur d'atomes pour ces ponts de forme avant toute promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
