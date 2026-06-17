@@ -86,6 +86,26 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             "backrefs flat-walk noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_backref_probe.py"],
         ),
+        Step(
+            "seeds palette flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_seed_probe.py"],
+        ),
+        Step(
+            "mix palette flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_mix_probe.py"],
+        ),
+        Step(
+            "chain backrefs palette flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_backref_chain_probe.py"],
+        ),
+        Step(
+            "signatures palette flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_signature_probe.py"],
+        ),
+        Step(
+            "contextes palette flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_context_probe.py"],
+        ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step(
             "etat opcode payload gradient .tex",

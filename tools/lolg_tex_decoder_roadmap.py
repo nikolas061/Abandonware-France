@@ -33,6 +33,12 @@ DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY = Path("output/tex_micro_stable_length_in
 DEFAULT_FLAT_WALK_BACKREF_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_probe/summary.csv"
 )
+DEFAULT_FLAT_WALK_BACKREF_CHAIN_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_chain_probe/summary.csv"
+)
+DEFAULT_FLAT_WALK_PALETTE_CONTEXT_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_context_probe/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -231,6 +237,8 @@ def build_queue(
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_backref_summary: dict[str, str] | None = None,
     flat_walk_backref_summary: dict[str, str] | None = None,
+    flat_walk_backref_chain_summary: dict[str, str] | None = None,
+    flat_walk_palette_context_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -758,6 +766,42 @@ def build_queue(
             row = {
                 **row,
                 "next_action": "decode flat-walk first occurrences/source coverage before -320 replay promotion",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and flat_walk_backref_summary
+            and flat_walk_backref_chain_summary
+            and flat_walk_palette_context_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"flat_walk_chain_source_candidate="
+                    f"{flat_walk_backref_chain_summary.get('any_source_candidate_bytes', '0')}",
+                    f"flat_walk_context_copy320="
+                    f"{flat_walk_palette_context_summary.get('copy_distance_320_rows', '0')}",
+                    f"flat_walk_context_overlap="
+                    f"{flat_walk_palette_context_summary.get('best_unique_control_overlap', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"flat_walk_chain_repeated="
+                    f"{flat_walk_backref_chain_summary.get('repeated_group_chain_bytes', '0')}",
+                    f"flat_walk_chain_blocked="
+                    f"{flat_walk_backref_chain_summary.get('blocked_chain_bytes', '0')}",
+                    f"flat_walk_context_shared="
+                    f"{flat_walk_palette_context_summary.get('shared_context_rows', '0')}",
+                    f"flat_walk_context_same_transform="
+                    f"{flat_walk_palette_context_summary.get('same_transform_set_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "probe context-normalized palette producers for flat-walk first occurrences",
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -1558,6 +1602,51 @@ def build_queue(
                     ],
                 )
                 next_action = "decode flat-walk first occurrences/source coverage before -320 replay promotion"
+            if (
+                flat_walk_palette_context_summary
+                and flat_walk_backref_chain_summary
+                and flat_walk_backref_summary
+                and gradient_macro_state_cluster_backref_summary
+                and gradient_macro_state_cluster_literal_summary
+                and gradient_macro_state_cluster_source_summary
+                and gradient_macro_state_cluster_payload_summary
+                and gradient_macro_state_cluster_summary
+                and gradient_macro_fixture_transition_summary
+                and gradient_macro_phase_sequence_summary
+                and gradient_macro_phase_conflict_split_summary
+                and gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"flat_walk_chain_source_candidate="
+                        f"{flat_walk_backref_chain_summary.get('any_source_candidate_bytes', '0')}",
+                        f"flat_walk_context_copy320="
+                        f"{flat_walk_palette_context_summary.get('copy_distance_320_rows', '0')}",
+                        f"flat_walk_context_overlap="
+                        f"{flat_walk_palette_context_summary.get('best_unique_control_overlap', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"flat_walk_chain_repeated="
+                        f"{flat_walk_backref_chain_summary.get('repeated_group_chain_bytes', '0')}",
+                        f"flat_walk_chain_blocked="
+                        f"{flat_walk_backref_chain_summary.get('blocked_chain_bytes', '0')}",
+                        f"flat_walk_context_shared="
+                        f"{flat_walk_palette_context_summary.get('shared_context_rows', '0')}",
+                        f"flat_walk_context_same_transform="
+                        f"{flat_walk_palette_context_summary.get('same_transform_set_rows', '0')}",
+                    ],
+                )
+                next_action = "probe context-normalized palette producers for flat-walk first occurrences"
             row = {
                 **row,
                 "next_action": next_action,
@@ -1877,6 +1966,16 @@ def main() -> None:
     parser.add_argument("--stable-length-interval-summary", type=Path, default=DEFAULT_STABLE_LENGTH_INTERVAL_SUMMARY)
     parser.add_argument("--flat-walk-backref-summary", type=Path, default=DEFAULT_FLAT_WALK_BACKREF_SUMMARY)
     parser.add_argument(
+        "--flat-walk-backref-chain-summary",
+        type=Path,
+        default=DEFAULT_FLAT_WALK_BACKREF_CHAIN_SUMMARY,
+    )
+    parser.add_argument(
+        "--flat-walk-palette-context-summary",
+        type=Path,
+        default=DEFAULT_FLAT_WALK_PALETTE_CONTEXT_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-payload-profile-summary",
         type=Path,
         default=DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY,
@@ -2127,6 +2226,22 @@ def main() -> None:
         read_rows(args.flat_walk_backref_summary) if args.flat_walk_backref_summary.exists() else []
     )
     flat_walk_backref_summary = flat_walk_backref_rows[0] if flat_walk_backref_rows else None
+    flat_walk_backref_chain_rows = (
+        read_rows(args.flat_walk_backref_chain_summary)
+        if args.flat_walk_backref_chain_summary.exists()
+        else []
+    )
+    flat_walk_backref_chain_summary = (
+        flat_walk_backref_chain_rows[0] if flat_walk_backref_chain_rows else None
+    )
+    flat_walk_palette_context_rows = (
+        read_rows(args.flat_walk_palette_context_summary)
+        if args.flat_walk_palette_context_summary.exists()
+        else []
+    )
+    flat_walk_palette_context_summary = (
+        flat_walk_palette_context_rows[0] if flat_walk_palette_context_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -2224,6 +2339,8 @@ def main() -> None:
         gradient_macro_state_cluster_literal_summary,
         gradient_macro_state_cluster_backref_summary,
         flat_walk_backref_summary,
+        flat_walk_backref_chain_summary,
+        flat_walk_palette_context_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

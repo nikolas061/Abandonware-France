@@ -681,6 +681,31 @@ mais aucune source n'est encore connue par le replay actuel. La prochaine etape
 doit decoder les premieres occurrences `flat_walk` ou leur source de palette
 avant toute promotion de copie verticale.
 
+Les rapports de chaine palette montrent pourquoi ces premieres occurrences ne
+sont pas encore promotables:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_backref_chain_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_context_probe/index.html
+```
+
+Etat courant:
+
+```text
+Source candidate bytes: 122
+Any source chain bytes: 244
+Repeated group chain bytes: 0
+Blocked chain bytes: 244
+Copy-distance-320 context rows: 2
+Shared context rows: 0
+Same transform-set rows: 0
+Best unique-control overlap: 5
+```
+
+Conclusion: les producteurs palette existent pour les deux sources, mais restent
+singleton et changent de contexte. La prochaine sonde doit normaliser les
+contextes/transformations palette autour des premieres occurrences `flat_walk`.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
