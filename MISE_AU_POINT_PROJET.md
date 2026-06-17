@@ -806,6 +806,37 @@ Conclusion: les octets du flux compresse expliquent une partie du conflit
 features compressees pour couvrir les six lignes conflictuelles avant toute
 promotion.
 
+La sonde de combinaisons teste ensuite les ensembles de features compressees
+de taille 1 a 3, en mesurant separement la couverture exacte et le risque de
+singletons:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_combo_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_combo_probe/feature_sets.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_combo_probe/groups.csv
+```
+
+Etat courant:
+
+```text
+Tested feature sets: 1350
+Full transform cover sets: 741
+Full pair cover sets: 723
+Best transform feature set: raw_delta_signed / 6 conflicts
+Best transform multirow conflicts: 5
+Best transform singleton conflicts: 1
+Best pair feature set: raw_pair / 6 conflicts
+Best pair multirow conflicts: 1
+Best pair singleton conflicts: 5
+Promotion-ready bytes: 0
+```
+
+Conclusion: `raw_delta_signed` generalise deja le delta transform sur les six
+lignes conflictuelles. La paire complete est aussi couverte par `raw_pair`, mais
+elle est trop dependante de singletons: 5 conflits sur 6 seraient appris comme
+cas uniques. La prochaine passe doit generaliser ces `raw_pair` en familles
+d'offsets avant promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
