@@ -1126,6 +1126,34 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_adjacent/index.html"),
         ),
         (
+            "Low-copy residuel sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_low_copy/index.html"),
+        ),
+        (
+            "Promotion low-copy sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_low_copy_promoted_replay/index.html"),
+        ),
+        (
+            "Generalisation apres low-copy sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_low_copy_generalization/index.html"),
+        ),
+        (
+            "Second low-copy sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_low_copy_second/index.html"),
+        ),
+        (
+            "Split low residuel apres low-copy sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_low_copy_low_split/index.html"),
+        ),
+        (
+            "Expansion corpus residuelle apres low-copy sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_low_copy_corpus_expansion/index.html"),
+        ),
+        (
+            "Prerequis adjacent-known apres low-copy sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_low_copy_adjacent/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),

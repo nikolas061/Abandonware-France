@@ -1994,10 +1994,66 @@ Residual corpus promotion-candidate bytes: 0
 Residual adjacent-known candidate/false/conflict slots: 0/0/0
 ```
 
-Conclusion: transform selection-only + corpus-transform ajoutent 4 bytes propres
-apres adjacent-known, portant l'etat a 9439 bytes propres. Il reste 1 slot
-sequence replayable et 2 slots bloques; la prochaine piste doit ajouter une
-famille au dela de transform/corpus-transform/low-split/corpus/adjacent-known.
+Conclusion intermediaire: transform selection-only + corpus-transform ajoutent
+4 bytes propres apres adjacent-known, portant l'etat a 9439 bytes propres.
+
+La famille low-copy cible ensuite le dernier slot sequence replayable en
+validant `low = prev1_low` sur le corpus avec support leave-one-row-out:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_low_copy/index.html
+output/tex_micro_mixed_value_payload_sequence_low_copy/slots.csv
+output/tex_micro_mixed_value_payload_sequence_low_copy/rules.csv
+output/tex_micro_mixed_value_payload_sequence_low_copy_promoted_replay/index.html
+```
+
+Etat courant:
+
+```text
+Low-copy false-free sets: 27
+Best low-copy feature set: prev1_low_eq_dominant_low + run_len_bucket + pos8
+Best low-copy training correct/false slots: 2/0
+Low-copy promotion candidates: 1
+Low-copy promoted rows: 1/1
+Low-copy added/exact/false bytes: 1/1/0
+Total clean bytes after low-copy: 9440
+Remaining unresolved bytes: 8006
+```
+
+La promotion propre est:
+
+```text
+row 6 / frontier 50 / offset 2 -> 6d
+```
+
+Les checks residuels apres low-copy bornent le nouvel etat:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_low_copy_generalization/index.html
+output/tex_micro_mixed_value_payload_sequence_low_copy_second/index.html
+output/tex_micro_mixed_value_payload_sequence_low_copy_low_split/index.html
+output/tex_micro_mixed_value_payload_sequence_low_copy_corpus_expansion/index.html
+output/tex_micro_mixed_value_payload_sequence_low_copy_adjacent/index.html
+```
+
+Etat courant:
+
+```text
+Post-low-copy replayable unknown slots: 0
+Post-low-copy target-known slots: 20
+Post-low-copy blocked prerequisite slots: 2
+Second low-copy false-free sets: 0
+Residual low-split false-free sets: 0
+Residual low-split promotion-candidate bytes: 0
+Residual corpus false-free rule sets: 0
+Residual corpus promotion-candidate bytes: 0
+Residual adjacent-known candidate/false/conflict slots: 0/0/0
+```
+
+Conclusion: il ne reste plus de slot sequence replayable dans cette piste; les
+2 derniers slots sequence sont bloques par des prerequis entierement inconnus.
+La prochaine piste doit cibler les prerequis bloques au-dela de
+low-copy/corpus/adjacent-known.
 
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
