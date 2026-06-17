@@ -1643,6 +1643,41 @@ touchent des bytes connus produisent des faux, donc la garde reste bloquee par
 des features target-only. La prochaine piste concrete est de chercher une
 evidence non-cible independante pour le pont cinq octets du frontier `80`.
 
+La sonde d'evidence independante sort ensuite du corpus d'operations et scanne
+directement les segments et les fenetres attendues du manifest:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence/segment_hits.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence/formula_windows.csv
+```
+
+Etat courant:
+
+```text
+Manifest rows: 32
+Fixture rows: 32
+Segment positions scanned: 65570
+Pair any rows: 1
+Pair+mod rows: 1
+Pair+mod non-target rows: 0
+Formula windows: 74
+Formula exact rows: 1
+Formula exact non-target rows: 0
+Formula known-full exact rows: 0
+Formula known-full false rows: 36
+Target-only exact rows: 1
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: meme sans segmentation, le couple `segment_pair=5354` avec
+`control_ref_mod64=22` n'apparait qu'une fois dans le manifest, sur
+`80:7-12`. La formule ne donne aucun exact non-cible et aucun exact connu; la
+prochaine piste concrete est donc d'elargir la recherche d'evidence au-dela du
+corpus de fixtures courant.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
