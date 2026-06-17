@@ -2150,6 +2150,34 @@ Conclusion: le seuil `span_start <= 253` separe les trois samples cible des
 deux non-cibles sans faux positif. La prochaine piste concrete est de revoir ce
 split start-threshold pour promotion eventuelle.
 
+La revue promotion du contexte carrier-local valide ensuite que ce seuil est
+non-oracle et que tous les samples attendus sont couverts:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_review/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_review/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_review/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_review/splits.csv
+```
+
+Etat courant:
+
+```text
+Threshold support ready rows: 1
+Threshold non-oracle rows: 1
+Validated target rows: 3
+Validated non-target rows: 2
+Validated false rows: 0
+Validated unknown rows: 0
+Promotion candidate bytes: 5
+Promotion-ready bytes: 5
+Issue rows: 0
+```
+
+Conclusion: le seuil `span_start <= 253` est pret pour promotion. La prochaine
+piste concrete est de promouvoir ce split start-threshold carrier-local dans le
+replay compact-control cinq octets.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
