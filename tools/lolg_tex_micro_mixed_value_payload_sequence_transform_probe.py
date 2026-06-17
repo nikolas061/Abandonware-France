@@ -11,6 +11,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from lolg_tex_micro_mixed_value_payload_predictor_probe import (
+    DEFAULT_FIXTURES,
     int_value,
     ratio,
     read_csv,
@@ -28,6 +29,7 @@ from lolg_tex_micro_mixed_value_payload_sequence_promoted_generalization_probe i
     SLOT_FIELDNAMES as BASE_SLOT_FIELDNAMES,
     build_slots,
 )
+from lolg_tex_micro_mixed_value_payload_sequence_state_probe import build_entries
 
 
 DEFAULT_OUTPUT = Path("output/tex_micro_mixed_value_payload_sequence_transform")
@@ -70,7 +72,9 @@ TRANSFORM_TARGETS = [
 
 SUMMARY_FIELDNAMES = [
     "scope",
+    "training_scope",
     "selected_high_slots",
+    "training_entries",
     "features",
     "transform_targets",
     "feature_sets",
@@ -335,8 +339,10 @@ def evaluate_rule(
 def build(
     selected_rows: list[dict[str, str]],
     input_rows: list[dict[str, str]],
+    fixture_rows: list[dict[str, str]],
     replay_rows: list[dict[str, str]],
     *,
+    training_scope: str,
     max_features: int,
 ) -> tuple[dict[str, object], list[dict[str, object]], list[dict[str, object]]]:
     rows: list[dict[str, object]] = enriched_selected_rows(selected_rows, input_rows)
@@ -344,10 +350,35 @@ def build(
     slots, _known_by_fixture, issue_rows = build_slots(rows, replay_rows)
     replayable_slots = [slot for slot in slots if slot.get("state") == "replayable_unknown"]
     rows_by_rank = {str(row.get("rank", "")): row for row in rows}
-    features = [feature for feature in FEATURES if all(feature in row for row in rows)]
+    training_rows = rows
+    if training_scope == "corpus":
+        entries, entry_issues = build_entries(input_rows, fixture_rows)
+        issue_rows += len(entry_issues)
+        add_transform_values(entries)
+        entry_by_slot = {
+            (int(entry["row_index"]), int(entry["offset"])): entry
+            for entry in entries
+        }
+        training_rows = entries
+        merged_by_rank: dict[str, dict[str, object]] = {}
+        for row in rows:
+            key = (int_value(row, "row_index"), int_value(row, "offset"))
+            entry = entry_by_slot.get(key)
+            if entry is None:
+                issue_rows += 1
+                merged_by_rank[str(row.get("rank", ""))] = row
+            else:
+                merged_by_rank[str(row.get("rank", ""))] = {**entry, **row}
+        rows_by_rank = merged_by_rank
+    features = [
+        feature
+        for feature in FEATURES
+        if all(feature in row for row in training_rows)
+        and all(feature in row for row in rows_by_rank.values())
+    ]
     feature_sets = feature_combinations(features, max_features)
     rules = [
-        evaluate_rule(rows_by_rank, replayable_slots, rows, transform, feature_set)
+        evaluate_rule(rows_by_rank, replayable_slots, training_rows, transform, feature_set)
         for transform in TRANSFORM_TARGETS
         for feature_set in feature_sets
     ]
@@ -409,7 +440,7 @@ def build(
         if best_transform and best_feature_set and slot.get("state") == "replayable_unknown":
             context, value, output, verdict = prediction_for_slot(
                 rows_by_rank,
-                rows,
+                training_rows,
                 slot,
                 best_transform,
                 best_feature_set,
@@ -428,7 +459,9 @@ def build(
 
     summary = {
         "scope": "total",
+        "training_scope": training_scope,
         "selected_high_slots": len(rows),
+        "training_entries": len(training_rows),
         "features": len(features),
         "transform_targets": len(TRANSFORM_TARGETS),
         "feature_sets": len(feature_sets) * len(TRANSFORM_TARGETS),
@@ -504,7 +537,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Probe previous-byte transforms for mixed-value sequence slots.")
     parser.add_argument("--input-rows", type=Path, default=DEFAULT_INPUT_ROWS)
     parser.add_argument("--selected-rows", type=Path, default=DEFAULT_SELECTED_ROWS)
+    parser.add_argument("--fixtures", type=Path, default=DEFAULT_FIXTURES)
     parser.add_argument("--replay-fixtures", type=Path, default=DEFAULT_REPLAY_FIXTURES)
+    parser.add_argument("--training-scope", choices=["selected", "corpus"], default="selected")
     parser.add_argument("--max-features", type=int, default=3)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Mixed Value Sequence Transform")
@@ -513,7 +548,9 @@ def main() -> None:
     summary, slots, rules = build(
         read_csv(args.selected_rows),
         read_csv(args.input_rows),
+        read_csv(args.fixtures),
         read_csv(args.replay_fixtures),
+        training_scope=args.training_scope,
         max_features=args.max_features,
     )
     args.output.mkdir(parents=True, exist_ok=True)

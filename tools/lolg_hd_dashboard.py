@@ -1086,6 +1086,46 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_adjacent/index.html"),
         ),
         (
+            "Transform corpus residuel sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus/index.html"),
+        ),
+        (
+            "Promotion transform corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_promoted_replay/index.html"),
+        ),
+        (
+            "Second transform corpus residuel sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_second/index.html"),
+        ),
+        (
+            "Promotion second transform corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_second_promoted_replay/index.html"),
+        ),
+        (
+            "Troisieme transform corpus residuel sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third/index.html"),
+        ),
+        (
+            "Promotion troisieme transform corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_promoted_replay/index.html"),
+        ),
+        (
+            "Quatrieme transform corpus residuel sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_fourth/index.html"),
+        ),
+        (
+            "Split low residuel apres transform corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_low_split/index.html"),
+        ),
+        (
+            "Expansion corpus residuelle apres transform corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_corpus_expansion/index.html"),
+        ),
+        (
+            "Prerequis adjacent-known apres transform corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_adjacent/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),

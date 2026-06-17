@@ -1932,10 +1932,72 @@ Residual corpus promotion-candidate bytes: 0
 Residual adjacent-known candidate/false/conflict slots: 0/0/0
 ```
 
-Conclusion: la famille transform ajoute 1 byte propre et epuise aussitot ses
-propres suites simples. Il reste 4 slots sequence replayables et 2 slots
-bloques; la prochaine piste doit ajouter une autre famille au dela de
-transform/corpus/adjacent-known.
+Conclusion intermediaire: la famille transform selection-only ajoute 1 byte
+propre et epuise aussitot ses propres suites simples.
+
+La meme famille appliquee au corpus complet apprend ensuite les transformations
+depuis 567 entrees de payload, et non plus seulement depuis les 22 slots high
+selectionnes:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_second/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_second_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_promoted_replay/index.html
+```
+
+Etat courant:
+
+```text
+Corpus-transform training entries: 567
+Corpus-transform feature sets per pass: 11844
+First corpus-transform false-free/candidates: 69/1
+Second corpus-transform false-free/candidates: 8/1
+Third corpus-transform false-free/candidates: 61/1
+Corpus-transform promoted rows: 3/3
+Corpus-transform added/exact/false bytes: 3/3/0
+Total clean bytes after corpus-transform: 9439
+Remaining unresolved bytes: 8007
+```
+
+Les promotions propres sont:
+
+```text
+row 0 / frontier 26 / offset 33 -> 6d
+row 4 / frontier 80 / offset 53 -> 6d
+row 4 / frontier 80 / offset 22 -> 68
+```
+
+Les checks residuels apres la troisieme promotion bornent le nouvel etat:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_generalization/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_fourth/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_low_split/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_corpus_expansion/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_transform_corpus_third_adjacent/index.html
+```
+
+Etat courant:
+
+```text
+Final replayable unknown slots: 1
+Final target-known slots: 19
+Final blocked prerequisite slots: 2
+Fourth corpus-transform false-free sets: 0
+Residual low-split false-free sets: 0
+Residual low-split promotion-candidate bytes: 0
+Residual corpus false-free rule sets: 0
+Residual corpus promotion-candidate bytes: 0
+Residual adjacent-known candidate/false/conflict slots: 0/0/0
+```
+
+Conclusion: transform selection-only + corpus-transform ajoutent 4 bytes propres
+apres adjacent-known, portant l'etat a 9439 bytes propres. Il reste 1 slot
+sequence replayable et 2 slots bloques; la prochaine piste doit ajouter une
+famille au dela de transform/corpus-transform/low-split/corpus/adjacent-known.
 
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
