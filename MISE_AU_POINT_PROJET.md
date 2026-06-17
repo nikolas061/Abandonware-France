@@ -729,6 +729,30 @@ Conclusion: la normalisation globale par signature ne suffit pas. Il faut
 maintenant descendre au niveau des valeurs palette individuelles dans les deux
 signatures repetees.
 
+La sonde par valeur palette separe enfin les deltas transform/offset de chaque
+valeur partagee entre source et copie:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_value_split_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_value_split_probe/values.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_value_split_probe/by_delta.csv
+```
+
+Etat courant:
+
+```text
+Palette value rows: 14
+Best transform delta: -1 / 8 values
+Best delta pair: shift=-1|offset=-6 / 4 values
+Transform delta groups: 4
+Delta pair groups: 10
+Promotion-ready bytes: 0
+```
+
+Conclusion: le delta par valeur donne une piste, mais reste trop fragmente. La
+prochaine passe doit chercher une table compacte valeur->delta, ou un selecteur
+plus proche du flux compresse, avant toute promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

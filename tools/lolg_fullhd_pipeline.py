@@ -113,6 +113,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_normalized_context_probe.py",
             ],
         ),
+        Step(
+            "split valeurs palette flat-walk noisy .tex",
+            [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_value_split_probe.py"],
+        ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step(
             "etat opcode payload gradient .tex",
