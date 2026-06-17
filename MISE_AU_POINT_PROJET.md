@@ -828,6 +828,35 @@ aucune famille robuste multi-row ne couvre les exceptions sans faux. La suite
 doit chercher un etat externe corpus/source plutot que prolonger les selecteurs
 pair-row.
 
+La passe etat externe exceptions low teste alors les champs corpus/source deja
+extraits autour des memes 86 exceptions minoritaires: offset/source/control,
+prefix/fragment, fenetre head/tail, transition reconstruite, couples
+source/control et position corpus. Chaque contexte est rejoue en
+leave-one-row-out.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_state/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_state/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_state/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_state/candidates.csv
+```
+
+Etat courant:
+
+```text
+Context families: 24
+Best external target: mid:a / prefix_low_seq = 18 correct / 21 false
+Combined external-state best: 20 correct / 24 false
+Combined false-free slots: 0
+Promotion candidate bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: les champs externes disponibles ne separant pas les lows
+minoritaires sans faux, ils bornent plutot un manque de pre-requis. La suite
+doit chercher un resolveur payload/corpus plus amont avant de relancer les
+exceptions low.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
