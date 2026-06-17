@@ -1577,6 +1577,37 @@ garde le pont `80:7-12`, mais elle manque encore de support connu/reference
 pour etre promue. La prochaine piste concrete est donc de trouver un support
 connu ou reference pour cette garde cinq octets.
 
+La sonde de support cinq octets cherche ensuite cette garde dans tout le corpus
+d'operations pour verifier si elle existe hors cible ou sur des bytes deja
+connus:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_support/support.csv
+```
+
+Etat courant:
+
+```text
+Operation rows: 984
+Length5 operation rows: 72
+Length5 gap rows: 22
+Guard candidate rows: 1
+Guard known-full rows: 0
+Guard reference exact rows: 1
+Same-guard non-target rows: 0
+Target-only reference bytes: 5
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le corpus d'operations complet ne donne aucun support connu ni
+non-cible pour la garde cinq octets. Le seul support exact est la reference
+cible `80:7-12`; il faut donc reviser ce support target-only avant tout replay
+ou promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
