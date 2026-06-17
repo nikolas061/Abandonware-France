@@ -621,10 +621,34 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "fixtures regles gaps .tex",
+            [sys.executable, "tools/lolg_tex_gap_rule_fixtures.py"],
+        ),
+        Step(
+            "fixtures regles gaps etendues .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_rule_fixtures.py",
+                "--limit",
+                "0",
+                "-o",
+                "output/tex_gap_rule_fixtures_expanded",
+                "--title",
+                "Lands of Lore II .tex Expanded Gap Rule Fixtures",
+            ],
+        ),
+        Step(
             "evidence independante garde cinq octets pont spatial sources terminales externes exceptions low high-safe gradient .tex",
             [
                 sys.executable,
                 "tools/lolg_tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence_probe.py",
+            ],
+        ),
+        Step(
+            "corpus etendu garde cinq octets pont spatial sources terminales externes exceptions low high-safe gradient .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_probe.py",
             ],
         ),
         Step(

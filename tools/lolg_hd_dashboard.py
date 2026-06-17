@@ -50,6 +50,7 @@ DEFAULT_TEX_GAP_OPCODE_PROBE = Path("output/tex_gap_opcode_probe/index.html")
 DEFAULT_TEX_GAP_RLE_PROBE = Path("output/tex_gap_rle_probe/index.html")
 DEFAULT_TEX_GAP_RULE_QUEUE = Path("output/tex_gap_rule_queue/index.html")
 DEFAULT_TEX_GAP_RULE_FIXTURES = Path("output/tex_gap_rule_fixtures/index.html")
+DEFAULT_TEX_GAP_RULE_FIXTURES_EXPANDED = Path("output/tex_gap_rule_fixtures_expanded/index.html")
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -357,6 +358,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Probe RLE gaps .tex", DEFAULT_TEX_GAP_RLE_PROBE),
         ("File règles gaps .tex", DEFAULT_TEX_GAP_RULE_QUEUE),
         ("Fixtures règles gaps .tex", DEFAULT_TEX_GAP_RULE_FIXTURES),
+        ("Fixtures regles gaps etendues .tex", DEFAULT_TEX_GAP_RULE_FIXTURES_EXPANDED),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
         ("Probe flux nonzero gaps .tex", DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE),
@@ -1073,6 +1075,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             "Evidence independante garde cinq octets pont spatial sources terminales externes exceptions low high-safe gradient .tex",
             Path(
                 "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_independent_evidence/index.html"
+            ),
+        ),
+        (
+            "Corpus etendu garde cinq octets pont spatial sources terminales externes exceptions low high-safe gradient .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus/index.html"
             ),
         ),
         (

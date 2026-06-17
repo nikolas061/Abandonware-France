@@ -1678,6 +1678,41 @@ Conclusion: meme sans segmentation, le couple `segment_pair=5354` avec
 prochaine piste concrete est donc d'elargir la recherche d'evidence au-dela du
 corpus de fixtures courant.
 
+La sonde de corpus etendu regenere ensuite les fixtures depuis toute la file
+gap-rule, puis rescane le meme couple/garde sur les fenetres attendues:
+
+```text
+output/tex_gap_rule_fixtures_expanded/index.html
+output/tex_gap_rule_fixtures_expanded/manifest.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus/hits.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus/windows.csv
+```
+
+Etat courant:
+
+```text
+Manifest rows: 105
+Segment positions scanned: 4386930
+Pair any rows: 323
+Pair+mod rows: 3
+Pair+mod non-target rows: 2
+Reference window rows: 11171
+Reference exact rows: 1
+Reference exact non-target rows: 0
+Target-only exact rows: 1
+Pair+mod non-target frontiers: 5,104
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le corpus etendu trouve deux lignes non-cibles avec
+`segment_pair=5354` et `control_ref_mod64=22` (`frontier_id=5` et `104`), mais
+la formule exacte reste limitee au span cible `80:7-12`. La prochaine piste
+concrete est donc d'inspecter ces deux lignes `pair+mod` non-cibles pour trouver
+une garde alternative qui generalise sans promouvoir une regle target-only.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
