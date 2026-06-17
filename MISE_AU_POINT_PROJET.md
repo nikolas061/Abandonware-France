@@ -1260,6 +1260,34 @@ Conclusion: l'etat sequentiel produit un petit signal high/low, mais il reste
 trop rare pour une promotion automatique. Les 2 bytes candidats doivent etre
 revus avec traces avant d'entrer dans un replay garde.
 
+La revue des candidats sequence verifie ensuite si les 2 bytes high/low
+peuvent etre reproduits par le replay actuel, sans oracle sur les bytes
+precedents:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_candidate_review/index.html
+output/tex_micro_mixed_value_payload_sequence_candidate_review/rows.csv
+```
+
+Etat courant:
+
+```text
+Candidate bytes: 2
+Predicted bytes: 6e:2
+Correct/false oracle bytes: 2/0
+Known prerequisites: 0/4
+Oracle dependency bytes: 2
+Replay-ready bytes: 0
+Promotion-ready bytes: 0
+Verdict: oracle_sequence_dependency_reject
+```
+
+Conclusion: les 2 candidats sont exacts seulement parce que la sonde lit les
+bytes precedents attendus. Dans le replay courant, les deux bytes precedents de
+chaque candidat sont inconnus (`known_mask=0`, decoded `00`). Cette piste est
+donc rejetee comme dependance oracle; la suite doit chercher un etat non-oracle
+ou une regle capable de resoudre les prefixes de sequence.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
