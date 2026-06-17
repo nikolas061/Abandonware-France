@@ -1092,8 +1092,34 @@ Promotion-ready bytes: 0
 Conclusion: meme en combinant les features locales, aucun predicteur full-byte
 false-free n'apparait. Le seul signal sans faux reste un indice de nibble haut
 tres clairseme (4 slots), insuffisant pour une promotion. La suite doit donc
-chercher un etat externe ou un resolvuer bas-nibble, pas empiler davantage de
+chercher un etat externe ou un resolveur bas-nibble, pas empiler davantage de
 contextes locaux.
+
+La passe high/low isole ces 4 slots high-nibble false-free et teste les
+contextes low-nibble sur ce sous-ensemble:
+
+```text
+output/tex_micro_mixed_value_payload_high_low/index.html
+output/tex_micro_mixed_value_payload_high_low/rows.csv
+output/tex_micro_mixed_value_payload_high_low/contexts.csv
+```
+
+Etat courant:
+
+```text
+High feature set: prev_delta+control
+Selected high slots: 4
+Selected high rows: 2
+Selected low values: f:2|e:1|c:1
+Best low resolver: offset_context 0/0, unknown 4
+Deterministic low slots: 12
+Promotion-ready bytes: 0
+```
+
+Conclusion: les contextes low deterministes sont intra-ligne ou singleton; en
+validation leave-one-row-out, aucun slot low n'est predit. La piste high locale
+est donc trop clairsemee et doit etre ecartee au profit d'une source byte
+externe.
 
 La passe source compare enfin les payloads du dominant avec les pools externes
 du fixture (`segment_gap`, `control_prefix`, `fragment`) et le replay decode:
