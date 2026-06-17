@@ -1417,6 +1417,37 @@ deterministe, mais tous ses octets sont dans l'alphabet voisin elargi. La
 prochaine piste concrete est donc l'ordre spatial/gradient de ces valeurs
 compact-control locales.
 
+La sonde de pont spatial/gradient cherche une ancre deja connue autour de chaque
+span externe, puis encode le span comme petites deltas signees depuis cette
+ancre:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge/signatures.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge/known_signatures.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 9
+Anchor-supported bytes: 9
+Target signature seen bytes: 1
+Known signature rows: 17
+Repeated known signatures: 2
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: tous les octets externes ont une explication spatiale locale:
+`80:0-3` utilise l'ancre droite `6b` avec la signature `-1,+1,-1`,
+`80:7-12` utilise l'ancre gauche `56` avec `-1,-2,-1,-3,0`, et `58:9-10`
+reprend une signature connue sur un seul octet. Les deux signatures du frontier
+`80` restent uniques; la prochaine piste concrete est donc un selecteur
+non-oracle pour ces signatures, avant toute promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

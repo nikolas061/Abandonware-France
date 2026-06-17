@@ -1028,6 +1028,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Pont spatial gradient sources terminales externes exceptions low high-safe gradient .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_gradient_bridge/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
