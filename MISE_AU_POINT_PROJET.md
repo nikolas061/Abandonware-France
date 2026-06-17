@@ -776,6 +776,36 @@ Conclusion: seules `0x6a` et `0x6b` gardent un delta transform stable. Les
 valeurs `0x6c`, `0x6d` et `0xaa` restent conflictuelles et doivent etre reliees
 a un selecteur du flux compresse.
 
+La sonde des selecteurs compresses relie ensuite ces lignes valeur->delta aux
+octets bruts, aux contextes voisins et aux offsets/pools de la source et de la
+copie:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_selector_probe/rows.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_compressed_selector_probe/selectors.csv
+```
+
+Etat courant:
+
+```text
+Conflicted value rows: 6
+Compressed feature groups: 103
+Multirow compressed feature groups: 62
+Exact transform compressed groups: 15
+Exact pair compressed groups: 10
+Best transform selector: raw_delta_signed=-1 / 3 rows -> 1
+Best pair selector: raw_pair=0x6d->0x6e / 2 rows
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: les octets du flux compresse expliquent une partie du conflit
+(`raw_delta_signed=-1` couvre les trois conflits a delta transform `+1`, et
+`raw_pair=0x6d->0x6e` fixe deux lignes). Il faut maintenant combiner plusieurs
+features compressees pour couvrir les six lignes conflictuelles avant toute
+promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
