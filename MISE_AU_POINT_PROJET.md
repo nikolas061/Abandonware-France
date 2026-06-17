@@ -518,6 +518,35 @@ row/corpus. Le meilleur cas false-free reste limite a 10 slots et le meilleur
 cas large conserve 136 faux; la piste suivante doit viser une grammaire
 residuelle source-window/controle plutot qu'un low-split simple.
 
+La passe source-window scanne ensuite les offsets voisins autour du
+`source_profile_offset` puis teste un gating hors-ligne des meilleurs candidats:
+
+```text
+output/tex_gradient_sequence_high_safe_source_window/index.html
+output/tex_gradient_sequence_high_safe_source_window/fixed_candidates.csv
+output/tex_gradient_sequence_high_safe_source_window/gated_rules.csv
+output/tex_gradient_sequence_high_safe_source_window/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Scan radius: 64
+Best fixed low: +21:lowsigned-7 = 119 exact / 201 false
+Best fixed full identity: +0:identity = 23 exact / 297 false
+Gate candidates: 15
+Gate feature sets: 5491
+Best gated rule: +20:lowxor9 + unknown_before_mod16 + target_x_mod32 = 30 exact / 30 false
+Best gated false-free: +21:lowsigned-7 + x_mod8 + row_quarter + row_third = 5 slots
+Promotion candidate bytes: 0
+```
+
+Conclusion: la fenetre source contient un signal low reel mais trop diffus:
+le meilleur offset fixe touche 119 slots tout en produisant 201 faux, et le
+meilleur gating hors-ligne reste equilibre a 30/30. La suite doit revenir a un
+etat residuel controle/opcode gradient plutot qu'a une copie de fenetre source.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
