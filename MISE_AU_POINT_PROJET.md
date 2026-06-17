@@ -416,6 +416,33 @@ d'operation (`op_index_band8` ou `span_index_band4`), qui stabilise 138 bytes
 mais laisse le cas delta=1 en singleton. La prochaine passe doit etendre ces
 bins de phase sur toutes les lignes macro gradient avant promotion.
 
+La sonde de phase globale applique ensuite ces bins a toutes les lignes
+`gradient_like` macro, en separant les phases pures (`op_index`, `span_index`,
+offset, longueur) des phases combinees avec fixture ou ancre:
+
+```text
+output/tex_gradient_macro_phase/index.html
+output/tex_gradient_macro_phase/rows.csv
+output/tex_gradient_macro_phase/groups.csv
+output/tex_gradient_macro_phase/families.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1925
+Selector families: 24
+Best coarse phase: dominant_delta / op_index_band4 1288 / 530
+Best payload phase: band_shape / fixture_length_op_phase 0 / 196
+Payload deterministic evidence bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: le signal de phase se generalise bien pour le delta dominant, avec
+`op_index_band4` a 1288 bytes deterministes, mais il conserve 530 bytes
+conflictuels et ne predit aucune forme payload repetee. La prochaine passe
+doit donc scinder les conflits `op_index` avant toute promotion opcode.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

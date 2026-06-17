@@ -41,6 +41,7 @@ DEFAULT_GRADIENT_MACRO_CONFLICT_SPLIT_SUMMARY = Path(
 DEFAULT_GRADIENT_MACRO_RESIDUAL_STATE_SUMMARY = Path(
     "output/tex_gradient_macro_residual_state/summary.csv"
 )
+DEFAULT_GRADIENT_MACRO_PHASE_SUMMARY = Path("output/tex_gradient_macro_phase/summary.csv")
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
@@ -193,6 +194,7 @@ def build_queue(
     gradient_macro_opcode_summary: dict[str, str] | None = None,
     gradient_macro_conflict_split_summary: dict[str, str] | None = None,
     gradient_macro_residual_state_summary: dict[str, str] | None = None,
+    gradient_macro_phase_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -381,6 +383,36 @@ def build_queue(
             row = {
                 **row,
                 "next_action": "expand residual op-index phase bins across gradient macro rows before promotion",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_macro_phase_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_phase_best="
+                    f"{gradient_macro_phase_summary.get('best_coarse_target_kind', '')}/"
+                    f"{gradient_macro_phase_summary.get('best_coarse_selector_family', '')}",
+                    f"gradient_phase_deterministic="
+                    f"{gradient_macro_phase_summary.get('best_coarse_deterministic_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_phase_conflicted="
+                    f"{gradient_macro_phase_summary.get('best_coarse_conflicted_bytes', '0')}",
+                    f"gradient_phase_payload_deterministic="
+                    f"{gradient_macro_phase_summary.get('best_payload_deterministic_bytes', '0')}",
+                    f"gradient_phase_payload_conflicted="
+                    f"{gradient_macro_phase_summary.get('best_payload_conflicted_bytes', '0')}",
+                    f"gradient_phase_promotion_ready="
+                    f"{gradient_macro_phase_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "split op-index phase conflicts before gradient macro opcode promotion",
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -799,6 +831,37 @@ def build_queue(
                 next_action = (
                     "expand residual gradient op-index phase bins; local source windows remain conflicted"
                 )
+            if (
+                gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_phase_best="
+                        f"{gradient_macro_phase_summary.get('best_coarse_target_kind', '')}/"
+                        f"{gradient_macro_phase_summary.get('best_coarse_selector_family', '')}",
+                        f"gradient_phase_deterministic="
+                        f"{gradient_macro_phase_summary.get('best_coarse_deterministic_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_phase_conflicted="
+                        f"{gradient_macro_phase_summary.get('best_coarse_conflicted_bytes', '0')}",
+                        f"gradient_phase_payload_deterministic="
+                        f"{gradient_macro_phase_summary.get('best_payload_deterministic_bytes', '0')}",
+                    ],
+                )
+                next_action = (
+                    "split gradient op-index phase conflicts; local source windows remain conflicted"
+                )
             row = {
                 **row,
                 "next_action": next_action,
@@ -1142,6 +1205,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_RESIDUAL_STATE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-macro-phase-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_MACRO_PHASE_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-jump-mixed-payload-summary",
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
@@ -1250,6 +1318,10 @@ def main() -> None:
     gradient_macro_residual_state_summary = (
         gradient_macro_residual_state_rows[0] if gradient_macro_residual_state_rows else None
     )
+    gradient_macro_phase_rows = (
+        read_rows(args.gradient_macro_phase_summary) if args.gradient_macro_phase_summary.exists() else []
+    )
+    gradient_macro_phase_summary = gradient_macro_phase_rows[0] if gradient_macro_phase_rows else None
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -1337,6 +1409,7 @@ def main() -> None:
         gradient_macro_opcode_summary,
         gradient_macro_conflict_split_summary,
         gradient_macro_residual_state_summary,
+        gradient_macro_phase_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,
