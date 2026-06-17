@@ -1032,6 +1032,33 @@ terminal. La meilleure couverture brute est bruitee, et le meilleur faux-free
 ne couvre que 3 racines; il faut chercher des features de delta plus fortes
 avant de promouvoir cette piste.
 
+La passe contexte chaines terminaux source exceptions low teste ensuite un
+predictor direct du low racine sur les 28 chaines de la revue terminale. Elle
+exclut les buckets low racine, trop proches du low cible, et combine le contexte
+terminal, la signature du chemin et les features racine/arete.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_chain_context/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_chain_context/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_chain_context/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_chain_context/chains.csv
+```
+
+Etat courant:
+
+```text
+Chain rows: 28
+Feature sets: 34279
+Best chain context: terminal_source_low+edge1_rel_mod4+edge1_gradient_class = 10 correct / 7 false
+Best false-free chain context: root_target_x_mod32+root_shape_len_key = 6 chains
+Promotion-ready bytes: 0
+```
+
+Conclusion: le replay direct de chaine donne une meilleure borne faux-free que
+le delta arete par arete, mais il reste trop etroit pour promouvoir. La suite
+doit chercher un support terminal/chaine plus large ou un contexte de delta
+moins bruite.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
