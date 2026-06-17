@@ -922,6 +922,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_mixed_token_control_context_probe/index.html"),
         ),
         (
+            "Combinaisons payload mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_combo/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),

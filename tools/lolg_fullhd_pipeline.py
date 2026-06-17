@@ -258,6 +258,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_predictor_probe.py"],
         ),
         Step(
+            "combinaisons payload mixed-value micro-token .tex",
+            [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_combo_probe.py"],
+        ),
+        Step(
             "sources payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_source_profile_probe.py"],
         ),

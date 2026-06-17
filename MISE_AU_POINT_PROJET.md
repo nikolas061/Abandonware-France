@@ -1067,6 +1067,34 @@ Conclusion: un contexte gauche/position ne predit pas le byte complet
 mais il reste proche du biais global `0x6*`. Il faut donc eviter de promouvoir
 un predicteur local et chercher une source d'etat plus externe.
 
+La passe de combinaisons teste ensuite 1561 jeux de features locales (jusqu'a
+3 features parmi contexte gauche, position, signal, controle, longueur et
+dominante de ligne):
+
+```text
+output/tex_micro_mixed_value_payload_combo/index.html
+output/tex_micro_mixed_value_payload_combo/candidates.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Feature sets: 1561
+Candidate rows: 4683
+Best byte combo: pos8+pos16+dominant_byte 38/174
+Best high combo: prev1+pos16 165/74
+False-free byte slots: 0
+Best false-free high slots: 4
+Promotion-ready bytes: 0
+```
+
+Conclusion: meme en combinant les features locales, aucun predicteur full-byte
+false-free n'apparait. Le seul signal sans faux reste un indice de nibble haut
+tres clairseme (4 slots), insuffisant pour une promotion. La suite doit donc
+chercher un etat externe ou un resolvuer bas-nibble, pas empiler davantage de
+contextes locaux.
+
 La passe source compare enfin les payloads du dominant avec les pools externes
 du fixture (`segment_gap`, `control_prefix`, `fragment`) et le replay decode:
 
