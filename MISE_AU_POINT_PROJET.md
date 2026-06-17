@@ -918,6 +918,37 @@ Conclusion: l'unlock amont est maintenant localise. Une partie du blocage est
 un graphe high-safe interne a resoudre avant de revenir aux lows minoritaires;
 le reste depend encore de sources externes au sous-graphe.
 
+La passe chaines source exceptions low suit ensuite chaque dependance
+`unknown_source` interne au graphe high-safe jusqu'a son terminal. Elle verifie
+s'il existe des cycles, puis teste les lows terminaux avec les bytes source
+deja disponibles.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_chain/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_chain/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_chain/chains.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_chain/terminals.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_chain/candidates.csv
+```
+
+Etat courant:
+
+```text
+Unknown high-safe source chains: 101
+Unique terminal slots: 43
+Cycle chains: 0
+Terminal known-source chains: 86
+Terminal unknown-outside chains: 15
+Max chain length: 3
+Best terminal model: source_low_rel4 = 4 correct / 8 false
+Best terminal false-free slots: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: le graphe high-safe est acyclique, mais les terminaux ne se
+resolvent pas par propagation low/source locale. La suite doit chercher un
+unlock externe des terminaux, pas propager directement les lows.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
