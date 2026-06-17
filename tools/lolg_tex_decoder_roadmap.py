@@ -142,6 +142,9 @@ DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_STATE_SUMMARY = Path(
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_CANDIDATE_REVIEW_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_sequence_candidate_review/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_PREFIX_BOOTSTRAP_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_prefix_bootstrap/summary.csv"
+)
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_spatial/summary.csv"
 )
@@ -387,6 +390,20 @@ def mixed_value_sequence_candidate_review_action(summary: dict[str, str]) -> str
     return "expand mixed-value sequence candidate review"
 
 
+def mixed_value_prefix_bootstrap_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote mixed-value prefix bootstrap candidates"
+    if (
+        int_value(summary, "union_candidate_slots") > 0
+        and int_value(summary, "union_conflict_slots") == 0
+        and int_value(summary, "sequence_candidate_unlocked_bytes") > 0
+    ):
+        return "review mixed-value prefix bootstrap union before guarded replay"
+    if int_value(summary, "union_candidate_slots") > 0:
+        return "inspect conflicted mixed-value prefix bootstrap candidates"
+    return "expand non-oracle mixed-value prefix bootstrap search"
+
+
 def flat_walk_palette_formula_replay_consumed(
     summary: dict[str, str],
     candidate_summary: dict[str, str] | None = None,
@@ -443,6 +460,7 @@ def build_queue(
     micro_mixed_value_payload_state_external_combo_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_state_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_sequence_candidate_review_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_prefix_bootstrap_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_spatial_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_state_opcode_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
@@ -1758,6 +1776,33 @@ def build_queue(
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_prefix_bootstrap_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_prefix_union="
+                    f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('union_candidate_slots', '0')}",
+                    f"mixed_value_prefix_sequence_unlock="
+                    f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('sequence_candidate_unlocked_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_prefix_conflicts="
+                    f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('union_conflict_slots', '0')}",
+                    f"mixed_value_prefix_promotion_ready="
+                    f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": mixed_value_prefix_bootstrap_action(
+                    micro_mixed_value_payload_prefix_bootstrap_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_spatial_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -2011,6 +2056,26 @@ def build_queue(
                 next_action = mixed_value_sequence_candidate_review_action(
                     micro_mixed_value_payload_sequence_candidate_review_summary
                 )
+            if micro_mixed_value_payload_prefix_bootstrap_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_prefix_union="
+                        f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('union_candidate_slots', '0')}",
+                        f"mixed_value_prefix_sequence_unlock="
+                        f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('sequence_candidate_unlocked_bytes', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_prefix_conflicts="
+                        f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('union_conflict_slots', '0')}",
+                        f"mixed_value_prefix_promotion_ready="
+                        f"{micro_mixed_value_payload_prefix_bootstrap_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = mixed_value_prefix_bootstrap_action(micro_mixed_value_payload_prefix_bootstrap_summary)
             if micro_mixed_value_payload_state_opcode_summary and jump_token_payload_state_opcode_summary:
                 positive_evidence = append_evidence(
                     positive_evidence,
@@ -2918,6 +2983,8 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif micro_mixed_value_payload_prefix_bootstrap_summary:
+                    next_action = mixed_value_prefix_bootstrap_action(micro_mixed_value_payload_prefix_bootstrap_summary)
                 elif micro_mixed_value_payload_sequence_candidate_review_summary:
                     next_action = mixed_value_sequence_candidate_review_action(
                         micro_mixed_value_payload_sequence_candidate_review_summary
@@ -3462,6 +3529,11 @@ def main() -> None:
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SEQUENCE_CANDIDATE_REVIEW_SUMMARY,
     )
     parser.add_argument(
+        "--micro-mixed-value-payload-prefix-bootstrap-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_PREFIX_BOOTSTRAP_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-mixed-value-payload-spatial-summary",
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY,
@@ -3819,6 +3891,16 @@ def main() -> None:
         if micro_mixed_value_payload_sequence_candidate_review_rows
         else None
     )
+    micro_mixed_value_payload_prefix_bootstrap_rows = (
+        read_rows(args.micro_mixed_value_payload_prefix_bootstrap_summary)
+        if args.micro_mixed_value_payload_prefix_bootstrap_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_prefix_bootstrap_summary = (
+        micro_mixed_value_payload_prefix_bootstrap_rows[0]
+        if micro_mixed_value_payload_prefix_bootstrap_rows
+        else None
+    )
     micro_mixed_value_payload_spatial_rows = (
         read_rows(args.micro_mixed_value_payload_spatial_summary)
         if args.micro_mixed_value_payload_spatial_summary.exists()
@@ -3879,6 +3961,7 @@ def main() -> None:
         micro_mixed_value_payload_state_external_combo_summary,
         micro_mixed_value_payload_sequence_state_summary,
         micro_mixed_value_payload_sequence_candidate_review_summary,
+        micro_mixed_value_payload_prefix_bootstrap_summary,
         micro_mixed_value_payload_spatial_summary,
         micro_mixed_value_payload_state_opcode_summary,
     )

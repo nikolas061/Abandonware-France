@@ -1288,6 +1288,36 @@ chaque candidat sont inconnus (`known_mask=0`, decoded `00`). Cette piste est
 donc rejetee comme dependance oracle; la suite doit chercher un etat non-oracle
 ou une regle capable de resoudre les prefixes de sequence.
 
+La passe prefix-bootstrap cible alors les deux premiers bytes de chaque payload
+mixed-value avec seulement des signaux non-oracle (`signal_*`, `prefix_*`,
+sources externes, offset et dominant):
+
+```text
+output/tex_micro_mixed_value_payload_prefix_bootstrap/index.html
+output/tex_micro_mixed_value_payload_prefix_bootstrap/rules.csv
+output/tex_micro_mixed_value_payload_prefix_bootstrap/slots.csv
+```
+
+Etat courant:
+
+```text
+Prefix slots: 20
+Feature sets: 7175
+False-free byte rule sets: 342
+Best false-free byte rule: dominant+signal_delta 4/0, unknown 16
+Union candidate slots: 12
+Union candidate rows: 8
+Union conflict slots: 0
+Sequence prerequisites covered: 4/4
+Sequence candidates unlocked: 2/2
+Promotion-ready bytes: 0
+```
+
+Conclusion: l'union des regles prefix non-oracle couvre les 4 bytes qui
+bloquent les 2 candidats sequence, sans conflit entre predictions. C'est le
+premier pont non-oracle vers la piste sequence; il faut maintenant revoir cette
+union et la rejouer avec garde avant toute promotion.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
