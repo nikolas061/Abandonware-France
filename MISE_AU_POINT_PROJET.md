@@ -1206,6 +1206,32 @@ ces 8 contextes en replay garde et revalider l'application aux bytes, mais la
 roadmap peut maintenant suivre une piste de promotion candidate au lieu d'une
 simple revue fragmentee.
 
+La passe promotion couverture garde union replay applique cette garde compacte
+sur les buffers de base `palette_formula_replay`. Elle verifie pour chaque byte
+le masque connu, les plages rejetees, les chevauchements, le byte attendu et le
+byte predit avant d'ecrire.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_replay/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_replay/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_replay/fixtures.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_promoted_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Promoted rows: 25/25
+Added guard bytes: 25
+False bytes: 0
+Promotion-ready bytes: 25
+Issue rows: 0
+```
+
+Conclusion: les 25 bytes de la garde compacte sont maintenant promus proprement
+dans un replay separe. La suite doit consommer ce replay comme nouvelle base
+gradient, puis relancer les probes aval pour mesurer le deblocage reel.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
