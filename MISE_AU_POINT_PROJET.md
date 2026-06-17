@@ -1445,8 +1445,40 @@ Conclusion: tous les octets externes ont une explication spatiale locale:
 `80:0-3` utilise l'ancre droite `6b` avec la signature `-1,+1,-1`,
 `80:7-12` utilise l'ancre gauche `56` avec `-1,-2,-1,-3,0`, et `58:9-10`
 reprend une signature connue sur un seul octet. Les deux signatures du frontier
-`80` restent uniques; la prochaine piste concrete est donc un selecteur
-non-oracle pour ces signatures, avant toute promotion.
+`80` restent uniques; cela motive un selecteur non-oracle pour ces signatures,
+avant toute promotion.
+
+La sonde de selecteur du pont spatial regroupe les candidats d'ancre par
+familles non-oracle (`literal_edge_anchor`, `op_length_anchor`,
+`control_mod_anchor`, etc.), puis verifie si une famille deja vue sur des spans
+connus predit les signatures cible:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector/selectors.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_selector/candidates.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 9
+Target candidate rows: 5
+Known candidate rows: 17
+Selector group rows: 154
+Guarded exact bytes: 0
+Frontier 80 target-only unique bytes: 8
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: les 8 bytes du frontier `80` sont bien isoles par des signaux
+non-oracle locaux (`literal_edge_anchor` autour des ancres `6b` et `56`), mais
+aucun groupe equivalent n'existe encore dans les references connues. La
+prochaine piste concrete n'est donc pas une promotion; il faut deriver le
+producteur compresse/controle des deltas `-1,+1,-1` et `-1,-2,-1,-3,0`.
 
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
