@@ -50,6 +50,9 @@ DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SOURCE_PROFILE_SUMMARY = Path(
 DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY = Path(
     "output/tex_micro_mixed_value_payload_spatial/summary.csv"
 )
+DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
+    "output/tex_micro_mixed_value_payload_state_opcode/summary.csv"
+)
 
 QUEUE_FIELDNAMES = [
     "priority",
@@ -182,6 +185,7 @@ def build_queue(
     micro_mixed_value_payload_predictor_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_source_profile_summary: dict[str, str] | None = None,
     micro_mixed_value_payload_spatial_summary: dict[str, str] | None = None,
+    micro_mixed_value_payload_state_opcode_summary: dict[str, str] | None = None,
 ) -> list[dict[str, object]]:
     enriched: list[dict[str, object]] = []
     for row in decisions:
@@ -425,18 +429,71 @@ def build_queue(
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if row.get("surface", "").startswith("mixed_token") and micro_mixed_value_payload_state_opcode_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"mixed_value_state_signal_slots="
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('signal_slot_bytes', '0')}",
+                    f"mixed_value_state_best_high="
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('best_high_correct_slots', '0')}/"
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('best_high_false_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"mixed_value_state_raw_exact="
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('signal_raw_exact_bytes', '0')}/"
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('control_raw_exact_bytes', '0')}",
+                    f"mixed_value_state_best_byte="
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('best_byte_correct_slots', '0')}/"
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('best_byte_false_slots', '0')}",
+                    f"mixed_value_state_rejected="
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('source_state_rejected', '0')}",
+                    f"mixed_value_state_promotion_ready="
+                    f"{micro_mixed_value_payload_state_opcode_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
         if (
             row.get("surface", "") == "micro_token"
             and gradient_payload_profile_summary
             and micro_jump_mixed_payload_summary
             and jump_token_payload_profile_summary
         ):
+            next_action = (
+                "move beyond family splits: derive a state/opcode grammar for mixed-value, "
+                "gradient and jump-token payloads"
+            )
+            if micro_mixed_value_payload_state_opcode_summary:
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"mixed_value_state_best_high="
+                        f"{micro_mixed_value_payload_state_opcode_summary.get('best_high_correct_slots', '0')}/"
+                        f"{micro_mixed_value_payload_state_opcode_summary.get('best_high_false_slots', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"mixed_value_state_best_byte="
+                        f"{micro_mixed_value_payload_state_opcode_summary.get('best_byte_correct_slots', '0')}/"
+                        f"{micro_mixed_value_payload_state_opcode_summary.get('best_byte_false_slots', '0')}",
+                        f"mixed_value_state_rejected="
+                        f"{micro_mixed_value_payload_state_opcode_summary.get('source_state_rejected', '0')}",
+                    ],
+                )
+                next_action = (
+                    "extend state/opcode search to gradient and jump-token payloads; "
+                    "mixed-value source-state contexts are rejected"
+                )
             row = {
                 **row,
-                "next_action": (
-                    "move beyond family splits: derive a state/opcode grammar for mixed-value, "
-                    "gradient and jump-token payloads"
-                ),
+                "next_action": next_action,
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
             }
         enriched.append(
             {
@@ -795,6 +852,11 @@ def main() -> None:
         type=Path,
         default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_SPATIAL_SUMMARY,
     )
+    parser.add_argument(
+        "--micro-mixed-value-payload-state-opcode-summary",
+        type=Path,
+        default=DEFAULT_MICRO_MIXED_VALUE_PAYLOAD_STATE_OPCODE_SUMMARY,
+    )
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Decoder Roadmap")
     args = parser.parse_args()
@@ -887,6 +949,14 @@ def main() -> None:
     micro_mixed_value_payload_spatial_summary = (
         micro_mixed_value_payload_spatial_rows[0] if micro_mixed_value_payload_spatial_rows else None
     )
+    micro_mixed_value_payload_state_opcode_rows = (
+        read_rows(args.micro_mixed_value_payload_state_opcode_summary)
+        if args.micro_mixed_value_payload_state_opcode_summary.exists()
+        else []
+    )
+    micro_mixed_value_payload_state_opcode_summary = (
+        micro_mixed_value_payload_state_opcode_rows[0] if micro_mixed_value_payload_state_opcode_rows else None
+    )
     queue = build_queue(
         decisions,
         gradient_payload_profile_summary,
@@ -899,6 +969,7 @@ def main() -> None:
         micro_mixed_value_payload_predictor_summary,
         micro_mixed_value_payload_source_profile_summary,
         micro_mixed_value_payload_spatial_summary,
+        micro_mixed_value_payload_state_opcode_summary,
     )
     summary = build_summary(queue, review_summary)
 

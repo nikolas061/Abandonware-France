@@ -55,9 +55,9 @@ CDCACHE HD assets: 3104
 Inventaire historique:
 
 ```text
-Historical project files: 17537
+Historical project files: 17536
 Core historical files: 18
-Historical bytes: 4147149127
+Historical bytes: 4147148994
 ```
 
 Rapports:
@@ -412,6 +412,34 @@ Conclusion: le voisin gauche donne le meilleur score agrege, mais reste trop
 faible et produit 429 faux bytes. Les distances type largeur d'image ne
 fournissent pas de copie exploitable non plus. Le dominant `mixed_value` reste
 donc bloque sur une grammaire d'etat, pas sur une copie spatiale directe.
+
+La passe etat/opcode teste ensuite des contextes externes non-oracle autour du
+signal compresse, du `control_ref_mod64`, du `control_prefix` et du fragment:
+
+```text
+output/tex_micro_mixed_value_payload_state_opcode/index.html
+output/tex_micro_mixed_value_payload_state_opcode/rows.csv
+output/tex_micro_mixed_value_payload_state_opcode/candidates.csv
+output/tex_micro_mixed_value_payload_state_opcode/contexts.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 567
+Raw exact signal/control: 5 / 3
+Best byte state: signal_byte_pos16 25 / 144
+Best high state: signal_byte_pos16 121 / 100
+High baseline precision: 0.626102
+Source-state rejected: 1
+Promotion-ready bytes: 0
+```
+
+Conclusion: les contextes d'etat disponibles autour du flux compresse ne
+produisent pas le byte complet, et le meilleur high nibble reste inferieur au
+biais global `0x6*`. Le dominant `mixed_value` ne doit donc pas etre promu via
+ces etats locaux; il faut chercher une grammaire opcode plus haute ou passer
+aux familles `gradient`/`jump-token`.
 
 La passe suivante analyse les positions normalisees des sauts dans les buckets
 repetees:
