@@ -1785,6 +1785,42 @@ seg_ref+2, anchor` ne matche toujours qu'en cible. La prochaine piste concrete
 est donc de deriver une variante de formule pour les lignes compact-control
 non-cibles avant de reconsiderer la promotion du guard cinq octets.
 
+La sonde de variante formule separe ensuite les candidats locaux, proches du
+couple `5354`, des candidats plein-gap/tail sur les quatre hits compact-control:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant/variants.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant/matches.csv
+```
+
+Etat courant:
+
+```text
+Refined pair rows: 4
+Refined non-target rows: 3
+Local variant rows: 106
+Local multi-frontier rows: 106
+Local all non-target rows: 0
+Local target rows: 12
+Full variant rows: 4395
+Full all non-target rows: 113
+Full target rows: 473
+Best local template: ar+2|c55|s+2+0|a+0|c00|c00
+Best local samples: 80:9-14:5553560000;29:8-13:5553550000
+Best full template: ar+0|a+0|s+1+0|c53|c54|s+4+0
+Best full frontiers: 29,54,55
+Best full samples: 29:586-591:6854535457;54:283-288:5555535454;55:276-281:6caa535459
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: aucune variante locale ne couvre les trois non-cibles
+compact-control. Les variantes qui couvrent `29`, `54` et `55` existent
+uniquement dans les fenetres plein-gap/tail et doivent donc etre gatees par leur
+contexte local/tail avant toute promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
