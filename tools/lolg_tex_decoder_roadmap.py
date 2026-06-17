@@ -270,6 +270,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRID
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_FAMILY_BRIDGE_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_ATOM_RESOLVER_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1470,6 +1473,22 @@ def gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_f
     return "expand compact-control five-byte bridge shapes beyond current pair families"
 
 
+def gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix external terminal five-byte atom resolver issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote compact-control five-byte atom resolver"
+    if int_value(summary, "exact_family_resolver_rows") > 0:
+        return summary.get("next_probe", "") or "gate single-axis compact-control atom resolver against target-overlap templates"
+    if int_value(summary, "single_axis_resolver_rows") > 0:
+        return summary.get("next_probe", "") or "resolve shared ambiguous compact-control atoms inside single-axis bridges"
+    if int_value(summary, "broad_ambiguous_shape_rows") > 0:
+        return "split broad ambiguous compact-control atom bridges by context"
+    return "expand compact-control five-byte atom resolver features"
+
+
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
     if int_value(summary, "false_free_byte_slots") > 0:
         return "replay false-free mixed-value payload byte combos"
@@ -2043,6 +2062,10 @@ def build_queue(
     ]
     | None = None,
     gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary: dict[
         str, str
     ]
     | None = None,
@@ -5044,43 +5067,70 @@ def build_queue(
                         f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary.get('issue_rows', '0')}",
                     ],
                 )
+            if (
+                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_sequence_low_exception_external_spatial_five_atom_resolver_shapes="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.get('shape_resolver_rows', '0')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_atom_resolver_exact="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.get('exact_family_resolver_rows', '0')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_atom_resolver_single_axis="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.get('single_axis_resolver_rows', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_sequence_low_exception_external_spatial_five_atom_resolver_best_switch="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.get('best_single_axis_switch', '')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_atom_resolver_broad="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.get('broad_ambiguous_shape_rows', '0')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_atom_resolver_next="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.get('next_probe', '')}",
+                        f"gradient_sequence_low_exception_external_spatial_five_atom_resolver_issues="
+                        f"{gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.get('issue_rows', '0')}",
+                    ],
+                )
             row = {
                 **row,
                 "next_action": (
-                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_action(
-                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary
+                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary
                     )
-                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary
+                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary
                     else (
-                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split_action(
-                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split_summary
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_action(
+                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary
                         )
-                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split_summary
+                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary
                         else (
-                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support_action(
-                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support_summary
+                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split_action(
+                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split_summary
                             )
-                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support_summary
+                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split_summary
                             else (
-                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_action(
-                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
+                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support_action(
+                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support_summary
                                 )
-                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
+                                if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support_summary
                                 else (
-                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_action(
-                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
+                                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_action(
+                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
                                     )
-                                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
+                                    if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_tail_context_gate_summary
                                     else (
-                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_action(
-                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
+                                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_action(
+                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
                                         )
-                                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
+                                        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_formula_variant_summary
                                         else (
-                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_action(
-                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_summary
+                                            gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_action(
+                                                gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
                                             )
-                                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_mod_review_summary
+                                            if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_refined_support_summary
                                             else (
                                                 gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_action(
                                                     gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_expanded_corpus_summary
@@ -8864,6 +8914,12 @@ def build_queue(
                         flat_walk_palette_promotion_candidate_summary,
                     )
                 elif (
+                    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_action(
+                        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary
+                    )
+                elif (
                     gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary
                 ):
                     next_action = gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_action(
@@ -10047,6 +10103,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_FAMILY_BRIDGE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-external-terminal-spatial-bridge-five-byte-atom-resolver-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_EXTERNAL_TERMINAL_SPATIAL_BRIDGE_FIVE_BYTE_ATOM_RESOLVER_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -11057,6 +11118,18 @@ def main() -> None:
         if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_rows
         else None
     )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary = (
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_rows[0]
+        if gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_rows
+        else None
+    )
     gradient_macro_state_cluster_payload_rows = (
         read_rows(args.gradient_macro_state_cluster_payload_summary)
         if args.gradient_macro_state_cluster_payload_summary.exists()
@@ -11881,6 +11954,7 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_non_tail_support_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_pair_family_split_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_family_bridge_summary,
+        gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

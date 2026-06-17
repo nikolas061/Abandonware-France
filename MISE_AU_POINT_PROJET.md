@@ -1967,6 +1967,47 @@ un template exact. Le meilleur pont `s|s|a|s|s` relie la famille dominante
 `29,54` a `29,55` sans recouper la cible. La prochaine piste concrete est donc
 de deriver un resolveur d'atomes pour ces ponts de forme avant toute promotion.
 
+La sonde resolveur d'atomes classe ensuite les positions internes de ces ponts
+target-free:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver/shapes.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver/atoms.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_atom_resolver/positions.csv
+```
+
+Etat courant:
+
+```text
+Target-free shape bridge rows: 4
+Shape resolver rows: 4
+Exact family resolver rows: 1
+Single-axis resolver rows: 3
+Shared ambiguity single-axis rows: 2
+Broad ambiguous shape rows: 1
+Family atom rows: 40
+Resolved family atom rows: 31
+Ambiguous family atom rows: 9
+Position delta rows: 20
+Shared position rows: 12
+Divergent exact position rows: 3
+Divergent ambiguous position rows: 5
+Best exact shape: a|s|s|c|c
+Best single-axis shape: a|s|s|c|c
+Best single-axis position: 2
+Best single-axis switch: 29,54:s+1+0;29,55:s+6+2
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le signal utile est un switch single-axis en position 2, exact sur
+`a|s|s|c|c` et partage avec ambiguite controlee sur deux autres formes. Le
+grand pont `s|s|a|s|s` reste trop ambigu pour promotion. La prochaine piste
+concrete est donc de gater ce switch d'atome contre les templates qui recoupent
+la cible.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
