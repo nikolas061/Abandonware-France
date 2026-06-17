@@ -425,6 +425,19 @@ def build_queue(
                 ],
             )
             row = {**row, "positive_evidence": positive_evidence, "blocking_evidence": blocking_evidence}
+        if (
+            row.get("surface", "") == "micro_token"
+            and gradient_payload_profile_summary
+            and micro_jump_mixed_payload_summary
+            and jump_token_payload_profile_summary
+        ):
+            row = {
+                **row,
+                "next_action": (
+                    "move beyond family splits: derive a state/opcode grammar for mixed-value, "
+                    "gradient and jump-token payloads"
+                ),
+            }
         enriched.append(
             {
                 "priority": 0,
