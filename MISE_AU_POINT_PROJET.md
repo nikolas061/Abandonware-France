@@ -496,6 +496,32 @@ Conclusion: la sequence locale n'ameliore pas le signal global
 singleton-heavy. La prochaine passe doit donc chercher une grammaire de
 transition fixture/op plus large que la sequence locale d'une frontier.
 
+La sonde de transition fixture/op decompose ensuite les fixtures macro en
+regle, paire `op0/op1`, nibbles, delta, ordre, skip, phase et voisinage:
+
+```text
+output/tex_gradient_macro_fixture_transition/index.html
+output/tex_gradient_macro_fixture_transition/rows.csv
+output/tex_gradient_macro_fixture_transition/groups.csv
+output/tex_gradient_macro_fixture_transition/families.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1925
+Selector families: 26
+Best fixture transition: dominant_delta / fixture_rule_delta_skip 781 / 908 / 236 singleton
+Lowest conflict transition: dominant_delta / fixture_rule_delta_phase 778 / 0 / 1147 singleton
+Best payload transition: band_shape / fixture_opcode_lo_pair 94 / 1452 / 379 singleton
+Promotion-ready bytes: 0
+```
+
+Conclusion: les opcodes de fixture expliquent quelques sous-cas repetes, mais
+le meilleur signal utile reste soit conflictuel, soit trop singleton-heavy. La
+prochaine passe doit donc chercher des clusters d'etat macro cross-frontier
+plutot qu'une transition locale fixture/op.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

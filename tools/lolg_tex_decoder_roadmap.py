@@ -48,6 +48,9 @@ DEFAULT_GRADIENT_MACRO_PHASE_CONFLICT_SPLIT_SUMMARY = Path(
 DEFAULT_GRADIENT_MACRO_PHASE_SEQUENCE_SUMMARY = Path(
     "output/tex_gradient_macro_phase_sequence/summary.csv"
 )
+DEFAULT_GRADIENT_MACRO_FIXTURE_TRANSITION_SUMMARY = Path(
+    "output/tex_gradient_macro_fixture_transition/summary.csv"
+)
 DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY = Path("output/tex_micro_jump_mixed_payload/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_jump_token_payload_profile/summary.csv")
 DEFAULT_JUMP_TOKEN_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
@@ -203,6 +206,7 @@ def build_queue(
     gradient_macro_phase_summary: dict[str, str] | None = None,
     gradient_macro_phase_conflict_split_summary: dict[str, str] | None = None,
     gradient_macro_phase_sequence_summary: dict[str, str] | None = None,
+    gradient_macro_fixture_transition_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -484,6 +488,44 @@ def build_queue(
             row = {
                 **row,
                 "next_action": "probe fixture/op transition grammar; local sequence stays conflicted or singleton-heavy",
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_macro_fixture_transition_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_fixture_transition_best="
+                    f"{gradient_macro_fixture_transition_summary.get('best_transition_target_kind', '')}/"
+                    f"{gradient_macro_fixture_transition_summary.get('best_transition_selector_family', '')}",
+                    f"gradient_fixture_transition_deterministic="
+                    f"{gradient_macro_fixture_transition_summary.get('best_transition_deterministic_bytes', '0')}",
+                    f"gradient_fixture_transition_low_conflict="
+                    f"{gradient_macro_fixture_transition_summary.get('low_conflict_transition_selector_family', '')}",
+                    f"gradient_fixture_transition_low_conflict_deterministic="
+                    f"{gradient_macro_fixture_transition_summary.get('low_conflict_transition_deterministic_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_fixture_transition_conflicted="
+                    f"{gradient_macro_fixture_transition_summary.get('best_transition_conflicted_bytes', '0')}",
+                    f"gradient_fixture_transition_singleton="
+                    f"{gradient_macro_fixture_transition_summary.get('best_transition_singleton_bytes', '0')}",
+                    f"gradient_fixture_transition_low_conflict_singleton="
+                    f"{gradient_macro_fixture_transition_summary.get('low_conflict_transition_singleton_bytes', '0')}",
+                    f"gradient_fixture_transition_payload_deterministic="
+                    f"{gradient_macro_fixture_transition_summary.get('best_payload_deterministic_bytes', '0')}",
+                    f"gradient_fixture_transition_promotion_ready="
+                    f"{gradient_macro_fixture_transition_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": (
+                    "probe cross-frontier macro state clusters; fixture/op transition stays conflicted or singleton-heavy"
+                ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -1001,6 +1043,44 @@ def build_queue(
                 next_action = (
                     "probe fixture/op transition grammar; local sequence stays conflicted or singleton-heavy"
                 )
+            if (
+                gradient_macro_fixture_transition_summary
+                and gradient_macro_phase_sequence_summary
+                and gradient_macro_phase_conflict_split_summary
+                and gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"gradient_fixture_transition_best="
+                        f"{gradient_macro_fixture_transition_summary.get('best_transition_target_kind', '')}/"
+                        f"{gradient_macro_fixture_transition_summary.get('best_transition_selector_family', '')}",
+                        f"gradient_fixture_transition_deterministic="
+                        f"{gradient_macro_fixture_transition_summary.get('best_transition_deterministic_bytes', '0')}",
+                        f"gradient_fixture_transition_low_conflict="
+                        f"{gradient_macro_fixture_transition_summary.get('low_conflict_transition_selector_family', '')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"gradient_fixture_transition_conflicted="
+                        f"{gradient_macro_fixture_transition_summary.get('best_transition_conflicted_bytes', '0')}",
+                        f"gradient_fixture_transition_low_conflict_singleton="
+                        f"{gradient_macro_fixture_transition_summary.get('low_conflict_transition_singleton_bytes', '0')}",
+                        f"gradient_fixture_transition_promotion_ready="
+                        f"{gradient_macro_fixture_transition_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = (
+                    "probe cross-frontier macro state clusters; fixture/op transition stays conflicted or singleton-heavy"
+                )
             row = {
                 **row,
                 "next_action": next_action,
@@ -1359,6 +1439,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_PHASE_SEQUENCE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-macro-fixture-transition-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_MACRO_FIXTURE_TRANSITION_SUMMARY,
+    )
+    parser.add_argument(
         "--micro-jump-mixed-payload-summary",
         type=Path,
         default=DEFAULT_MICRO_JUMP_MIXED_PAYLOAD_SUMMARY,
@@ -1487,6 +1572,14 @@ def main() -> None:
     gradient_macro_phase_sequence_summary = (
         gradient_macro_phase_sequence_rows[0] if gradient_macro_phase_sequence_rows else None
     )
+    gradient_macro_fixture_transition_rows = (
+        read_rows(args.gradient_macro_fixture_transition_summary)
+        if args.gradient_macro_fixture_transition_summary.exists()
+        else []
+    )
+    gradient_macro_fixture_transition_summary = (
+        gradient_macro_fixture_transition_rows[0] if gradient_macro_fixture_transition_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -1577,6 +1670,7 @@ def main() -> None:
         gradient_macro_phase_summary,
         gradient_macro_phase_conflict_split_summary,
         gradient_macro_phase_sequence_summary,
+        gradient_macro_fixture_transition_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

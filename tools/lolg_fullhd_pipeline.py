@@ -107,6 +107,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             "sequence phase macro opcode gradient .tex",
             [sys.executable, "tools/lolg_tex_gradient_macro_phase_sequence_probe.py"],
         ),
+        Step(
+            "transition fixture/op macro opcode gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_macro_fixture_transition_probe.py"],
+        ),
         Step("split micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_split.py"]),
         Step("positions micro jump .tex", [sys.executable, "tools/lolg_tex_micro_jump_positions.py"]),
         Step("payload jump-mixed micro .tex", [sys.executable, "tools/lolg_tex_micro_jump_mixed_payload_probe.py"]),
