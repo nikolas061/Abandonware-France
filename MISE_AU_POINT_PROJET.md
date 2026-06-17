@@ -1004,6 +1004,34 @@ sont deja connus, mais cette etape est encore une validation oracle. La suite
 doit deriver une regle de delta non-oracle avant de rejouer/promouvoir ces
 racines.
 
+La passe delta terminaux source exceptions low teste ensuite des contextes
+non-oracle pour predire `source_low_delta` sur les aretes high-safe, puis mesure
+directement combien des 28 chaines de la revue terminale deviennent rejouables.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_delta/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_delta/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_delta/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_delta/chains.csv
+```
+
+Etat courant:
+
+```text
+Edge rows: 157
+Review chains: 28
+Review edges: 28
+Feature sets: 3303
+Best delta replay: source_actual_mod32+fragment_low = 5 exact / 10 false
+Best false-free delta replay: source_availability+source_actual_mod32+window_head_byte = 2 exact
+Promotion-ready bytes: 0
+```
+
+Conclusion: les contextes non-oracle actuels ne generalisent pas le replay
+terminal. La meilleure couverture brute est bruitee, et le meilleur faux-free
+ne couvre que 2 racines; il faut chercher des features de delta plus fortes
+avant de promouvoir cette piste.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

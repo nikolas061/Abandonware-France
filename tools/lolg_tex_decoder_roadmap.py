@@ -174,6 +174,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_SUMMARY = Path
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REVIEW_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_DELTA_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_delta/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -932,6 +935,16 @@ def gradient_sequence_high_safe_low_exception_source_terminal_review_action(summ
     return "reject terminal source-chain replay and seek another terminal source"
 
 
+def gradient_sequence_high_safe_low_exception_source_terminal_delta_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient sequence low-exception source-terminal delta probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote gradient sequence low-exception source-terminal delta candidates"
+    if int_value(summary, "best_false_free_review_exact") > 0:
+        return "review narrow terminal delta candidates and seek stronger chain-delta features"
+    return "reject current terminal delta contexts and seek stronger chain-delta features"
+
+
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
     if int_value(summary, "false_free_byte_slots") > 0:
         return "replay false-free mixed-value payload byte combos"
@@ -1434,6 +1447,7 @@ def build_queue(
     gradient_sequence_high_safe_low_exception_source_chain_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_terminal_summary: dict[str, str] | None = None,
     gradient_sequence_high_safe_low_exception_source_terminal_review_summary: dict[str, str] | None = None,
+    gradient_sequence_high_safe_low_exception_source_terminal_delta_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -3389,6 +3403,43 @@ def build_queue(
                 **row,
                 "next_action": gradient_sequence_high_safe_low_exception_source_terminal_review_action(
                     gradient_sequence_high_safe_low_exception_source_terminal_review_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_terminal_delta_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_terminal_delta="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('best_review_exact', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('best_review_false', '0')}",
+                    f"gradient_sequence_low_exception_source_terminal_delta_ff="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('best_false_free_review_exact', '0')}",
+                    f"gradient_sequence_low_exception_source_terminal_delta_features="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('feature_sets', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_terminal_delta_best="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('best_context', '')}",
+                    f"gradient_sequence_low_exception_source_terminal_delta_ff_context="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('best_false_free_context', '')}",
+                    f"gradient_sequence_low_exception_source_terminal_delta_promotion_ready="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('promotion_ready_bytes', '0')}",
+                    f"gradient_sequence_low_exception_source_terminal_delta_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_terminal_delta_action(
+                    gradient_sequence_high_safe_low_exception_source_terminal_delta_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -7090,6 +7141,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_sequence_high_safe_low_exception_source_terminal_delta_summary:
+                    next_action = gradient_sequence_high_safe_low_exception_source_terminal_delta_action(
+                        gradient_sequence_high_safe_low_exception_source_terminal_delta_summary
+                    )
                 elif gradient_sequence_high_safe_low_exception_source_terminal_review_summary:
                     next_action = gradient_sequence_high_safe_low_exception_source_terminal_review_action(
                         gradient_sequence_high_safe_low_exception_source_terminal_review_summary
@@ -7966,6 +8021,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REVIEW_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-delta-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_DELTA_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -8628,6 +8688,16 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_source_terminal_review_summary = (
         gradient_sequence_high_safe_low_exception_source_terminal_review_rows[0]
         if gradient_sequence_high_safe_low_exception_source_terminal_review_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_delta_rows = (
+        read_rows(args.gradient_sequence_high_safe_low_exception_source_terminal_delta_summary)
+        if args.gradient_sequence_high_safe_low_exception_source_terminal_delta_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_delta_summary = (
+        gradient_sequence_high_safe_low_exception_source_terminal_delta_rows[0]
+        if gradient_sequence_high_safe_low_exception_source_terminal_delta_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -9422,6 +9492,7 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_source_chain_summary,
         gradient_sequence_high_safe_low_exception_source_terminal_summary,
         gradient_sequence_high_safe_low_exception_source_terminal_review_summary,
+        gradient_sequence_high_safe_low_exception_source_terminal_delta_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,
