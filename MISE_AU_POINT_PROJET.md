@@ -487,6 +487,37 @@ slots) mais reste trop sparse, et le meilleur contexte large est encore plus
 bruite que le source-profile seul. La suite doit chercher un transform/low-split
 gradient plutot qu'une cle positionnelle directe.
 
+La passe transform-low teste ensuite le low direct, les deltas, signed-deltas et
+xor du low contre la source, les voisins connus et les bases positionnelles des
+slots row/corpus:
+
+```text
+output/tex_gradient_sequence_high_safe_transform_low/index.html
+output/tex_gradient_sequence_high_safe_transform_low/rules.csv
+output/tex_gradient_sequence_high_safe_transform_low/slots.csv
+```
+
+Etat courant:
+
+```text
+Row/corpus slots: 320
+Feature sets: 4101 focused
+Transform targets: 40
+Candidate rules: 164040
+Predicted rules: 75443
+False-free transform sets: 5962
+Best false-free slots: 10
+Best false-free rule: xor:x + x_mod8 + src_rel_mod4 + row_quarter
+Best broad rule: xor:source_delta + end_mod16 + source_target_delta_mod32 = 56 exact / 136 false
+Best low-false rule: xor:x + x_mod8 + src_rel_mod8 + offset_delta_bucket + row_third = 17 exact / 5 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: les transforms low ne generalisent pas mieux que le direct
+row/corpus. Le meilleur cas false-free reste limite a 10 slots et le meilleur
+cas large conserve 136 faux; la piste suivante doit viser une grammaire
+residuelle source-window/controle plutot qu'un low-split simple.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
