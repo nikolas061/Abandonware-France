@@ -753,6 +753,29 @@ Conclusion: le delta par valeur donne une piste, mais reste trop fragmente. La
 prochaine passe doit chercher une table compacte valeur->delta, ou un selecteur
 plus proche du flux compresse, avant toute promotion.
 
+La table valeur->delta verifie ensuite si les memes valeurs palette conservent
+un delta stable entre les deux signatures:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_value_table_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_value_table_probe/values.csv
+```
+
+Etat courant:
+
+```text
+Multi-signature values: 5
+Stable transform multi-values: 2
+Conflicted transform multi-values: 3
+Stable offset multi-values: 1
+Stable pair multi-values: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: seules `0x6a` et `0x6b` gardent un delta transform stable. Les
+valeurs `0x6c`, `0x6d` et `0xaa` restent conflictuelles et doivent etre reliees
+a un selecteur du flux compresse.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

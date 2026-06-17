@@ -45,6 +45,9 @@ DEFAULT_FLAT_WALK_PALETTE_NORMALIZED_CONTEXT_SUMMARY = Path(
 DEFAULT_FLAT_WALK_PALETTE_VALUE_SPLIT_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_value_split_probe/summary.csv"
 )
+DEFAULT_FLAT_WALK_PALETTE_VALUE_TABLE_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_value_table_probe/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -247,6 +250,7 @@ def build_queue(
     flat_walk_palette_context_summary: dict[str, str] | None = None,
     flat_walk_palette_normalized_context_summary: dict[str, str] | None = None,
     flat_walk_palette_value_split_summary: dict[str, str] | None = None,
+    flat_walk_palette_value_table_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -884,6 +888,40 @@ def build_queue(
                 "next_action": (
                     "derive a compact palette-value delta table; best transform delta covers only 8/14 values"
                 ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and flat_walk_palette_value_split_summary
+            and flat_walk_palette_value_table_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"flat_walk_value_table_multi="
+                    f"{flat_walk_palette_value_table_summary.get('multi_signature_values', '0')}",
+                    f"flat_walk_value_table_stable_transform="
+                    f"{flat_walk_palette_value_table_summary.get('stable_transform_multi_values', '0')}",
+                    f"flat_walk_value_table_best_transform="
+                    f"{flat_walk_palette_value_table_summary.get('best_value_transform', '')}/"
+                    f"{flat_walk_palette_value_table_summary.get('best_value_transform_rows', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"flat_walk_value_table_conflicted_transform="
+                    f"{flat_walk_palette_value_table_summary.get('conflicted_transform_multi_values', '0')}",
+                    f"flat_walk_value_table_stable_pair="
+                    f"{flat_walk_palette_value_table_summary.get('stable_pair_multi_values', '0')}",
+                    f"flat_walk_value_table_promotion_ready="
+                    f"{flat_walk_palette_value_table_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": "seek compressed-stream selectors for conflicted flat-walk palette values",
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -1826,6 +1864,53 @@ def build_queue(
                 next_action = (
                     "derive a compact palette-value delta table; best transform delta covers only 8/14 values"
                 )
+            if (
+                flat_walk_palette_value_table_summary
+                and flat_walk_palette_value_split_summary
+                and flat_walk_palette_normalized_context_summary
+                and flat_walk_palette_context_summary
+                and flat_walk_backref_chain_summary
+                and flat_walk_backref_summary
+                and gradient_macro_state_cluster_backref_summary
+                and gradient_macro_state_cluster_literal_summary
+                and gradient_macro_state_cluster_source_summary
+                and gradient_macro_state_cluster_payload_summary
+                and gradient_macro_state_cluster_summary
+                and gradient_macro_fixture_transition_summary
+                and gradient_macro_phase_sequence_summary
+                and gradient_macro_phase_conflict_split_summary
+                and gradient_macro_phase_summary
+                and gradient_macro_residual_state_summary
+                and gradient_macro_conflict_split_summary
+                and gradient_macro_opcode_summary
+                and gradient_payload_state_opcode_summary
+                and micro_mixed_value_payload_state_opcode_summary
+                and jump_token_payload_state_opcode_summary
+            ):
+                positive_evidence = append_evidence(
+                    positive_evidence,
+                    [
+                        f"flat_walk_value_table_multi="
+                        f"{flat_walk_palette_value_table_summary.get('multi_signature_values', '0')}",
+                        f"flat_walk_value_table_stable_transform="
+                        f"{flat_walk_palette_value_table_summary.get('stable_transform_multi_values', '0')}",
+                        f"flat_walk_value_table_best_transform="
+                        f"{flat_walk_palette_value_table_summary.get('best_value_transform', '')}/"
+                        f"{flat_walk_palette_value_table_summary.get('best_value_transform_rows', '0')}",
+                    ],
+                )
+                blocking_evidence = append_evidence(
+                    blocking_evidence,
+                    [
+                        f"flat_walk_value_table_conflicted_transform="
+                        f"{flat_walk_palette_value_table_summary.get('conflicted_transform_multi_values', '0')}",
+                        f"flat_walk_value_table_stable_pair="
+                        f"{flat_walk_palette_value_table_summary.get('stable_pair_multi_values', '0')}",
+                        f"flat_walk_value_table_promotion_ready="
+                        f"{flat_walk_palette_value_table_summary.get('promotion_ready_bytes', '0')}",
+                    ],
+                )
+                next_action = "seek compressed-stream selectors for conflicted flat-walk palette values"
             row = {
                 **row,
                 "next_action": next_action,
@@ -2165,6 +2250,11 @@ def main() -> None:
         default=DEFAULT_FLAT_WALK_PALETTE_VALUE_SPLIT_SUMMARY,
     )
     parser.add_argument(
+        "--flat-walk-palette-value-table-summary",
+        type=Path,
+        default=DEFAULT_FLAT_WALK_PALETTE_VALUE_TABLE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-payload-profile-summary",
         type=Path,
         default=DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY,
@@ -2447,6 +2537,14 @@ def main() -> None:
     flat_walk_palette_value_split_summary = (
         flat_walk_palette_value_split_rows[0] if flat_walk_palette_value_split_rows else None
     )
+    flat_walk_palette_value_table_rows = (
+        read_rows(args.flat_walk_palette_value_table_summary)
+        if args.flat_walk_palette_value_table_summary.exists()
+        else []
+    )
+    flat_walk_palette_value_table_summary = (
+        flat_walk_palette_value_table_rows[0] if flat_walk_palette_value_table_rows else None
+    )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
     )
@@ -2548,6 +2646,7 @@ def main() -> None:
         flat_walk_palette_context_summary,
         flat_walk_palette_normalized_context_summary,
         flat_walk_palette_value_split_summary,
+        flat_walk_palette_value_table_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,
