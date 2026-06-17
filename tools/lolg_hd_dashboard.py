@@ -728,6 +728,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_macro_conflict_split/index.html"),
         ),
         (
+            "Etat residuel macro opcode gradient .tex",
+            Path("output/tex_gradient_macro_residual_state/index.html"),
+        ),
+        (
             "Contexte gradients repetes .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_repeat_context_probe/index.html"),
         ),

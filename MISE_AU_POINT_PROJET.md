@@ -388,6 +388,34 @@ restant a 213 bytes, mais le meilleur split sans conflit (`exact_length`)
 isole 400 bytes en singletons. La prochaine passe doit donc resoudre le groupe
 residuel `mod64=23` par un signal source supplementaire avant promotion.
 
+La sonde residuelle reprend ensuite ce groupe `mod64=23` et separe les
+fenetres source locales des bins d'etat/position (`span_index`, `op_index`,
+offset decode et longueur):
+
+```text
+output/tex_gradient_macro_residual_state/index.html
+output/tex_gradient_macro_residual_state/rows.csv
+output/tex_gradient_macro_residual_state/groups.csv
+output/tex_gradient_macro_residual_state/families.csv
+```
+
+Etat courant:
+
+```text
+Residual rows: 3
+Residual bytes: 213
+Best source selector: source_window_signature 0 / 139 / 74 singleton
+Best state selector: op_index_band8 138 / 0 / 75 singleton
+Best selector: state / op_index_band8
+Promotion-ready bytes: 0
+```
+
+Conclusion: les fenetres source locales restent conflictuelles, y compris
+quand l'ancre de depart est identique. Le meilleur signal vient de la phase
+d'operation (`op_index_band8` ou `span_index_band4`), qui stabilise 138 bytes
+mais laisse le cas delta=1 en singleton. La prochaine passe doit etendre ces
+bins de phase sur toutes les lignes macro gradient avant promotion.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 
