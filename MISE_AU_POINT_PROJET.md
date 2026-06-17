@@ -294,6 +294,46 @@ isolees, mais l'exact source direct reste trop faible et les profils source
 eleves sont trop larges. Les lignes `gradient_like` restent donc bloquees sur
 un decodeur d'etat/opcode, pas sur une source ou copie directe generalisable.
 
+La chaine seed rejoue ensuite les gradients repetes exacts a distance 320,
+teste leurs shifts, deltas, phases et tokens opcode/payload:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_repeat_context_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_unlock_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_shift_family_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_selector_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_context_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_phase_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_state_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_opcode_sequence_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_semantic_opcode_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_payload_opcode_probe/index.html
+```
+
+Etat courant:
+
+```text
+Repeated gradient payload bytes: 244
+Copy-distance-320 bytes: 244
+Seed candidate bytes: 122
+Copy-unlock bytes: 122
+Total seed + unlock potential: 244
+Shift family repeated bytes: 122
+Repeated exact shift-set bytes: 0
+Delta selector repeated deterministic bytes: 0
+Delta phase/state repeated deterministic bytes: 0 / 0
+Opcode sequence repeated bytes: 0
+Semantic opcode repeated bytes: 0
+Payload opcode repeated bytes: 46
+Best payload opcode token: palette_index = 36 repeated / 122 conflicted
+Promotion-ready bytes: 0
+```
+
+Conclusion: les deux seeds exacts sont reels, mais les deltas restent soit
+oracle-only, soit singletons, soit conflictuels. Meme le payload opcode ne
+stabilise que 46 octets repetes avec 122 octets conflictuels; cette piste doit
+donc rester un indice de structure, pas une promotion.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes

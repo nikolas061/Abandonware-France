@@ -178,6 +178,76 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_shape_peer_copy_probe.py",
             ],
         ),
+        Step(
+            "contexte gradients repetes .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_repeat_context_probe.py",
+            ],
+        ),
+        Step(
+            "seeds gradients repetes .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_unlock_probe.py",
+            ],
+        ),
+        Step(
+            "famille shifts seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_shift_family_probe.py",
+            ],
+        ),
+        Step(
+            "selecteurs delta seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_selector_probe.py",
+            ],
+        ),
+        Step(
+            "contexte delta seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_context_probe.py",
+            ],
+        ),
+        Step(
+            "phase delta seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_phase_probe.py",
+            ],
+        ),
+        Step(
+            "etat delta seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_state_probe.py",
+            ],
+        ),
+        Step(
+            "sequence opcode seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_opcode_sequence_probe.py",
+            ],
+        ),
+        Step(
+            "semantique opcode seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_semantic_opcode_probe.py",
+            ],
+        ),
+        Step(
+            "payload opcode seeds gradients .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_payload_opcode_probe.py",
+            ],
+        ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step(
             "haut/bas source-profile gradient post-formule .tex",

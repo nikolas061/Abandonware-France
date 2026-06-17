@@ -105,6 +105,9 @@ DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_SUMMARY = Path(
 DEFAULT_GRADIENT_MACRO_SOURCE_PROFILE_STATE_SUMMARY = Path(
     "output/tex_gradient_macro_source_profile_state/summary.csv"
 )
+DEFAULT_GRADIENT_SEED_DELTA_PAYLOAD_OPCODE_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_payload_opcode_probe/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -539,6 +542,20 @@ def gradient_macro_source_profile_state_action(summary: dict[str, str]) -> str:
     ):
         return "reject overfit macro/source-profile gradient state and search nonlocal payload state"
     return "inspect macro/source-profile gradient state residuals"
+
+
+def gradient_seed_delta_payload_opcode_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient seed payload-opcode probe issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote gradient seed payload-opcode candidates"
+    if (
+        int_value(summary, "best_token_repeated_bytes") > 0
+        and int_value(summary, "best_token_conflicted_bytes")
+        >= int_value(summary, "best_token_repeated_bytes")
+    ):
+        return "reject seed payload-opcode shortcuts and search broader nonlocal gradient state"
+    return "inspect gradient seed payload-opcode residuals"
 
 
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
@@ -1020,6 +1037,7 @@ def build_queue(
     gradient_macro_fixture_transition_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_summary: dict[str, str] | None = None,
     gradient_macro_source_profile_state_summary: dict[str, str] | None = None,
+    gradient_seed_delta_payload_opcode_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_payload_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_source_summary: dict[str, str] | None = None,
     gradient_macro_state_cluster_literal_summary: dict[str, str] | None = None,
@@ -1481,6 +1499,38 @@ def build_queue(
                 **row,
                 "next_action": gradient_macro_source_profile_state_action(
                     gradient_macro_source_profile_state_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_seed_delta_payload_opcode_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_seed_payload_opcode_mapping="
+                    f"{gradient_seed_delta_payload_opcode_summary.get('mapping_value_bytes', '0')}",
+                    f"gradient_seed_payload_opcode_best="
+                    f"{gradient_seed_delta_payload_opcode_summary.get('best_token_family', '')}/"
+                    f"{gradient_seed_delta_payload_opcode_summary.get('best_token_repeated_bytes', '0')}",
+                    f"gradient_seed_payload_opcode_copy_unlock="
+                    f"{gradient_seed_delta_payload_opcode_summary.get('copy_unlock_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_seed_payload_opcode_conflicted="
+                    f"{gradient_seed_delta_payload_opcode_summary.get('best_token_conflicted_bytes', '0')}",
+                    f"gradient_seed_payload_opcode_singleton="
+                    f"{gradient_seed_delta_payload_opcode_summary.get('singleton_deterministic_bytes', '0')}",
+                    f"gradient_seed_payload_opcode_promotion_ready="
+                    f"{gradient_seed_delta_payload_opcode_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_seed_delta_payload_opcode_action(
+                    gradient_seed_delta_payload_opcode_summary
                 ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
@@ -5847,6 +5897,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_seed_delta_payload_opcode_summary:
+                    next_action = gradient_seed_delta_payload_opcode_action(
+                        gradient_seed_delta_payload_opcode_summary
+                    )
                 elif gradient_macro_source_profile_state_summary:
                     next_action = gradient_macro_source_profile_state_action(
                         gradient_macro_source_profile_state_summary
@@ -6516,6 +6570,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_MACRO_SOURCE_PROFILE_STATE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-seed-delta-payload-opcode-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEED_DELTA_PAYLOAD_OPCODE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-macro-state-cluster-payload-summary",
         type=Path,
         default=DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY,
@@ -6948,6 +7007,16 @@ def main() -> None:
     gradient_macro_source_profile_state_summary = (
         gradient_macro_source_profile_state_rows[0]
         if gradient_macro_source_profile_state_rows
+        else None
+    )
+    gradient_seed_delta_payload_opcode_rows = (
+        read_rows(args.gradient_seed_delta_payload_opcode_summary)
+        if args.gradient_seed_delta_payload_opcode_summary.exists()
+        else []
+    )
+    gradient_seed_delta_payload_opcode_summary = (
+        gradient_seed_delta_payload_opcode_rows[0]
+        if gradient_seed_delta_payload_opcode_rows
         else None
     )
     gradient_macro_state_cluster_payload_rows = (
@@ -7719,6 +7788,7 @@ def main() -> None:
         gradient_macro_fixture_transition_summary,
         gradient_macro_state_cluster_summary,
         gradient_macro_source_profile_state_summary,
+        gradient_seed_delta_payload_opcode_summary,
         gradient_macro_state_cluster_payload_summary,
         gradient_macro_state_cluster_source_summary,
         gradient_macro_state_cluster_literal_summary,

@@ -832,6 +832,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Payload opcode seeds gradients .tex",
+            Path(
+                "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_seed_delta_payload_opcode_probe/index.html"
+            ),
+        ),
+        (
             "Plateaux noisy gaps nonzero tiny .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_probe/index.html"),
         ),
