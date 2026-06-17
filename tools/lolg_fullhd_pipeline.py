@@ -438,6 +438,33 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "second split low sequence corpus mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_low_split_probe.py",
+                "--replay-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split_promoted_replay/fixtures.csv",
+                "--max-features",
+                "3",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_second_low_split",
+            ],
+        ),
+        Step(
+            "promotion second split low sequence corpus mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_low_split_promoted_replay.py",
+                "--base-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split_promoted_replay/fixtures.csv",
+                "--low-split-slots",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_second_low_split/slots.csv",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_second_low_split_promoted_replay",
+            ],
+            requires_pillow=True,
+        ),
+        Step(
             "spatial payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_spatial_probe.py"],
         ),
