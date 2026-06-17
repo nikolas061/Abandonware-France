@@ -1010,6 +1010,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion_promoted_replay/index.html"),
         ),
         (
+            "Split low corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split/index.html"),
+        ),
+        (
+            "Promotion split low corpus sequence mixed-value .tex",
+            Path("output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split_promoted_replay/index.html"),
+        ),
+        (
             "Etat opcode payload mixed-value .tex",
             Path("output/tex_micro_mixed_value_payload_state_opcode/index.html"),
         ),

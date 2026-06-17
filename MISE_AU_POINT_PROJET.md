@@ -1689,6 +1689,58 @@ Conclusion: l'apprentissage corpus debloque 5 slots sequence sans conflit et
 porte le replay propre a 9427 bytes. La prochaine etape est de reevaluer la
 sequence sur ce replay corpus enrichi.
 
+Le split low corpus reprend ce replay enrichi avec des combinaisons jusqu'a
+3 features:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split/rules.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split/slots.csv
+```
+
+Etat courant:
+
+```text
+Features: 75
+Feature sets: 70375
+Replayable unknown slots: 7
+Target known slots: 9
+Blocked prerequisite slots: 6
+False-free split sets: 10333
+Best false-free split: best_d0+compressed_d1
+Best false-free split correct/unknown: 3/4
+Best conflicted correct/false: 3/1
+Promotion-candidate bytes: 3
+Issue rows: 0
+```
+
+Le replay promu applique ces 3 candidats low-split:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split_promoted_replay/fixtures.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_low_split_promoted_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Split candidate rows: 3
+Promoted rows: 3
+Low-split added bytes: 3
+Low-split exact bytes: 3
+Low-split false bytes: 0
+Skipped known/rejected bytes: 0/0
+Issue rows: 0
+Total clean bytes: 9430
+Remaining unresolved bytes: 8016
+Full HD previews: 32
+```
+
+Conclusion: le split low corpus promeut 3 bytes supplementaires sans faux
+positif. La prochaine etape est de reevaluer la sequence apres cette promotion
+corpus low-split.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
