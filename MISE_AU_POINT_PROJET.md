@@ -974,6 +974,36 @@ Promotion-ready bytes: 0
 Conclusion: il existe maintenant une piste terminale faux-free mais encore
 etroite. La suite doit relire/rejouer ces 10 slots avant toute promotion.
 
+La passe revue terminaux source exceptions low projette ensuite ces 10
+terminaux faux-free sur les chaines racines. Elle mesure seulement le replay
+avec les deltas de dependance deja observes; ce replay reste oracle et ne
+declenche donc aucune promotion.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review/terminals.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review/chains.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review/groups.csv
+```
+
+Etat courant:
+
+```text
+Predicted terminal slots: 10 / 43
+Covered chains: 28
+Covered root slots: 28
+Covered contexts: 5
+Covered chain lengths: 23 length-2 / 5 length-3
+Oracle delta replay: 28 exact / 0 false
+Promotion-ready bytes: 0
+```
+
+Conclusion: la piste terminale explique 28 racines si les deltas de dependance
+sont deja connus, mais cette etape est encore une validation oracle. La suite
+doit deriver une regle de delta non-oracle avant de rejouer/promouvoir ces
+racines.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
