@@ -1608,6 +1608,41 @@ non-cible pour la garde cinq octets. Le seul support exact est la reference
 cible `80:7-12`; il faut donc reviser ce support target-only avant tout replay
 ou promotion.
 
+La revue target-only de cette garde relache ensuite les features une par une et
+par combinaisons pour verifier si un sous-ensemble donne un support non-cible
+fiable:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review/features.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_only_review/ablations.csv
+```
+
+Etat courant:
+
+```text
+Support rows: 125
+Full guard rows: 1
+Full guard known-full rows: 0
+Full guard non-target rows: 0
+Exact non-target rows: 0
+Known exact rows: 0
+Known false rows: 111
+Unique single features: 2 (control_ref_mod64, segment_pair)
+Relaxed known rows: 111
+Relaxed false rows: 124
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: `control_ref_mod64=22` et `segment_pair=5354` isolent deja la cible
+`80:7-12` seuls dans le corpus d'ancres longueur 5. Les relachements qui
+touchent des bytes connus produisent des faux, donc la garde reste bloquee par
+des features target-only. La prochaine piste concrete est de chercher une
+evidence non-cible independante pour le pont cinq octets du frontier `80`.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
