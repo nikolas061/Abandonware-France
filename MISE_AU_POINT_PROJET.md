@@ -994,6 +994,38 @@ Conclusion: les copies verticales post-formula restent trop bruitees. Les
 petits contextes false-free sont positionnels et ne couvrent que 5 bytes au
 mieux; aucune promotion de copie verticale n'est sure.
 
+Une passe post-formula supplementaire teste ensuite les copies depuis un pair
+gradient de meme forme (`band_shape`, `step_shape`, `gradient_class` ou
+`length_band8`) au meme offset relatif, uniquement quand le pair est deja connu
+dans le replay palette/formule:
+
+```text
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_shape_peer_copy_probe/index.html
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_shape_peer_copy_probe/candidates.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_shape_peer_copy_probe/families.csv
+output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_shape_peer_copy_probe/rules.csv
+```
+
+Etat courant:
+
+```text
+Unknown gradient slots: 1564
+Peer-copy candidates: 573
+Copy-exact bytes: 37
+Copy-false bytes: 536
+Copy precision: 0.064572
+Best selector family: length_band8
+Best false-free repeated feature set: rel_mod16 + x_mod8 + prediction_low
+Best false-free repeated bytes: 5
+Promotion candidate bytes: 0
+```
+
+Conclusion: les pairs de meme forme ne produisent pas de source gradient
+fiable. `length_band8` donne presque tous les candidats mais reste massivement
+faux, et le seul contexte false-free est positionnel et limite a 5 bytes. La
+prochaine piste gradient doit donc viser un producteur source/profil plus fort,
+pas une copie entre formes similaires.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

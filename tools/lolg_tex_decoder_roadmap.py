@@ -69,6 +69,9 @@ DEFAULT_FLAT_WALK_PALETTE_FORMULA_REPLAY_SUMMARY = Path(
 DEFAULT_FLAT_WALK_PALETTE_POST_FORMULA_VERTICAL_COPY_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_flat_walk_palette_post_formula_vertical_copy_probe/summary.csv"
 )
+DEFAULT_GRADIENT_SHAPE_PEER_COPY_SUMMARY = Path(
+    "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_shape_peer_copy_probe/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -471,6 +474,16 @@ def flat_walk_palette_post_formula_vertical_copy_action(summary: dict[str, str])
     if int_value(summary, "copy_false_bytes") > 0:
         return "reject post-formula vertical-copy shortcuts and seek a stronger gradient producer"
     return "inspect post-formula vertical copy residuals"
+
+
+def gradient_shape_peer_copy_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient shape-peer copy probe issues"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay gradient shape-peer copy candidates"
+    if int_value(summary, "copy_false_bytes") > 0:
+        return "reject shape-peer gradient copies and mine source-profile gradients"
+    return "inspect gradient shape-peer residuals"
 
 
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
@@ -968,6 +981,7 @@ def build_queue(
     flat_walk_palette_promotion_candidate_summary: dict[str, str] | None = None,
     flat_walk_palette_formula_replay_summary: dict[str, str] | None = None,
     flat_walk_palette_post_formula_vertical_copy_summary: dict[str, str] | None = None,
+    gradient_shape_peer_copy_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -1951,6 +1965,35 @@ def build_queue(
                 "next_action": flat_walk_palette_post_formula_vertical_copy_action(
                     flat_walk_palette_post_formula_vertical_copy_summary
                 ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_shape_peer_copy_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_shape_peer_exact="
+                    f"{gradient_shape_peer_copy_summary.get('copy_exact_bytes', '0')}",
+                    f"gradient_shape_peer_best_false_free="
+                    f"{gradient_shape_peer_copy_summary.get('best_false_free_bytes', '0')}",
+                    f"gradient_shape_peer_unknown="
+                    f"{gradient_shape_peer_copy_summary.get('unknown_gradient_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_shape_peer_false="
+                    f"{gradient_shape_peer_copy_summary.get('copy_false_bytes', '0')}",
+                    f"gradient_shape_peer_candidates="
+                    f"{gradient_shape_peer_copy_summary.get('candidate_slots', '0')}",
+                    f"gradient_shape_peer_promotions="
+                    f"{gradient_shape_peer_copy_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_shape_peer_copy_action(gradient_shape_peer_copy_summary),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -5651,6 +5694,8 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_shape_peer_copy_summary:
+                    next_action = gradient_shape_peer_copy_action(gradient_shape_peer_copy_summary)
                 elif flat_walk_palette_post_formula_vertical_copy_summary:
                     next_action = flat_walk_palette_post_formula_vertical_copy_action(
                         flat_walk_palette_post_formula_vertical_copy_summary
@@ -6234,6 +6279,11 @@ def main() -> None:
         "--flat-walk-palette-post-formula-vertical-copy-summary",
         type=Path,
         default=DEFAULT_FLAT_WALK_PALETTE_POST_FORMULA_VERTICAL_COPY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-shape-peer-copy-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SHAPE_PEER_COPY_SUMMARY,
     )
     parser.add_argument(
         "--gradient-payload-profile-summary",
@@ -6843,6 +6893,14 @@ def main() -> None:
         flat_walk_palette_post_formula_vertical_copy_rows[0]
         if flat_walk_palette_post_formula_vertical_copy_rows
         else None
+    )
+    gradient_shape_peer_copy_rows = (
+        read_rows(args.gradient_shape_peer_copy_summary)
+        if args.gradient_shape_peer_copy_summary.exists()
+        else []
+    )
+    gradient_shape_peer_copy_summary = (
+        gradient_shape_peer_copy_rows[0] if gradient_shape_peer_copy_rows else None
     )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
@@ -7469,6 +7527,7 @@ def main() -> None:
         flat_walk_palette_promotion_candidate_summary,
         flat_walk_palette_formula_replay_summary,
         flat_walk_palette_post_formula_vertical_copy_summary,
+        gradient_shape_peer_copy_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,

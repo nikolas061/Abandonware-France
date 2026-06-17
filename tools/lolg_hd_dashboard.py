@@ -722,6 +722,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Copies pair meme forme gradient post-formule .tex",
+            Path(
+                "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_shape_peer_copy_probe/index.html"
+            ),
+        ),
+        (
             "Etat opcode payload gradient .tex",
             Path("output/tex_gradient_payload_state_opcode/index.html"),
         ),

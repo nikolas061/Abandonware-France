@@ -171,6 +171,13 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_palette_post_formula_vertical_copy_probe.py",
             ],
         ),
+        Step(
+            "copies pair meme forme gradient post-formule .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_shape_peer_copy_probe.py",
+            ],
+        ),
         Step("profil payload gradient .tex", [sys.executable, "tools/lolg_tex_gradient_payload_profile_probe.py"]),
         Step(
             "etat opcode payload gradient .tex",
