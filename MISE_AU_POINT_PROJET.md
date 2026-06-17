@@ -2112,6 +2112,44 @@ Conclusion: les deux atomes carrier-local `s-4+0` et `s-4-1` restent partages
 entre samples cible et non-cible. Il faut donc splitter le contexte local de la
 famille `29` avant de promouvoir quoi que ce soit.
 
+La sonde split contexte carrier-local teste ensuite les seuils simples de
+position sur ces samples:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_split/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_split/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_split/splits.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_five_byte_target_carrier_context_split/samples.csv
+```
+
+Etat courant:
+
+```text
+Carrier shape: a|s|s|s|s
+Target carrier: 29
+Switch position: 2
+Sample rows: 5
+Target sample rows: 3
+Non-target sample rows: 2
+Target start range: 234..253
+Non-target start range: 274..324
+Best context: span_start
+Best threshold: 253
+Best direction: lte
+Best correct rows: 3
+Best false rows: 0
+Best unknown rows: 0
+False-free context rows: 1
+Best target atoms: s-4+0;s-4-1
+Best non-target atoms: s-4+0;s-4-1
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: le seuil `span_start <= 253` separe les trois samples cible des
+deux non-cibles sans faux positif. La prochaine piste concrete est de revoir ce
+split start-threshold pour promotion eventuelle.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
