@@ -408,6 +408,7 @@ def guard_rows_for(
     guard_sets: list[tuple[GuardCondition, ...]] = []
     guard_sets.extend((condition,) for condition in conditions)
     guard_sets.extend(itertools.combinations(conditions, 2))
+    guard_sets.extend(itertools.combinations(conditions, 3))
 
     seen: set[str] = set()
     for guard_set in guard_sets:
@@ -512,7 +513,9 @@ def next_probe_for(best: dict[str, str]) -> str:
     verdict = best.get("review_verdict", "")
     if verdict == "promotion_ready_guard":
         return "promote final guarded relative small-nonzero external terminal source byte"
-    if verdict in {"target_and_known_only_guard", "known_support_reference_false"}:
+    if verdict == "target_and_known_only_guard":
+        return "review relative previous-literal guard support before promotion"
+    if verdict == "known_support_reference_false":
         return "derive guard separating relative previous-literal repeat reference-false rows"
     if verdict == "known_supported_overall_conflicted":
         return "split relative previous-literal repeat by control and position context"
