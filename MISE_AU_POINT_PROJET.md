@@ -325,6 +325,40 @@ ne produisent pas le byte complet ni une transition fiable. Les
 `gradient_like` doivent donc passer par une grammaire opcode plus haute, pas
 par une promotion de fenetre controle/source locale.
 
+La sonde macro-opcode `gradient_like` regroupe ensuite les selecteurs
+source-only plus hauts: regle fixture, longueur, classes d'ancre, fenetre
+controle, prefixe et fragment. Elle teste ces selecteurs contre le payload
+exact, les formes de bande/step et les classes grossieres sans utiliser de
+valeur payload comme selecteur:
+
+```text
+output/tex_gradient_macro_opcode/index.html
+output/tex_gradient_macro_opcode/rows.csv
+output/tex_gradient_macro_opcode/groups.csv
+output/tex_gradient_macro_opcode/families.csv
+```
+
+Etat courant:
+
+```text
+Target bytes: 1925
+Selector groups: 1392
+Deterministic repeated evidence bytes: 11853
+Conflicted evidence bytes: 52935
+Best macro selector: dominant_delta / fixture_rule_length 845 / 528
+Exact payload repeated evidence bytes: 116
+Band shape repeated evidence bytes: 398
+Step shape repeated evidence bytes: 116
+Top nibble repeated evidence bytes: 3616
+Promotion-ready bytes: 0
+```
+
+Conclusion: les macro-selecteurs expliquent mieux des proprietes grossieres
+comme le delta dominant ou le nibble haut, mais les conflits restent massifs et
+les preuves payload/forme exactes sont trop faibles. La prochaine passe doit
+donc scinder les conflits du selecteur `dominant_delta / fixture_rule_length`
+avant toute promotion opcode.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

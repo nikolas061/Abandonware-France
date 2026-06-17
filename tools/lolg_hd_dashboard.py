@@ -720,6 +720,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_payload_state_opcode/index.html"),
         ),
         (
+            "Macro opcode payload gradient .tex",
+            Path("output/tex_gradient_macro_opcode/index.html"),
+        ),
+        (
             "Contexte gradients repetes .tex",
             Path("output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_repeat_context_probe/index.html"),
         ),
