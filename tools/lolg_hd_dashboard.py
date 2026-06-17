@@ -950,6 +950,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_split/index.html"),
         ),
         (
+            "Couverture garde union replay terminaux source exceptions low high-safe gradient .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover/index.html"),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),

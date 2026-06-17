@@ -1177,6 +1177,35 @@ de `21`) et couvre toutes les racines de l'union, mais reste au-dessus du seuil
 compact de `9` contextes. La suite doit reduire ces 5 contextes additionnels ou
 transformer la garde deux niveaux en replay verifie avant promotion.
 
+La passe couverture garde union replay resout ensuite le probleme comme un
+set-cover de contextes purs. Apres deduplication et suppression des contextes
+domines, elle trouve une couverture complete en `8` contextes, donc sous le
+seuil compact de `9`.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover/items.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover/selected.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover/roots.csv
+```
+
+Etat courant:
+
+```text
+Candidate rows: 37
+Selected contexts: 8
+Covered roots: 25/25
+Promotion candidate bytes: 25
+Promotion-ready bytes: 0
+```
+
+Conclusion: les 25 racines couvertes par l'union disposent maintenant d'une
+garde compacte pure. Ce n'est pas encore une promotion, car il faut convertir
+ces 8 contextes en replay garde et revalider l'application aux bytes, mais la
+roadmap peut maintenant suivre une piste de promotion candidate au lieu d'une
+simple revue fragmentee.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
