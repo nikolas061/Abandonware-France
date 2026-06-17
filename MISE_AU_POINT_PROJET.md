@@ -644,6 +644,36 @@ meilleur contexte large reste plus faux que correct et le false-free est trop
 faible. La suite doit viser un modele low par templates de row ou une grammaire
 de forme plus globale, pas seulement un etat Markov court.
 
+La passe template low row teste ensuite des contextes de position/forme sans
+dependre de lows precedents: position de sequence, `target_x`, tiers/quart de
+row, frontier/opcode, source profile et formes de row:
+
+```text
+output/tex_gradient_sequence_high_safe_row_template/index.html
+output/tex_gradient_sequence_high_safe_row_template/summary.csv
+output/tex_gradient_sequence_high_safe_row_template/candidates.csv
+output/tex_gradient_sequence_high_safe_row_template/contexts.csv
+output/tex_gradient_sequence_high_safe_row_template/slots.csv
+```
+
+Etat courant:
+
+```text
+Slots: 320
+Slot rows: 10
+Context families: 25
+Best row-template low: rel4_target_x_third_start_band = 55 correct / 94 false
+Best row-template bucket: target_x_quarter_edge_start_band = 90 correct / 103 false
+Best false-free low: rel8_quarter_frontier_source_low = 9 slots
+Promotion candidate bytes: 0
+Promotion-ready bytes: 0
+```
+
+Conclusion: le template exact reste bloque, mais le bucket low grossier donne
+un signal superieur au low exact. La piste suivante doit scinder le probleme en
+bucket low puis resolver intra-bucket, au lieu de chercher directement le low
+exact.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
