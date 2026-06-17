@@ -1790,6 +1790,53 @@ Full HD previews: 32
 Conclusion: le second split low corpus ajoute un byte propre de plus. La
 prochaine etape est de reevaluer la sequence sur le replay a 9431 bytes propres.
 
+La passe adjacent-known exploite ensuite uniquement les bytes non nuls deja
+connus juste avant ou juste apres un prerequis encore inconnu:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known/slots.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known/rules.csv
+```
+
+Etat courant:
+
+```text
+Unknown prerequisite slots: 8
+Adjacent candidate slots: 2
+Adjacent false/conflict slots: 0/0
+Unlocked sequence slots: 2
+Promotion-candidate bytes: 2
+Issue rows: 0
+```
+
+Le replay promu applique ces deux premiers prerequis, puis deux autres passes
+propagent les runs adjacents nouvellement connus:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_second_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_adjacent_known_third_promoted_replay/index.html
+```
+
+Etat courant cumule:
+
+```text
+First adjacent-known promoted rows: 2/2
+Second adjacent-known promoted rows: 1/1
+Third adjacent-known promoted rows: 1/1
+Adjacent-known added/exact bytes: 4/4
+Adjacent-known false bytes: 0
+Issue rows: 0
+Total clean bytes: 9435
+Remaining unresolved bytes: 8011
+Full HD previews: 32
+```
+
+Conclusion: la propagation adjacent-known ajoute 4 prerequis propres dans les
+runs de `dinodead.pcx` frontier 80 et debloque 4 slots sequence au total. La
+prochaine etape est de reevaluer la sequence sur le replay a 9435 bytes propres.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
