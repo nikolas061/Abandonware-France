@@ -390,6 +390,27 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "expansion corpus prerequis sequence mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion_probe.py",
+            ],
+        ),
+        Step(
+            "promotion expansion corpus prerequis sequence mixed-value micro-token .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_micro_mixed_value_payload_sequence_prerequisite_expansion_promoted_replay.py",
+                "--base-fixtures",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_low_split_promoted_replay/fixtures.csv",
+                "--prerequisite-slots",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion/slots.csv",
+                "-o",
+                "output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion_promoted_replay",
+            ],
+            requires_pillow=True,
+        ),
+        Step(
             "spatial payload mixed-value micro-token .tex",
             [sys.executable, "tools/lolg_tex_micro_mixed_value_payload_spatial_probe.py"],
         ),

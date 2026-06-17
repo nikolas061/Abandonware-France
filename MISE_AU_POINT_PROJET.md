@@ -1637,6 +1637,58 @@ donnent plus de candidat false-free. La prochaine piste doit ajouter une
 nouvelle famille de features de prerequis/sequence au lieu de recombiner les
 features actuelles.
 
+L'expansion corpus de prerequis remplace alors l'apprentissage limite aux
+prerequis par les 567 entrees byte-level mixed-value, toujours en
+leave-one-row-out:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion/rules.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion/slots.csv
+```
+
+Etat courant:
+
+```text
+Training entries: 567
+Unknown prerequisite slots: 16
+Features: 84
+Feature sets: 98854
+False-free rule sets: 737
+Best correct/unknown: 2/14
+Union candidate slots: 8
+Union conflict slots: 0
+Unlocked sequence slots: 5
+Promotion-candidate bytes: 8
+Issue rows: 0
+```
+
+Le replay promu applique ces 8 prerequis corpus:
+
+```text
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion_promoted_replay/index.html
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion_promoted_replay/fixtures.csv
+output/tex_micro_mixed_value_payload_sequence_prerequisite_corpus_expansion_promoted_replay/promotions.csv
+```
+
+Etat courant:
+
+```text
+Candidate rows: 8
+Promoted rows: 8
+Prerequisite added/exact bytes: 8/8
+Prerequisite false bytes: 0
+Skipped known/rejected bytes: 0/0
+Issue rows: 0
+Total clean bytes: 9427
+Remaining unresolved bytes: 8019
+Full HD previews: 32
+```
+
+Conclusion: l'apprentissage corpus debloque 5 slots sequence sans conflit et
+porte le replay propre a 9427 bytes. La prochaine etape est de reevaluer la
+sequence sur ce replay corpus enrichi.
+
 La passe spatiale teste enfin les distances de copie dans l'image attendue,
 dont les voisinages courts et les distances proches d'une largeur 320:
 
