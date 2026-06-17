@@ -1480,6 +1480,39 @@ aucun groupe equivalent n'existe encore dans les references connues. La
 prochaine piste concrete n'est donc pas une promotion; il faut deriver le
 producteur compresse/controle des deltas `-1,+1,-1` et `-1,-2,-1,-3,0`.
 
+La sonde producteur delta teste ensuite des slices et motifs `ABA` du segment
+compresse autour de `control_ref`, en sortie valeur directe ou delta depuis
+l'ancre spatiale:
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer/index.html
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer/targets.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer/producers.csv
+output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer/candidates.csv
+```
+
+Etat courant:
+
+```text
+Target spans: 2
+Target bytes: 8
+Compact exact bytes: 3
+Compact guarded exact bytes: 0
+Compact rejected bytes: 3
+Compact missing bytes: 5
+Target-only template bytes: 8
+Promotion-ready bytes: 0
+Issue rows: 0
+```
+
+Conclusion: `80:0-3` a des producteurs compacts exacts, dont le motif deja
+connu `seg_ref@-8,-11:aba:identity`, mais ces producteurs restent rejetes par
+les references connues. `80:7-12` n'a toujours pas de producteur compact/control
+exact; il ne reste pour lui que le template spatial cible `56 + [-1,-2,-1,-3,0]`.
+La prochaine piste concrete est donc d'etendre le producteur compact/control du
+pont cinq octets `80:7-12`.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
