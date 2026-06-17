@@ -425,6 +425,36 @@ Conclusion: le high-safe de sequence ne suffit pas; les false-free low/full ne
 couvrent que 5 slots et les meilleurs contextes reutilisables restent faux. La
 suite doit enrichir l'etat low, pas promouvoir cette sous-piste.
 
+La passe sequence high-safe + source-profile joint ensuite ces 320 slots avec
+les fenetres source-profile deja calculees:
+
+```text
+output/tex_gradient_sequence_high_safe_source_profile_low/index.html
+output/tex_gradient_sequence_high_safe_source_profile_low/rules.csv
+output/tex_gradient_sequence_high_safe_source_profile_low/slots.csv
+```
+
+Etat courant:
+
+```text
+Joined high-safe slots: 320
+High-safe rows: 10
+Feature sets: 26938 focused
+Full false-free sets: 271
+Best full false-free slots: 6
+Best full rule: x_mod8 + prev_gap_bucket + unknown_before_mod16 = 50 exact / 102 false
+Best near-full rule: rel_mod8 + prev4 + source_low = 10 exact / 4 false
+Target-low false-free sets: 271
+Best target-low false-free slots: 6
+Best target-low rule: x_mod8 + prev_gap_bucket + unknown_before_mod16 = 50 exact / 102 false
+Best near-low rule: rel_mod8 + prev4 + source_low = 10 exact / 4 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: l'ajout source-profile ne transforme pas le high-safe de sequence
+en resolveur low/full. La couverture false-free gagne seulement un slot (6 au
+lieu de 5) et les meilleurs contextes reutilisables restent bruites.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
