@@ -342,6 +342,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_terminal_chain_context_probe.py"],
         ),
         Step(
+            "support replay terminaux source exceptions low high-safe gradient .tex",
+            [sys.executable, "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_support_probe.py"],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),

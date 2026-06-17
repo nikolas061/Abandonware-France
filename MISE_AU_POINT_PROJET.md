@@ -1059,6 +1059,36 @@ le delta arete par arete, mais il reste trop etroit pour promouvoir. La suite
 doit chercher un support terminal/chaine plus large ou un contexte de delta
 moins bruite.
 
+La passe support replay terminaux source exceptions low rejoue ensuite tous les
+contextes terminaux candidats dans les chaines high-safe avec les deltas de
+dependance observes. Elle separe les contextes qui utilisent `low_bucket` des
+contextes sans bucket, afin de ne pas confondre support large et indice trop
+proche du low cible.
+
+```text
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_support/index.html
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_support/summary.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_support/candidates.csv
+output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_support/chains.csv
+```
+
+Etat courant:
+
+```text
+Terminal contexts: 1159
+Chain rows: 101
+Best terminal replay: rel_mod8+terminal_state+low_bucket = 34 exact / 35 false
+Best false-free terminal replay: target_mod32+terminal_state+low_bucket = 28 chains
+Best no-bucket terminal replay: source_availability+target_mod32+root_chains = 24 exact / 6 false
+Best no-bucket false-free replay: target_mod32+best_fixed_transition_source_low+root_chains = 6 chains
+Promotion-ready bytes: 0
+```
+
+Conclusion: elargir les contextes terminaux augmente la couverture seulement au
+prix de nombreux faux. Sans `low_bucket`, le meilleur replay faux-free reste a
+6 chaines; la suite doit chercher un support terminal non-bucket plus large ou
+revenir a une source de delta moins bruitee.
+
 La passe etat/opcode `gradient_like` teste ensuite les ancres
 `control_ref_offset`, l'ancre reconstruite via `start_mod64`, les signatures de
 fenetre controle, le `control_prefix` et le fragment sans utiliser les classes
