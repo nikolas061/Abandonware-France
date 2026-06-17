@@ -1026,6 +1026,38 @@ faux, et le seul contexte false-free est positionnel et limite a 5 bytes. La
 prochaine piste gradient doit donc viser un producteur source/profil plus fort,
 pas une copie entre formes similaires.
 
+La sonde source-profile high/low reprend ensuite les meilleures fenetres de
+profil source, mais les evalue apres le replay palette/formule et en
+leave-one-row-out: un slot n'est predit que si les autres lignes du meme
+contexte imposent un delta unique.
+
+```text
+output/tex_gradient_source_profile_high_low/index.html
+output/tex_gradient_source_profile_high_low/slots.csv
+output/tex_gradient_source_profile_high_low/rules.csv
+```
+
+Etat courant:
+
+```text
+Source-profile slots: 1564
+Source-profile rows: 29
+Feature sets: 2516
+Full false-free feature sets: 0
+Best full rule: top_nibble + length_band8 + source_byte = 43 exact / 105 false
+High false-free feature sets: 38
+Best high false-free slots: 108
+Best high false-free rule: offset_delta_bucket + length_band8 + source_high + rel_mod4
+Best high broad rule: gradient_class + top_nibble + source_high + rel_mod16 = 465 exact / 75 false
+Low false-free feature sets: 0
+Best low rule: pool + top_nibble + source_byte + rel_mod4 = 46 exact / 86 false
+Promotion candidate bytes: 0
+```
+
+Conclusion: le source-profile produit un signal partiel utile sur le nibble
+haut, mais aucun chemin full-byte ou low-nibble false-free. Il doit donc rester
+un indice de phase/etat pour une passe suivante, pas une promotion du decodeur.
+
 La famille dominante `mixed_value` est maintenant redecoupee par nibble haut,
 bande de longueur et presence du controle:
 

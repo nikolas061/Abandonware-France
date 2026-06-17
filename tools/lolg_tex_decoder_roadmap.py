@@ -72,6 +72,9 @@ DEFAULT_FLAT_WALK_PALETTE_POST_FORMULA_VERTICAL_COPY_SUMMARY = Path(
 DEFAULT_GRADIENT_SHAPE_PEER_COPY_SUMMARY = Path(
     "output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_gradient_shape_peer_copy_probe/summary.csv"
 )
+DEFAULT_GRADIENT_SOURCE_PROFILE_HIGH_LOW_SUMMARY = Path(
+    "output/tex_gradient_source_profile_high_low/summary.csv"
+)
 DEFAULT_GRADIENT_PAYLOAD_PROFILE_SUMMARY = Path("output/tex_gradient_payload_profile/summary.csv")
 DEFAULT_GRADIENT_PAYLOAD_STATE_OPCODE_SUMMARY = Path(
     "output/tex_gradient_payload_state_opcode/summary.csv"
@@ -484,6 +487,22 @@ def gradient_shape_peer_copy_action(summary: dict[str, str]) -> str:
     if int_value(summary, "copy_false_bytes") > 0:
         return "reject shape-peer gradient copies and mine source-profile gradients"
     return "inspect gradient shape-peer residuals"
+
+
+def gradient_source_profile_high_low_action(summary: dict[str, str]) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix gradient source-profile high/low probe issues"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "replay gradient source-profile full-byte candidates"
+    if (
+        int_value(summary, "high_best_false_free_slots") > 0
+        and int_value(summary, "full_false_free_feature_sets") == 0
+        and int_value(summary, "low_false_free_feature_sets") == 0
+    ):
+        return "keep source-profile high nibble as partial signal and seek low/full gradient resolver"
+    if int_value(summary, "full_best_false_slots") > 0:
+        return "reject source-profile full-byte transforms and seek richer gradient state"
+    return "inspect gradient source-profile high/low residuals"
 
 
 def mixed_value_payload_combo_action(summary: dict[str, str]) -> str:
@@ -982,6 +1001,7 @@ def build_queue(
     flat_walk_palette_formula_replay_summary: dict[str, str] | None = None,
     flat_walk_palette_post_formula_vertical_copy_summary: dict[str, str] | None = None,
     gradient_shape_peer_copy_summary: dict[str, str] | None = None,
+    gradient_source_profile_high_low_summary: dict[str, str] | None = None,
     micro_jump_mixed_payload_summary: dict[str, str] | None = None,
     jump_token_payload_profile_summary: dict[str, str] | None = None,
     jump_token_payload_state_opcode_summary: dict[str, str] | None = None,
@@ -1994,6 +2014,37 @@ def build_queue(
             row = {
                 **row,
                 "next_action": gradient_shape_peer_copy_action(gradient_shape_peer_copy_summary),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if row.get("surface", "") == "gradient_like" and gradient_source_profile_high_low_summary:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_source_profile_high_false_free="
+                    f"{gradient_source_profile_high_low_summary.get('high_best_false_free_slots', '0')}",
+                    f"gradient_source_profile_high_sets="
+                    f"{gradient_source_profile_high_low_summary.get('high_false_free_feature_sets', '0')}",
+                    f"gradient_source_profile_slots="
+                    f"{gradient_source_profile_high_low_summary.get('slot_rows', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_source_profile_full_false_free="
+                    f"{gradient_source_profile_high_low_summary.get('full_false_free_feature_sets', '0')}",
+                    f"gradient_source_profile_low_false_free="
+                    f"{gradient_source_profile_high_low_summary.get('low_false_free_feature_sets', '0')}",
+                    f"gradient_source_profile_full_best_false="
+                    f"{gradient_source_profile_high_low_summary.get('full_best_false_slots', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_source_profile_high_low_action(
+                    gradient_source_profile_high_low_summary
+                ),
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
@@ -5694,6 +5745,10 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif gradient_source_profile_high_low_summary:
+                    next_action = gradient_source_profile_high_low_action(
+                        gradient_source_profile_high_low_summary
+                    )
                 elif gradient_shape_peer_copy_summary:
                     next_action = gradient_shape_peer_copy_action(gradient_shape_peer_copy_summary)
                 elif flat_walk_palette_post_formula_vertical_copy_summary:
@@ -6284,6 +6339,11 @@ def main() -> None:
         "--gradient-shape-peer-copy-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SHAPE_PEER_COPY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-source-profile-high-low-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SOURCE_PROFILE_HIGH_LOW_SUMMARY,
     )
     parser.add_argument(
         "--gradient-payload-profile-summary",
@@ -6901,6 +6961,14 @@ def main() -> None:
     )
     gradient_shape_peer_copy_summary = (
         gradient_shape_peer_copy_rows[0] if gradient_shape_peer_copy_rows else None
+    )
+    gradient_source_profile_high_low_rows = (
+        read_rows(args.gradient_source_profile_high_low_summary)
+        if args.gradient_source_profile_high_low_summary.exists()
+        else []
+    )
+    gradient_source_profile_high_low_summary = (
+        gradient_source_profile_high_low_rows[0] if gradient_source_profile_high_low_rows else None
     )
     micro_token_family_split_rows = (
         read_rows(args.micro_token_family_split_summary) if args.micro_token_family_split_summary.exists() else []
@@ -7528,6 +7596,7 @@ def main() -> None:
         flat_walk_palette_formula_replay_summary,
         flat_walk_palette_post_formula_vertical_copy_summary,
         gradient_shape_peer_copy_summary,
+        gradient_source_profile_high_low_summary,
         micro_jump_mixed_payload_summary,
         jump_token_payload_profile_summary,
         jump_token_payload_state_opcode_summary,
