@@ -643,6 +643,9 @@ DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_SOURCE_SUPPORT_REVIEW_SUMMARY =
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_PRERUN_DELTA_REVIEW_SUMMARY = Path(
     "output/tex_old_clean_byte_union_frontier80_tail_prerun_delta_review/summary.csv"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_REVIEW_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_frontier80_tail_compact_token_review/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1280,6 +1283,7 @@ def apply_old_clean_byte_union(
     outside_source_stop_review: dict[str, str] | None,
     outside_source_frontier80_tail_support: dict[str, str] | None,
     outside_source_frontier80_tail_prerun_delta: dict[str, str] | None,
+    outside_source_frontier80_tail_compact_token: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1313,6 +1317,7 @@ def apply_old_clean_byte_union(
             outside_source_stop_review,
             outside_source_frontier80_tail_support,
             outside_source_frontier80_tail_prerun_delta,
+            outside_source_frontier80_tail_compact_token,
         )
     ):
         return queue
@@ -1955,6 +1960,22 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_tail_compact_token:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_verdict="
+                    f"{outside_source_frontier80_tail_compact_token.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_best="
+                    f"{outside_source_frontier80_tail_compact_token.get('best_selector', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_known="
+                    f"{outside_source_frontier80_tail_compact_token.get('best_known_exact_rows', '0')}/"
+                    f"{outside_source_frontier80_tail_compact_token.get('best_known_false_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_next="
+                    f"{outside_source_frontier80_tail_compact_token.get('next_probe', '')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
         final_dependency = outside_source_final_dependency or outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
         final_residual = outside_source_final_residual or outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
@@ -1992,12 +2013,26 @@ def apply_old_clean_byte_union(
             )
         elif (
             outside_source_frontier80_tail_prerun_delta
+            and not outside_source_frontier80_tail_compact_token
             and outside_source_frontier80_tail_prerun_delta.get("review_verdict")
             == "frontier80_tail_prerun_delta_target_only_no_known_support"
         ):
             next_action = outside_source_frontier80_tail_prerun_delta.get(
                 "next_probe",
                 "derive non-oracle compact-control token for frontier80 pre-run delta +2",
+            )
+        elif (
+            outside_source_frontier80_tail_compact_token
+            and outside_source_frontier80_tail_compact_token.get("review_verdict")
+            in {
+                "frontier80_tail_compact_token_rejected",
+                "frontier80_tail_compact_token_target_only",
+                "frontier80_tail_compact_token_weak_support",
+            }
+        ):
+            next_action = outside_source_frontier80_tail_compact_token.get(
+                "next_probe",
+                "expand compact-control token selector families beyond segment/control windows",
             )
         elif outside_source_stop_review and outside_source_stop_review.get("review_verdict") == "outside_source_dependency_target_only_no_known_support":
             next_action = outside_source_stop_review.get(
@@ -15908,6 +15943,11 @@ def main() -> None:
         default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_PRERUN_DELTA_REVIEW_SUMMARY,
     )
     parser.add_argument(
+        "--tex-old-clean-byte-union-frontier80-tail-compact-token-review-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_REVIEW_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -17877,6 +17917,9 @@ def main() -> None:
     tex_old_clean_byte_union_frontier80_tail_prerun_delta_review_summary = read_optional_summary(
         args.tex_old_clean_byte_union_frontier80_tail_prerun_delta_review_summary
     )
+    tex_old_clean_byte_union_frontier80_tail_compact_token_review_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_frontier80_tail_compact_token_review_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -19218,6 +19261,7 @@ def main() -> None:
         outside_source_stop_review=tex_old_clean_byte_union_fourteenth_outside_source_dependency_review_summary,
         outside_source_frontier80_tail_support=tex_old_clean_byte_union_frontier80_tail_source_support_review_summary,
         outside_source_frontier80_tail_prerun_delta=tex_old_clean_byte_union_frontier80_tail_prerun_delta_review_summary,
+        outside_source_frontier80_tail_compact_token=tex_old_clean_byte_union_frontier80_tail_compact_token_review_summary,
     )
     summary = build_summary(queue, review_summary)
 
