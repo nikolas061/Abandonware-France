@@ -688,6 +688,9 @@ DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_S
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_NEIGHBORHOOD_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_neighborhood_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_CORPUS_SOURCE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_corpus_source_probe/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1400,6 +1403,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_context_split_residual_second_clean_gap_queue: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_second_run_probe: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_low_payload_neighborhood: dict[str, str] | None,
+    outside_source_frontier80_context_split_residual_low_payload_corpus_source: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1468,6 +1472,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_context_split_residual_second_clean_gap_queue,
             outside_source_frontier80_context_split_residual_second_run_probe,
             outside_source_frontier80_context_split_residual_low_payload_neighborhood,
+            outside_source_frontier80_context_split_residual_low_payload_corpus_source,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -2370,6 +2375,25 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_context_split_residual_low_payload_corpus_source:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_corpus_verdict="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_corpus_source.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_corpus_candidates="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_corpus_source.get('candidate_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_corpus_known="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_corpus_source.get('known_source_candidate_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_corpus_cover="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_corpus_source.get('target_rows_with_candidate', '0')}/"
+                    f"{outside_source_frontier80_context_split_residual_low_payload_corpus_source.get('target_low_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_corpus_low1_low2="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_corpus_source.get('low1_rows_with_candidate', '0')}/"
+                    f"{outside_source_frontier80_context_split_residual_low_payload_corpus_source.get('low2_rows_with_candidate', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -2896,6 +2920,20 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_context_split_residual_low_payload_corpus_source
+            and outside_source_frontier80_context_split_residual_low_payload_corpus_source.get("review_verdict")
+            in {
+                "frontier80_context_residual_low_payload_corpus_known_source_signal",
+                "frontier80_context_residual_low_payload_corpus_low1_unknown_source_only",
+                "frontier80_context_residual_low_payload_corpus_unknown_source_signal",
+                "frontier80_context_residual_low_payload_corpus_no_source_signal",
+            }
+        ):
+            next_action = outside_source_frontier80_context_split_residual_low_payload_corpus_source.get(
+                "next_probe",
+                "derive unknown low1 source windows and broaden low2 transform search",
+            )
         elif (
             outside_source_frontier80_context_split_residual_low_payload_neighborhood
             and outside_source_frontier80_context_split_residual_low_payload_neighborhood.get("review_verdict")
@@ -17196,6 +17234,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_NEIGHBORHOOD_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-context-split-residual-low-payload-corpus-source-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_CORPUS_SOURCE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -19310,6 +19353,9 @@ def main() -> None:
     tex_gap_decoder_frontier80_context_split_residual_low_payload_neighborhood_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_context_split_residual_low_payload_neighborhood_summary
     )
+    tex_gap_decoder_frontier80_context_split_residual_low_payload_corpus_source_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_context_split_residual_low_payload_corpus_source_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -20730,6 +20776,7 @@ def main() -> None:
         outside_source_frontier80_context_split_residual_second_clean_gap_queue=tex_gap_decoder_clean_gap_queue_frontier80_context_split_residual_second_summary,
         outside_source_frontier80_context_split_residual_second_run_probe=tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_second_summary,
         outside_source_frontier80_context_split_residual_low_payload_neighborhood=tex_gap_decoder_frontier80_context_split_residual_low_payload_neighborhood_summary,
+        outside_source_frontier80_context_split_residual_low_payload_corpus_source=tex_gap_decoder_frontier80_context_split_residual_low_payload_corpus_source_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
