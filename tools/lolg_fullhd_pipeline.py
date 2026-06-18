@@ -999,6 +999,19 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Integrated Replay",
                 ],
             ),
+            Step(
+                "probe correction residuelle exacte prior high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_correction_probe.py",
+                    "--selector-rows",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_integrated_replay/selector_rows.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_correction_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Prior High Row Exact Residual Correction Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -5508,6 +5521,19 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_integrated_replay",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Integrated Replay",
+            ],
+        ),
+        Step(
+            "probe correction residuelle exacte prior high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_correction_probe.py",
+                "--selector-rows",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_integrated_replay/selector_rows.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_correction_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Prior High Row Exact Residual Correction Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),

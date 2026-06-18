@@ -236,6 +236,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_THRESHOLD_SOURCE_GUARD_P
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_THRESHOLD_SOURCE_GUARD_INTEGRATED_REPLAY = Path(
     "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_integrated_replay/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_EXACT_RESIDUAL_CORRECTION_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_correction_probe/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -831,6 +834,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Replay integre guard seuil source prior high-row frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_THRESHOLD_SOURCE_GUARD_INTEGRATED_REPLAY,
+        ),
+        (
+            "Probe correction residuelle exacte prior high-row frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_EXACT_RESIDUAL_CORRECTION_PROBE,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
