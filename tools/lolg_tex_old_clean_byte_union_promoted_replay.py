@@ -12,11 +12,14 @@ from lolg_tex_gap_decoder_seed_replay import frontier_lookup, render_preview, sa
 from lolg_tex_gap_opcode_probe import int_value, relative_href, write_csv
 
 
-DEFAULT_OUTPUT = Path("output/tex_old_clean_byte_seed_union_promoted_replay")
+DEFAULT_OUTPUT = Path("output/tex_old_clean_byte_union_promoted_replay")
 DEFAULT_BASE_FIXTURES = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted/fixtures.csv"
 )
-DEFAULT_SOURCE_FIXTURES = Path("output/tex_gap_decoder_seed_replay/fixtures.csv")
+DEFAULT_SOURCE_FIXTURES = (
+    Path("output/tex_gap_decoder_seed_replay/fixtures.csv"),
+    Path("output/tex_micro_mixed_value_payload_sequence_low_copy_promoted_replay/fixtures.csv"),
+)
 DEFAULT_EXPECTED_MANIFEST = Path("output/tex_gap_rule_fixtures_expanded/manifest.csv")
 DEFAULT_FRONTIERS = Path("output/tex_gap_frontier_report/frontiers.csv")
 TARGET_SIZE = (1920, 1080)
@@ -78,6 +81,7 @@ BYTE_FIELDNAMES = [
     "offset",
     "expected_hex",
     "source_hex",
+    "source_fixtures",
     "promotion_ready",
     "issues",
 ]
@@ -157,7 +161,7 @@ def build_rows(
     *,
     output_dir: Path,
     base_rows: list[dict[str, str]],
-    source_rows: list[dict[str, str]],
+    source_sets: list[tuple[Path, list[dict[str, str]]]],
     manifest_rows: list[dict[str, str]],
     frontier_rows: list[dict[str, str]],
 ) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
@@ -171,7 +175,7 @@ def build_rows(
     issue_rows = 0
     manifest_issues: list[str] = []
     expected_by_key = load_expected(manifest_rows, manifest_issues)
-    source_by_key = {fixture_key(row): row for row in source_rows}
+    source_sets_by_key = [(path, {fixture_key(row): row for row in rows}) for path, rows in source_sets]
     frontiers = frontier_lookup(frontier_rows)
 
     output_fixture_rows: list[dict[str, str]] = []
@@ -196,20 +200,15 @@ def build_rows(
         expected = expected_by_key.get(key, b"")
         if not expected:
             fixture_issues.append("missing_expected")
-        source_row = source_by_key.get(key, {})
-        if not source_row:
-            fixture_issues.append("missing_source_fixture")
 
         base_decoded = bytearray(load_bytes(base_row.get("decoded_path", ""), fixture_issues, "base_decoded"))
         base_mask = bytearray(load_bytes(base_row.get("known_mask_path", ""), fixture_issues, "base_known_mask"))
         base_decoded_original = bytes(base_decoded)
         base_mask_original = bytes(base_mask)
-        source_decoded = load_bytes(source_row.get("decoded_path", ""), fixture_issues, "source_decoded") if source_row else b""
-        source_mask = load_bytes(source_row.get("known_mask_path", ""), fixture_issues, "source_known_mask") if source_row else b""
 
         fixture_bytes = len(expected)
-        limit = min(len(expected), len(base_decoded), len(base_mask), len(source_decoded), len(source_mask))
-        if fixture_bytes and limit != fixture_bytes:
+        base_limit = min(len(expected), len(base_decoded), len(base_mask))
+        if fixture_bytes and base_limit != fixture_bytes:
             fixture_issues.append("length_mismatch")
 
         source_promoted_mask = bytearray(len(base_mask))
@@ -221,35 +220,46 @@ def build_rows(
         skipped_rejected_bytes = 0
         rejected_false_bytes = int_value(base_row, "rejected_false_bytes")
 
-        for offset in range(limit):
-            if not source_mask[offset]:
+        for source_path, source_by_key in source_sets_by_key:
+            source_row = source_by_key.get(key, {})
+            if not source_row:
+                fixture_issues.append(f"missing_source_fixture:{source_path.as_posix()}")
                 continue
-            if base_mask[offset]:
-                skipped_known_bytes += 1
-                continue
-            source_candidate_bytes += 1
-            if source_decoded[offset] != expected[offset]:
-                source_false_bytes += 1
-                continue
-            source_exact_bytes += 1
-            source_added_bytes += 1
-            base_decoded[offset] = source_decoded[offset]
-            base_mask[offset] = 1
-            source_promoted_mask[offset] = 255
-            output_byte_rows.append(
-                {
-                    "rank": base_row.get("rank", ""),
-                    "archive": base_row.get("archive", ""),
-                    "archive_tag": key[0],
-                    "pcx_name": key[1],
-                    "frontier_id": key[2],
-                    "offset": str(offset),
-                    "expected_hex": f"{expected[offset]:02x}",
-                    "source_hex": f"{source_decoded[offset]:02x}",
-                    "promotion_ready": "1",
-                    "issues": "",
-                }
-            )
+            source_decoded = load_bytes(source_row.get("decoded_path", ""), fixture_issues, "source_decoded")
+            source_mask = load_bytes(source_row.get("known_mask_path", ""), fixture_issues, "source_known_mask")
+            limit = min(len(expected), len(base_decoded), len(base_mask), len(source_decoded), len(source_mask))
+            if fixture_bytes and limit != fixture_bytes:
+                fixture_issues.append(f"source_length_mismatch:{source_path.as_posix()}")
+            for offset in range(limit):
+                if not source_mask[offset]:
+                    continue
+                if base_mask[offset]:
+                    skipped_known_bytes += 1
+                    continue
+                source_candidate_bytes += 1
+                if source_decoded[offset] != expected[offset]:
+                    source_false_bytes += 1
+                    continue
+                source_exact_bytes += 1
+                source_added_bytes += 1
+                base_decoded[offset] = source_decoded[offset]
+                base_mask[offset] = 1
+                source_promoted_mask[offset] = 255
+                output_byte_rows.append(
+                    {
+                        "rank": base_row.get("rank", ""),
+                        "archive": base_row.get("archive", ""),
+                        "archive_tag": key[0],
+                        "pcx_name": key[1],
+                        "frontier_id": key[2],
+                        "offset": str(offset),
+                        "expected_hex": f"{expected[offset]:02x}",
+                        "source_hex": f"{source_decoded[offset]:02x}",
+                        "source_fixtures": source_path.as_posix(),
+                        "promotion_ready": "1",
+                        "issues": "",
+                    }
+                )
 
         base_clean_bytes = clean_count(expected, base_decoded_original, base_mask_original)
         total_clean_bytes = clean_count(expected, base_decoded, base_mask)
@@ -327,9 +337,9 @@ def build_rows(
         totals["remaining_unresolved_bytes"] += remaining_unresolved
 
     summary = {
-        "scope": "old_clean_seed_union_promoted_replay",
+        "scope": "old_clean_union_promoted_replay",
         "base_fixtures": DEFAULT_BASE_FIXTURES.as_posix(),
-        "source_fixtures": DEFAULT_SOURCE_FIXTURES.as_posix(),
+        "source_fixtures": ";".join(path.as_posix() for path, _rows in source_sets),
         "fixture_rows": str(len(output_fixture_rows)),
         "promoted_rows": str(sum(1 for row in output_fixture_rows if int_value(row, "source_added_bytes") > 0)),
         "base_clean_bytes": str(totals["base_clean_bytes"]),
@@ -417,7 +427,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--base-fixtures", type=Path, default=DEFAULT_BASE_FIXTURES)
-    parser.add_argument("--source-fixtures", type=Path, default=DEFAULT_SOURCE_FIXTURES)
+    parser.add_argument("--source-fixtures", type=Path, action="append", default=None)
     parser.add_argument("--expected-manifest", type=Path, default=DEFAULT_EXPECTED_MANIFEST)
     parser.add_argument("--frontiers", type=Path, default=DEFAULT_FRONTIERS)
     args = parser.parse_args()
@@ -425,10 +435,13 @@ def main() -> int:
     output_dir = args.output
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    source_fixture_paths = args.source_fixtures if args.source_fixtures else list(DEFAULT_SOURCE_FIXTURES)
+    source_sets = [(path, read_csv(path)) for path in source_fixture_paths]
+
     summary, fixture_rows, byte_rows = build_rows(
         output_dir=output_dir,
         base_rows=read_csv(args.base_fixtures),
-        source_rows=read_csv(args.source_fixtures),
+        source_sets=source_sets,
         manifest_rows=read_csv(args.expected_manifest),
         frontier_rows=read_csv(args.frontiers),
     )
