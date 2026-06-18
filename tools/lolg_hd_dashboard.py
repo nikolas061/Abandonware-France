@@ -274,6 +274,7 @@ TERMINAL_SOURCE_BYTE_DASHBOARD_STAGES = [
     ("eighth_", "Huitieme garde terminal-source"),
     ("ninth_", "Neuvieme garde terminal-source"),
     ("tenth_", "Dixieme garde terminal-source"),
+    ("eleventh_", "Onzieme garde terminal-source"),
 ]
 
 
@@ -306,8 +307,8 @@ def terminal_source_byte_dashboard_links() -> list[tuple[str, Path]]:
         )
     links.append(
         (
-            "Onzieme revue garde terminal-source apres cascade source-byte terminal/root .tex",
-            terminal_source_byte_review_dir("eleventh_") / "index.html",
+            "Douzieme revue garde terminal-source apres cascade source-byte terminal/root .tex",
+            terminal_source_byte_review_dir("twelfth_") / "index.html",
         )
     )
     return links

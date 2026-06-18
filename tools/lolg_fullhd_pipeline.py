@@ -61,6 +61,7 @@ TERMINAL_SOURCE_BYTE_CASCADE_STAGES = [
     ("eighth_", "Eighth Terminal-Source", "huitieme garde terminal-source"),
     ("ninth_", "Ninth Terminal-Source", "neuvieme garde terminal-source"),
     ("tenth_", "Tenth Terminal-Source", "dixieme garde terminal-source"),
+    ("eleventh_", "Eleventh Terminal-Source", "onzieme garde terminal-source"),
 ]
 
 
@@ -150,19 +151,19 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
         slot_input = f"{dependency_dir}/slots.csv"
         base_fixtures = f"{promoted_dir}/fixtures.csv"
 
-    eleventh_review_dir = terminal_source_byte_review_dir("eleventh_")
+    twelfth_review_dir = terminal_source_byte_review_dir("twelfth_")
     steps.append(
         Step(
-            "onzieme revue garde terminal-source apres cascade source-byte terminal/root .tex",
+            "douzieme revue garde terminal-source apres cascade source-byte terminal/root .tex",
             [
                 sys.executable,
                 "tools/lolg_tex_gradient_sequence_high_safe_low_exception_terminal_source_byte_guard_review.py",
                 "--slots",
                 slot_input,
                 "-o",
-                eleventh_review_dir,
+                twelfth_review_dir,
                 "--title",
-                "Lands of Lore II .tex Eleventh Terminal-Source Byte Guard After Terminal Root Source-Byte Cascade",
+                "Lands of Lore II .tex Twelfth Terminal-Source Byte Guard After Terminal Root Source-Byte Cascade",
             ],
         )
     )

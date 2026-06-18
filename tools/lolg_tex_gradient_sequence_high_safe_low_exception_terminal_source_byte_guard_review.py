@@ -337,7 +337,11 @@ def formula_predictions(rows: list[dict[str, str]]) -> list[tuple[str, dict[str,
 
 
 def feature_sets() -> list[tuple[str, ...]]:
-    return [(field,) for field in FEATURES] + list(itertools.combinations(PAIR_FEATURES, 2))
+    return (
+        [(field,) for field in FEATURES]
+        + list(itertools.combinations(PAIR_FEATURES, 2))
+        + list(itertools.combinations(PAIR_FEATURES, 3))
+    )
 
 
 def guard_key(row: dict[str, str], fields: tuple[str, ...]) -> str:

@@ -528,17 +528,17 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_FOURTH_TERMI
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_AFTER_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay/summary.csv"
 )
-DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_TENTH_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_SUMMARY = Path(
-    "output/tex_gradient_sequence_high_safe_low_exception_tenth_terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted/summary.csv"
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted/summary.csv"
 )
-DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TENTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY = Path(
-    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted/summary.csv"
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted/summary.csv"
 )
-DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TENTH_TERMINAL_SOURCE_BYTE_GUARD_RESIDUAL_CORE_SUMMARY = Path(
-    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted_residual_core/summary.csv"
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted_residual_core/summary.csv"
 )
-DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY = Path(
-    "output/tex_gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_after_terminal_root_source_byte_cascade/summary.csv"
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_TWELFTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_after_terminal_root_source_byte_cascade/summary.csv"
 )
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
@@ -14836,24 +14836,24 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_AFTER_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY,
     )
     parser.add_argument(
-        "--gradient-sequence-high-safe-low-exception-tenth-terminal-source-byte-guard-promoted-summary",
+        "--gradient-sequence-high-safe-low-exception-eleventh-terminal-source-byte-guard-promoted-summary",
         type=Path,
-        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_TENTH_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_SUMMARY,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_SUMMARY,
     )
     parser.add_argument(
-        "--gradient-sequence-high-safe-low-exception-source-dependency-tenth-terminal-source-byte-guard-summary",
+        "--gradient-sequence-high-safe-low-exception-source-dependency-eleventh-terminal-source-byte-guard-summary",
         type=Path,
-        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TENTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY,
     )
     parser.add_argument(
-        "--gradient-sequence-high-safe-low-exception-source-dependency-tenth-terminal-source-byte-guard-residual-core-summary",
+        "--gradient-sequence-high-safe-low-exception-source-dependency-eleventh-terminal-source-byte-guard-residual-core-summary",
         type=Path,
-        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TENTH_TERMINAL_SOURCE_BYTE_GUARD_RESIDUAL_CORE_SUMMARY,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_RESIDUAL_CORE_SUMMARY,
     )
     parser.add_argument(
-        "--gradient-sequence-high-safe-low-exception-eleventh-terminal-source-byte-guard-summary",
+        "--gradient-sequence-high-safe-low-exception-twelfth-terminal-source-byte-guard-summary",
         type=Path,
-        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_ELEVENTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_TWELFTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY,
     )
     parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
@@ -16696,17 +16696,17 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary = read_optional_summary(
         args.gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary
     )
-    gradient_sequence_high_safe_low_exception_tenth_terminal_source_byte_guard_promoted_summary = read_optional_summary(
-        args.gradient_sequence_high_safe_low_exception_tenth_terminal_source_byte_guard_promoted_summary
+    gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_promoted_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_promoted_summary
     )
-    gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_summary = read_optional_summary(
-        args.gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_summary
+    gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_summary
     )
-    gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_residual_core_summary = read_optional_summary(
-        args.gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_residual_core_summary
+    gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_residual_core_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_residual_core_summary
     )
-    gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_summary = read_optional_summary(
-        args.gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_summary
+    gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_summary
     )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
@@ -18012,10 +18012,10 @@ def main() -> None:
     queue = apply_terminal_source_byte_cascade(
         queue,
         base_promoted=gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_replay_promoted_summary,
-        final_promoted=gradient_sequence_high_safe_low_exception_tenth_terminal_source_byte_guard_promoted_summary,
-        final_dependency=gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_summary,
-        final_residual=gradient_sequence_high_safe_low_exception_source_dependency_tenth_terminal_source_byte_guard_residual_core_summary,
-        stop_review=gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_summary,
+        final_promoted=gradient_sequence_high_safe_low_exception_eleventh_terminal_source_byte_guard_promoted_summary,
+        final_dependency=gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_summary,
+        final_residual=gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_residual_core_summary,
+        stop_review=gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_summary,
     )
     summary = build_summary(queue, review_summary)
 
