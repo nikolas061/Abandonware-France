@@ -293,6 +293,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRID
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_VALUE_DEPENDENCY = Path(
     "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_CROSS_PCX_GUARD = Path(
+    "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard_probe/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1024,6 +1027,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Probe dependance valeurs target outliers stride-320 frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_VALUE_DEPENDENCY,
+        ),
+        (
+            "Probe guard cross-PCX valeurs target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_CROSS_PCX_GUARD,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",

@@ -766,6 +766,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRID
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_VALUE_DEPENDENCY_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_CROSS_PCX_GUARD_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard_probe/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1504,6 +1507,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_value_candidate: dict[str, str] | None,
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_target_delta_candidate: dict[str, str] | None,
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency: dict[str, str] | None,
+    outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1598,6 +1602,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_value_candidate,
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_target_delta_candidate,
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency,
+            outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -2982,6 +2987,23 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_cross_pcx_guard_verdict="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_cross_pcx_guard_ready="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get('guard_ready_bytes', '0')}/"
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get('cross_pcx_candidate_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_cross_pcx_guard_values="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get('cross_pcx_values', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_cross_pcx_guard_bridge="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get('same_pcx_le4_bridge_rows', '0')}:"
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get('bridge_deltas', '')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -3508,6 +3530,22 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard
+            and outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get(
+                "review_verdict"
+            )
+            in {
+                "frontier80_stride320_outlier_target_cross_pcx_guard_ready",
+                "frontier80_stride320_outlier_target_cross_pcx_guard_partial",
+                "frontier80_stride320_outlier_target_cross_pcx_guard_missing",
+                "frontier80_stride320_outlier_target_cross_pcx_guard_issues",
+            }
+        ):
+            next_action = outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard.get(
+                "next_probe",
+                "build guarded target-value replay for stride-320 outliers",
+            )
         elif (
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency
             and outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency.get(
@@ -18309,6 +18347,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_VALUE_DEPENDENCY_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-single-row-non-oracle-selector-promoted-stride320-outlier-target-cross-pcx-guard-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_CROSS_PCX_GUARD_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -20501,6 +20544,9 @@ def main() -> None:
     tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency_summary
     )
+    tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -21947,6 +21993,7 @@ def main() -> None:
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_value_candidate=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_value_candidate_summary,
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_target_delta_candidate=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_target_delta_candidate_summary,
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency_summary,
+        outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
