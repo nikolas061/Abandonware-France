@@ -582,6 +582,54 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_promoted_replay_residual_core",
                 ],
             ),
+            Step(
+                "revue dependances source hors high-safe apres fill control-prefix union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_old_clean_byte_union_outside_source_dependency_review.py",
+                ],
+            ),
+            Step(
+                "promotion dependances source hors high-safe apres fill control-prefix union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_byte_guard_promoted_replay.py",
+                    "--base-fixtures",
+                    "output/tex_old_clean_byte_union_control_prefix_fill_guard_promoted_replay/fixtures.csv",
+                    "--targets",
+                    "output/tex_old_clean_byte_union_outside_source_dependency_review/targets.csv",
+                    "-o",
+                    "output/tex_old_clean_byte_union_outside_source_dependency_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Old Clean Union Outside Source Dependency Promoted Replay",
+                ],
+            ),
+            Step(
+                "dependances source apres promotion hors high-safe union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_probe.py",
+                    "--replay-fixtures",
+                    "output/tex_old_clean_byte_union_outside_source_dependency_promoted_replay/fixtures.csv",
+                    "-o",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Source-Dependency After Old Clean Union Outside Source Dependency Promoted",
+                ],
+            ),
+            Step(
+                "noyau residuel apres promotion hors high-safe union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core_review.py",
+                    "--slots",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_promoted_replay/slots.csv",
+                    "--edges",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_promoted_replay/edges.csv",
+                    "-o",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_promoted_replay_residual_core",
+                ],
+            ),
         ]
     )
     return steps
