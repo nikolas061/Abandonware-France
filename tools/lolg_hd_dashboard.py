@@ -170,6 +170,9 @@ DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_REVIEW = Path(
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_GUARD_SPLIT_REVIEW = Path(
     "output/tex_old_clean_byte_union_frontier80_tail_compact_token_guard_split_review/index.html"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_INDEPENDENT_SUPPORT_REVIEW = Path(
+    "output/tex_old_clean_byte_union_frontier80_tail_compact_token_independent_support_review/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -677,6 +680,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Garde token compact tail frontier80 hors high-safe anciens octets propres .tex",
             DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_GUARD_SPLIT_REVIEW,
+        ),
+        (
+            "Support independant token compact tail frontier80 hors high-safe anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_INDEPENDENT_SUPPORT_REVIEW,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
