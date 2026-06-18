@@ -1246,6 +1246,40 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Revue terminaux source apres promotion finale garde relative .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review_final_relative_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Union replay terminaux source apres promotion finale garde relative .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_final_relative_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Couverture garde union replay terminaux source apres promotion finale garde relative .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_final_relative_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion couverture garde union replay terminaux source apres promotion finale garde relative .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_final_relative_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres promotion finale garde connue .tex",
+            Path("output/tex_gradient_sequence_high_safe_low_exception_source_dependency_final_known_guard_promoted_replay/index.html"),
+        ),
+        (
+            "Noyau residuel dependances source apres promotion finale garde connue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_final_known_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
