@@ -861,6 +861,23 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Prior High Row Outlier Fallback Probe",
                 ],
             ),
+            Step(
+                "probe selector byte-local start prior high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe.py",
+                    "--pairs",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/pairs.csv",
+                    "--candidates",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/cluster_candidates.csv",
+                    "--outliers",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/outlier_alternatives.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Prior High Row Byte Local Start Selector Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -5232,6 +5249,23 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Prior High Row Outlier Fallback Probe",
+            ],
+        ),
+        Step(
+            "probe selector byte-local start prior high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe.py",
+                "--pairs",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/pairs.csv",
+                "--candidates",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/cluster_candidates.csv",
+                "--outliers",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/outlier_alternatives.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Prior High Row Byte Local Start Selector Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),

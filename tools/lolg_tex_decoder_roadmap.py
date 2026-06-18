@@ -691,6 +691,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_SIGNED_DELTA_SELECTOR_PR
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1344,6 +1347,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_clean_prior_high_row_compact_selector_probe: dict[str, str] | None,
     outside_source_frontier80_clean_prior_high_row_signed_delta_selector_probe: dict[str, str] | None,
     outside_source_frontier80_clean_prior_high_row_outlier_fallback_probe: dict[str, str] | None,
+    outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1393,6 +1397,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_clean_prior_high_row_compact_selector_probe,
             outside_source_frontier80_clean_prior_high_row_signed_delta_selector_probe,
             outside_source_frontier80_clean_prior_high_row_outlier_fallback_probe,
+            outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe,
         )
     ):
         return queue
@@ -2318,6 +2323,27 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_byte_local_selector_verdict="
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_byte_local_selector_best="
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('best_selector', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_byte_local_selector_resolved="
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('best_selector_resolved_outliers', '0')}/"
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('outlier_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_byte_local_selector_false_switch="
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('best_selector_false_switch_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_byte_local_selector_le2="
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('best_selector_total_le2_bytes', '0')}/"
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('total_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_byte_local_selector_next="
+                    f"{outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get('next_probe', '')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
         final_dependency = outside_source_final_dependency or outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
         final_residual = outside_source_final_residual or outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
@@ -2441,6 +2467,15 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe
+            and outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get("review_verdict")
+            == "frontier80_prior_high_row_byte_local_start_selector_ready"
+        ):
+            next_action = outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe.get(
+                "next_probe",
+                "validate non-oracle inputs for guarded byte-local support-start selector",
+            )
         elif (
             outside_source_frontier80_clean_prior_high_row_outlier_fallback_probe
             and outside_source_frontier80_clean_prior_high_row_outlier_fallback_probe.get("review_verdict")
@@ -16522,6 +16557,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-clean-prior-high-row-byte-local-start-selector-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -18539,6 +18579,9 @@ def main() -> None:
     tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe_summary
     )
+    tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -19896,6 +19939,7 @@ def main() -> None:
         outside_source_frontier80_clean_prior_high_row_compact_selector_probe=tex_gap_decoder_frontier80_clean_prior_high_row_compact_selector_probe_summary,
         outside_source_frontier80_clean_prior_high_row_signed_delta_selector_probe=tex_gap_decoder_frontier80_clean_prior_high_row_signed_delta_selector_probe_summary,
         outside_source_frontier80_clean_prior_high_row_outlier_fallback_probe=tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe_summary,
+        outside_source_frontier80_clean_prior_high_row_byte_local_start_selector_probe=tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe_summary,
     )
     summary = build_summary(queue, review_summary)
 
