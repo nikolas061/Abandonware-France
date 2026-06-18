@@ -637,6 +637,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BY
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTEENTH_OUTSIDE_SOURCE_DEPENDENCY_REVIEW_SUMMARY = Path(
     "output/tex_old_clean_byte_union_fourteenth_outside_source_dependency_review/summary.csv"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_SOURCE_SUPPORT_REVIEW_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_frontier80_tail_source_support_review/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1272,6 +1275,7 @@ def apply_old_clean_byte_union(
     outside_source_final_dependency: dict[str, str] | None,
     outside_source_final_residual: dict[str, str] | None,
     outside_source_stop_review: dict[str, str] | None,
+    outside_source_frontier80_tail_support: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1303,6 +1307,7 @@ def apply_old_clean_byte_union(
             outside_source_final_dependency,
             outside_source_final_residual,
             outside_source_stop_review,
+            outside_source_frontier80_tail_support,
         )
     ):
         return queue
@@ -1913,6 +1918,22 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_tail_support:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_tail_verdict="
+                    f"{outside_source_frontier80_tail_support.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_tail_pair_known="
+                    f"{outside_source_frontier80_tail_support.get('pair_known_rows', '0')}/"
+                    f"{outside_source_frontier80_tail_support.get('pair_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_tail_exact_known="
+                    f"{outside_source_frontier80_tail_support.get('exact_context_known_non_target_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_tail_next="
+                    f"{outside_source_frontier80_tail_support.get('next_probe', '')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
         final_dependency = outside_source_final_dependency or outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
         final_residual = outside_source_final_residual or outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
@@ -1937,6 +1958,15 @@ def apply_old_clean_byte_union(
             next_action = (
                 "derive post-union source-byte transforms for "
                 f"{final_dependency.get('source_unknown_in_highsafe_slots', '0')} high-safe unknown slots"
+            )
+        elif (
+            outside_source_frontier80_tail_support
+            and outside_source_frontier80_tail_support.get("review_verdict")
+            == "frontier80_tail_target_only_no_known_support"
+        ):
+            next_action = outside_source_frontier80_tail_support.get(
+                "next_probe",
+                "derive opcode producer for frontier80 compact-control tail offsets 16-17",
             )
         elif outside_source_stop_review and outside_source_stop_review.get("review_verdict") == "outside_source_dependency_target_only_no_known_support":
             next_action = outside_source_stop_review.get(
@@ -15837,6 +15867,11 @@ def main() -> None:
         default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTEENTH_OUTSIDE_SOURCE_DEPENDENCY_REVIEW_SUMMARY,
     )
     parser.add_argument(
+        "--tex-old-clean-byte-union-frontier80-tail-source-support-review-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_SOURCE_SUPPORT_REVIEW_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -17800,6 +17835,9 @@ def main() -> None:
     tex_old_clean_byte_union_fourteenth_outside_source_dependency_review_summary = read_optional_summary(
         args.tex_old_clean_byte_union_fourteenth_outside_source_dependency_review_summary
     )
+    tex_old_clean_byte_union_frontier80_tail_source_support_review_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_frontier80_tail_source_support_review_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -19139,6 +19177,7 @@ def main() -> None:
         outside_source_final_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_summary,
         outside_source_final_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_residual_core_summary,
         outside_source_stop_review=tex_old_clean_byte_union_fourteenth_outside_source_dependency_review_summary,
+        outside_source_frontier80_tail_support=tex_old_clean_byte_union_frontier80_tail_source_support_review_summary,
     )
     summary = build_summary(queue, review_summary)
 
