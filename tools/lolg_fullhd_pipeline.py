@@ -961,6 +961,23 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Probe",
                 ],
             ),
+            Step(
+                "replay promu guard seuil source prior high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_promoted_replay.py",
+                    "--observations",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_non_oracle_guard_probe/byte_observations.csv",
+                    "--switches",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_source_split_probe/source_split_switch_rows.csv",
+                    "--guard-predictions",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe/guard_predictions.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Promoted Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -5432,6 +5449,23 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Probe",
+            ],
+        ),
+        Step(
+            "replay promu guard seuil source prior high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_promoted_replay.py",
+                "--observations",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_non_oracle_guard_probe/byte_observations.csv",
+                "--switches",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_source_split_probe/source_split_switch_rows.csv",
+                "--guard-predictions",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe/guard_predictions.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Promoted Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
