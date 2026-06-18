@@ -676,6 +676,15 @@ DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SUMMAR
 DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SUMMARY = Path(
     "output/tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_replay/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_FIXTURE_REPLAY_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_context_split_residual_second_fixture_replay/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_SUMMARY = Path(
+    "output/tex_gap_decoder_clean_gap_queue_frontier80_context_split_residual_second_replay/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_SUMMARY = Path(
+    "output/tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_second_replay/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1384,6 +1393,9 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_tail_compact_token_transfer_guard_run_probe: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_clean_gap_queue: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_run_probe: dict[str, str] | None,
+    outside_source_frontier80_context_split_residual_second_fixture_replay: dict[str, str] | None,
+    outside_source_frontier80_context_split_residual_second_clean_gap_queue: dict[str, str] | None,
+    outside_source_frontier80_context_split_residual_second_run_probe: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1448,6 +1460,9 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_tail_compact_token_transfer_guard_run_probe,
             outside_source_frontier80_context_split_residual_clean_gap_queue,
             outside_source_frontier80_context_split_residual_run_probe,
+            outside_source_frontier80_context_split_residual_second_fixture_replay,
+            outside_source_frontier80_context_split_residual_second_clean_gap_queue,
+            outside_source_frontier80_context_split_residual_second_run_probe,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -2288,6 +2303,49 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_context_split_residual_second_fixture_replay:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_fixture_added="
+                    f"{outside_source_frontier80_context_split_residual_second_fixture_replay.get('residual_added_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_fixture_skipped_known="
+                    f"{outside_source_frontier80_context_split_residual_second_fixture_replay.get('skipped_known_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_fixture_ready="
+                    f"{outside_source_frontier80_context_split_residual_second_fixture_replay.get('promotion_ready_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_fixture_false="
+                    f"{outside_source_frontier80_context_split_residual_second_fixture_replay.get('residual_false_bytes', '0')}",
+                ],
+            )
+
+        if outside_source_frontier80_context_split_residual_second_clean_gap_queue:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_clean_gap_clean="
+                    f"{outside_source_frontier80_context_split_residual_second_clean_gap_queue.get('clean_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_clean_gap_unresolved="
+                    f"{outside_source_frontier80_context_split_residual_second_clean_gap_queue.get('unresolved_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_clean_gap_largest="
+                    f"{outside_source_frontier80_context_split_residual_second_clean_gap_queue.get('largest_unresolved_span', '0')}",
+                ],
+            )
+
+        if outside_source_frontier80_context_split_residual_second_run_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_run_probe_runs="
+                    f"{outside_source_frontier80_context_split_residual_second_run_probe.get('run_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_run_probe_zero_nonzero="
+                    f"{outside_source_frontier80_context_split_residual_second_run_probe.get('zero_bytes', '0')}/"
+                    f"{outside_source_frontier80_context_split_residual_second_run_probe.get('nonzero_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_second_run_probe_largest="
+                    f"{outside_source_frontier80_context_split_residual_second_run_probe.get('largest_run_class', '')}:"
+                    f"{outside_source_frontier80_context_split_residual_second_run_probe.get('largest_run_bytes', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -2814,6 +2872,30 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_context_split_residual_second_run_probe
+            and int_value(outside_source_frontier80_context_split_residual_second_run_probe, "run_rows") > 0
+        ):
+            next_action = (
+                "derive new producer for remaining context-split residual "
+                f"{outside_source_frontier80_context_split_residual_second_run_probe.get('largest_run_class', 'run')} "
+                "run after saturated replay "
+                f"({outside_source_frontier80_context_split_residual_second_run_probe.get('largest_run_bytes', '0')} bytes)"
+            )
+        elif (
+            outside_source_frontier80_context_split_residual_second_clean_gap_queue
+            and int_value(outside_source_frontier80_context_split_residual_second_clean_gap_queue, "unresolved_bytes") > 0
+        ):
+            next_action = (
+                "split largest clean-gap span after saturated context-split residual replay "
+                f"({outside_source_frontier80_context_split_residual_second_clean_gap_queue.get('largest_unresolved_span', '0')} bytes)"
+            )
+        elif (
+            outside_source_frontier80_context_split_residual_second_fixture_replay
+            and int_value(outside_source_frontier80_context_split_residual_second_fixture_replay, "residual_added_bytes") == 0
+            and int_value(outside_source_frontier80_context_split_residual_second_fixture_replay, "skipped_known_bytes") > 0
+        ):
+            next_action = "derive new producer after saturated context-split residual fixture replay"
         elif (
             outside_source_frontier80_context_split_residual_run_probe
             and int_value(outside_source_frontier80_context_split_residual_run_probe, "run_rows") > 0
@@ -17057,6 +17139,21 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-context-split-residual-second-fixture-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_FIXTURE_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-clean-gap-queue-frontier80-context-split-residual-second-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-unresolved-run-probe-frontier80-context-split-residual-second-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -19159,6 +19256,15 @@ def main() -> None:
     tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_summary = read_optional_summary(
         args.tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_summary
     )
+    tex_gap_decoder_frontier80_context_split_residual_second_fixture_replay_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_context_split_residual_second_fixture_replay_summary
+    )
+    tex_gap_decoder_clean_gap_queue_frontier80_context_split_residual_second_summary = read_optional_summary(
+        args.tex_gap_decoder_clean_gap_queue_frontier80_context_split_residual_second_summary
+    )
+    tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_second_summary = read_optional_summary(
+        args.tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_second_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -20575,6 +20681,9 @@ def main() -> None:
         outside_source_frontier80_tail_compact_token_transfer_guard_run_probe=tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_summary,
         outside_source_frontier80_context_split_residual_clean_gap_queue=tex_gap_decoder_clean_gap_queue_frontier80_context_split_residual_summary,
         outside_source_frontier80_context_split_residual_run_probe=tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_summary,
+        outside_source_frontier80_context_split_residual_second_fixture_replay=tex_gap_decoder_frontier80_context_split_residual_second_fixture_replay_summary,
+        outside_source_frontier80_context_split_residual_second_clean_gap_queue=tex_gap_decoder_clean_gap_queue_frontier80_context_split_residual_second_summary,
+        outside_source_frontier80_context_split_residual_second_run_probe=tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_second_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,

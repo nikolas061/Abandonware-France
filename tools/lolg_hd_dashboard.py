@@ -197,6 +197,15 @@ DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL = Path
 DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL = Path(
     "output/tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_replay/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_FIXTURE_REPLAY = Path(
+    "output/tex_gap_decoder_frontier80_context_split_residual_second_fixture_replay/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND = Path(
+    "output/tex_gap_decoder_clean_gap_queue_frontier80_context_split_residual_second_replay/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND = Path(
+    "output/tex_gap_decoder_unresolved_run_probe_frontier80_context_split_residual_second_replay/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -800,6 +809,18 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Runs gaps clean apres residuel context-split frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL,
+        ),
+        (
+            "Second replay fixtures residuel context-split frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND_FIXTURE_REPLAY,
+        ),
+        (
+            "File gaps clean apres second replay residuel context-split frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND,
+        ),
+        (
+            "Runs gaps clean apres second replay residuel context-split frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_SECOND,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
