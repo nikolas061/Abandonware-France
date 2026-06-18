@@ -50,6 +50,125 @@ def shlex_quote(value: str) -> str:
     return "'" + value.replace("'", "'\"'\"'") + "'"
 
 
+TERMINAL_SOURCE_BYTE_CASCADE_STAGES = [
+    ("", "Terminal-Source", "garde terminal-source"),
+    ("second_", "Second Terminal-Source", "deuxieme garde terminal-source"),
+    ("third_", "Third Terminal-Source", "troisieme garde terminal-source"),
+    ("fourth_", "Fourth Terminal-Source", "quatrieme garde terminal-source"),
+    ("fifth_", "Fifth Terminal-Source", "cinquieme garde terminal-source"),
+    ("sixth_", "Sixth Terminal-Source", "sixieme garde terminal-source"),
+    ("seventh_", "Seventh Terminal-Source", "septieme garde terminal-source"),
+    ("eighth_", "Eighth Terminal-Source", "huitieme garde terminal-source"),
+    ("ninth_", "Ninth Terminal-Source", "neuvieme garde terminal-source"),
+    ("tenth_", "Tenth Terminal-Source", "dixieme garde terminal-source"),
+]
+
+
+def terminal_source_byte_review_dir(prefix: str) -> str:
+    return f"output/tex_gradient_sequence_high_safe_low_exception_{prefix}terminal_source_byte_guard_after_terminal_root_source_byte_cascade"
+
+
+def terminal_source_byte_dependency_dir(prefix: str) -> str:
+    return (
+        "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_"
+        f"{prefix}terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted"
+    )
+
+
+def terminal_source_byte_guard_cascade_steps() -> list[Step]:
+    steps: list[Step] = []
+    slot_input = (
+        "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_"
+        "third_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay/slots.csv"
+    )
+    base_fixtures = (
+        "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_"
+        "third_terminal_root_transform_sixteenth_promoted_replay_promoted/fixtures.csv"
+    )
+    for prefix, title_prefix, name_prefix in TERMINAL_SOURCE_BYTE_CASCADE_STAGES:
+        review_dir = terminal_source_byte_review_dir(prefix)
+        promoted_dir = f"{review_dir}_promoted"
+        dependency_dir = terminal_source_byte_dependency_dir(prefix)
+        steps.extend(
+            [
+                Step(
+                    f"revue {name_prefix} apres cascade source-byte terminal/root .tex",
+                    [
+                        sys.executable,
+                        "tools/lolg_tex_gradient_sequence_high_safe_low_exception_terminal_source_byte_guard_review.py",
+                        "--slots",
+                        slot_input,
+                        "-o",
+                        review_dir,
+                        "--title",
+                        f"Lands of Lore II .tex {title_prefix} Byte Guard After Terminal Root Source-Byte Cascade",
+                    ],
+                ),
+                Step(
+                    f"promotion {name_prefix} apres cascade source-byte terminal/root .tex",
+                    [
+                        sys.executable,
+                        "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_byte_guard_promoted_replay.py",
+                        "--base-fixtures",
+                        base_fixtures,
+                        "--targets",
+                        f"{review_dir}/targets.csv",
+                        "-o",
+                        promoted_dir,
+                        "--title",
+                        f"Lands of Lore II .tex {title_prefix} Byte Guard After Terminal Root Source-Byte Cascade Promoted",
+                    ],
+                ),
+                Step(
+                    f"dependances source apres promotion {name_prefix} .tex",
+                    [
+                        sys.executable,
+                        "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_probe.py",
+                        "--replay-fixtures",
+                        f"{promoted_dir}/fixtures.csv",
+                        "-o",
+                        dependency_dir,
+                        "--title",
+                        f"Lands of Lore II .tex Source-Dependency After {title_prefix} Byte Guard Promoted",
+                    ],
+                ),
+                Step(
+                    f"noyau residuel apres promotion {name_prefix} .tex",
+                    [
+                        sys.executable,
+                        "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core_review.py",
+                        "--slots",
+                        f"{dependency_dir}/slots.csv",
+                        "--edges",
+                        f"{dependency_dir}/edges.csv",
+                        "-o",
+                        f"{dependency_dir}_residual_core",
+                    ],
+                ),
+            ]
+        )
+        slot_input = f"{dependency_dir}/slots.csv"
+        base_fixtures = f"{promoted_dir}/fixtures.csv"
+
+    eleventh_review_dir = terminal_source_byte_review_dir("eleventh_")
+    steps.append(
+        Step(
+            "onzieme revue garde terminal-source apres cascade source-byte terminal/root .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_terminal_source_byte_guard_review.py",
+                "--slots",
+                slot_input,
+                "-o",
+                eleventh_review_dir,
+                "--title",
+                "Lands of Lore II .tex Eleventh Terminal-Source Byte Guard After Terminal Root Source-Byte Cascade",
+            ],
+        )
+    )
+    return steps
+
+
 def quick_steps(fail_on_issues: bool) -> list[Step]:
     audit = [sys.executable, "tools/lolg_hd_audit.py"]
     final_audit = [sys.executable, "tools/lolg_hd_audit.py"]
@@ -3426,6 +3545,7 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "Lands of Lore II .tex Terminal Root Transform After Third Source-Byte Guard Terminal Root Sixteenth Promotion",
             ],
         ),
+        *terminal_source_byte_guard_cascade_steps(),
         Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],

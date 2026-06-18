@@ -263,6 +263,56 @@ def choose_existing(paths: list[Path]) -> Path:
     return paths[0]
 
 
+TERMINAL_SOURCE_BYTE_DASHBOARD_STAGES = [
+    ("", "Garde terminal-source"),
+    ("second_", "Deuxieme garde terminal-source"),
+    ("third_", "Troisieme garde terminal-source"),
+    ("fourth_", "Quatrieme garde terminal-source"),
+    ("fifth_", "Cinquieme garde terminal-source"),
+    ("sixth_", "Sixieme garde terminal-source"),
+    ("seventh_", "Septieme garde terminal-source"),
+    ("eighth_", "Huitieme garde terminal-source"),
+    ("ninth_", "Neuvieme garde terminal-source"),
+    ("tenth_", "Dixieme garde terminal-source"),
+]
+
+
+def terminal_source_byte_review_dir(prefix: str) -> Path:
+    return Path(
+        f"output/tex_gradient_sequence_high_safe_low_exception_{prefix}"
+        "terminal_source_byte_guard_after_terminal_root_source_byte_cascade"
+    )
+
+
+def terminal_source_byte_dependency_dir(prefix: str) -> Path:
+    return Path(
+        "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_"
+        f"{prefix}terminal_source_byte_guard_after_terminal_root_source_byte_cascade_promoted"
+    )
+
+
+def terminal_source_byte_dashboard_links() -> list[tuple[str, Path]]:
+    links: list[tuple[str, Path]] = []
+    for prefix, label in TERMINAL_SOURCE_BYTE_DASHBOARD_STAGES:
+        review_dir = terminal_source_byte_review_dir(prefix)
+        dependency_dir = terminal_source_byte_dependency_dir(prefix)
+        links.extend(
+            [
+                (f"{label} apres cascade source-byte terminal/root .tex", review_dir / "index.html"),
+                (f"Promotion {label.lower()} .tex", Path(f"{review_dir}_promoted/index.html")),
+                (f"Dependances source apres promotion {label.lower()} .tex", dependency_dir / "index.html"),
+                (f"Noyau residuel apres promotion {label.lower()} .tex", Path(f"{dependency_dir}_residual_core/index.html")),
+            ]
+        )
+    links.append(
+        (
+            "Onzieme revue garde terminal-source apres cascade source-byte terminal/root .tex",
+            terminal_source_byte_review_dir("eleventh_") / "index.html",
+        )
+    )
+    return links
+
+
 def dashboard_payload(output: Path) -> dict[str, object]:
     base_dir = output.parent
     audit_summary = first_row(DEFAULT_AUDIT_SUMMARY)
@@ -2005,6 +2055,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay/index.html"
             ),
         ),
+        *terminal_source_byte_dashboard_links(),
         (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
