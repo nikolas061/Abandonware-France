@@ -20,6 +20,11 @@ DEFAULT_CURRENT_SUMMARY = Path(
 )
 DEFAULT_EXPECTED_MANIFEST = Path("output/tex_gap_rule_fixtures_expanded/manifest.csv")
 DEFAULT_EXCLUDED_DIRS = ("C/LOLG",)
+GENERATED_OUTPUT_DIR_NAMES = {
+    "tex_old_clean_byte_search",
+    "tex_old_clean_byte_seed_union_promoted_replay",
+    "tex_old_clean_byte_union_promoted_replay",
+}
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -227,7 +232,7 @@ def iter_fixture_csvs(root: Path, excluded_dirs: list[Path]) -> list[Path]:
         "fixtures",
         "fullhd",
         "native",
-    }
+    } | GENERATED_OUTPUT_DIR_NAMES
     paths: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
         directory = Path(dirpath).resolve(strict=False)
@@ -518,6 +523,11 @@ def main() -> int:
         if int_value(row, "candidate_new_clean_bytes") > 0
         and int_value(row, "candidate_new_false_bytes") == 0
     ]
+    actionable_candidate_issue_rows = sum(
+        int_value(row, "issue_rows")
+        for row in candidate_rows
+        if int_value(row, "candidate_new_clean_bytes") > 0 or int_value(row, "candidate_new_false_bytes") > 0
+    )
     best = candidate_rows[0] if candidate_rows else {}
     current_stats = summary_stats(current_summary)
     summary = {
@@ -537,7 +547,7 @@ def main() -> int:
         "best_candidate_new_false_bytes": best.get("candidate_new_false_bytes", "0"),
         "current_total_clean_bytes": current_stats.get("total_clean_bytes", ""),
         "current_remaining_unresolved_bytes": current_stats.get("remaining_unresolved_bytes", ""),
-        "issue_rows": str(len(expected_issues) + len(current_issues) + sum(int_value(row, "issue_rows") for row in candidate_rows)),
+        "issue_rows": str(len(expected_issues) + len(current_issues) + actionable_candidate_issue_rows),
     }
 
     output.mkdir(parents=True, exist_ok=True)

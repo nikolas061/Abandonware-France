@@ -540,6 +540,16 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_ELEVENTH_TER
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_TWELFTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_after_terminal_root_source_byte_cascade/summary.csv"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_SEARCH_SUMMARY = Path("output/tex_old_clean_byte_search/summary.csv")
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_promoted_replay_residual_core/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1139,6 +1149,134 @@ def apply_terminal_source_byte_cascade(
                 "next_action": next_action,
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
+            }
+        )
+    return updated
+
+
+def apply_old_clean_byte_union(
+    queue: list[dict[str, str]],
+    *,
+    search: dict[str, str] | None,
+    promoted: dict[str, str] | None,
+    dependency: dict[str, str] | None,
+    residual: dict[str, str] | None,
+) -> list[dict[str, str]]:
+    if not any((search, promoted, dependency, residual)):
+        return queue
+
+    updated: list[dict[str, str]] = []
+    for row in queue:
+        if row.get("surface", "") != "gradient_like":
+            updated.append(row)
+            continue
+        positive_evidence = row.get("positive_evidence", "")
+        blocking_evidence = row.get("blocking_evidence", "")
+
+        if search:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_search_candidates="
+                    f"{search.get('zero_false_candidates_with_new_clean', '0')}",
+                    "gradient_sequence_old_clean_byte_search_new_clean="
+                    f"{search.get('candidate_new_clean_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_search_best="
+                    f"{search.get('best_candidate_new_clean_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_search_false="
+                    f"{search.get('candidate_new_false_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_search_issues="
+                    f"{search.get('issue_rows', '0')}",
+                ],
+            )
+
+        if promoted:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_old_clean_byte_union_added={promoted.get('source_added_bytes', '0')}",
+                    f"gradient_sequence_old_clean_byte_union_total_clean={promoted.get('total_clean_bytes', '0')}",
+                    f"gradient_sequence_old_clean_byte_union_remaining={promoted.get('remaining_unresolved_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_old_clean_byte_union_false={promoted.get('source_false_bytes', '0')}",
+                    f"gradient_sequence_old_clean_byte_union_issues={promoted.get('issue_rows', '0')}",
+                ],
+            )
+
+        if dependency:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_dependency_available="
+                    f"{dependency.get('source_available_slots', '0')}/{dependency.get('slots', '0')}",
+                    "gradient_sequence_old_clean_byte_dependency_highsafe_unknown="
+                    f"{dependency.get('source_unknown_in_highsafe_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_dependency_outside_unknown="
+                    f"{dependency.get('source_unknown_outside_highsafe_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_dependency_top_unknown="
+                    f"{dependency.get('top_unknown_dependency_edge', '')}:"
+                    f"{dependency.get('top_unknown_dependency_edge_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_dependency_issues="
+                    f"{dependency.get('issue_rows', '0')}",
+                ],
+            )
+
+        if residual:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_residual_known_chains="
+                    f"{residual.get('terminal_known_chains', '0')}",
+                    "gradient_sequence_old_clean_byte_residual_external_chains="
+                    f"{residual.get('terminal_unknown_outside_chains', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_residual_top_unknown="
+                    f"{residual.get('top_unknown_edge', '')}:"
+                    f"{residual.get('top_unknown_edge_unknown_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_residual_blocker="
+                    f"{residual.get('dominant_blocker', '')}",
+                    "gradient_sequence_old_clean_byte_residual_issues="
+                    f"{residual.get('issue_rows', '0')}",
+                ],
+            )
+
+        next_action = row.get("next_action", "")
+        if promoted and int_value(promoted, "source_false_bytes") > 0:
+            next_action = "review old-clean byte union false positives"
+        elif promoted and int_value(promoted, "issue_rows") > 0:
+            next_action = "fix old-clean byte union replay issues"
+        elif dependency and int_value(dependency, "source_unknown_in_highsafe_slots") > 0:
+            next_action = (
+                "derive post-union source-byte transforms for "
+                f"{dependency.get('source_unknown_in_highsafe_slots', '0')} high-safe unknown slots"
+            )
+        elif residual and residual.get("dominant_blocker"):
+            next_action = "split post-union residual source dependency blockers"
+
+        updated.append(
+            {
+                **row,
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+                "next_action": next_action,
             }
         )
     return updated
@@ -14855,6 +14993,22 @@ def main() -> None:
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_TWELFTH_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY,
     )
+    parser.add_argument("--tex-old-clean-byte-search-summary", type=Path, default=DEFAULT_TEX_OLD_CLEAN_BYTE_SEARCH_SUMMARY)
+    parser.add_argument(
+        "--tex-old-clean-byte-union-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_RESIDUAL_CORE_SUMMARY,
+    )
     parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
@@ -16708,6 +16862,18 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_summary = read_optional_summary(
         args.gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_summary
     )
+    tex_old_clean_byte_search_summary = read_optional_summary(args.tex_old_clean_byte_search_summary)
+    tex_old_clean_byte_union_promoted_replay_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_promoted_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_residual_core_summary = (
+        read_optional_summary(
+            args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_residual_core_summary
+        )
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -18016,6 +18182,13 @@ def main() -> None:
         final_dependency=gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_summary,
         final_residual=gradient_sequence_high_safe_low_exception_source_dependency_eleventh_terminal_source_byte_guard_residual_core_summary,
         stop_review=gradient_sequence_high_safe_low_exception_twelfth_terminal_source_byte_guard_summary,
+    )
+    queue = apply_old_clean_byte_union(
+        queue,
+        search=tex_old_clean_byte_search_summary,
+        promoted=tex_old_clean_byte_union_promoted_replay_summary,
+        dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_summary,
+        residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_residual_core_summary,
     )
     summary = build_summary(queue, review_summary)
 

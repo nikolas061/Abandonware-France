@@ -167,6 +167,44 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
             ],
         )
     )
+    steps.extend(
+        [
+            Step(
+                "recherche anciens octets propres .tex",
+                [sys.executable, "tools/lolg_tex_old_clean_byte_search.py"],
+            ),
+            Step(
+                "promotion union anciens octets propres .tex",
+                [sys.executable, "tools/lolg_tex_old_clean_byte_union_promoted_replay.py"],
+            ),
+            Step(
+                "dependances source apres promotion union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_probe.py",
+                    "--replay-fixtures",
+                    "output/tex_old_clean_byte_union_promoted_replay/fixtures.csv",
+                    "-o",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Source-Dependency After Old Clean Byte Union Promoted Replay",
+                ],
+            ),
+            Step(
+                "noyau residuel apres promotion union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_residual_core_review.py",
+                    "--slots",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_promoted_replay/slots.csv",
+                    "--edges",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_promoted_replay/edges.csv",
+                    "-o",
+                    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_promoted_replay_residual_core",
+                ],
+            ),
+        ]
+    )
     return steps
 
 
