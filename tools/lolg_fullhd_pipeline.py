@@ -1343,6 +1343,13 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "tools/lolg_tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_fallback_probe.py",
                 ],
             ),
+            Step(
+                "replay candidat valeurs source restantes stride-320 frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_value_candidate_replay.py",
+                ],
+            ),
         ]
     )
     return steps
@@ -6196,6 +6203,13 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [
                 sys.executable,
                 "tools/lolg_tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_fallback_probe.py",
+            ],
+        ),
+        Step(
+            "replay candidat valeurs source restantes stride-320 frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_remaining_source_value_candidate_replay.py",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
