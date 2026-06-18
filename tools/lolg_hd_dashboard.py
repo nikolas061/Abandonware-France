@@ -275,6 +275,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRID
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_SOURCE_PREFIX_TAIL_CANDIDATE = Path(
     "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_source_prefix_tail_candidate_replay/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_TARGET_PREFIX_DELTA_CANDIDATE = Path(
+    "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_target_prefix_delta_candidate_replay/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -982,6 +985,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Replay candidat source-prefix tail stride-320 apres promotion single-row frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_SOURCE_PREFIX_TAIL_CANDIDATE,
+        ),
+        (
+            "Replay candidat target-prefix delta stride-320 apres promotion single-row frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_TARGET_PREFIX_DELTA_CANDIDATE,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
