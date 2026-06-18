@@ -1421,6 +1421,19 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Largest Residual Run Selector After Stride-320 Outlier Target Replay",
                 ],
             ),
+            Step(
+                "profil structurel run residuel 96 apres replay target outliers stride-320 frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_largest_run_structural_profile.py",
+                    "--runs",
+                    "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay/runs.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Largest Residual Run Structural Profile After Stride-320 Outlier Target Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -6352,6 +6365,19 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_selector_review",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Largest Residual Run Selector After Stride-320 Outlier Target Replay",
+            ],
+        ),
+        Step(
+            "profil structurel run residuel 96 apres replay target outliers stride-320 frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_largest_run_structural_profile.py",
+                "--runs",
+                "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay/runs.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Largest Residual Run Structural Profile After Stride-320 Outlier Target Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
