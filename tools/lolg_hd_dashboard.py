@@ -344,6 +344,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_PROMOTED_REPLAY = Path(
     "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_promoted_replay/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_FIXTURE_REPLAY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_fixture_replay/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1143,6 +1146,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Replay promu correction compacte exacte support-only prior high-row apres replay target outliers stride-320 frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_PROMOTED_REPLAY,
+        ),
+        (
+            "Replay fixture correction compacte exacte support-only prior high-row apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_FIXTURE_REPLAY,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
