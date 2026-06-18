@@ -652,6 +652,18 @@ DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_GUARD_SPLIT_REVIE
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_INDEPENDENT_SUPPORT_REVIEW_SUMMARY = Path(
     "output/tex_old_clean_byte_union_frontier80_tail_compact_token_independent_support_review/summary.csv"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_REVIEW_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_review/summary.csv"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_residual_core/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1292,6 +1304,10 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_tail_compact_token: dict[str, str] | None,
     outside_source_frontier80_tail_compact_token_guard: dict[str, str] | None,
     outside_source_frontier80_tail_compact_token_independent_support: dict[str, str] | None,
+    outside_source_frontier80_tail_compact_token_transfer_guard: dict[str, str] | None,
+    outside_source_frontier80_tail_compact_token_transfer_guard_promoted: dict[str, str] | None,
+    outside_source_frontier80_tail_compact_token_transfer_guard_dependency: dict[str, str] | None,
+    outside_source_frontier80_tail_compact_token_transfer_guard_residual: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1328,6 +1344,10 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_tail_compact_token,
             outside_source_frontier80_tail_compact_token_guard,
             outside_source_frontier80_tail_compact_token_independent_support,
+            outside_source_frontier80_tail_compact_token_transfer_guard,
+            outside_source_frontier80_tail_compact_token_transfer_guard_promoted,
+            outside_source_frontier80_tail_compact_token_transfer_guard_dependency,
+            outside_source_frontier80_tail_compact_token_transfer_guard_residual,
         )
     ):
         return queue
@@ -2024,6 +2044,64 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_tail_compact_token_transfer_guard:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_guard_verdict="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_guard_key="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard.get('best_guard_key', '').replace(';', '+')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_guard_known="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard.get('best_known_exact_rows', '0')}/"
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard.get('best_known_false_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_guard_compact_cross="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard.get('best_compact_exact_rows', '0')}/"
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard.get('best_cross_rule_exact_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_guard_next="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard.get('next_probe', '')}",
+                ],
+            )
+
+        if outside_source_frontier80_tail_compact_token_transfer_guard_promoted:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_replay_added="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_promoted.get('source_added_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_replay_false="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_promoted.get('source_false_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_replay_ready="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_promoted.get('promotion_ready_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_replay_issues="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_promoted.get('issue_rows', '0')}",
+                ],
+            )
+
+        if outside_source_frontier80_tail_compact_token_transfer_guard_dependency:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_dependency_unknown="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_dependency.get('source_unknown_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_dependency_highsafe_unknown="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_dependency.get('source_unknown_in_highsafe_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_dependency_outside_unknown="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_dependency.get('source_unknown_outside_highsafe_slots', '0')}",
+                ],
+            )
+
+        if outside_source_frontier80_tail_compact_token_transfer_guard_residual:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_residual_highsafe_unknown="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_residual.get('unknown_highsafe_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_residual_blocker="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_residual.get('dominant_blocker', '')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
         final_dependency = outside_source_final_dependency or outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
         final_residual = outside_source_final_residual or outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
@@ -2099,6 +2177,7 @@ def apply_old_clean_byte_union(
             )
         elif (
             outside_source_frontier80_tail_compact_token_independent_support
+            and not outside_source_frontier80_tail_compact_token_transfer_guard
             and outside_source_frontier80_tail_compact_token_independent_support.get("review_verdict")
             in {
                 "frontier80_tail_compact_token_cross_rule_support_only",
@@ -2110,6 +2189,47 @@ def apply_old_clean_byte_union(
                 "next_probe",
                 "derive compact-control-specific guard for cross-rule high2 selector transfer",
             )
+        elif (
+            outside_source_frontier80_tail_compact_token_transfer_guard
+            and not outside_source_frontier80_tail_compact_token_transfer_guard_promoted
+            and outside_source_frontier80_tail_compact_token_transfer_guard.get("review_verdict")
+            in {
+                "frontier80_tail_compact_token_transfer_guard_ready",
+                "frontier80_tail_compact_token_transfer_guard_compact_only",
+                "frontier80_tail_compact_token_transfer_guard_cross_rule_only",
+                "frontier80_tail_compact_token_transfer_guard_rejected",
+            }
+        ):
+            next_action = outside_source_frontier80_tail_compact_token_transfer_guard.get(
+                "next_probe",
+                "validate guarded high2 selector with compact-control replay before promotion",
+            )
+        elif (
+            outside_source_frontier80_tail_compact_token_transfer_guard_promoted
+            and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "source_false_bytes") > 0
+        ):
+            next_action = "review guarded high2 frontier80 transfer replay false positives"
+        elif (
+            outside_source_frontier80_tail_compact_token_transfer_guard_promoted
+            and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "issue_rows") > 0
+        ):
+            next_action = "fix guarded high2 frontier80 transfer replay issues"
+        elif (
+            outside_source_frontier80_tail_compact_token_transfer_guard_promoted
+            and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "promotion_ready_bytes") > 0
+            and not outside_source_frontier80_tail_compact_token_transfer_guard_dependency
+        ):
+            next_action = "review source dependency after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_tail_compact_token_transfer_guard_dependency
+            and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
+        ):
+            next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_tail_compact_token_transfer_guard_promoted
+            and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "promotion_ready_bytes") > 0
+        ):
+            next_action = "promote guarded high2 selector for frontier80 offsets 16-17"
         elif outside_source_stop_review and outside_source_stop_review.get("review_verdict") == "outside_source_dependency_target_only_no_known_support":
             next_action = outside_source_stop_review.get(
                 "next_probe",
@@ -16034,6 +16154,26 @@ def main() -> None:
         default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_INDEPENDENT_SUPPORT_REVIEW_SUMMARY,
     )
     parser.add_argument(
+        "--tex-old-clean-byte-union-frontier80-tail-compact-token-transfer-guard-review-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_REVIEW_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-old-clean-byte-union-frontier80-tail-compact-token-transfer-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-frontier80-tail-compact-token-transfer-guard-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-frontier80-tail-compact-token-transfer-guard-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -18012,6 +18152,18 @@ def main() -> None:
     tex_old_clean_byte_union_frontier80_tail_compact_token_independent_support_review_summary = read_optional_summary(
         args.tex_old_clean_byte_union_frontier80_tail_compact_token_independent_support_review_summary
     )
+    tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_review_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_review_summary
+    )
+    tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_residual_core_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_residual_core_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -19356,6 +19508,10 @@ def main() -> None:
         outside_source_frontier80_tail_compact_token=tex_old_clean_byte_union_frontier80_tail_compact_token_review_summary,
         outside_source_frontier80_tail_compact_token_guard=tex_old_clean_byte_union_frontier80_tail_compact_token_guard_split_review_summary,
         outside_source_frontier80_tail_compact_token_independent_support=tex_old_clean_byte_union_frontier80_tail_compact_token_independent_support_review_summary,
+        outside_source_frontier80_tail_compact_token_transfer_guard=tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_review_summary,
+        outside_source_frontier80_tail_compact_token_transfer_guard_promoted=tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_summary,
+        outside_source_frontier80_tail_compact_token_transfer_guard_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_summary,
+        outside_source_frontier80_tail_compact_token_transfer_guard_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_residual_core_summary,
     )
     summary = build_summary(queue, review_summary)
 
