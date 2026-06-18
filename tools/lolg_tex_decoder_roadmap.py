@@ -715,6 +715,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_DELTA_GUARD_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_DELTA_GUARD_PROMOTED_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted_replay/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1436,6 +1439,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_context_split_residual_low_payload_row_state_source_transform: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_selector: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard: dict[str, str] | None,
+    outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1513,6 +1517,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_transform,
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_selector,
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard,
+            outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -2588,6 +2593,22 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_delta_guard_promoted_verdict="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_delta_guard_promoted_added_false="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted.get('source_added_bytes', '0')}/"
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted.get('source_false_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_delta_guard_promoted_residual="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted.get('residual_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_delta_guard_promoted_clean="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted.get('total_clean_bytes', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -3114,6 +3135,21 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted
+            and outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted.get(
+                "review_verdict"
+            )
+            in {
+                "frontier80_context_residual_low_payload_row_state_source_delta_guard_promoted_replay_partial_ready",
+                "frontier80_context_residual_low_payload_row_state_source_delta_guard_promoted_replay_ready",
+                "frontier80_context_residual_low_payload_row_state_source_delta_guard_promoted_replay_weak",
+            }
+        ):
+            next_action = outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted.get(
+                "next_probe",
+                "review residual row-state source bytes after guarded selector promotion",
+            )
         elif (
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard
             and outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard.get("review_verdict")
@@ -17578,6 +17614,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_DELTA_GUARD_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-context-split-residual-low-payload-row-state-source-delta-guard-promoted-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_DELTA_GUARD_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -19719,6 +19760,9 @@ def main() -> None:
     tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_summary
     )
+    tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -21148,6 +21192,7 @@ def main() -> None:
         outside_source_frontier80_context_split_residual_low_payload_row_state_source_transform=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_transform_summary,
         outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_selector=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_selector_summary,
         outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_summary,
+        outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
