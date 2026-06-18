@@ -17,6 +17,7 @@ DEFAULT_AUDIT_SUMMARY = Path("output/fullhd_audit/summary.csv")
 DEFAULT_INVENTORY_SUMMARY = Path("output/fullhd_inventory/summary.csv")
 DEFAULT_PROJECT_LEGACY_INVENTORY = Path("output/project_legacy_inventory/index.html")
 DEFAULT_PROJECT_LEGACY_MANIFEST = Path("output/project_legacy_inventory/manifest.csv")
+DEFAULT_EXTERNAL_LEGACY_MEDIA_REVIEW = Path("output/external_legacy_media_review/index.html")
 DEFAULT_VQA_GALLERY = Path("output/vqa_batch_window_lcw_transparent0_allframes/index.html")
 DEFAULT_VQA_GALLERY_MANIFEST = Path(
     "output/vqa_batch_window_lcw_transparent0_allframes/gallery_manifest.csv"
@@ -427,6 +428,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Inventaire Full HD", DEFAULT_INVENTORY_SUMMARY),
         ("Inventaire fichiers projet", DEFAULT_PROJECT_LEGACY_INVENTORY),
         ("Manifest fichiers projet", DEFAULT_PROJECT_LEGACY_MANIFEST),
+        ("Revue ancien travail media externe", DEFAULT_EXTERNAL_LEGACY_MEDIA_REVIEW),
         ("Galerie images fixes", DEFAULT_STILL_GALLERY),
         ("Manifest images fixes", DEFAULT_STILL_MANIFEST),
         ("Galerie VQA", DEFAULT_VQA_GALLERY),

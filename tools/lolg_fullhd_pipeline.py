@@ -4544,6 +4544,7 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
         Step("inventaire historique projet", [sys.executable, "tools/lolg_project_legacy_inventory.py"]),
+        Step("revue ancien travail media externe", [sys.executable, "tools/lolg_external_legacy_media_review.py"]),
     ]
     return steps + quick_steps(fail_on_issues)
 
