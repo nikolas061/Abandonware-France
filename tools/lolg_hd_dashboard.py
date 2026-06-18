@@ -305,6 +305,9 @@ DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALU
 DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY = Path(
     "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_LARGEST_RUN_SELECTOR_REVIEW = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_selector_review/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1052,6 +1055,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Runs gaps clean apres replay target outliers stride-320 frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY,
+        ),
+        (
+            "Revue selector run residuel 96 apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_LARGEST_RUN_SELECTOR_REVIEW,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
