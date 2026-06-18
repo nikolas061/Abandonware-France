@@ -311,6 +311,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_LARGES
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_LARGEST_RUN_STRUCTURAL_PROFILE = Path(
     "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_WIDTH32_DELTA_NEIGHBORHOOD = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_probe/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1066,6 +1069,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Profil structurel run residuel 96 apres replay target outliers stride-320 frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_LARGEST_RUN_STRUCTURAL_PROFILE,
+        ),
+        (
+            "Probe delta width32 run residuel apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_WIDTH32_DELTA_NEIGHBORHOOD,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",

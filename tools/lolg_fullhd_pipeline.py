@@ -1434,6 +1434,21 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Largest Residual Run Structural Profile After Stride-320 Outlier Target Replay",
                 ],
             ),
+            Step(
+                "probe delta width32 run residuel apres replay target outliers stride-320 frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe.py",
+                    "--runs",
+                    "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay/runs.csv",
+                    "--clean-fixtures",
+                    "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay/fixtures.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Width32 Delta Neighborhood After Stride-320 Outlier Target Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -6378,6 +6393,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Largest Residual Run Structural Profile After Stride-320 Outlier Target Replay",
+            ],
+        ),
+        Step(
+            "probe delta width32 run residuel apres replay target outliers stride-320 frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe.py",
+                "--runs",
+                "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay/runs.csv",
+                "--clean-fixtures",
+                "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay/fixtures.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Width32 Delta Neighborhood After Stride-320 Outlier Target Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
