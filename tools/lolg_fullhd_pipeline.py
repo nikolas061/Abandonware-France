@@ -806,6 +806,21 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Prior High Row Support Review",
                 ],
             ),
+            Step(
+                "probe selector compact prior high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_compact_selector_probe.py",
+                    "--support",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_support_review/known_family_support.csv",
+                    "--sources",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_support_review/sources.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_compact_selector_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Prior High Row Compact Selector Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -5122,6 +5137,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_clean_prior_high_row_support_review",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Prior High Row Support Review",
+            ],
+        ),
+        Step(
+            "probe selector compact prior high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_compact_selector_probe.py",
+                "--support",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_support_review/known_family_support.csv",
+                "--sources",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_support_review/sources.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_compact_selector_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Prior High Row Compact Selector Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
