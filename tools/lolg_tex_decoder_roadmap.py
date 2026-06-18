@@ -423,6 +423,18 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TERMINAL_ROO
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1838,6 +1850,54 @@ def gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_co
     return "no residual high-safe roots after terminal-root context promotion"
 
 
+def gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix terminal/root transform review issues after terminal-root context promotion"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "promote terminal/root transform bytes after terminal-root context promotion"
+    if int_value(summary, "best_unknown_exact_roots") > 0:
+        return "seek known support for terminal/root transform after terminal-root context promotion"
+    return "derive broader terminal/root transform after terminal-root context promotion"
+
+
+def gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix terminal/root transform promoted replay issues"
+    if int_value(summary, "guard_false_bytes") > 0:
+        return "reject terminal/root transform promoted replay false bytes"
+    if int_value(summary, "guard_added_bytes") > 0:
+        return "rerun source-dependency core after terminal/root transform promotion"
+    return "rerun terminal/root transform promotion with ready roots"
+
+
+def gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix terminal/root transform source-dependency probe issues"
+    if int_value(summary, "source_unknown_in_highsafe_slots") > 0:
+        return "derive next terminal/root transform after terminal-root transform promotion"
+    return "rerun downstream gradient probes with terminal-root transform promoted replay base"
+
+
+def gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix terminal/root transform residual core review issues"
+    if int_value(summary, "terminal_unknown_outside_chains") > 0:
+        return "resolve external terminal source after terminal-root transform promotion"
+    if int_value(summary, "terminal_known_chains") > 0:
+        return "derive next terminal/root transform after terminal-root transform promotion"
+    if int_value(summary, "terminal_other_chains") > 0:
+        return "inspect terminal-root transform promoted non-terminal high-safe chain tail"
+    return "no residual high-safe roots after terminal-root transform promotion"
+
+
 def gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
     summary: dict[str, str],
 ) -> str:
@@ -2924,6 +2984,22 @@ def build_queue(
     ]
     | None = None,
     gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary: dict[
         str, str
     ]
     | None = None,
@@ -7741,6 +7817,159 @@ def build_queue(
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_unknown_exact_roots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_known_exact_roots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_best="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_context', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_context_key', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_transform', '')}="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_transform_param', '')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_candidate="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform_false="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_false_roots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('best_unknown_roots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform_promoted="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('guard_added_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('guard_candidate_rows', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_total_clean="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('total_clean_bytes', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_ready="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform_false="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('guard_false_bytes', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_skipped="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('skipped_known_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('skipped_rejected_bytes', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_promoted_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get('issue_rows', '0')}",
+                ],
+            )
+            ready = max(
+                ready,
+                int_value(
+                    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary,
+                    "promotion_ready_bytes",
+                ),
+            )
+            row = {
+                **row,
+                "promotion_ready_bytes": gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.get(
+                    "promotion_ready_bytes", row.get("promotion_ready_bytes", "0")
+                ),
+                "next_action": gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_action(
+                    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform_dependency_available="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('source_available_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_highsafe_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('source_unknown_in_highsafe_slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_edges="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('dependency_edges', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform_top_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('top_unknown_dependency_edge', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('top_unknown_dependency_edge_slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_outside_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('source_unknown_outside_highsafe_slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_dependency_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform_residual_known_chains="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary.get('terminal_known_chains', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_residual_external_chains="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary.get('terminal_unknown_outside_chains', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_transform_residual_top_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary.get('top_unknown_edge', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary.get('top_unknown_edge_unknown_slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_residual_blocker="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary.get('dominant_blocker', '')}",
+                    f"gradient_sequence_low_exception_terminal_root_transform_residual_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_action(
+                    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "") == "micro_token" and micro_jump_mixed_payload_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -11439,6 +11668,30 @@ def build_queue(
                         flat_walk_palette_promotion_candidate_summary,
                     )
                 elif (
+                    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_action(
+                        gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_action(
+                        gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+                    )
+                elif (
                     gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary
                 ):
                     next_action = gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_action(
@@ -13026,6 +13279,26 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-root-transform-terminal-root-context-terminal-guard-cover-ninth-source-byte-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-root-transform-terminal-root-context-terminal-guard-cover-ninth-source-byte-guard-promoted-replay-promoted-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-terminal-root-transform-terminal-root-context-terminal-guard-cover-ninth-source-byte-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-terminal-root-transform-terminal-root-context-terminal-guard-cover-ninth-source-byte-guard-promoted-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_TERMINAL_ROOT_TRANSFORM_TERMINAL_ROOT_CONTEXT_TERMINAL_GUARD_COVER_NINTH_SOURCE_BYTE_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -14533,6 +14806,62 @@ def main() -> None:
         if gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_rows
         else None
     )
+    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary = (
+        gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_rows
+        else None
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -15685,6 +16014,10 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_source_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary,
+        gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_source_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary,
