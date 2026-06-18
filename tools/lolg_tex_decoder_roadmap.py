@@ -787,6 +787,24 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_LARGES
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_WIDTH32_DELTA_NEIGHBORHOOD_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SUPPORT_REVIEW_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_COMPACT_SELECTOR_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SIGNED_DELTA_SELECTOR_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_NON_ORACLE_GUARD_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1532,6 +1550,12 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_stride320_outlier_target_value_guarded_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1633,6 +1657,12 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_stride320_outlier_target_value_guarded_largest_run_selector_review,
             outside_source_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile,
             outside_source_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -3134,6 +3164,115 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_verdict="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_family_min="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review.get('best_known_family_small_delta_le2_min', '0')}/32",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_source_known="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review.get('best_known_family_source_known_min', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_next="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review.get('next_probe', '')}",
+                ],
+            )
+
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_cluster_verdict="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_cluster_best="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get('best_cluster_key', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_cluster_coverage="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get('best_cluster_source_coverage', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get('source_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_cluster_min="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get('best_cluster_small_delta_le2_min', '0')}/32",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_cluster_next="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get('next_probe', '')}",
+                ],
+            )
+
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_verdict="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_le2="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get('signed_delta_le2_bytes', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get('total_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_le4="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get('signed_delta_le4_bytes', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get('total_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_outliers="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get('outlier_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_next="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get('next_probe', '')}",
+                ],
+            )
+
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_verdict="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_byte_alt="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get('oracle_byte_alt_le2_bytes', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get('total_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_resolved="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get('resolved_outlier_bytes', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get('selected_outlier_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_next="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get('next_probe', '')}",
+                ],
+            )
+
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_selector_verdict="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_selector_best="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get('best_selector', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_selector_resolved="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get('best_selector_resolved_outliers', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get('outlier_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_selector_le2="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get('best_selector_total_le2_bytes', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get('total_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_selector_next="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get('next_probe', '')}",
+                ],
+            )
+
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_non_oracle_guard_verdict="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_non_oracle_guard_support_only="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('best_support_only_selector', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_non_oracle_guard_resolved="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('best_support_only_resolved_outliers', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('outlier_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_non_oracle_guard_false_delta="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('best_support_only_false_delta_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_non_oracle_guard_le2="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('best_support_only_total_le2_bytes', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('total_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_non_oracle_guard_next="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get('next_probe', '')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -3660,6 +3799,78 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe
+            and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get(
+                "review_verdict"
+            )
+            in {
+                "frontier80_prior_high_row_non_oracle_guard_ready",
+                "frontier80_prior_high_row_non_oracle_guard_false_positive_split_needed",
+            }
+        ):
+            next_action = outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe.get(
+                "next_probe",
+                "promote support-only byte-local start guard for high-row outliers",
+            )
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe
+            and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get(
+                "review_verdict"
+            )
+            == "frontier80_prior_high_row_byte_local_start_selector_ready"
+        ):
+            next_action = outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe.get(
+                "next_probe",
+                "validate non-oracle inputs for guarded byte-local support-start selector",
+            )
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe
+            and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get(
+                "review_verdict"
+            )
+            == "frontier80_prior_high_row_outliers_alt_start_resolved"
+        ):
+            next_action = outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe.get(
+                "next_probe",
+                "derive byte-local support-start selector for prior high-row outliers",
+            )
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe
+            and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get(
+                "review_verdict"
+            )
+            in {
+                "frontier80_prior_high_row_signed_delta_le2_selector_ready",
+                "frontier80_prior_high_row_signed_delta_le4_fallback_needed",
+            }
+        ):
+            next_action = outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe.get(
+                "next_probe",
+                "isolate <=4 outlier producer for dominant prior high-row cluster",
+            )
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe
+            and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get(
+                "review_verdict"
+            )
+            == "frontier80_prior_high_row_compact_cluster_ready"
+        ):
+            next_action = outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe.get(
+                "next_probe",
+                "derive signed-delta byte selector inside dominant prior high-row compact cluster",
+            )
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review
+            and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review.get(
+                "review_verdict"
+            )
+            == "frontier80_prior_high_row_known_family_support"
+        ):
+            next_action = outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review.get(
+                "next_probe",
+                "derive compact selector for known high-row family plus signed delta <=2",
+            )
         elif (
             outside_source_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood
             and outside_source_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood.get(
@@ -18572,6 +18783,36 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_WIDTH32_DELTA_NEIGHBORHOOD_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-stride320-outlier-target-value-guarded-prior-high-row-support-review-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SUPPORT_REVIEW_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-frontier80-stride320-outlier-target-value-guarded-prior-high-row-compact-selector-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_COMPACT_SELECTOR_PROBE_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-frontier80-stride320-outlier-target-value-guarded-prior-high-row-signed-delta-selector-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SIGNED_DELTA_SELECTOR_PROBE_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-frontier80-stride320-outlier-target-value-guarded-prior-high-row-outlier-fallback-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-frontier80-stride320-outlier-target-value-guarded-prior-high-row-byte-local-start-selector-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-frontier80-stride320-outlier-target-value-guarded-prior-high-row-byte-local-start-non-oracle-guard-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_NON_ORACLE_GUARD_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -20785,6 +21026,36 @@ def main() -> None:
     tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_summary
     )
+    tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review_summary = (
+        read_optional_summary(
+            args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review_summary
+        )
+    )
+    tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe_summary = (
+        read_optional_summary(
+            args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe_summary
+        )
+    )
+    tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe_summary = (
+        read_optional_summary(
+            args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe_summary
+        )
+    )
+    tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe_summary = (
+        read_optional_summary(
+            args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe_summary
+        )
+    )
+    tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe_summary = (
+        read_optional_summary(
+            args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe_summary
+        )
+    )
+    tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe_summary = (
+        read_optional_summary(
+            args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe_summary
+        )
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -22238,6 +22509,12 @@ def main() -> None:
         outside_source_frontier80_stride320_outlier_target_value_guarded_largest_run_selector_review=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_selector_review_summary,
         outside_source_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_largest_run_structural_profile_summary,
         outside_source_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,

@@ -314,6 +314,24 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_LARGES
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_WIDTH32_DELTA_NEIGHBORHOOD = Path(
     "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_width32_delta_neighborhood_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SUPPORT_REVIEW = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_review/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_COMPACT_SELECTOR_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_compact_selector_probe/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SIGNED_DELTA_SELECTOR_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_signed_delta_selector_probe/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_outlier_fallback_probe/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_selector_probe/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_NON_ORACLE_GUARD_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_byte_local_start_non_oracle_guard_probe/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1073,6 +1091,30 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Probe delta width32 run residuel apres replay target outliers stride-320 frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_WIDTH32_DELTA_NEIGHBORHOOD,
+        ),
+        (
+            "Revue support prior high-row width32 apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SUPPORT_REVIEW,
+        ),
+        (
+            "Probe selector compact prior high-row apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_COMPACT_SELECTOR_PROBE,
+        ),
+        (
+            "Probe selector signed-delta prior high-row apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_SIGNED_DELTA_SELECTOR_PROBE,
+        ),
+        (
+            "Probe fallback outliers prior high-row apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE,
+        ),
+        (
+            "Probe selector byte-local start prior high-row apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE,
+        ),
+        (
+            "Probe guard non-oracle selector byte-local prior high-row apres replay target outliers stride-320 frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_BYTE_LOCAL_START_NON_ORACLE_GUARD_PROBE,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
