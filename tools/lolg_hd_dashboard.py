@@ -1466,6 +1466,48 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Revue terminale source apres neuvieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_review_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Contexte chaines terminales apres neuvieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_chain_context_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Union replay terminal apres neuvieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Couverture garde union terminale apres neuvieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion couverture garde union terminale apres neuvieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres couverture garde terminale neuvieme source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres couverture garde terminale neuvieme source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
