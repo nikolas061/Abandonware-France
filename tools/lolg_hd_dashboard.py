@@ -1724,6 +1724,78 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Neuvieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_ninth_terminal_root_transform_eighth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Neuvieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_ninth_terminal_root_transform_eighth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres neuvieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_ninth_terminal_root_transform_eighth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres neuvieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_ninth_terminal_root_transform_eighth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Dixieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_tenth_terminal_root_transform_ninth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Dixieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_tenth_terminal_root_transform_ninth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres dixieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_tenth_terminal_root_transform_ninth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres dixieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_tenth_terminal_root_transform_ninth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Onzieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_eleventh_terminal_root_transform_tenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Onzieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_eleventh_terminal_root_transform_tenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres onzieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_eleventh_terminal_root_transform_tenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres onzieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_eleventh_terminal_root_transform_tenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
