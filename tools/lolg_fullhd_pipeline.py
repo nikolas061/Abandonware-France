@@ -644,6 +644,13 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "tools/lolg_tex_old_clean_byte_union_frontier80_tail_source_support_review.py",
                 ],
             ),
+            Step(
+                "delta prerun frontier80 tail apres cascade hors high-safe union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_old_clean_byte_union_frontier80_tail_prerun_delta_review.py",
+                ],
+            ),
         ]
     )
     return steps
@@ -4817,6 +4824,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step(
             "support frontier80 tail apres cascade hors high-safe union anciens octets propres .tex",
             [sys.executable, "tools/lolg_tex_old_clean_byte_union_frontier80_tail_source_support_review.py"],
+        ),
+        Step(
+            "delta prerun frontier80 tail apres cascade hors high-safe union anciens octets propres .tex",
+            [sys.executable, "tools/lolg_tex_old_clean_byte_union_frontier80_tail_prerun_delta_review.py"],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
         Step("inventaire historique projet", [sys.executable, "tools/lolg_project_legacy_inventory.py"]),
