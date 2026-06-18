@@ -45,6 +45,10 @@ FEATURE_SETS = [
     ("target_low", "bucket_split_prediction", "gradient_class"),
 ]
 
+TERMINAL_ROOT_FEATURE_SETS = [
+    ("source_slot_target_low", "source_same_bucket", "prev_low1"),
+]
+
 SUMMARY_FIELDNAMES = [
     "scope",
     "candidate_mode",
@@ -161,10 +165,10 @@ def guard_family(fields: tuple[str, ...]) -> str:
     return "+".join(fields)
 
 
-def build_guard_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+def build_guard_rows(rows: list[dict[str, str]], feature_sets: list[tuple[str, ...]]) -> list[dict[str, str]]:
     guard_rows: list[dict[str, str]] = []
     for formula in FORMULAS:
-        for fields in FEATURE_SETS:
+        for fields in feature_sets:
             groups: dict[str, Counter[str]] = defaultdict(Counter)
             for row in rows:
                 if not source_scope(row):
@@ -248,8 +252,10 @@ def next_probe_for(verdict: str) -> str:
     return "derive safer source-byte guard for known-terminal high-safe chains"
 
 
-def build(slot_rows: list[dict[str, str]]) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
-    guard_rows = build_guard_rows(slot_rows)
+def build(
+    slot_rows: list[dict[str, str]], feature_sets: list[tuple[str, ...]] | None = None
+) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
+    guard_rows = build_guard_rows(slot_rows, feature_sets or FEATURE_SETS)
     guard = select_guard(guard_rows)
     verdict = review_verdict(guard)
     target_rows: list[dict[str, str]] = []
@@ -398,10 +404,16 @@ def main() -> None:
     parser.add_argument("--slots", type=Path, default=DEFAULT_SLOTS)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--title", default="Lands of Lore II .tex Source Byte Guard Review")
+    parser.add_argument(
+        "--terminal-root-source-contexts",
+        action="store_true",
+        help="Include source-context guards derived after terminal/root transform exhaustion.",
+    )
     args = parser.parse_args()
 
     args.output.mkdir(parents=True, exist_ok=True)
-    summary, guard_rows, target_rows = build(read_csv(args.slots))
+    feature_sets = FEATURE_SETS + TERMINAL_ROOT_FEATURE_SETS if args.terminal_root_source_contexts else FEATURE_SETS
+    summary, guard_rows, target_rows = build(read_csv(args.slots), feature_sets)
     write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(args.output / "guards.csv", GUARD_FIELDNAMES, guard_rows)
     write_csv(args.output / "targets.csv", TARGET_FIELDNAMES, target_rows)

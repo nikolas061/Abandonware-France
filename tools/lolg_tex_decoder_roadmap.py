@@ -501,6 +501,33 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay_promoted/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_SECOND_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_SECOND_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_promoted_replay_promoted/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_THIRD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_THIRD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_promoted_replay_promoted/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_promoted_residual_core/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_FOURTH_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_fourth_terminal_root_transform_sixteenth_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_AFTER_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -739,6 +766,13 @@ def read_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def read_optional_summary(path: Path) -> dict[str, str] | None:
+    if not path.exists():
+        return None
+    rows = read_rows(path)
+    return rows[0] if rows else None
+
+
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, object]]) -> None:
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -812,6 +846,165 @@ def append_evidence(existing: str, extra: list[str]) -> str:
     values = [existing] if existing else []
     values.extend(value for value in extra if value)
     return "; ".join(values)
+
+
+def apply_terminal_root_source_byte_cascade(
+    queue: list[dict[str, str]],
+    *,
+    first_promoted: dict[str, str] | None,
+    second_review: dict[str, str] | None,
+    second_promoted: dict[str, str] | None,
+    third_review: dict[str, str] | None,
+    third_promoted: dict[str, str] | None,
+    third_dependency: dict[str, str] | None,
+    third_residual: dict[str, str] | None,
+    fourth_review: dict[str, str] | None,
+    terminal_root_review: dict[str, str] | None,
+) -> list[dict[str, str]]:
+    if not any(
+        (
+            first_promoted,
+            second_review,
+            second_promoted,
+            third_review,
+            third_promoted,
+            third_dependency,
+            third_residual,
+            fourth_review,
+            terminal_root_review,
+        )
+    ):
+        return queue
+
+    updated: list[dict[str, str]] = []
+    for row in queue:
+        if row.get("surface", "") != "gradient_like":
+            updated.append(row)
+            continue
+        positive_evidence = row.get("positive_evidence", "")
+        blocking_evidence = row.get("blocking_evidence", "")
+        for label, summary in (
+            ("first", first_promoted),
+            ("second", second_promoted),
+            ("third", third_promoted),
+        ):
+            if not summary:
+                continue
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_{label}_added="
+                    f"{summary.get('source_added_bytes', '0')}/{summary.get('target_rows', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_{label}_total_clean="
+                    f"{summary.get('total_clean_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_{label}_false="
+                    f"{summary.get('source_false_bytes', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_{label}_issues="
+                    f"{summary.get('issue_rows', '0')}",
+                ],
+            )
+        for label, summary in (("second", second_review), ("third", third_review)):
+            if not summary:
+                continue
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_{label}_guard="
+                    f"{summary.get('best_formula', '')}/{summary.get('best_guard_key', '')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_{label}_ready="
+                    f"{summary.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+        if third_dependency:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_dependency_available="
+                    f"{third_dependency.get('source_available_slots', '0')}/{third_dependency.get('slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_highsafe_unknown="
+                    f"{third_dependency.get('source_unknown_in_highsafe_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_outside_unknown="
+                    f"{third_dependency.get('source_unknown_outside_highsafe_slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_top_unknown="
+                    f"{third_dependency.get('top_unknown_dependency_edge', '')}:"
+                    f"{third_dependency.get('top_unknown_dependency_edge_slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_dependency_issues="
+                    f"{third_dependency.get('issue_rows', '0')}",
+                ],
+            )
+        if third_residual:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_residual_known_chains="
+                    f"{third_residual.get('terminal_known_chains', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_residual_external_chains="
+                    f"{third_residual.get('terminal_unknown_outside_chains', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_residual_top_unknown="
+                    f"{third_residual.get('top_unknown_edge', '')}:"
+                    f"{third_residual.get('top_unknown_edge_unknown_slots', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_residual_blocker="
+                    f"{third_residual.get('dominant_blocker', '')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_residual_issues="
+                    f"{third_residual.get('issue_rows', '0')}",
+                ],
+            )
+        if fourth_review:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_fourth_verdict="
+                    f"{fourth_review.get('review_verdict', '')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_fourth_ready="
+                    f"{fourth_review.get('promotion_ready_bytes', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_source_byte_fourth_issues="
+                    f"{fourth_review.get('issue_rows', '0')}",
+                ],
+            )
+        if terminal_root_review:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_terminal_root_after_source_byte_candidate="
+                    f"{terminal_root_review.get('promotion_candidate_bytes', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_after_source_byte_unknown_roots="
+                    f"{terminal_root_review.get('unknown_root_rows', '0')}",
+                    f"gradient_sequence_low_exception_terminal_root_after_source_byte_issues="
+                    f"{terminal_root_review.get('issue_rows', '0')}",
+                ],
+            )
+
+        next_action = "derive stronger terminal transform after terminal/root source-byte cascade"
+        if fourth_review and int_value(fourth_review, "promotion_ready_bytes") > 0:
+            next_action = "promote fourth terminal/root source-byte guard"
+        elif terminal_root_review and int_value(terminal_root_review, "promotion_candidate_bytes") > 0:
+            next_action = "promote terminal/root transform after source-byte cascade"
+
+        updated.append(
+            {
+                **row,
+                "promotion_ready_bytes": fourth_review.get("promotion_ready_bytes", "0") if fourth_review else "0",
+                "next_action": next_action,
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        )
+    return updated
 
 
 def flat_walk_compressed_selector_action(summary: dict[str, str]) -> str:
@@ -14461,6 +14654,51 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-terminal-root-transform-sixteenth-replay-promoted-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-second-terminal-root-transform-sixteenth-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_SECOND_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-second-terminal-root-transform-sixteenth-replay-promoted-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_SECOND_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-third-terminal-root-transform-sixteenth-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_THIRD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-third-terminal-root-transform-sixteenth-replay-promoted-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_THIRD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-third-source-byte-guard-terminal-root-transform-sixteenth-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-third-source-byte-guard-terminal-root-transform-sixteenth-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-fourth-terminal-root-transform-sixteenth-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_FOURTH_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-root-transform-after-third-source-byte-guard-terminal-root-transform-sixteenth-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_ROOT_TRANSFORM_AFTER_THIRD_SOURCE_BYTE_GUARD_TERMINAL_ROOT_TRANSFORM_SIXTEENTH_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -16274,6 +16512,33 @@ def main() -> None:
         if gradient_sequence_high_safe_low_exception_source_byte_guard_terminal_root_transform_sixteenth_replay_rows
         else None
     )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_terminal_root_transform_sixteenth_replay_promoted_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_byte_guard_terminal_root_transform_sixteenth_replay_promoted_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_replay_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_replay_promoted_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_replay_promoted_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_replay_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_replay_promoted_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_replay_promoted_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_residual_core_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_residual_core_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_fourth_terminal_root_transform_sixteenth_replay_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_byte_guard_fourth_terminal_root_transform_sixteenth_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -17562,6 +17827,18 @@ def main() -> None:
         micro_mixed_value_payload_sequence_blocked_prerequisite_role_transform_summary,
         micro_mixed_value_payload_spatial_summary,
         micro_mixed_value_payload_state_opcode_summary,
+    )
+    queue = apply_terminal_root_source_byte_cascade(
+        queue,
+        first_promoted=gradient_sequence_high_safe_low_exception_source_byte_guard_terminal_root_transform_sixteenth_replay_promoted_summary,
+        second_review=gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_replay_summary,
+        second_promoted=gradient_sequence_high_safe_low_exception_source_byte_guard_second_terminal_root_transform_sixteenth_replay_promoted_summary,
+        third_review=gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_replay_summary,
+        third_promoted=gradient_sequence_high_safe_low_exception_source_byte_guard_third_terminal_root_transform_sixteenth_replay_promoted_summary,
+        third_dependency=gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary,
+        third_residual=gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_terminal_root_transform_sixteenth_residual_core_summary,
+        fourth_review=gradient_sequence_high_safe_low_exception_source_byte_guard_fourth_terminal_root_transform_sixteenth_replay_summary,
+        terminal_root_review=gradient_sequence_high_safe_low_exception_source_terminal_root_transform_after_third_source_byte_guard_terminal_root_transform_sixteenth_replay_summary,
     )
     summary = build_summary(queue, review_summary)
 
