@@ -215,6 +215,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE =
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE = Path(
     "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_selector_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_BYTE_LOCAL_START_NON_ORACLE_GUARD_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_non_oracle_guard_probe/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -782,6 +785,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Probe selector byte-local start prior high-row frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SELECTOR_PROBE,
+        ),
+        (
+            "Probe guard non-oracle selector byte-local prior high-row frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_BYTE_LOCAL_START_NON_ORACLE_GUARD_PROBE,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
