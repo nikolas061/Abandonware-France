@@ -46,6 +46,7 @@ FEATURE_SETS = [
 ]
 
 TERMINAL_ROOT_FEATURE_SETS = [
+    ("frontier_id",),
     ("source_slot_target_low", "source_same_bucket", "prev_low1"),
 ]
 
