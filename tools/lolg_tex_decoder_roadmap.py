@@ -724,6 +724,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_GUARD_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_NON_ORACLE_SELECTOR_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_probe/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1448,6 +1451,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_residual: dict[str, str] | None,
     outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard: dict[str, str] | None,
+    outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1528,6 +1532,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted,
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_residual,
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard,
+            outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -2652,6 +2657,27 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_verdict="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_selected="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('selected_support_rank', '')}/"
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('selected_support_frontier_id', '')}/"
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('selected_support_start', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_exact="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('selected_non_oracle_exact_bytes', '0')}/"
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('missing_source_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_table="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('selected_table_predicted_bytes', '0')}/"
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('selected_fallback_predicted_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_ready="
+                    f"{outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get('promotion_ready_bytes', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -3178,6 +3204,21 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector
+            and outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get(
+                "review_verdict"
+            )
+            in {
+                "frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_ready",
+                "frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_fallback_guard_needed",
+                "frontier80_context_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_split_needed",
+            }
+        ):
+            next_action = outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector.get(
+                "next_probe",
+                "promote single-row residual non-oracle delta selector",
+            )
         elif (
             outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard
             and outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard.get(
@@ -17702,6 +17743,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_GUARD_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-context-split-residual-low-payload-row-state-source-single-row-delta-non-oracle-selector-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_NON_ORACLE_SELECTOR_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -19852,6 +19898,9 @@ def main() -> None:
     tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard_summary
     )
+    tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -21284,6 +21333,7 @@ def main() -> None:
         outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted_summary,
         outside_source_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_residual=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_residual_summary,
         outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard_summary,
+        outside_source_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector=tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,

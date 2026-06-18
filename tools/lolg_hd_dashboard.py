@@ -245,6 +245,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_GUARD = Path(
     "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_guard_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_NON_ORACLE_SELECTOR = Path(
+    "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_probe/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -912,6 +915,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Probe garde delta single-row source row-state low-payload residuel context-split frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_GUARD,
+        ),
+        (
+            "Probe selector non-oracle garde delta single-row source row-state low-payload residuel context-split frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROW_STATE_SOURCE_SINGLE_ROW_DELTA_NON_ORACLE_SELECTOR,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
