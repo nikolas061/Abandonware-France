@@ -1234,6 +1234,18 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Noyau residuel dependances source apres promotion finale garde relative .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_final_relative_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Sources terminales externes apres promotion finale garde relative .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_source_final_relative_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
