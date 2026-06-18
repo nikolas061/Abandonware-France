@@ -1304,6 +1304,48 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Union replay terminaux source apres promotion bucket-split finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_bucket_split_guard_final_known_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Couverture garde union replay terminaux source apres promotion bucket-split finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion couverture garde union replay terminaux source apres promotion bucket-split finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Revue garde source-byte apres promotion bucket-split finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion garde source-byte apres promotion terminale bucket-split finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres promotion source-byte finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel dependances source apres promotion source-byte finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),

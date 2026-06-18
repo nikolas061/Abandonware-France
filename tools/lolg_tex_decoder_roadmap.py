@@ -357,6 +357,24 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_BUCKET_SPLIT
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core/summary.csv"
 )
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_REPLAY_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_BUCKET_SPLIT_TERMINAL_GUARD_PROMOTED_REPLAY_PROMOTED_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SOURCE_BYTE_GUARD_BUCKET_SPLIT_TERMINAL_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SOURCE_BYTE_GUARD_BUCKET_SPLIT_TERMINAL_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1510,6 +1528,76 @@ def gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_gua
     return "no residual high-safe roots after final bucket-split promotion"
 
 
+def gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix bucket-split terminal guard-cover issues"
+    if int_value(summary, "promotion_candidate_bytes") > 0:
+        return "promote bucket-split terminal guard-cover bytes"
+    if int_value(summary, "covered_roots") > 0:
+        return "review bucket-split terminal guard cover before promotion"
+    return "derive broader bucket-split terminal guard cover"
+
+
+def gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix bucket-split terminal guard-cover promoted replay issues"
+    if int_value(summary, "guard_false_bytes") > 0:
+        return "reject bucket-split terminal guard-cover promoted replay false bytes"
+    if int_value(summary, "guard_added_bytes") > 0:
+        return "review guarded source-byte promotion after bucket-split terminal guard"
+    return "rerun bucket-split terminal guard-cover promotion with ready cover roots"
+
+
+def gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix bucket-split source-byte guard review issues"
+    if int_value(summary, "promotion_ready_bytes") > 0:
+        return "promote guarded source bytes after bucket-split terminal guard"
+    return summary.get("next_probe", "") or "derive safer bucket-split source-byte guard"
+
+
+def gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix source-byte guard promoted replay issues"
+    if int_value(summary, "source_false_bytes") > 0:
+        return "reject source-byte guard promoted replay false bytes"
+    if int_value(summary, "source_added_bytes") > 0:
+        return "rerun source-dependency core after source-byte promotion"
+    return "rerun source-byte promotion with ready review inputs"
+
+
+def gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix source-byte promoted source-dependency probe issues"
+    if int_value(summary, "source_unknown_in_highsafe_slots") > 0:
+        return "derive next source-byte terminal transform after guarded source-byte promotion"
+    return "rerun downstream gradient probes with source-byte promoted replay base"
+
+
+def gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_action(
+    summary: dict[str, str],
+) -> str:
+    if int_value(summary, "issue_rows") > 0:
+        return "fix source-byte promoted residual core review issues"
+    if int_value(summary, "terminal_unknown_outside_chains") > 0:
+        return "resolve external terminal source after source-byte promotion"
+    if int_value(summary, "terminal_known_chains") > 0:
+        return "derive next source-byte terminal transform after guarded source-byte promotion"
+    if int_value(summary, "terminal_other_chains") > 0:
+        return "inspect source-byte promoted non-terminal high-safe chain tail"
+    return "no residual high-safe roots after source-byte promotion"
+
+
 def gradient_sequence_high_safe_low_exception_source_dependency_residual_core_action(
     summary: dict[str, str],
 ) -> str:
@@ -2508,6 +2596,30 @@ def build_queue(
     ]
     | None = None,
     gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary: dict[
+        str, str
+    ]
+    | None = None,
+    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary: dict[
         str, str
     ]
     | None = None,
@@ -6579,6 +6691,195 @@ def build_queue(
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
             }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_bucket_terminal_guard_cover="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary.get('covered_roots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary.get('union_roots', '0')}",
+                    f"gradient_sequence_low_exception_bucket_terminal_guard_candidate="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_bucket_terminal_guard_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_bucket_terminal_guard_promoted="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary.get('guard_added_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary.get('guard_candidate_rows', '0')}",
+                    f"gradient_sequence_low_exception_bucket_terminal_guard_total_clean="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary.get('total_clean_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_bucket_terminal_guard_false="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary.get('guard_false_bytes', '0')}",
+                    f"gradient_sequence_low_exception_bucket_terminal_guard_promoted_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_action(
+                    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_guard="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.get('best_formula', '')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.get('best_guard_key', '')}",
+                    f"gradient_sequence_low_exception_source_byte_guard_ready="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.get('promotion_ready_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.get('promotion_candidate_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_guard_false="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.get('best_unknown_false_rows', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.get('best_known_false_rows', '0')}",
+                    f"gradient_sequence_low_exception_source_byte_guard_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_promoted="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary.get('source_added_bytes', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary.get('target_rows', '0')}",
+                    f"gradient_sequence_low_exception_source_byte_total_clean="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary.get('total_clean_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_false="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary.get('source_false_bytes', '0')}",
+                    f"gradient_sequence_low_exception_source_byte_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_action(
+                    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_dependency_available="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary.get('source_available_slots', '0')}/"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary.get('slots', '0')}",
+                    f"gradient_sequence_low_exception_source_byte_highsafe_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary.get('source_unknown_in_highsafe_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_top_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary.get('top_unknown_dependency_edge', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary.get('top_unknown_dependency_edge_slots', '0')}",
+                    f"gradient_sequence_low_exception_source_byte_dependency_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_action(
+                    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
+        if (
+            row.get("surface", "") == "gradient_like"
+            and gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary
+        ):
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_residual_known_chains="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary.get('terminal_known_chains', '0')}",
+                    f"gradient_sequence_low_exception_source_byte_residual_external_chains="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary.get('terminal_unknown_outside_chains', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    f"gradient_sequence_low_exception_source_byte_residual_top_unknown="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary.get('top_unknown_edge', '')}:"
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary.get('top_unknown_edge_unknown_slots', '0')}",
+                    f"gradient_sequence_low_exception_source_byte_residual_blocker="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary.get('dominant_blocker', '')}",
+                    f"gradient_sequence_low_exception_source_byte_residual_issues="
+                    f"{gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary.get('issue_rows', '0')}",
+                ],
+            )
+            row = {
+                **row,
+                "next_action": gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_action(
+                    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary
+                ),
+                "positive_evidence": positive_evidence,
+                "blocking_evidence": blocking_evidence,
+            }
         if row.get("surface", "") == "micro_token" and micro_jump_mixed_payload_summary:
             positive_evidence = append_evidence(
                 positive_evidence,
@@ -10276,6 +10577,40 @@ def build_queue(
                         flat_walk_palette_formula_replay_summary,
                         flat_walk_palette_promotion_candidate_summary,
                     )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_action(
+                        gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_action(
+                        gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary
+                    )
+                elif gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary:
+                    next_action = gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_action(
+                        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary
+                    )
+                elif (
+                    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary
+                ):
+                    next_action = gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_action(
+                        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary
+                    )
                 elif gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core_summary:
                     next_action = gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core_action(
                         gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core_summary
@@ -11628,6 +11963,36 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY,
     )
     parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-replay-union-guard-cover-bucket-split-guard-final-known-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-terminal-replay-union-guard-cover-bucket-split-guard-final-known-guard-promoted-replay-promoted-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_TERMINAL_REPLAY_UNION_GUARD_COVER_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_REPLAY_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-bucket-split-guard-final-known-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_BUCKET_SPLIT_GUARD_FINAL_KNOWN_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-byte-guard-bucket-split-terminal-guard-promoted-replay-promoted-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_BYTE_GUARD_BUCKET_SPLIT_TERMINAL_GUARD_PROMOTED_REPLAY_PROMOTED_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-source-byte-guard-bucket-split-terminal-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SOURCE_BYTE_GUARD_BUCKET_SPLIT_TERMINAL_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-source-byte-guard-bucket-split-terminal-guard-promoted-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_SOURCE_BYTE_GUARD_BUCKET_SPLIT_TERMINAL_GUARD_PROMOTED_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -12827,6 +13192,90 @@ def main() -> None:
         if gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core_rows
         else None
     )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary = (
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary = (
+        gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_rows
+        else None
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_rows = (
+        read_rows(
+            args.gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary
+        )
+        if args.gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary.exists()
+        else []
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary = (
+        gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_rows[
+            0
+        ]
+        if gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_rows
+        else None
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -13957,6 +14406,12 @@ def main() -> None:
         gradient_sequence_high_safe_low_exception_source_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_replay_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core_summary,
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_terminal_replay_union_guard_cover_bucket_split_guard_final_known_guard_promoted_replay_promoted_summary,
+        gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_guard_final_known_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_byte_guard_bucket_split_terminal_guard_promoted_replay_promoted_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_replay_summary,
+        gradient_sequence_high_safe_low_exception_source_dependency_source_byte_guard_bucket_split_terminal_guard_promoted_residual_core_summary,
         gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_source_summary,
         gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_selector_summary,
