@@ -1280,6 +1280,13 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Single-Row Non-Oracle Selector Promoted Replay",
                 ],
             ),
+            Step(
+                "revue runs apres replay promu selector non-oracle single-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_run_review.py",
+                ],
+            ),
         ]
     )
     return steps
@@ -6070,6 +6077,13 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_unresolved_run_probe_frontier80_single_row_non_oracle_selector_promoted_replay",
                 "--title",
                 "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Single-Row Non-Oracle Selector Promoted Replay",
+            ],
+        ),
+        Step(
+            "revue runs apres replay promu selector non-oracle single-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_run_review.py",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
