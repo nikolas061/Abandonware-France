@@ -1224,6 +1224,13 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted_replay.py",
                 ],
             ),
+            Step(
+                "revue residu garde delta source row-state low-payload residuel context-split frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_residual_review.py",
+                ],
+            ),
         ]
     )
     return steps
@@ -5958,6 +5965,13 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [
                 sys.executable,
                 "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_promoted_replay.py",
+            ],
+        ),
+        Step(
+            "revue residu garde delta source row-state low-payload residuel context-split frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_delta_guard_residual_review.py",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
