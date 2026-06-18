@@ -209,6 +209,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_COMPACT_SELECTOR_PROBE =
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_SIGNED_DELTA_SELECTOR_PROBE = Path(
     "output/tex_gap_decoder_frontier80_clean_prior_high_row_signed_delta_selector_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_clean_prior_high_row_outlier_fallback_probe/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -768,6 +771,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Probe selector signed-delta prior high-row frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_SIGNED_DELTA_SELECTOR_PROBE,
+        ),
+        (
+            "Probe fallback outliers prior high-row frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_OUTLIER_FALLBACK_PROBE,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
