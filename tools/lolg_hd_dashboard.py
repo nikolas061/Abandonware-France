@@ -101,6 +101,36 @@ DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRD_EXPANDED_SOURCE_BYTE_GUARD_RESIDUAL_CORE 
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTH_EXPANDED_SOURCE_BYTE_GUARD = Path(
     "output/tex_old_clean_byte_union_fourth_expanded_source_byte_guard_review/index.html"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_TERMINAL_SOURCE_BYTE_GUARD = Path(
+    "output/tex_old_clean_byte_union_terminal_source_byte_guard_review/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY = Path(
+    "output/tex_old_clean_byte_union_terminal_source_byte_guard_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_SECOND_TERMINAL_SOURCE_BYTE_GUARD = Path(
+    "output/tex_old_clean_byte_union_second_terminal_source_byte_guard_review/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_SECOND_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY = Path(
+    "output/tex_old_clean_byte_union_second_terminal_source_byte_guard_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD = Path(
+    "output/tex_old_clean_byte_union_third_terminal_source_byte_guard_review/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY = Path(
+    "output/tex_old_clean_byte_union_third_terminal_source_byte_guard_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD = Path(
+    "output/tex_old_clean_byte_union_control_prefix_fill_guard_review/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_PROMOTED_REPLAY = Path(
+    "output/tex_old_clean_byte_union_control_prefix_fill_guard_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_SOURCE_DEPENDENCY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_RESIDUAL_CORE = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_promoted_replay_residual_core/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -516,6 +546,46 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Quatrieme revue garde source-byte elargie apres union anciens octets propres .tex",
             DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTH_EXPANDED_SOURCE_BYTE_GUARD,
+        ),
+        (
+            "Revue garde terminal-source apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_TERMINAL_SOURCE_BYTE_GUARD,
+        ),
+        (
+            "Promotion garde terminal-source apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY,
+        ),
+        (
+            "Deuxieme revue garde terminal-source apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_SECOND_TERMINAL_SOURCE_BYTE_GUARD,
+        ),
+        (
+            "Deuxieme promotion garde terminal-source apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_SECOND_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY,
+        ),
+        (
+            "Troisieme revue garde terminal-source apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD,
+        ),
+        (
+            "Troisieme promotion garde terminal-source apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY,
+        ),
+        (
+            "Revue garde fill control-prefix apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD,
+        ),
+        (
+            "Promotion garde fill control-prefix apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_PROMOTED_REPLAY,
+        ),
+        (
+            "Dependances source apres fill control-prefix anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_SOURCE_DEPENDENCY,
+        ),
+        (
+            "Noyau residuel apres fill control-prefix anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_RESIDUAL_CORE,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),

@@ -589,6 +589,27 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BY
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTH_EXPANDED_SOURCE_BYTE_GUARD_SUMMARY = Path(
     "output/tex_old_clean_byte_union_fourth_expanded_source_byte_guard_review/summary.csv"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_third_terminal_source_byte_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_promoted_replay_residual_core/summary.csv"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_control_prefix_fill_guard_review/summary.csv"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_control_prefix_fill_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_promoted_replay_residual_core/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1208,6 +1229,13 @@ def apply_old_clean_byte_union(
     expanded_final_dependency: dict[str, str] | None,
     expanded_final_residual: dict[str, str] | None,
     expanded_stop_review: dict[str, str] | None,
+    terminal_source_final_promoted: dict[str, str] | None,
+    terminal_source_final_dependency: dict[str, str] | None,
+    terminal_source_final_residual: dict[str, str] | None,
+    control_prefix_fill_review: dict[str, str] | None,
+    control_prefix_fill_promoted: dict[str, str] | None,
+    control_prefix_fill_dependency: dict[str, str] | None,
+    control_prefix_fill_residual: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1223,6 +1251,13 @@ def apply_old_clean_byte_union(
             expanded_final_dependency,
             expanded_final_residual,
             expanded_stop_review,
+            terminal_source_final_promoted,
+            terminal_source_final_dependency,
+            terminal_source_final_residual,
+            control_prefix_fill_review,
+            control_prefix_fill_promoted,
+            control_prefix_fill_dependency,
+            control_prefix_fill_residual,
         )
     ):
         return queue
@@ -1504,10 +1539,153 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if terminal_source_final_promoted:
+            terminal_source_added_total = terminal_source_final_promoted.get("source_added_bytes", "0")
+            if expanded_final_promoted:
+                terminal_source_added_total = str(
+                    max(
+                        0,
+                        int_value(terminal_source_final_promoted, "total_clean_bytes")
+                        - int_value(expanded_final_promoted, "total_clean_bytes"),
+                    )
+                )
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_terminal_source_added="
+                    f"{terminal_source_added_total}",
+                    "gradient_sequence_old_clean_byte_terminal_source_total_clean="
+                    f"{terminal_source_final_promoted.get('total_clean_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_terminal_source_remaining="
+                    f"{terminal_source_final_promoted.get('remaining_unresolved_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_terminal_source_false="
+                    f"{terminal_source_final_promoted.get('source_false_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_terminal_source_issues="
+                    f"{terminal_source_final_promoted.get('issue_rows', '0')}",
+                ],
+            )
+
+        if terminal_source_final_dependency:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_terminal_source_available="
+                    f"{terminal_source_final_dependency.get('source_available_slots', '0')}/"
+                    f"{terminal_source_final_dependency.get('slots', '0')}",
+                    "gradient_sequence_old_clean_byte_terminal_source_highsafe_unknown="
+                    f"{terminal_source_final_dependency.get('source_unknown_in_highsafe_slots', '0')}",
+                ],
+            )
+
+        if terminal_source_final_residual:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_terminal_source_residual_top_unknown="
+                    f"{terminal_source_final_residual.get('top_unknown_edge', '')}:"
+                    f"{terminal_source_final_residual.get('top_unknown_edge_unknown_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_terminal_source_residual_blocker="
+                    f"{terminal_source_final_residual.get('dominant_blocker', '')}",
+                ],
+            )
+
+        if control_prefix_fill_review:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_ready="
+                    f"{control_prefix_fill_review.get('promotion_ready_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_known="
+                    f"{control_prefix_fill_review.get('known_exact_bytes', '0')}/"
+                    f"{control_prefix_fill_review.get('known_false_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_highsafe="
+                    f"{control_prefix_fill_review.get('highsafe_unknown_target_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_extra="
+                    f"{control_prefix_fill_review.get('extra_run_target_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_verdict="
+                    f"{control_prefix_fill_review.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_issues="
+                    f"{control_prefix_fill_review.get('issue_rows', '0')}",
+                ],
+            )
+
+        if control_prefix_fill_promoted:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_added="
+                    f"{control_prefix_fill_promoted.get('source_added_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_total_clean="
+                    f"{control_prefix_fill_promoted.get('total_clean_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_remaining="
+                    f"{control_prefix_fill_promoted.get('remaining_unresolved_bytes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_false="
+                    f"{control_prefix_fill_promoted.get('source_false_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_promoted_issues="
+                    f"{control_prefix_fill_promoted.get('issue_rows', '0')}",
+                ],
+            )
+
+        if control_prefix_fill_dependency:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_available="
+                    f"{control_prefix_fill_dependency.get('source_available_slots', '0')}/"
+                    f"{control_prefix_fill_dependency.get('slots', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_highsafe_unknown="
+                    f"{control_prefix_fill_dependency.get('source_unknown_in_highsafe_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_outside_unknown="
+                    f"{control_prefix_fill_dependency.get('source_unknown_outside_highsafe_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_dependency_issues="
+                    f"{control_prefix_fill_dependency.get('issue_rows', '0')}",
+                ],
+            )
+
+        if control_prefix_fill_residual:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_residual_highsafe_unknown="
+                    f"{control_prefix_fill_residual.get('unknown_highsafe_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_residual_blocker="
+                    f"{control_prefix_fill_residual.get('dominant_blocker', '')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_residual_outside_unknown="
+                    f"{control_prefix_fill_residual.get('unknown_outside_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_control_prefix_fill_residual_issues="
+                    f"{control_prefix_fill_residual.get('issue_rows', '0')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
-        final_dependency = expanded_final_dependency or expanded_dependency or dependency
-        final_residual = expanded_final_residual or expanded_residual or residual
-        final_expanded_promoted = expanded_final_promoted or expanded_promoted
+        final_dependency = control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
+        final_residual = control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
+        final_expanded_promoted = control_prefix_fill_promoted or terminal_source_final_promoted or expanded_final_promoted or expanded_promoted
         if final_expanded_promoted and int_value(final_expanded_promoted, "source_false_bytes") > 0:
             next_action = "review expanded source-byte guard false positives"
         elif final_expanded_promoted and int_value(final_expanded_promoted, "issue_rows") > 0:
@@ -1521,6 +1699,8 @@ def apply_old_clean_byte_union(
                 "derive post-union source-byte transforms for "
                 f"{final_dependency.get('source_unknown_in_highsafe_slots', '0')} high-safe unknown slots"
             )
+        elif final_residual and final_residual.get("dominant_blocker") == "no residual high-safe roots":
+            next_action = "continue non-high-safe .tex source dependency work"
         elif final_residual and final_residual.get("dominant_blocker"):
             next_action = "split post-union residual source dependency blockers"
 
@@ -15328,6 +15508,41 @@ def main() -> None:
         default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTH_EXPANDED_SOURCE_BYTE_GUARD_SUMMARY,
     )
     parser.add_argument(
+        "--tex-old-clean-byte-union-third-terminal-source-byte-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-third-terminal-source-byte-guard-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-third-terminal-source-byte-guard-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRD_TERMINAL_SOURCE_BYTE_GUARD_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-old-clean-byte-union-control-prefix-fill-guard-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-old-clean-byte-union-control-prefix-fill-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-control-prefix-fill-guard-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-control-prefix-fill-guard-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_CONTROL_PREFIX_FILL_GUARD_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -17243,6 +17458,27 @@ def main() -> None:
     tex_old_clean_byte_union_fourth_expanded_source_byte_guard_summary = read_optional_summary(
         args.tex_old_clean_byte_union_fourth_expanded_source_byte_guard_summary
     )
+    tex_old_clean_byte_union_third_terminal_source_byte_guard_promoted_replay_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_third_terminal_source_byte_guard_promoted_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_residual_core_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_residual_core_summary
+    )
+    tex_old_clean_byte_union_control_prefix_fill_guard_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_control_prefix_fill_guard_summary
+    )
+    tex_old_clean_byte_union_control_prefix_fill_guard_promoted_replay_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_control_prefix_fill_guard_promoted_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_residual_core_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_residual_core_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -18566,6 +18802,13 @@ def main() -> None:
         expanded_final_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_expanded_source_byte_guard_summary,
         expanded_final_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_expanded_source_byte_guard_residual_core_summary,
         expanded_stop_review=tex_old_clean_byte_union_fourth_expanded_source_byte_guard_summary,
+        terminal_source_final_promoted=tex_old_clean_byte_union_third_terminal_source_byte_guard_promoted_replay_summary,
+        terminal_source_final_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_summary,
+        terminal_source_final_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_third_terminal_source_byte_guard_residual_core_summary,
+        control_prefix_fill_review=tex_old_clean_byte_union_control_prefix_fill_guard_summary,
+        control_prefix_fill_promoted=tex_old_clean_byte_union_control_prefix_fill_guard_promoted_replay_summary,
+        control_prefix_fill_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_summary,
+        control_prefix_fill_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_control_prefix_fill_guard_residual_core_summary,
     )
     summary = build_summary(queue, review_summary)
 
