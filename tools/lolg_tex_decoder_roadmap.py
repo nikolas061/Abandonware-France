@@ -772,6 +772,12 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRID
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY_SUMMARY = Path(
+    "output/tex_gap_decoder_clean_gap_queue_frontier80_stride320_outlier_target_value_guarded_replay/summary.csv"
+)
+DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY_SUMMARY = Path(
+    "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1512,6 +1518,8 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency: dict[str, str] | None,
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard: dict[str, str] | None,
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1608,6 +1616,8 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency,
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard,
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -3027,6 +3037,35 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_replay_clean="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue.get('clean_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_replay_unresolved="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue.get('unresolved_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_replay_spans="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue.get('unresolved_span_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_replay_largest_span="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue.get('largest_unresolved_span', '0')}",
+                ],
+            )
+
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_replay_runs="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe.get('run_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_replay_nonzero_runs="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe.get('nonzero_run_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_replay_largest_run="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe.get('largest_run_bytes', '0')}:"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe.get('largest_run_class', '')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -3553,6 +3592,22 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe
+            and int_value(
+                outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe,
+                "largest_run_bytes",
+            )
+            > 0
+        ):
+            next_action = (
+                "derive selector for largest "
+                f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe.get('largest_run_bytes', '0')}-byte "
+                f"{outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe.get('largest_run_class', '')} "
+                "residual run after stride-320 outlier target replay"
+            )
+        elif outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue:
+            next_action = "profile residual unresolved runs after stride-320 outlier target replay"
         elif (
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay
             and outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay.get(
@@ -18394,6 +18449,16 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-clean-gap-queue-frontier80-stride320-outlier-target-value-guarded-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-gap-decoder-unresolved-run-probe-frontier80-stride320-outlier-target-value-guarded-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -20592,6 +20657,12 @@ def main() -> None:
     tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay_summary
     )
+    tex_gap_decoder_clean_gap_queue_frontier80_stride320_outlier_target_value_guarded_replay_summary = read_optional_summary(
+        args.tex_gap_decoder_clean_gap_queue_frontier80_stride320_outlier_target_value_guarded_replay_summary
+    )
+    tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay_summary = read_optional_summary(
+        args.tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -22040,6 +22111,8 @@ def main() -> None:
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_dependency_summary,
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_cross_pcx_guard_summary,
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_outlier_target_value_guarded_replay_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_replay_clean_gap_queue=tex_gap_decoder_clean_gap_queue_frontier80_stride320_outlier_target_value_guarded_replay_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_replay_run_probe=tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_replay_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
