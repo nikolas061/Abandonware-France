@@ -742,6 +742,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRID
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_SOURCE_DEPENDENCY_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_TAIL_SOURCE_SELECTOR_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector_probe/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1472,6 +1475,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_pair_selector: dict[str, str] | None,
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_local_delta_transform: dict[str, str] | None,
     outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency: dict[str, str] | None,
+    outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1558,6 +1562,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_pair_selector,
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_local_delta_transform,
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency,
+            outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -2798,6 +2803,23 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_tail_source_selector_verdict="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_tail_source_selector_offset="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector.get('tail_source_offset', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_tail_source_selector_value="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector.get('tail_source_value', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_tail_source_selector_exact_support="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector.get('exact_support_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_tail_source_selector_best="
+                    f"{outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector.get('best_selector', '')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -3324,6 +3346,22 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector
+            and outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector.get(
+                "review_verdict"
+            )
+            in {
+                "frontier80_stride320_tail_source_selector_guard_candidate_ready",
+                "frontier80_stride320_tail_source_selector_prefix_guard_needed",
+                "frontier80_stride320_tail_source_selector_external_support_needed",
+                "frontier80_stride320_tail_source_selector_no_tail",
+            }
+        ):
+            next_action = outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector.get(
+                "next_probe",
+                "build guarded source-prefix plus tail-byte replay candidate for stride-320 pair",
+            )
         elif (
             outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency
             and outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency.get(
@@ -17968,6 +18006,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_SOURCE_DEPENDENCY_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-single-row-non-oracle-selector-promoted-stride320-tail-source-selector-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_SINGLE_ROW_NON_ORACLE_SELECTOR_PROMOTED_STRIDE320_TAIL_SOURCE_SELECTOR_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -20136,6 +20179,9 @@ def main() -> None:
     tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency_summary
     )
+    tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -21574,6 +21620,7 @@ def main() -> None:
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_pair_selector=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_pair_selector_summary,
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_local_delta_transform=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_local_delta_transform_summary,
         outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_source_dependency_summary,
+        outside_source_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector=tex_gap_decoder_frontier80_single_row_non_oracle_selector_promoted_stride320_tail_source_selector_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
