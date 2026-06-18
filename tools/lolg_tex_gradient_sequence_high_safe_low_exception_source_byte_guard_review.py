@@ -23,6 +23,7 @@ FORMULAS = {
     "target_high+bucket_split_prediction": ("target_high", "bucket_split_prediction", 0),
     "target_high+source_slot_target_low": ("target_high", "source_slot_target_low", 0),
     "target_high+target_low": ("target_high", "target_low", 0),
+    "6+best_fixed_low_predicted_low": ("6", "best_fixed_low_predicted_low", 0),
     "6+bucket_split_prediction": ("6", "bucket_split_prediction", 0),
     "6+source_slot_target_low": ("6", "source_slot_target_low", 0),
     "6+target_low": ("6", "target_low", 0),
@@ -38,6 +39,7 @@ FEATURE_SETS = [
     ("source_slot_frontier_id",),
     ("source_slot_start",),
     ("source_slot_frontier_id", "source_slot_start"),
+    ("source_slot_frontier_id", "source_slot_target_low"),
     ("source_same_bucket", "gradient_class", "prev_low2"),
     ("source_same_low", "bucket_split_prediction", "gradient_class"),
     ("target_low", "bucket_split_prediction", "gradient_class"),
@@ -251,6 +253,7 @@ def build(slot_rows: list[dict[str, str]]) -> tuple[dict[str, str], list[dict[st
     guard = select_guard(guard_rows)
     verdict = review_verdict(guard)
     target_rows: list[dict[str, str]] = []
+    seen_target_keys: set[tuple[str, str, str, str]] = set()
     if guard:
         formula = guard.get("formula", "")
         for row in slot_rows:
@@ -263,6 +266,15 @@ def build(slot_rows: list[dict[str, str]]) -> tuple[dict[str, str], list[dict[st
             if prediction != row.get("source_expected_byte", "").lower():
                 issues.append("prediction_false")
             source_offset = row.get("source_actual_offset", "")
+            target_key = (
+                row.get("archive", ""),
+                row.get("pcx_name", ""),
+                row.get("frontier_id", ""),
+                source_offset,
+            )
+            if target_key in seen_target_keys:
+                continue
+            seen_target_keys.add(target_key)
             target_rows.append(
                 {
                     "rank": str(len(target_rows) + 1),
