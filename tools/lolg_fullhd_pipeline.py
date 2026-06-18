@@ -1005,6 +1005,19 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "dependances source apres promotion finale garde relative small nonzero .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_source_dependency_probe.py",
+                "--replay-fixtures",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_relative_guard_promoted_replay_delta_guard_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_final_relative_guard_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Gradient Sequence High-Safe Low Exception Source-Dependency Final Relative Guard Promoted Replay",
+            ],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),
