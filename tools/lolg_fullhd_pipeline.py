@@ -740,6 +740,23 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Transfer Guard Promoted Replay",
                 ],
             ),
+            Step(
+                "revue selector run 96 apres clean frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_largest_run_selector_review.py",
+                    "--runs",
+                    "output/tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_promoted_replay/runs.csv",
+                    "--manifest",
+                    "output/tex_gap_rule_fixtures/manifest.csv",
+                    "--clean-fixtures",
+                    "output/tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay/fixtures.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Clean Largest Run Selector Review",
+                ],
+            ),
         ]
     )
     return steps
@@ -4990,6 +5007,23 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_promoted_replay",
                 "--title",
                 "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Transfer Guard Promoted Replay",
+            ],
+        ),
+        Step(
+            "revue selector run 96 apres clean frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_largest_run_selector_review.py",
+                "--runs",
+                "output/tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_promoted_replay/runs.csv",
+                "--manifest",
+                "output/tex_gap_rule_fixtures/manifest.csv",
+                "--clean-fixtures",
+                "output/tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Clean Largest Run Selector Review",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),

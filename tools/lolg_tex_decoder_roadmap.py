@@ -670,6 +670,9 @@ DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_TRANSFER_GUARD_SUMMARY = Path
 DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_TRANSFER_GUARD_SUMMARY = Path(
     "output/tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_promoted_replay/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1316,6 +1319,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_tail_compact_token_transfer_guard_residual: dict[str, str] | None,
     outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue: dict[str, str] | None,
     outside_source_frontier80_tail_compact_token_transfer_guard_run_probe: dict[str, str] | None,
+    outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1358,6 +1362,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_tail_compact_token_transfer_guard_residual,
             outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue,
             outside_source_frontier80_tail_compact_token_transfer_guard_run_probe,
+            outside_source_frontier80_clean_largest_run_selector_review,
         )
     ):
         return queue
@@ -2150,6 +2155,25 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_clean_largest_run_selector_review:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_largest_run_selector_verdict="
+                    f"{outside_source_frontier80_clean_largest_run_selector_review.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_largest_run_exact_known="
+                    f"{outside_source_frontier80_clean_largest_run_selector_review.get('exact_copy_known_matches', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_largest_run_best_known_relative="
+                    f"{outside_source_frontier80_clean_largest_run_selector_review.get('best_known_relative_exact', '0')}/"
+                    f"{outside_source_frontier80_clean_largest_run_selector_review.get('largest_run_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_largest_run_best_pairwise="
+                    f"{outside_source_frontier80_clean_largest_run_selector_review.get('best_pairwise_same', '0')}/"
+                    f"{outside_source_frontier80_clean_largest_run_selector_review.get('largest_run_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_largest_run_next="
+                    f"{outside_source_frontier80_clean_largest_run_selector_review.get('next_probe', '')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
         final_dependency = outside_source_final_dependency or outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
         final_residual = outside_source_final_residual or outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
@@ -2273,6 +2297,15 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_clean_largest_run_selector_review
+            and outside_source_frontier80_clean_largest_run_selector_review.get("review_verdict")
+            == "frontier80_clean_largest_run_no_simple_selector"
+        ):
+            next_action = outside_source_frontier80_clean_largest_run_selector_review.get(
+                "next_probe",
+                "derive structural nonzero-run grammar beyond local copy/delta/xor selectors",
+            )
         elif (
             outside_source_frontier80_tail_compact_token_transfer_guard_run_probe
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_run_probe, "run_rows") > 0
@@ -16253,6 +16286,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_TRANSFER_GUARD_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -18249,6 +18287,9 @@ def main() -> None:
     tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_summary = read_optional_summary(
         args.tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_summary
     )
+    tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -19599,6 +19640,7 @@ def main() -> None:
         outside_source_frontier80_tail_compact_token_transfer_guard_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_residual_core_summary,
         outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue=tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_summary,
         outside_source_frontier80_tail_compact_token_transfer_guard_run_probe=tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_summary,
+        outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
     )
     summary = build_summary(queue, review_summary)
 
