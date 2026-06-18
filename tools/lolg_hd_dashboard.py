@@ -197,6 +197,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_STRUCTURAL_PROFILE = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_structural_profile/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_WIDTH32_DELTA_NEIGHBORHOOD_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -740,6 +743,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Profil structurel run 96 apres clean frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_STRUCTURAL_PROFILE,
+        ),
+        (
+            "Probe delta voisinage width32 apres clean frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_WIDTH32_DELTA_NEIGHBORHOOD_PROBE,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
