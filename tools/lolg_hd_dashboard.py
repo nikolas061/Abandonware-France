@@ -1892,6 +1892,42 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Seizieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_sixteenth_terminal_root_transform_fifteenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Seizieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_sixteenth_terminal_root_transform_fifteenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres seizieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_sixteenth_terminal_root_transform_fifteenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres seizieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_sixteenth_terminal_root_transform_fifteenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Dix-septieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_seventeenth_terminal_root_transform_sixteenth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Revue garde source-byte apres seizieme promotion terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_terminal_root_transform_sixteenth_promoted_replay/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
