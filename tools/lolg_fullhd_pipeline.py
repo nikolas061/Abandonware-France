@@ -1245,6 +1245,41 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_probe.py",
                 ],
             ),
+            Step(
+                "replay promu selector non-oracle garde delta single-row source row-state low-payload residuel context-split frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_promoted_replay.py",
+                ],
+            ),
+            Step(
+                "file gaps clean apres replay promu selector non-oracle single-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_clean_gap_queue.py",
+                    "--clean-fixtures",
+                    "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_promoted_replay/fixtures.csv",
+                    "-o",
+                    "output/tex_gap_decoder_clean_gap_queue_frontier80_single_row_non_oracle_selector_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Clean Gap Queue After Frontier80 Single-Row Non-Oracle Selector Promoted Replay",
+                ],
+            ),
+            Step(
+                "runs gaps clean apres replay promu selector non-oracle single-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_unresolved_run_probe.py",
+                    "--spans",
+                    "output/tex_gap_decoder_clean_gap_queue_frontier80_single_row_non_oracle_selector_promoted_replay/spans.csv",
+                    "--fixtures",
+                    "output/tex_gap_rule_fixtures/manifest.csv",
+                    "-o",
+                    "output/tex_gap_decoder_unresolved_run_probe_frontier80_single_row_non_oracle_selector_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Single-Row Non-Oracle Selector Promoted Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -6000,6 +6035,41 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [
                 sys.executable,
                 "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_probe.py",
+            ],
+        ),
+        Step(
+            "replay promu selector non-oracle garde delta single-row source row-state low-payload residuel context-split frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_promoted_replay.py",
+            ],
+        ),
+        Step(
+            "file gaps clean apres replay promu selector non-oracle single-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_clean_gap_queue.py",
+                "--clean-fixtures",
+                "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_row_state_source_single_row_delta_non_oracle_selector_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_gap_decoder_clean_gap_queue_frontier80_single_row_non_oracle_selector_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Clean Gap Queue After Frontier80 Single-Row Non-Oracle Selector Promoted Replay",
+            ],
+        ),
+        Step(
+            "runs gaps clean apres replay promu selector non-oracle single-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_unresolved_run_probe.py",
+                "--spans",
+                "output/tex_gap_decoder_clean_gap_queue_frontier80_single_row_non_oracle_selector_promoted_replay/spans.csv",
+                "--fixtures",
+                "output/tex_gap_rule_fixtures/manifest.csv",
+                "-o",
+                "output/tex_gap_decoder_unresolved_run_probe_frontier80_single_row_non_oracle_selector_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Single-Row Non-Oracle Selector Promoted Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
