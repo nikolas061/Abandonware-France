@@ -61,6 +61,18 @@ DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_SOURCE_DEPENDENCY = Path(
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_RESIDUAL_CORE = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_promoted_replay_residual_core/index.html"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD = Path(
+    "output/tex_old_clean_byte_union_expanded_source_byte_guard_review/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD_PROMOTED_REPLAY = Path(
+    "output/tex_old_clean_byte_union_expanded_source_byte_guard_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD_SOURCE_DEPENDENCY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_expanded_source_byte_guard_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD_RESIDUAL_CORE = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_expanded_source_byte_guard_promoted_replay_residual_core/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -424,6 +436,22 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Promotion union anciens octets propres .tex", DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_PROMOTED_REPLAY),
         ("Dependances source apres union anciens octets propres .tex", DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_SOURCE_DEPENDENCY),
         ("Noyau residuel apres union anciens octets propres .tex", DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_RESIDUAL_CORE),
+        (
+            "Revue garde source-byte elargie apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD,
+        ),
+        (
+            "Promotion garde source-byte elargie apres union anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD_PROMOTED_REPLAY,
+        ),
+        (
+            "Dependances source apres garde source-byte elargie anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD_SOURCE_DEPENDENCY,
+        ),
+        (
+            "Noyau residuel apres garde source-byte elargie anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_EXPANDED_SOURCE_BYTE_GUARD_RESIDUAL_CORE,
+        ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
         ("Probe flux nonzero gaps .tex", DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE),
