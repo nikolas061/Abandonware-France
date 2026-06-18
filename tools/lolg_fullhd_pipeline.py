@@ -1589,6 +1589,19 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Prior High Row Support-Only Guard Integrated Replay After Stride-320 Outlier Target Replay",
                 ],
             ),
+            Step(
+                "probe correction residuelle exacte support-only prior high-row apres replay target outliers stride-320 frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_correction_probe.py",
+                    "--selector-rows",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_only_guard_integrated_replay/selector_rows.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_correction_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Prior High Row Exact Residual Correction After Stride-320 Outlier Target Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -6688,6 +6701,19 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_only_guard_integrated_replay",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Prior High Row Support-Only Guard Integrated Replay After Stride-320 Outlier Target Replay",
+            ],
+        ),
+        Step(
+            "probe correction residuelle exacte support-only prior high-row apres replay target outliers stride-320 frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_correction_probe.py",
+                "--selector-rows",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_support_only_guard_integrated_replay/selector_rows.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_correction_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Prior High Row Exact Residual Correction After Stride-320 Outlier Target Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
