@@ -664,6 +664,9 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BY
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_RESIDUAL_CORE_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_residual_core/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_TRANSFER_GUARD_SUMMARY = Path(
+    "output/tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_promoted_replay/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1308,6 +1311,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_tail_compact_token_transfer_guard_promoted: dict[str, str] | None,
     outside_source_frontier80_tail_compact_token_transfer_guard_dependency: dict[str, str] | None,
     outside_source_frontier80_tail_compact_token_transfer_guard_residual: dict[str, str] | None,
+    outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1348,6 +1352,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_tail_compact_token_transfer_guard_promoted,
             outside_source_frontier80_tail_compact_token_transfer_guard_dependency,
             outside_source_frontier80_tail_compact_token_transfer_guard_residual,
+            outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue,
         )
     ):
         return queue
@@ -1357,6 +1362,7 @@ def apply_old_clean_byte_union(
         if row.get("surface", "") != "gradient_like":
             updated.append(row)
             continue
+        row_ready = int_value(row, "promotion_ready_bytes")
         positive_evidence = row.get("positive_evidence", "")
         blocking_evidence = row.get("blocking_evidence", "")
 
@@ -2077,6 +2083,15 @@ def apply_old_clean_byte_union(
                     f"{outside_source_frontier80_tail_compact_token_transfer_guard_promoted.get('issue_rows', '0')}",
                 ],
             )
+            if (
+                int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "promotion_ready_bytes") > 0
+                and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "source_false_bytes") == 0
+                and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "issue_rows") == 0
+            ):
+                row_ready = max(
+                    row_ready,
+                    int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "promotion_ready_bytes"),
+                )
 
         if outside_source_frontier80_tail_compact_token_transfer_guard_dependency:
             blocking_evidence = append_evidence(
@@ -2099,6 +2114,19 @@ def apply_old_clean_byte_union(
                     f"{outside_source_frontier80_tail_compact_token_transfer_guard_residual.get('unknown_highsafe_slots', '0')}",
                     "gradient_sequence_old_clean_byte_frontier80_compact_token_transfer_residual_blocker="
                     f"{outside_source_frontier80_tail_compact_token_transfer_guard_residual.get('dominant_blocker', '')}",
+                ],
+            )
+
+        if outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_clean_gap_clean="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue.get('clean_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_clean_gap_unresolved="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue.get('unresolved_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_clean_gap_largest="
+                    f"{outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue.get('largest_unresolved_span', '0')}",
                 ],
             )
 
@@ -2226,10 +2254,18 @@ def apply_old_clean_byte_union(
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
         elif (
+            outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue
+            and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue, "unresolved_bytes") > 0
+        ):
+            next_action = (
+                "split largest clean-gap span after frontier80-clean base "
+                f"({outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue.get('largest_unresolved_span', '0')} bytes)"
+            )
+        elif (
             outside_source_frontier80_tail_compact_token_transfer_guard_promoted
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_promoted, "promotion_ready_bytes") > 0
         ):
-            next_action = "promote guarded high2 selector for frontier80 offsets 16-17"
+            next_action = "rerun downstream gradient probes with frontier80-clean base"
         elif outside_source_stop_review and outside_source_stop_review.get("review_verdict") == "outside_source_dependency_target_only_no_known_support":
             next_action = outside_source_stop_review.get(
                 "next_probe",
@@ -2245,9 +2281,12 @@ def apply_old_clean_byte_union(
         elif final_residual and final_residual.get("dominant_blocker"):
             next_action = "split post-union residual source dependency blockers"
 
+        status = "promotion_ready" if row_ready > 0 else row.get("status", "blocked_review")
         updated.append(
             {
                 **row,
+                "promotion_ready_bytes": str(row_ready),
+                "status": status,
                 "positive_evidence": positive_evidence,
                 "blocking_evidence": blocking_evidence,
                 "next_action": next_action,
@@ -16174,6 +16213,11 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_RESIDUAL_CORE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-clean-gap-queue-frontier80-transfer-guard-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_TRANSFER_GUARD_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -18164,6 +18208,9 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_residual_core_summary = read_optional_summary(
         args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_residual_core_summary
     )
+    tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_summary = read_optional_summary(
+        args.tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -19512,6 +19559,7 @@ def main() -> None:
         outside_source_frontier80_tail_compact_token_transfer_guard_promoted=tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_summary,
         outside_source_frontier80_tail_compact_token_transfer_guard_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_summary,
         outside_source_frontier80_tail_compact_token_transfer_guard_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_residual_core_summary,
+        outside_source_frontier80_tail_compact_token_transfer_guard_clean_gap_queue=tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_summary,
     )
     summary = build_summary(queue, review_summary)
 

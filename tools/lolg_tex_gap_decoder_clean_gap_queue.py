@@ -271,6 +271,9 @@ def build_rows(
         span_rows.extend(fixture_span_rows)
         if issues:
             issue_rows += 1
+        clean_byte_text = clean_fixture.get("clean_bytes") or clean_fixture.get("total_clean_bytes")
+        if not clean_byte_text:
+            clean_byte_text = str(sum(1 for value in known_mask if value))
 
         fixture_rows.append(
             {
@@ -280,7 +283,7 @@ def build_rows(
                 "pcx_name": clean_fixture.get("pcx_name", ""),
                 "frontier_id": clean_fixture.get("frontier_id", ""),
                 "fixture_bytes": str(len(expected)),
-                "clean_bytes": clean_fixture.get("clean_bytes", "0"),
+                "clean_bytes": clean_byte_text,
                 "rejected_false_bytes": str(rejected_false_bytes),
                 "unresolved_bytes": str(unresolved_bytes),
                 "unresolved_zero_bytes": str(unresolved_zero),

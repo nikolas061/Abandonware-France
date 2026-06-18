@@ -712,6 +712,19 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_residual_core",
                 ],
             ),
+            Step(
+                "file gaps clean apres replay garde transfert token compact frontier80 tail .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_clean_gap_queue.py",
+                    "--clean-fixtures",
+                    "output/tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay/fixtures.csv",
+                    "-o",
+                    "output/tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Clean Gap Queue After Frontier80 Transfer Guard Promoted Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -4934,6 +4947,19 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay/edges.csv",
                 "-o",
                 "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay_residual_core",
+            ],
+        ),
+        Step(
+            "file gaps clean apres replay garde transfert token compact frontier80 tail .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_clean_gap_queue.py",
+                "--clean-fixtures",
+                "output/tex_old_clean_byte_union_frontier80_tail_compact_token_transfer_guard_promoted_replay/fixtures.csv",
+                "-o",
+                "output/tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Clean Gap Queue After Frontier80 Transfer Guard Promoted Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
