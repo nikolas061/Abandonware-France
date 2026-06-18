@@ -910,6 +910,21 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Prior High Row Byte Local Start False Positive Split Probe",
                 ],
             ),
+            Step(
+                "probe split source selector byte-local prior high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_source_split_probe.py",
+                    "--switches",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_false_positive_split_probe/switch_rows.csv",
+                    "--byte-deltas",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_signed_delta_selector_probe/byte_deltas.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_source_split_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Prior High Row Byte Local Start Source Split Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -5330,6 +5345,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_false_positive_split_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Prior High Row Byte Local Start False Positive Split Probe",
+            ],
+        ),
+        Step(
+            "probe split source selector byte-local prior high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_source_split_probe.py",
+                "--switches",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_false_positive_split_probe/switch_rows.csv",
+                "--byte-deltas",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_signed_delta_selector_probe/byte_deltas.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_source_split_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Prior High Row Byte Local Start Source Split Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
