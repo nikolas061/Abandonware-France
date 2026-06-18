@@ -22,9 +22,18 @@ DEFAULT_OUTPUT = Path("output/tex_old_clean_byte_union_expanded_source_byte_guar
 FORMULAS = {
     "prefix_high+source_prefix_low-5": ("prefix_high", "source_prefix_low", -5),
     "source_prefix_high+prefix_low+2": ("source_prefix_high", "prefix_low", 2),
+    "5+fragment_low-5": ("5", "fragment_low", -5),
+    "5+prefix_low+2": ("5", "prefix_low", 2),
+    "5+source_target_low+4": ("5", "source_target_low", 4),
 }
 
 FEATURE_SETS = [
+    ("frontier_id", "source_slot_frontier_id"),
+    ("frontier_id", "source_slot_start"),
+    ("source_slot_frontier_id", "fragment_low"),
+    ("source_slot_frontier_id", "prefix_low"),
+    ("source_slot_start", "fragment_low"),
+    ("source_slot_start", "prefix_low"),
     ("source_slot_frontier_id", "rel_mod8", "bucket_split_context"),
     ("source_slot_frontier_id", "source_rel_mod8", "bucket_split_context"),
     ("source_slot_frontier_id", "rel_mod8", "source_fragment_low"),
