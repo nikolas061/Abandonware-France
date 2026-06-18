@@ -706,6 +706,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_BYTE_LOCAL_START_SOURCE_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_SOURCE_BYTE_PREREQ_PROBE_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_THRESHOLD_SOURCE_GUARD_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1364,6 +1367,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_clean_prior_high_row_byte_local_start_false_positive_split_probe: dict[str, str] | None,
     outside_source_frontier80_clean_prior_high_row_byte_local_start_source_split_probe: dict[str, str] | None,
     outside_source_frontier80_clean_prior_high_row_source_byte_prereq_probe: dict[str, str] | None,
+    outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1418,6 +1422,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_clean_prior_high_row_byte_local_start_false_positive_split_probe,
             outside_source_frontier80_clean_prior_high_row_byte_local_start_source_split_probe,
             outside_source_frontier80_clean_prior_high_row_source_byte_prereq_probe,
+            outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe,
         )
     ):
         return queue
@@ -2448,6 +2453,25 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_threshold_source_guard_verdict="
+                    f"{outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_threshold_source_guard_best="
+                    f"{outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get('best_guard', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_threshold_source_guard_correct="
+                    f"{outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get('best_guard_correct_rows', '0')}/"
+                    f"{outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get('prerequisite_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_threshold_source_guard_false="
+                    f"{outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get('best_guard_false_positive_rows', '0')}/"
+                    f"{outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get('best_guard_false_negative_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_prior_high_row_threshold_source_guard_next="
+                    f"{outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get('next_probe', '')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
         final_dependency = outside_source_final_dependency or outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
         final_residual = outside_source_final_residual or outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
@@ -2571,6 +2595,19 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe
+            and outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get("review_verdict")
+            in {
+                "frontier80_prior_high_row_threshold_source_guard_ready",
+                "frontier80_prior_high_row_threshold_source_guard_clean_but_weak",
+                "frontier80_prior_high_row_threshold_source_guard_weak",
+            }
+        ):
+            next_action = outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe.get(
+                "next_probe",
+                "promote threshold source guard into byte-local high-row selector replay",
+            )
         elif (
             outside_source_frontier80_clean_prior_high_row_source_byte_prereq_probe
             and outside_source_frontier80_clean_prior_high_row_source_byte_prereq_probe.get("review_verdict")
@@ -16737,6 +16774,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_SOURCE_BYTE_PREREQ_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-clean-prior-high-row-threshold-source-guard-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_THRESHOLD_SOURCE_GUARD_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -18769,6 +18811,9 @@ def main() -> None:
     tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe_summary
     )
+    tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe_summary = read_optional_summary(
+        args.tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -20131,6 +20176,7 @@ def main() -> None:
         outside_source_frontier80_clean_prior_high_row_byte_local_start_false_positive_split_probe=tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_false_positive_split_probe_summary,
         outside_source_frontier80_clean_prior_high_row_byte_local_start_source_split_probe=tex_gap_decoder_frontier80_clean_prior_high_row_byte_local_start_source_split_probe_summary,
         outside_source_frontier80_clean_prior_high_row_source_byte_prereq_probe=tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe_summary,
+        outside_source_frontier80_clean_prior_high_row_threshold_source_guard_probe=tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe_summary,
     )
     summary = build_summary(queue, review_summary)
 

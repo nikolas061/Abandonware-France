@@ -946,6 +946,21 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Prior High Row Source Byte Prerequisite Probe",
                 ],
             ),
+            Step(
+                "probe guard seuil source prior high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe.py",
+                    "--prerequisites",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe/source_prerequisites.csv",
+                    "--candidates",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe/support_candidates.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -5402,6 +5417,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Prior High Row Source Byte Prerequisite Probe",
+            ],
+        ),
+        Step(
+            "probe guard seuil source prior high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe.py",
+                "--prerequisites",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe/source_prerequisites.csv",
+                "--candidates",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_source_byte_prereq_probe/support_candidates.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_clean_prior_high_row_threshold_source_guard_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Prior High Row Threshold Source Guard Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
