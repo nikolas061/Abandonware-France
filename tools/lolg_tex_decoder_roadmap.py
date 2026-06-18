@@ -622,6 +622,21 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BY
 DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_promoted_replay_residual_core/summary.csv"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_CASCADE_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_outside_source_dependency_cascade/summary.csv"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay/summary.csv"
+)
+DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay_residual_core/summary.csv"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTEENTH_OUTSIDE_SOURCE_DEPENDENCY_REVIEW_SUMMARY = Path(
+    "output/tex_old_clean_byte_union_fourteenth_outside_source_dependency_review/summary.csv"
+)
 DEFAULT_GRADIENT_MACRO_STATE_CLUSTER_PAYLOAD_SUMMARY = Path(
     "output/tex_gradient_macro_state_cluster_payload/summary.csv"
 )
@@ -1252,6 +1267,11 @@ def apply_old_clean_byte_union(
     outside_source_promoted: dict[str, str] | None,
     outside_source_dependency: dict[str, str] | None,
     outside_source_residual: dict[str, str] | None,
+    outside_source_cascade: dict[str, str] | None,
+    outside_source_final_promoted: dict[str, str] | None,
+    outside_source_final_dependency: dict[str, str] | None,
+    outside_source_final_residual: dict[str, str] | None,
+    outside_source_stop_review: dict[str, str] | None,
 ) -> list[dict[str, str]]:
     if not any(
         (
@@ -1278,6 +1298,11 @@ def apply_old_clean_byte_union(
             outside_source_promoted,
             outside_source_dependency,
             outside_source_residual,
+            outside_source_cascade,
+            outside_source_final_promoted,
+            outside_source_final_dependency,
+            outside_source_final_residual,
+            outside_source_stop_review,
         )
     ):
         return queue
@@ -1792,11 +1817,111 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_cascade:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_added="
+                    f"{outside_source_cascade.get('source_added_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_total_clean="
+                    f"{outside_source_cascade.get('final_clean_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_unknown="
+                    f"{outside_source_cascade.get('base_unknown_outside_slots', '0')}->"
+                    f"{outside_source_cascade.get('final_unknown_outside_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_promoted_passes="
+                    f"{outside_source_cascade.get('promoted_passes', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_stop="
+                    f"{outside_source_cascade.get('stop_review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_target_only="
+                    f"{outside_source_cascade.get('final_target_only_guard_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_top_unknown="
+                    f"{outside_source_cascade.get('final_top_unknown_group_key', '')}",
+                    "gradient_sequence_old_clean_byte_outside_source_cascade_issues="
+                    f"{outside_source_cascade.get('issue_rows', '0')}",
+                ],
+            )
+
+        if outside_source_final_promoted:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_final_false="
+                    f"{outside_source_final_promoted.get('source_false_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_final_issues="
+                    f"{outside_source_final_promoted.get('issue_rows', '0')}",
+                ],
+            )
+
+        if outside_source_final_dependency:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_final_available="
+                    f"{outside_source_final_dependency.get('source_available_slots', '0')}/"
+                    f"{outside_source_final_dependency.get('slots', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_final_highsafe_unknown="
+                    f"{outside_source_final_dependency.get('source_unknown_in_highsafe_slots', '0')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_final_outside_unknown="
+                    f"{outside_source_final_dependency.get('source_unknown_outside_highsafe_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_final_dependency_issues="
+                    f"{outside_source_final_dependency.get('issue_rows', '0')}",
+                ],
+            )
+
+        if outside_source_final_residual:
+            positive_evidence = append_evidence(
+                positive_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_final_residual_highsafe_unknown="
+                    f"{outside_source_final_residual.get('unknown_highsafe_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_final_residual_blocker="
+                    f"{outside_source_final_residual.get('dominant_blocker', '')}",
+                ],
+            )
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_final_residual_outside_unknown="
+                    f"{outside_source_final_residual.get('unknown_outside_slots', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_final_residual_issues="
+                    f"{outside_source_final_residual.get('issue_rows', '0')}",
+                ],
+            )
+
+        if outside_source_stop_review:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_outside_source_stop_verdict="
+                    f"{outside_source_stop_review.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_outside_source_stop_unknown="
+                    f"{outside_source_stop_review.get('unknown_source_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_stop_target_only="
+                    f"{outside_source_stop_review.get('target_only_guard_rows', '0')}",
+                    "gradient_sequence_old_clean_byte_outside_source_stop_next="
+                    f"{outside_source_stop_review.get('next_probe', '')}",
+                ],
+            )
+
         next_action = row.get("next_action", "")
-        final_dependency = outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
-        final_residual = outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
-        final_promoted = outside_source_promoted or control_prefix_fill_promoted or terminal_source_final_promoted or expanded_final_promoted or expanded_promoted
-        if outside_source_promoted and int_value(outside_source_promoted, "source_false_bytes") > 0:
+        final_dependency = outside_source_final_dependency or outside_source_dependency or control_prefix_fill_dependency or terminal_source_final_dependency or expanded_final_dependency or expanded_dependency or dependency
+        final_residual = outside_source_final_residual or outside_source_residual or control_prefix_fill_residual or terminal_source_final_residual or expanded_final_residual or expanded_residual or residual
+        final_promoted = outside_source_final_promoted or outside_source_promoted or control_prefix_fill_promoted or terminal_source_final_promoted or expanded_final_promoted or expanded_promoted
+        if outside_source_final_promoted and int_value(outside_source_final_promoted, "source_false_bytes") > 0:
+            next_action = "review non-high-safe source dependency cascade false positives"
+        elif outside_source_final_promoted and int_value(outside_source_final_promoted, "issue_rows") > 0:
+            next_action = "fix non-high-safe source dependency cascade replay issues"
+        elif outside_source_promoted and int_value(outside_source_promoted, "source_false_bytes") > 0:
             next_action = "review non-high-safe source dependency false positives"
         elif outside_source_promoted and int_value(outside_source_promoted, "issue_rows") > 0:
             next_action = "fix non-high-safe source dependency replay issues"
@@ -1812,6 +1937,11 @@ def apply_old_clean_byte_union(
             next_action = (
                 "derive post-union source-byte transforms for "
                 f"{final_dependency.get('source_unknown_in_highsafe_slots', '0')} high-safe unknown slots"
+            )
+        elif outside_source_stop_review and outside_source_stop_review.get("review_verdict") == "outside_source_dependency_target_only_no_known_support":
+            next_action = outside_source_stop_review.get(
+                "next_probe",
+                "derive known support for remaining non-high-safe source offsets",
             )
         elif outside_source_dependency and int_value(outside_source_dependency, "source_unknown_outside_highsafe_slots") > 0:
             next_action = (
@@ -15682,6 +15812,31 @@ def main() -> None:
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-old-clean-byte-union-outside-source-dependency-cascade-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_CASCADE_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-old-clean-byte-union-thirteenth-outside-source-dependency-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-thirteenth-outside-source-dependency-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_SUMMARY,
+    )
+    parser.add_argument(
+        "--gradient-sequence-high-safe-low-exception-source-dependency-old-clean-byte-union-thirteenth-outside-source-dependency-residual-core-summary",
+        type=Path,
+        default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
+    )
+    parser.add_argument(
+        "--tex-old-clean-byte-union-fourteenth-outside-source-dependency-review-summary",
+        type=Path,
+        default=DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTEENTH_OUTSIDE_SOURCE_DEPENDENCY_REVIEW_SUMMARY,
+    )
+    parser.add_argument(
         "--gradient-sequence-high-safe-low-exception-source-dependency-residual-core-summary",
         type=Path,
         default=DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_RESIDUAL_CORE_SUMMARY,
@@ -17630,6 +17785,21 @@ def main() -> None:
     gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_residual_core_summary = read_optional_summary(
         args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_residual_core_summary
     )
+    tex_old_clean_byte_union_outside_source_dependency_cascade_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_outside_source_dependency_cascade_summary
+    )
+    tex_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_summary
+    )
+    gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_residual_core_summary = read_optional_summary(
+        args.gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_residual_core_summary
+    )
+    tex_old_clean_byte_union_fourteenth_outside_source_dependency_review_summary = read_optional_summary(
+        args.tex_old_clean_byte_union_fourteenth_outside_source_dependency_review_summary
+    )
     gradient_sequence_high_safe_low_exception_source_dependency_residual_core_rows = (
         read_rows(args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary)
         if args.gradient_sequence_high_safe_low_exception_source_dependency_residual_core_summary.exists()
@@ -18964,6 +19134,11 @@ def main() -> None:
         outside_source_promoted=tex_old_clean_byte_union_outside_source_dependency_promoted_replay_summary,
         outside_source_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_summary,
         outside_source_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_residual_core_summary,
+        outside_source_cascade=tex_old_clean_byte_union_outside_source_dependency_cascade_summary,
+        outside_source_final_promoted=tex_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay_summary,
+        outside_source_final_dependency=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_summary,
+        outside_source_final_residual=gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_residual_core_summary,
+        outside_source_stop_review=tex_old_clean_byte_union_fourteenth_outside_source_dependency_review_summary,
     )
     summary = build_summary(queue, review_summary)
 

@@ -437,11 +437,42 @@ def build_target_rows(slot_rows: list[dict[str, str]], guard: dict[str, str]) ->
     return output
 
 
-def next_probe_for(verdict: str) -> str:
+def offset_ranges(values: list[str]) -> str:
+    ints = sorted({int(value) for value in values if value.isdigit()})
+    if not ints:
+        return ""
+    ranges: list[str] = []
+    start = ints[0]
+    previous = ints[0]
+    for value in ints[1:]:
+        if value == previous + 1:
+            previous = value
+            continue
+        ranges.append(f"{start}" if start == previous else f"{start}-{previous}")
+        start = previous = value
+    ranges.append(f"{start}" if start == previous else f"{start}-{previous}")
+    return ",".join(ranges)
+
+
+def known_support_probe(unknown_rows: list[dict[str, str]]) -> str:
+    by_frontier: dict[str, list[str]] = defaultdict(list)
+    for row in unknown_rows:
+        by_frontier[row.get("frontier_id", "")].append(row.get("source_actual_offset", ""))
+    parts = [
+        f"frontier{frontier_id} source offsets {offset_ranges(offsets)}"
+        for frontier_id, offsets in sorted(by_frontier.items(), key=lambda item: int(item[0] or "0"))
+        if frontier_id and offset_ranges(offsets)
+    ]
+    if not parts:
+        return "derive known support for remaining non-high-safe source offsets"
+    return f"derive known support for {' and '.join(parts)}"
+
+
+def next_probe_for(verdict: str, unknown_rows: list[dict[str, str]]) -> str:
     if verdict == "outside_source_dependency_supported_guard_ready":
         return "promote supported non-high-safe source dependency guard"
     if verdict == "outside_source_dependency_target_only_no_known_support":
-        return "derive known support for frontier18 source offsets 247-269 and frontier80 offsets 16-17"
+        return known_support_probe(unknown_rows)
     return "derive non-high-safe source producer for unresolved .tex dependencies"
 
 
@@ -494,7 +525,7 @@ def build_summary(
         "best_target_only_guard_family": best_target_only.get("guard_family", ""),
         "best_target_only_guard_key": best_target_only.get("guard_key", ""),
         "review_verdict": verdict,
-        "next_probe": next_probe_for(verdict),
+        "next_probe": next_probe_for(verdict, unknown_rows),
         "promotion_candidate_bytes": str(len(target_rows)),
         "promotion_ready_bytes": str(sum(1 for row in target_rows if row.get("promotion_ready") == "1")),
         "issue_rows": str(

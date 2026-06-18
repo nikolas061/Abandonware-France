@@ -630,6 +630,13 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_promoted_replay_residual_core",
                 ],
             ),
+            Step(
+                "cascade dependances source hors high-safe union anciens octets propres .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_old_clean_byte_union_outside_source_dependency_cascade.py",
+                ],
+            ),
         ]
     )
     return steps

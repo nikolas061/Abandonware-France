@@ -143,6 +143,21 @@ DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_SOURCE_DEPENDENCY = P
 DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE = Path(
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_outside_source_dependency_promoted_replay_residual_core/index.html"
 )
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_CASCADE = Path(
+    "output/tex_old_clean_byte_union_outside_source_dependency_cascade/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_PROMOTED_REPLAY = Path(
+    "output/tex_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_SOURCE_DEPENDENCY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_old_clean_byte_union_thirteenth_outside_source_dependency_promoted_replay_residual_core/index.html"
+)
+DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTEENTH_OUTSIDE_SOURCE_DEPENDENCY_REVIEW = Path(
+    "output/tex_old_clean_byte_union_fourteenth_outside_source_dependency_review/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -614,6 +629,26 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Noyau residuel apres promotion hors high-safe anciens octets propres .tex",
             DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE,
+        ),
+        (
+            "Cascade dependances source hors high-safe anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_OUTSIDE_SOURCE_DEPENDENCY_CASCADE,
+        ),
+        (
+            "Treizieme promotion dependances source hors high-safe anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_PROMOTED_REPLAY,
+        ),
+        (
+            "Dependances source apres treizieme promotion hors high-safe anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_SOURCE_DEPENDENCY,
+        ),
+        (
+            "Noyau residuel apres treizieme promotion hors high-safe anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_THIRTEENTH_OUTSIDE_SOURCE_DEPENDENCY_RESIDUAL_CORE,
+        ),
+        (
+            "Revue blocage frontier80 hors high-safe anciens octets propres .tex",
+            DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FOURTEENTH_OUTSIDE_SOURCE_DEPENDENCY_REVIEW,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
