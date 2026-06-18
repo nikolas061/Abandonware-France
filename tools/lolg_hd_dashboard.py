@@ -1346,6 +1346,54 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Promotion deuxieme garde source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_second_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres deuxieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_second_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion troisieme garde source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_third_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres troisieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_third_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion quatrieme garde source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_fourth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres quatrieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_fourth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres quatrieme promotion source-byte .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_fourth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Revue cinquieme garde source-byte apres quatrieme promotion .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_byte_guard_fifth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
