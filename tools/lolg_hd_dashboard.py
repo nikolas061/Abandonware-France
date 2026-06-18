@@ -218,6 +218,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROLE_PAIR_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROLE_PAIR_SELECTOR = Path(
     "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_role_pair_selector_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_OPCODE_CONTEXT = Path(
+    "output/tex_gap_decoder_frontier80_context_split_residual_low_payload_opcode_context_probe/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -849,6 +852,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Probe selector role-pair low-payload residuel context-split frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_ROLE_PAIR_SELECTOR,
+        ),
+        (
+            "Probe contexte opcode low-payload residuel context-split frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CONTEXT_SPLIT_RESIDUAL_LOW_PAYLOAD_OPCODE_CONTEXT,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
