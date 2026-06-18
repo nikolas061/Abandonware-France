@@ -1280,6 +1280,30 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Revue garde bucket-split source apres promotion finale garde connue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_bucket_split_guard_final_known_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Promotion garde bucket-split source apres promotion finale garde connue .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_bucket_split_guard_final_known_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres promotion bucket-split finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel dependances source apres promotion bucket-split finale .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_bucket_split_guard_final_known_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
