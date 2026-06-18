@@ -1556,6 +1556,102 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Seconde revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_second_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Seconde promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_second_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres seconde promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_second_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres seconde promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_second_terminal_root_transform_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Troisieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_third_terminal_root_transform_second_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Troisieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_third_terminal_root_transform_second_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres troisieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_third_terminal_root_transform_second_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres troisieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_third_terminal_root_transform_second_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Quatrieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_fourth_terminal_root_transform_third_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Quatrieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_fourth_terminal_root_transform_third_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres quatrieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_fourth_terminal_root_transform_third_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres quatrieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_fourth_terminal_root_transform_third_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
+            "Cinquieme revue transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_fifth_terminal_root_transform_fourth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Cinquieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_terminal_root_transform_fifth_terminal_root_transform_fourth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay_promoted/index.html"
+            ),
+        ),
+        (
+            "Dependances source apres cinquieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_fifth_terminal_root_transform_fourth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
+            "Noyau residuel apres cinquieme promotion transform terminal/root .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_terminal_root_transform_fifth_terminal_root_transform_fourth_terminal_root_context_terminal_guard_cover_ninth_source_byte_guard_promoted_residual_core/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),
