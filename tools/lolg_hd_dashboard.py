@@ -245,6 +245,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_EXACT_RESIDUAL_CONSENSUS
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_EXACT_RESIDUAL_CONTEXT_SPLIT_PROBE = Path(
     "output/tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_context_split_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_EXACT_RESIDUAL_CONTEXT_SPLIT_PROMOTED_REPLAY = Path(
+    "output/tex_gap_decoder_frontier80_clean_prior_high_row_exact_residual_context_split_promoted_replay/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -852,6 +855,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Split contexte residuel exact prior high-row frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_EXACT_RESIDUAL_CONTEXT_SPLIT_PROBE,
+        ),
+        (
+            "Replay promu contexte residuel exact prior high-row frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_PRIOR_HIGH_ROW_EXACT_RESIDUAL_CONTEXT_SPLIT_PROMOTED_REPLAY,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),
