@@ -188,6 +188,9 @@ DEFAULT_TEX_OLD_CLEAN_BYTE_UNION_FRONTIER80_TAIL_COMPACT_TOKEN_TRANSFER_GUARD_RE
 DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_TRANSFER_GUARD = Path(
     "output/tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_promoted_replay/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_TRANSFER_GUARD = Path(
+    "output/tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_promoted_replay/index.html"
+)
 DEFAULT_TEX_GAP_ZERO_RUN_PROBE = Path("output/tex_gap_zero_run_probe/index.html")
 DEFAULT_TEX_GAP_GEOMETRY_REPLAY = Path("output/tex_gap_geometry_replay/index.html")
 DEFAULT_TEX_GAP_NONZERO_STREAM_PROBE = Path("output/tex_gap_nonzero_stream_probe/index.html")
@@ -719,6 +722,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "File gaps clean apres replay garde transfert token compact tail frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_TRANSFER_GUARD,
+        ),
+        (
+            "Runs gaps clean apres replay garde transfert token compact tail frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_TRANSFER_GUARD,
         ),
         ("Probe zero-runs gaps .tex", DEFAULT_TEX_GAP_ZERO_RUN_PROBE),
         ("Replay géométrie gaps .tex", DEFAULT_TEX_GAP_GEOMETRY_REPLAY),

@@ -725,6 +725,21 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Clean Gap Queue After Frontier80 Transfer Guard Promoted Replay",
                 ],
             ),
+            Step(
+                "runs gaps clean apres replay garde transfert token compact frontier80 tail .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_unresolved_run_probe.py",
+                    "--spans",
+                    "output/tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_promoted_replay/spans.csv",
+                    "--fixtures",
+                    "output/tex_gap_rule_fixtures/manifest.csv",
+                    "-o",
+                    "output/tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_promoted_replay",
+                    "--title",
+                    "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Transfer Guard Promoted Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -4960,6 +4975,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_promoted_replay",
                 "--title",
                 "Lands of Lore II .tex Clean Gap Queue After Frontier80 Transfer Guard Promoted Replay",
+            ],
+        ),
+        Step(
+            "runs gaps clean apres replay garde transfert token compact frontier80 tail .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_unresolved_run_probe.py",
+                "--spans",
+                "output/tex_gap_decoder_clean_gap_queue_frontier80_transfer_guard_promoted_replay/spans.csv",
+                "--fixtures",
+                "output/tex_gap_rule_fixtures/manifest.csv",
+                "-o",
+                "output/tex_gap_decoder_unresolved_run_probe_frontier80_transfer_guard_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Unresolved Run Probe After Frontier80 Transfer Guard Promoted Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
