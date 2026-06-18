@@ -1222,6 +1222,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             ),
         ),
         (
+            "Promotion garde relative small nonzero finale apres promotion delta-guard .tex",
+            Path(
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_relative_guard_promoted_replay_delta_guard_promoted_replay/index.html"
+            ),
+        ),
+        (
             "Etat prerequis exceptions low high-safe gradient .tex",
             Path("output/tex_gradient_sequence_high_safe_low_exception_prerequisite_state/index.html"),
         ),

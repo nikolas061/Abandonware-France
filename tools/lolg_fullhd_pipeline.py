@@ -988,6 +988,23 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "promotion garde relative small nonzero finale apres promotion delta-guard .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_relative_guard_promoted_replay.py",
+                "--base-fixtures",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_spatial_bridge_delta_producer_guard_carrier_context_promoted_replay_promoted/fixtures.csv",
+                "--review-summary",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_relative_guard_review_delta_guard_promoted_replay/summary.csv",
+                "--targets",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_relative_guard_review_delta_guard_promoted_replay/targets.csv",
+                "-o",
+                "output/tex_gradient_sequence_high_safe_low_exception_external_terminal_small_nonzero_relative_guard_promoted_replay_delta_guard_promoted_replay",
+                "--title",
+                "Lands of Lore II .tex Final Small Nonzero Relative Guard Promoted Replay Delta Guard Promoted Replay",
+            ],
+        ),
+        Step(
             "haut/bas source-profile gradient post-formule .tex",
             [sys.executable, "tools/lolg_tex_gradient_source_profile_high_low_probe.py"],
         ),
