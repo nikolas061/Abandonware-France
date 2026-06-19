@@ -2613,6 +2613,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_large_shifted_2a30_field16_decoder_route.py"],
         ),
         Step(
+            "previews decodeur field16 2a30 gros segments .tex rejetes",
+            [sys.executable, "tools/lolg_tex_large_shifted_2a30_field16_decoder_previews.py"],
+        ),
+        Step(
             "gradient-like noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,

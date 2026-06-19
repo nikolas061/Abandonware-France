@@ -277,6 +277,15 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_ROWS = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_HTML = Path(
     "output/tex_large_shifted_2a30_field16_decoder_route/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_MANIFEST = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews/manifest.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -996,6 +1005,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_decoder_route_routed_exact",
     "tex_large_shifted_2a30_field16_decoder_route_branch_blocked",
     "tex_large_shifted_2a30_field16_decoder_route_non_2a30",
+    "tex_large_shifted_2a30_field16_decoder_previews_native",
+    "tex_large_shifted_2a30_field16_decoder_previews_fullhd",
+    "tex_large_shifted_2a30_field16_decoder_previews_sources",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -4762,6 +4774,113 @@ def audit_tex_large_shifted_2a30_field16_decoder_route(
         routed_exact_rows if ok else 0,
         branch_blocked_rows if ok else 0,
         non_2a30_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_decoder_previews(
+    summary: Path,
+    manifest_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_previews", summary), 0, 0, 0
+    if not manifest_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_previews", manifest_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_previews", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    manifest_rows = read_csv(manifest_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    route_rows = int_value(total, "route_rows")
+    routed_rows = int_value(total, "routed_rows")
+    manifest_count = int_value(total, "manifest_rows")
+    native_previews = int_value(total, "native_previews")
+    fullhd_previews = int_value(total, "fullhd_previews")
+    source_previews = int_value(total, "source_previews")
+    missing_sources = int_value(total, "missing_source_previews")
+    issue_rows = int_value(total, "issue_rows")
+
+    native_rows = [row for row in manifest_rows if row.get("native_preview_exists") == "yes"]
+    fullhd_rows = [
+        row
+        for row in manifest_rows
+        if row.get("fullhd_preview_exists") == "yes"
+        and (row.get("fullhd_width"), row.get("fullhd_height")) == (str(TARGET_SIZE[0]), str(TARGET_SIZE[1]))
+    ]
+    source_rows = [row for row in manifest_rows if row.get("source_preview_exists") == "yes"]
+    manifest_issue_rows = [row for row in manifest_rows if row.get("issues")]
+
+    if route_rows != 9:
+        issues.append("field16_decoder_preview_route_count_mismatch")
+    if routed_rows != 4:
+        issues.append("field16_decoder_preview_routed_count_mismatch")
+    if manifest_count != len(manifest_rows) or manifest_count != 4:
+        issues.append("field16_decoder_preview_manifest_count_mismatch")
+    if native_previews != len(native_rows) or native_previews != 4:
+        issues.append("field16_decoder_preview_native_count_mismatch")
+    if fullhd_previews != len(fullhd_rows) or fullhd_previews != 4:
+        issues.append("field16_decoder_preview_fullhd_count_mismatch")
+    if source_previews != len(source_rows) or source_previews != 4:
+        issues.append("field16_decoder_preview_source_count_mismatch")
+    if missing_sources != 0:
+        issues.append("field16_decoder_preview_missing_sources")
+    if issue_rows != len(manifest_issue_rows) or issue_rows != 0:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    expected_rows = {
+        "stump2.pcx": ("L12_CM", "zero_delta_extra40", "40"),
+        "barsgld.pcx": ("L14_HT", "positive_small_nextlow_minus2", "24"),
+        "dragend.pcx": ("L3_DH", "negative_small_extra36", "36"),
+        "catbas.pcx": ("L5_HC", "zero_delta_extra40", "40"),
+    }
+    rows_by_name = {row.get("pcx_name", ""): row for row in manifest_rows}
+    if set(rows_by_name) != set(expected_rows):
+        issues.append("field16_decoder_preview_rows_unexpected")
+    else:
+        for pcx_name, expected in expected_rows.items():
+            row = rows_by_name[pcx_name]
+            actual = (row.get("archive_tag"), row.get("decoder_rule"), row.get("decoder_extra"))
+            if actual != expected:
+                issues.append(f"field16_decoder_preview_{pcx_name}_row_mismatch")
+            if row.get("native_width") != "48" or row.get("native_height") != "128":
+                issues.append(f"field16_decoder_preview_{pcx_name}_native_size_mismatch")
+            if (row.get("fullhd_width"), row.get("fullhd_height")) != (str(TARGET_SIZE[0]), str(TARGET_SIZE[1])):
+                issues.append(f"field16_decoder_preview_{pcx_name}_fullhd_size_mismatch")
+            for field in ("source_preview_path", "native_preview_path", "fullhd_preview_path"):
+                if not row.get(field) or not Path(row[field]).exists():
+                    issues.append(f"field16_decoder_preview_{pcx_name}_{field}_missing")
+            if row.get("issues"):
+                issues.append(f"field16_decoder_preview_{pcx_name}_issue")
+
+    if total.get("review_verdict") != "field16_decoder_previews_ready":
+        issues.append("field16_decoder_preview_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_decoder_previews_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_decoder_previews",
+            ok,
+            expected="materialized 4 routed shifted 0x2a30 field16 decoder previews as native and Full HD PNGs",
+            actual=(
+                f"native={native_previews}, fullhd={fullhd_previews}, "
+                f"sources={source_previews}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        native_previews if ok else 0,
+        fullhd_previews if ok else 0,
+        source_previews if ok else 0,
     )
 
 
@@ -14148,6 +14267,17 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_decoder_route_gate)
+    (
+        tex_large_shifted_2a30_field16_decoder_previews_gate,
+        tex_large_shifted_2a30_field16_decoder_previews_native,
+        tex_large_shifted_2a30_field16_decoder_previews_fullhd,
+        tex_large_shifted_2a30_field16_decoder_previews_sources,
+    ) = audit_tex_large_shifted_2a30_field16_decoder_previews(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_MANIFEST,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_decoder_previews_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -19589,6 +19719,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_decoder_route_non_2a30": str(
             tex_large_shifted_2a30_field16_decoder_route_non_2a30
+        ),
+        "tex_large_shifted_2a30_field16_decoder_previews_native": str(
+            tex_large_shifted_2a30_field16_decoder_previews_native
+        ),
+        "tex_large_shifted_2a30_field16_decoder_previews_fullhd": str(
+            tex_large_shifted_2a30_field16_decoder_previews_fullhd
+        ),
+        "tex_large_shifted_2a30_field16_decoder_previews_sources": str(
+            tex_large_shifted_2a30_field16_decoder_previews_sources
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),

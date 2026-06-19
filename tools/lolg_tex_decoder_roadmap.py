@@ -1026,6 +1026,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_SUMMARY = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_decoder_route/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1854,6 +1857,7 @@ def apply_old_clean_byte_union(
     tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay: dict[str, str] | None,
     tex_large_shifted_2a30_field16_decoder_integration: dict[str, str] | None,
     tex_large_shifted_2a30_field16_decoder_route: dict[str, str] | None,
+    tex_large_shifted_2a30_field16_decoder_previews: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -4965,6 +4969,20 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shifted_2a30_field16_decoder_previews:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_field16_previews_fullhd="
+                    f"{tex_large_shifted_2a30_field16_decoder_previews.get('fullhd_previews', '0')}/"
+                    f"{tex_large_shifted_2a30_field16_decoder_previews.get('manifest_rows', '0')}",
+                    "tex_large_shifted_2a30_field16_previews_sources="
+                    f"{tex_large_shifted_2a30_field16_decoder_previews.get('source_previews', '0')}",
+                    "tex_large_shifted_2a30_field16_previews_verdict="
+                    f"{tex_large_shifted_2a30_field16_decoder_previews.get('review_verdict', '')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5531,6 +5549,13 @@ def apply_old_clean_byte_union(
                     tex_raw_same_archive_promoted_pack.get("next_action")
                     or tex_remaining_reference_profile.get("next_action")
                 )
+            elif (
+                tex_large_shifted_2a30_field16_decoder_previews
+                and int_value(tex_large_shifted_2a30_field16_decoder_previews, "fullhd_previews") > 0
+                and int_value(tex_large_shifted_2a30_field16_decoder_previews, "issue_rows") == 0
+                and tex_large_shifted_2a30_field16_decoder_previews.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_field16_decoder_previews.get("next_action"))
             elif (
                 tex_large_shifted_2a30_field16_decoder_route
                 and int_value(tex_large_shifted_2a30_field16_decoder_route, "routed_exact_rows") > 0
@@ -21679,6 +21704,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-field16-decoder-previews-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -24263,6 +24293,9 @@ def main() -> None:
     tex_large_shifted_2a30_field16_decoder_route_summary = read_optional_summary(
         args.tex_large_shifted_2a30_field16_decoder_route_summary
     )
+    tex_large_shifted_2a30_field16_decoder_previews_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_field16_decoder_previews_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -25799,6 +25832,7 @@ def main() -> None:
         tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay=tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_summary,
         tex_large_shifted_2a30_field16_decoder_integration=tex_large_shifted_2a30_field16_decoder_integration_summary,
         tex_large_shifted_2a30_field16_decoder_route=tex_large_shifted_2a30_field16_decoder_route_summary,
+        tex_large_shifted_2a30_field16_decoder_previews=tex_large_shifted_2a30_field16_decoder_previews_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
