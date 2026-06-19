@@ -4798,8 +4798,12 @@ def apply_old_clean_byte_union(
                     f"{tex_augmented_coverage.get('decoded_material_unique_pcx', '0')}",
                     "tex_augmented_field16_decoder_unique="
                     f"{tex_augmented_coverage.get('field16_decoder_unique_pcx', '0')}",
+                    "tex_augmented_branch_high_arg2_unique="
+                    f"{tex_augmented_coverage.get('branch_high_arg2_unique_pcx', '0')}",
                     "tex_augmented_exact_alias_decoded_raw_or_field16="
                     f"{tex_augmented_coverage.get('exact_alias_decoded_raw_or_field16_unique_pcx', '0')}",
+                    "tex_augmented_exact_alias_decoded_raw_field16_or_branch="
+                    f"{tex_augmented_coverage.get('exact_alias_decoded_raw_field16_or_branch_unique_pcx', '0')}",
                     "tex_augmented_unresolved_unique="
                     f"{tex_augmented_coverage.get('unresolved_unique_pcx', '0')}",
                 ],
@@ -5880,6 +5884,13 @@ def apply_old_clean_byte_union(
             and tex_remaining_reference_profile.get("next_action")
         ):
             field16_decoder_covered = int_value(tex_augmented_coverage, "field16_decoder_unique_pcx") > 0
+            branch_high_arg2_covered = int_value(tex_augmented_coverage, "branch_high_arg2_unique_pcx") > 0
+            remaining_profile_current = (
+                int_value(tex_remaining_reference_profile, "unresolved_reference_rows")
+                == int_value(tex_augmented_coverage, "unresolved_reference_rows")
+                and int_value(tex_remaining_reference_profile, "unresolved_unique_pcx")
+                == int_value(tex_augmented_coverage, "unresolved_unique_pcx")
+            )
             remaining_large_segments = int_value(tex_remaining_reference_profile, "large_segment_unique")
             large_rejected_profile_current = (
                 tex_large_rejected_decoder_profile is not None
@@ -6037,7 +6048,13 @@ def apply_old_clean_byte_union(
                 and int_value(tex_large_shifted_2a30_branch_high_arg2_promoted_pack, "fullhd_assets")
                 == int_value(tex_large_shifted_2a30_branch_route_previews_review, "fullhd_reconstructed_rows")
             )
-            if (
+            if not remaining_profile_current:
+                next_action = (
+                    "refresh remaining .tex reference profile after augmented coverage "
+                    f"({tex_remaining_reference_profile.get('unresolved_unique_pcx', '0')} profile vs "
+                    f"{tex_augmented_coverage.get('unresolved_unique_pcx', '0')} augmented unique PCX)"
+                )
+            elif (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
                 and tex_raw_same_archive_pending_review.get("next_action")
@@ -6166,6 +6183,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
             elif (
+                not branch_high_arg2_covered
+                and
                 tex_large_shifted_2a30_branch_high_arg2_promoted_pack
                 and shifted_2a30_branch_high_arg2_promoted_pack_current
                 and int_value(tex_large_shifted_2a30_branch_high_arg2_promoted_pack, "coverage_eligible_rows") > 0
@@ -6174,6 +6193,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_branch_high_arg2_promoted_pack.get("next_action"))
             elif (
+                not branch_high_arg2_covered
+                and
                 tex_large_shifted_2a30_branch_route_previews_review
                 and shifted_2a30_branch_route_previews_review_current
                 and int_value(tex_large_shifted_2a30_branch_route_previews_review, "review_ready_rows") > 0
@@ -6182,6 +6203,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_branch_route_previews_review.get("next_action"))
             elif (
+                not branch_high_arg2_covered
+                and
                 tex_large_shifted_2a30_branch_route_previews
                 and shifted_2a30_branch_route_previews_current
                 and int_value(tex_large_shifted_2a30_branch_route_previews, "fullhd_previews") > 0
@@ -6190,6 +6213,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_branch_route_previews.get("next_action"))
             elif (
+                not branch_high_arg2_covered
+                and
                 tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay
                 and shifted_2a30_branch_high_arg2_renderer_route_promoted_replay_current
                 and int_value(
@@ -6207,6 +6232,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay.get("next_action"))
             elif (
+                not branch_high_arg2_covered
+                and
                 tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe
                 and shifted_2a30_branch_high_arg2_skip_validation_probe_current
                 and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("target_pixels_equal") == "yes"
@@ -7840,8 +7867,13 @@ def apply_old_clean_byte_union(
         elif final_residual and final_residual.get("dominant_blocker"):
             next_action = "split post-union residual source dependency blockers"
 
+        branch_high_arg2_coverage_ready = (
+            tex_augmented_coverage is not None
+            and int_value(tex_augmented_coverage, "branch_high_arg2_unique_pcx") > 0
+        )
         high_arg2_route_promoted_ready = (
-            tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay is not None
+            not branch_high_arg2_coverage_ready
+            and tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay is not None
             and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe is not None
             and int_value(
                 tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay,
@@ -7861,7 +7893,8 @@ def apply_old_clean_byte_union(
             and tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay.get("next_action")
         )
         high_arg2_route_previews_ready = (
-            tex_large_shifted_2a30_branch_route_previews is not None
+            not branch_high_arg2_coverage_ready
+            and tex_large_shifted_2a30_branch_route_previews is not None
             and tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay is not None
             and int_value(tex_large_shifted_2a30_branch_route_previews, "target_high_arg2_skips")
             == int_value(
@@ -7875,7 +7908,8 @@ def apply_old_clean_byte_union(
             and tex_large_shifted_2a30_branch_route_previews.get("next_action")
         )
         high_arg2_route_previews_review_ready = (
-            tex_large_shifted_2a30_branch_route_previews_review is not None
+            not branch_high_arg2_coverage_ready
+            and tex_large_shifted_2a30_branch_route_previews_review is not None
             and tex_large_shifted_2a30_branch_route_previews is not None
             and int_value(tex_large_shifted_2a30_branch_route_previews_review, "review_rows")
             == int_value(tex_large_shifted_2a30_branch_route_previews, "manifest_rows")
@@ -7886,7 +7920,8 @@ def apply_old_clean_byte_union(
             and tex_large_shifted_2a30_branch_route_previews_review.get("next_action")
         )
         high_arg2_promoted_pack_ready = (
-            tex_large_shifted_2a30_branch_high_arg2_promoted_pack is not None
+            not branch_high_arg2_coverage_ready
+            and tex_large_shifted_2a30_branch_high_arg2_promoted_pack is not None
             and tex_large_shifted_2a30_branch_route_previews_review is not None
             and int_value(tex_large_shifted_2a30_branch_high_arg2_promoted_pack, "review_rows")
             == int_value(tex_large_shifted_2a30_branch_route_previews_review, "review_rows")
@@ -7897,7 +7932,8 @@ def apply_old_clean_byte_union(
             and tex_large_shifted_2a30_branch_high_arg2_promoted_pack.get("next_action")
         )
         high_arg2_validation_ready = (
-            tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe is not None
+            not branch_high_arg2_coverage_ready
+            and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe is not None
             and tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe is not None
             and int_value(
                 tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe,

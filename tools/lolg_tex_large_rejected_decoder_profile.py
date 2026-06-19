@@ -321,7 +321,9 @@ def build_segment_rows(
         archive_path = Path(first.get("archive", ""))
         body_offset = int_value(first, "body_offset")
         segment_size = int_value(first, "segment_size")
-        profile = profiles.get((first.get("archive", ""), normalize_name(first.get("pcx_name", ""))), {})
+        profile = profiles.get((first.get("archive", ""), normalize_name(first.get("pcx_name", ""))))
+        if profile is None:
+            continue
         texture_row = texture_segments.get(key, {})
         if not texture_row:
             issues.append("missing_texture_segment_profile")
