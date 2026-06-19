@@ -1026,6 +1026,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HEADER_START_PROBE_SUMMARY = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
     "output/tex_large_shifted_2a30_branch_start_guard_promoted_replay/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_ROUTE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_branch_start_guard_route/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_probe/summary.csv"
 )
@@ -1890,6 +1893,7 @@ def apply_old_clean_byte_union(
     tex_large_shifted_2a30_branch_singleton_header_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_header_start_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_start_guard_promoted_replay: dict[str, str] | None,
+    tex_large_shifted_2a30_branch_start_guard_route: dict[str, str] | None,
     tex_large_shifted_2a30_field16_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_replay_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_transform_probe: dict[str, str] | None,
@@ -5020,6 +5024,21 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shifted_2a30_branch_start_guard_route:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_branch_start_guard_route_rows="
+                    f"{tex_large_shifted_2a30_branch_start_guard_route.get('branch_start_guard_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_start_guard_route_remaining_branch="
+                    f"{tex_large_shifted_2a30_branch_start_guard_route.get('remaining_branch_blocked_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_start_guard_route_renderer_blocked="
+                    f"{tex_large_shifted_2a30_branch_start_guard_route.get('branch_renderer_blocked_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_start_guard_route_target_extra="
+                    f"{tex_large_shifted_2a30_branch_start_guard_route.get('target_decoder_extra', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_field16_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5827,6 +5846,16 @@ def apply_old_clean_byte_union(
                 )
                 == int_value(tex_large_shifted_2a30_branch_selector_probe, "renderer_candidate_rows")
             )
+            shifted_2a30_branch_start_guard_route_current = (
+                shifted_2a30_branch_start_guard_promoted_replay_current
+                and tex_large_shifted_2a30_branch_start_guard_route is not None
+                and int_value(
+                    tex_large_shifted_2a30_branch_start_guard_route,
+                    "start_guard_operation_rows",
+                )
+                == int_value(tex_large_shifted_2a30_branch_start_guard_promoted_replay, "operation_rows")
+                and int_value(tex_large_shifted_2a30_branch_start_guard_route, "base_branch_blocked_rows") > 0
+            )
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -5955,6 +5984,14 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_field16_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
+            elif (
+                tex_large_shifted_2a30_branch_start_guard_route
+                and shifted_2a30_branch_start_guard_route_current
+                and int_value(tex_large_shifted_2a30_branch_start_guard_route, "branch_start_guard_rows") > 0
+                and int_value(tex_large_shifted_2a30_branch_start_guard_route, "issue_rows") == 0
+                and tex_large_shifted_2a30_branch_start_guard_route.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_branch_start_guard_route.get("next_action"))
             elif (
                 tex_large_shifted_2a30_branch_start_guard_promoted_replay
                 and shifted_2a30_branch_start_guard_promoted_replay_current
@@ -22108,6 +22145,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_PROMOTED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-branch-start-guard-route-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_ROUTE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-field16-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY,
@@ -24752,6 +24794,9 @@ def main() -> None:
     tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary = read_optional_summary(
         args.tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary
     )
+    tex_large_shifted_2a30_branch_start_guard_route_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_branch_start_guard_route_summary
+    )
     tex_large_shifted_2a30_field16_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_field16_probe_summary
     )
@@ -26324,6 +26369,7 @@ def main() -> None:
         tex_large_shifted_2a30_branch_singleton_header_probe=tex_large_shifted_2a30_branch_singleton_header_probe_summary,
         tex_large_shifted_2a30_branch_header_start_probe=tex_large_shifted_2a30_branch_header_start_probe_summary,
         tex_large_shifted_2a30_branch_start_guard_promoted_replay=tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary,
+        tex_large_shifted_2a30_branch_start_guard_route=tex_large_shifted_2a30_branch_start_guard_route_summary,
         tex_large_shifted_2a30_field16_probe=tex_large_shifted_2a30_field16_probe_summary,
         tex_large_shifted_2a30_field16_replay_probe=tex_large_shifted_2a30_field16_replay_probe_summary,
         tex_large_shifted_2a30_field16_transform_probe=tex_large_shifted_2a30_field16_transform_probe_summary,
