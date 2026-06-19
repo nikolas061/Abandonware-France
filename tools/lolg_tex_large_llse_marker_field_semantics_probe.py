@@ -155,6 +155,9 @@ ACTIONS = [
     "setxy_f1div4_f0_if_f1mod4_f0ge40_f0ltf0_ylt512",
     "setxy_f1div4_f0_if_f1mod4_f0ge40_f2ge10_ylt512",
     "setxy_f1div4_f0_if_f1mod4_f0ge40_f2ge10_f0ltf0_ylt512",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_f0ltf0_f2ge40_f3ge30_ylt512",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_f0ltf0_f4ge80_ylt512",
+    "setxy_f1div4_f0_if_f1mod4_f0gec0_f0ltf0_ylt512",
     "setxy_f1div4_f0_if_f1mod4_f0ge40",
     "setxy_f1div4_f0_if_f1mod4_f0ge60",
     "setxy_f1div4_f0_if_f1mod4_f0ge80",
@@ -303,7 +306,7 @@ def action_y_limit(action: str) -> int | None:
     return int(suffix)
 
 
-def static_f0_guard_ok(action: str, f0: int, f2: int, y: int) -> bool:
+def static_f0_guard_ok(action: str, f0: int, f2: int, f3: int, f4: int, y: int) -> bool:
     limit = action_y_limit(action)
     if limit is not None and y >= limit:
         return False
@@ -312,11 +315,15 @@ def static_f0_guard_ok(action: str, f0: int, f2: int, y: int) -> bool:
         or ("f0ge40" in action and f0 >= 0x40)
         or ("f0ge60" in action and f0 >= 0x60)
         or ("f0ge80" in action and f0 >= 0x80)
+        or ("f0gec0" in action and f0 >= 0xC0)
     )
     return (
         f0_floor_ok
         and ("f0ltf0" not in action or f0 < 0xF0)
         and ("f2ge10" not in action or f2 >= 0x10)
+        and ("f2ge40" not in action or f2 >= 0x40)
+        and ("f3ge30" not in action or f3 >= 0x30)
+        and ("f4ge80" not in action or f4 >= 0x80)
     )
 
 
@@ -436,7 +443,7 @@ def apply_field_action(
     elif (
         action.startswith("setxy_f1div4_f0_if_f1mod4_f0ge")
         and f1 % 4 == 0
-        and static_f0_guard_ok(action, f0, f2, y)
+        and static_f0_guard_ok(action, f0, f2, f3, f4, y)
     ):
         x = (f1 // 4) % max(1, width)
         y = clamp_y(f0, height)
