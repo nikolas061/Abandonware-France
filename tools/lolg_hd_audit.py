@@ -76,6 +76,12 @@ DEFAULT_TEX_MATERIAL_DECODE_PACK_HTML = Path("output/tex_material_decode_pack/in
 DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_SUMMARY = Path("output/tex_raw_same_archive_promoted_pack/summary.csv")
 DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_MANIFEST = Path("output/tex_raw_same_archive_promoted_pack/manifest.csv")
 DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_HTML = Path("output/tex_raw_same_archive_promoted_pack/index.html")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_SUMMARY = Path("output/tex_raw_same_archive_pending_review/summary.csv")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_ROWS = Path("output/tex_raw_same_archive_pending_review/pending.csv")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_DECISIONS = Path(
+    "output/tex_raw_same_archive_pending_review/decisions_template.tsv"
+)
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_HTML = Path("output/tex_raw_same_archive_pending_review/index.html")
 DEFAULT_TEX_AUGMENTED_SUMMARY = Path("output/tex_augmented_coverage/summary.csv")
 DEFAULT_TEX_AUGMENTED_REFERENCES = Path("output/tex_augmented_coverage/references.csv")
 DEFAULT_TEX_AUGMENTED_ALIASES = Path("output/tex_augmented_coverage/aliases.csv")
@@ -764,6 +770,7 @@ SUMMARY_FIELDNAMES = [
     "cdcache_tex_alias_pack_assets",
     "tex_material_decode_pack_assets",
     "tex_raw_same_archive_promoted_pack_eligible",
+    "tex_raw_same_archive_pending_review_rows",
     "tex_augmented_exact_or_alias_unique_pcx",
     "tex_augmented_exact_alias_or_decoded_unique_pcx",
     "tex_augmented_exact_alias_decoded_or_raw_unique_pcx",
@@ -1001,6 +1008,11 @@ SUMMARY_FIELDNAMES = [
 def read_csv(path: Path) -> list[dict[str, str]]:
     with path.open(newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def read_tsv(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="") as handle:
+        return list(csv.DictReader(handle, delimiter="\t"))
 
 
 def int_value(row: dict[str, str], field: str) -> int:
@@ -2248,6 +2260,103 @@ def audit_tex_raw_same_archive_promoted_pack(
             issues=issues,
         ),
         coverage_eligible_rows if ok else 0,
+    )
+
+
+def audit_tex_raw_same_archive_pending_review(
+    summary: Path,
+    pending_rows_path: Path,
+    decisions_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int]:
+    if not summary.exists():
+        return missing_gate("tex_raw_same_archive_pending_review", summary), 0
+    if not pending_rows_path.exists():
+        return missing_gate("tex_raw_same_archive_pending_review", pending_rows_path), 0
+    if not decisions_path.exists():
+        return missing_gate("tex_raw_same_archive_pending_review", decisions_path), 0
+    if not html_report.exists():
+        return missing_gate("tex_raw_same_archive_pending_review", html_report), 0
+
+    summary_rows = read_csv(summary)
+    pending_rows = read_csv(pending_rows_path)
+    decision_rows = read_tsv(decisions_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    pending_count = int_value(total, "pending_rows")
+    pending_unique = int_value(total, "pending_unique_pcx")
+    review_ready_rows = int_value(total, "review_ready_rows")
+    decision_template_rows = int_value(total, "decision_template_rows")
+    sheet_rows = int_value(total, "sheet_rows")
+    missing_source_paths = int_value(total, "missing_source_paths")
+    missing_fullhd_paths = int_value(total, "missing_fullhd_paths")
+    missing_sheet_paths = int_value(total, "missing_sheet_paths")
+    issue_rows = int_value(total, "issue_rows")
+
+    unique_names = {
+        row.get("normalized_pcx_name", "")
+        for row in pending_rows
+        if row.get("normalized_pcx_name")
+    }
+    if pending_count != len(pending_rows):
+        issues.append("raw_same_archive_pending_count_mismatch")
+    if pending_unique != len(unique_names):
+        issues.append("raw_same_archive_pending_unique_mismatch")
+    if review_ready_rows != sum(1 for row in pending_rows if not row.get("issues")):
+        issues.append("raw_same_archive_pending_ready_count_mismatch")
+    if decision_template_rows != len(decision_rows):
+        issues.append("raw_same_archive_pending_decision_count_mismatch")
+    if sheet_rows != sum(1 for row in pending_rows if row.get("review_sheet_exists") == "yes"):
+        issues.append("raw_same_archive_pending_sheet_count_mismatch")
+    if missing_source_paths != sum(1 for row in pending_rows if row.get("source_native_exists") != "yes"):
+        issues.append("raw_same_archive_pending_missing_source_count_mismatch")
+    if missing_fullhd_paths != sum(1 for row in pending_rows if row.get("promoted_fullhd_exists") != "yes"):
+        issues.append("raw_same_archive_pending_missing_fullhd_count_mismatch")
+    if missing_sheet_paths != sum(1 for row in pending_rows if row.get("review_sheet_exists") != "yes"):
+        issues.append("raw_same_archive_pending_missing_sheet_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    missing_paths = 0
+    filled_decisions = 0
+    for row in pending_rows:
+        for field in ("source_native_path", "promoted_fullhd_path", "review_sheet_path"):
+            value = row.get(field, "")
+            if not value or not Path(value).exists():
+                missing_paths += 1
+    for row in decision_rows:
+        if row.get("review_status") or row.get("review_note"):
+            filled_decisions += 1
+        sheet = row.get("review_sheet_path", "")
+        if not sheet or not Path(sheet).exists():
+            missing_paths += 1
+    if filled_decisions:
+        issues.append(f"decision_template_pre_filled:{filled_decisions}")
+    if missing_paths:
+        issues.append(f"missing_pending_review_paths:{missing_paths}")
+    if "const TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW = " not in text:
+        issues.append("missing_tex_raw_same_archive_pending_review_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_raw_same_archive_pending_review",
+            ok,
+            expected="pending raw same-archive .tex promotions have review sheets and a blank decision template",
+            actual=(
+                f"pending={pending_count}, ready={review_ready_rows}, "
+                f"decisions={decision_template_rows}, sheets={sheet_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        pending_count if ok else 0,
     )
 
 
@@ -11754,6 +11863,15 @@ def main() -> None:
         DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_HTML,
     )
     rows.append(tex_raw_same_archive_gate)
+    tex_raw_same_archive_pending_gate, tex_raw_same_archive_pending_rows = (
+        audit_tex_raw_same_archive_pending_review(
+            DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_SUMMARY,
+            DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_ROWS,
+            DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_DECISIONS,
+            DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_HTML,
+        )
+    )
+    rows.append(tex_raw_same_archive_pending_gate)
     (
         tex_augmented_gate,
         tex_augmented_exact_or_alias,
@@ -17118,6 +17236,7 @@ def main() -> None:
         "cdcache_tex_alias_pack_assets": str(alias_pack_assets),
         "tex_material_decode_pack_assets": str(tex_material_decode_assets),
         "tex_raw_same_archive_promoted_pack_eligible": str(tex_raw_same_archive_eligible),
+        "tex_raw_same_archive_pending_review_rows": str(tex_raw_same_archive_pending_rows),
         "tex_augmented_exact_or_alias_unique_pcx": str(tex_augmented_exact_or_alias),
         "tex_augmented_exact_alias_or_decoded_unique_pcx": str(tex_augmented_exact_alias_or_decoded),
         "tex_augmented_exact_alias_decoded_or_raw_unique_pcx": str(

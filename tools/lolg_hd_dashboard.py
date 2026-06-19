@@ -39,6 +39,7 @@ DEFAULT_TEX_MATERIAL_DECODE_PACK = Path("output/tex_material_decode_pack/index.h
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE = Path("output/tex_material_decoder_queue/index.html")
 DEFAULT_TEX_REMAINING_REFERENCE_PROFILE = Path("output/tex_remaining_reference_profile/index.html")
 DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK = Path("output/tex_raw_same_archive_promoted_pack/index.html")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW = Path("output/tex_raw_same_archive_pending_review/index.html")
 DEFAULT_TEX_EXACT_CDCACHE_COMPARE = Path("output/tex_exact_cdcache_compare/index.html")
 DEFAULT_TEX_EXACT_CHUNK_EVIDENCE = Path("output/tex_exact_chunk_evidence/index.html")
 DEFAULT_TEX_EXACT_MATCH_OVERLAYS = Path("output/tex_exact_match_overlays/index.html")
@@ -916,6 +917,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("File décodeur .tex", DEFAULT_TEX_MATERIAL_DECODER_QUEUE),
         ("Profil références restantes .tex", DEFAULT_TEX_REMAINING_REFERENCE_PROFILE),
         ("Pack raw same-archive .tex", DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK),
+        ("Revue raw same-archive .tex", DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW),
         ("Comparaison exact .tex", DEFAULT_TEX_EXACT_CDCACHE_COMPARE),
         ("Preuves chunks .tex", DEFAULT_TEX_EXACT_CHUNK_EVIDENCE),
         ("Overlays chunks .tex", DEFAULT_TEX_EXACT_MATCH_OVERLAYS),

@@ -2510,6 +2510,11 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_raw_same_archive_promoted_pack.py"],
             requires_pillow=True,
         ),
+        Step(
+            "revue promotions raw same-archive .tex",
+            [sys.executable, "tools/lolg_tex_raw_same_archive_pending_review.py"],
+            requires_pillow=True,
+        ),
         Step("couverture augmentee .tex apres promotions raw", [sys.executable, "tools/lolg_tex_augmented_coverage.py"]),
         Step(
             "profil references restantes .tex apres promotions raw",
