@@ -987,6 +987,9 @@ DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_SUMMARY = Path("output/tex_raw_same_
 DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_ANALYSIS_SUMMARY = Path(
     "output/tex_large_unresolved_probe_render/analysis_summary.csv"
 )
+DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_REVIEW_SUMMARY = Path(
+    "output/tex_large_unresolved_probe_review/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1802,6 +1805,7 @@ def apply_old_clean_byte_union(
     tex_raw_same_archive_promoted_pack: dict[str, str] | None,
     tex_raw_same_archive_pending_review: dict[str, str] | None,
     tex_large_unresolved_probe_analysis: dict[str, str] | None,
+    tex_large_unresolved_probe_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -4725,6 +4729,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_unresolved_probe_review:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_probe_review_candidates="
+                    f"{tex_large_unresolved_probe_review.get('candidate_rows', '0')}",
+                    "tex_large_probe_review_segments="
+                    f"{tex_large_unresolved_probe_review.get('segment_rows', '0')}",
+                    "tex_large_probe_review_template_rows="
+                    f"{tex_large_unresolved_probe_review.get('decision_template_rows', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5291,6 +5308,12 @@ def apply_old_clean_byte_union(
                     tex_raw_same_archive_promoted_pack.get("next_action")
                     or tex_remaining_reference_profile.get("next_action")
                 )
+            elif (
+                tex_large_unresolved_probe_review
+                and int_value(tex_large_unresolved_probe_review, "candidate_rows") > 0
+                and tex_large_unresolved_probe_review.get("next_action")
+            ):
+                next_action = str(tex_large_unresolved_probe_review.get("next_action"))
             elif (
                 tex_large_unresolved_probe_analysis
                 and int_value(tex_remaining_reference_profile, "large_segment_unique") > 0
@@ -21284,6 +21307,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_ANALYSIS_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-unresolved-probe-review-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_REVIEW_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -23829,6 +23857,9 @@ def main() -> None:
     tex_large_unresolved_probe_analysis_summary = read_optional_summary(
         args.tex_large_unresolved_probe_analysis_summary
     )
+    tex_large_unresolved_probe_review_summary = read_optional_summary(
+        args.tex_large_unresolved_probe_review_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -25352,6 +25383,7 @@ def main() -> None:
         tex_raw_same_archive_promoted_pack=tex_raw_same_archive_promoted_pack_summary,
         tex_raw_same_archive_pending_review=tex_raw_same_archive_pending_review_summary,
         tex_large_unresolved_probe_analysis=tex_large_unresolved_probe_analysis_summary,
+        tex_large_unresolved_probe_review=tex_large_unresolved_probe_review_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,

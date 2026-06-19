@@ -110,6 +110,11 @@ DEFAULT_TEX_LARGE_PROBE_ANALYSIS_SUMMARY = Path(
 DEFAULT_TEX_LARGE_PROBE_ANALYSIS_ROWS = Path("output/tex_large_unresolved_probe_render/analysis.csv")
 DEFAULT_TEX_LARGE_PROBE_ANALYSIS_BEST = Path("output/tex_large_unresolved_probe_render/best_candidates.csv")
 DEFAULT_TEX_LARGE_PROBE_ANALYSIS_HTML = Path("output/tex_large_unresolved_probe_render/analysis.html")
+DEFAULT_TEX_LARGE_PROBE_REVIEW_SUMMARY = Path("output/tex_large_unresolved_probe_review/summary.csv")
+DEFAULT_TEX_LARGE_PROBE_REVIEW_CANDIDATES = Path("output/tex_large_unresolved_probe_review/candidates.csv")
+DEFAULT_TEX_LARGE_PROBE_REVIEW_SEGMENTS = Path("output/tex_large_unresolved_probe_review/segments.csv")
+DEFAULT_TEX_LARGE_PROBE_REVIEW_DECISIONS = Path("output/tex_large_unresolved_probe_review/decisions_template.tsv")
+DEFAULT_TEX_LARGE_PROBE_REVIEW_HTML = Path("output/tex_large_unresolved_probe_review/index.html")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -794,6 +799,7 @@ SUMMARY_FIELDNAMES = [
     "tex_large_unresolved_probe_unique_pcx",
     "tex_large_probe_analysis_best_candidates",
     "tex_large_probe_analysis_segments",
+    "tex_large_probe_review_candidates",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -2714,6 +2720,115 @@ def audit_tex_probe_analysis(
         ),
         best_candidate_rows if ok else 0,
         segments if ok else 0,
+    )
+
+
+def audit_tex_large_probe_review(
+    summary: Path,
+    candidates_path: Path,
+    segments_path: Path,
+    decisions_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int]:
+    if not summary.exists():
+        return missing_gate("tex_large_probe_review", summary), 0
+    if not candidates_path.exists():
+        return missing_gate("tex_large_probe_review", candidates_path), 0
+    if not segments_path.exists():
+        return missing_gate("tex_large_probe_review", segments_path), 0
+    if not decisions_path.exists():
+        return missing_gate("tex_large_probe_review", decisions_path), 0
+    if not html_report.exists():
+        return missing_gate("tex_large_probe_review", html_report), 0
+
+    summary_rows = read_csv(summary)
+    candidate_rows = read_csv(candidates_path)
+    segment_rows = read_csv(segments_path)
+    decision_rows = read_tsv(decisions_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    candidate_count = int_value(total, "candidate_rows")
+    segment_count = int_value(total, "segment_rows")
+    unique_pcx = int_value(total, "unique_pcx")
+    review_ready = int_value(total, "review_ready_rows")
+    decision_template_rows = int_value(total, "decision_template_rows")
+    sheet_rows = int_value(total, "sheet_rows")
+    missing_native = int_value(total, "missing_native_paths")
+    missing_fullhd = int_value(total, "missing_fullhd_paths")
+    missing_sheets = int_value(total, "missing_sheet_paths")
+    issue_rows = int_value(total, "issue_rows")
+
+    unique_names = {
+        row.get("pcx_name", "").lower()
+        for row in candidate_rows
+        if row.get("pcx_name")
+    }
+    if candidate_count != len(candidate_rows):
+        issues.append("large_probe_review_candidate_count_mismatch")
+    if segment_count != len(segment_rows):
+        issues.append("large_probe_review_segment_count_mismatch")
+    if unique_pcx != len(unique_names):
+        issues.append("large_probe_review_unique_pcx_mismatch")
+    if review_ready != sum(1 for row in candidate_rows if not row.get("issues")):
+        issues.append("large_probe_review_ready_count_mismatch")
+    if decision_template_rows != len(decision_rows):
+        issues.append("large_probe_review_decision_count_mismatch")
+    if sheet_rows != sum(1 for row in segment_rows if row.get("review_sheet_exists") == "yes"):
+        issues.append("large_probe_review_sheet_count_mismatch")
+    if missing_native != sum(1 for row in candidate_rows if row.get("native_exists") != "yes"):
+        issues.append("large_probe_review_missing_native_count_mismatch")
+    if missing_fullhd != sum(1 for row in candidate_rows if row.get("fullhd_exists") != "yes"):
+        issues.append("large_probe_review_missing_fullhd_count_mismatch")
+    if missing_sheets != sum(1 for row in segment_rows if row.get("review_sheet_exists") != "yes"):
+        issues.append("large_probe_review_missing_sheet_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    missing_paths = 0
+    filled_decisions = 0
+    for row in candidate_rows:
+        for field in ("native_path", "fullhd_path", "review_sheet_path"):
+            value = row.get(field, "")
+            if not value or not Path(value).exists():
+                missing_paths += 1
+    for row in segment_rows:
+        value = row.get("review_sheet_path", "")
+        if not value or not Path(value).exists():
+            missing_paths += 1
+    for row in decision_rows:
+        if row.get("review_status") or row.get("review_note"):
+            filled_decisions += 1
+        for field in ("candidate_native_path", "candidate_fullhd_path", "review_sheet_path"):
+            value = row.get(field, "")
+            if not value or not Path(value).exists():
+                missing_paths += 1
+    if filled_decisions:
+        issues.append(f"decision_template_pre_filled:{filled_decisions}")
+    if missing_paths:
+        issues.append(f"missing_large_probe_review_paths:{missing_paths}")
+    if "const TEX_LARGE_UNRESOLVED_PROBE_REVIEW = " not in text:
+        issues.append("missing_tex_large_probe_review_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_probe_review",
+            ok,
+            expected="large unresolved .tex probe candidates have review sheets and a blank decision template",
+            actual=(
+                f"candidates={candidate_count}, segments={segment_count}, "
+                f"decisions={decision_template_rows}, sheets={sheet_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        candidate_count if ok else 0,
     )
 
 
@@ -11944,6 +12059,14 @@ def main() -> None:
         )
     )
     rows.append(tex_large_probe_analysis_gate)
+    tex_large_probe_review_gate, tex_large_probe_review_candidates = audit_tex_large_probe_review(
+        DEFAULT_TEX_LARGE_PROBE_REVIEW_SUMMARY,
+        DEFAULT_TEX_LARGE_PROBE_REVIEW_CANDIDATES,
+        DEFAULT_TEX_LARGE_PROBE_REVIEW_SEGMENTS,
+        DEFAULT_TEX_LARGE_PROBE_REVIEW_DECISIONS,
+        DEFAULT_TEX_LARGE_PROBE_REVIEW_HTML,
+    )
+    rows.append(tex_large_probe_review_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -17291,6 +17414,7 @@ def main() -> None:
         "tex_large_unresolved_probe_unique_pcx": str(tex_large_probe_unique_pcx),
         "tex_large_probe_analysis_best_candidates": str(tex_large_probe_analysis_best),
         "tex_large_probe_analysis_segments": str(tex_large_probe_analysis_segments),
+        "tex_large_probe_review_candidates": str(tex_large_probe_review_candidates),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
         "tex_remaining_reference_profile_unique": str(tex_remaining_profile_unique),

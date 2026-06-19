@@ -2560,6 +2560,11 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "revue gros segments .tex restants",
+            [sys.executable, "tools/lolg_tex_large_unresolved_probe_review.py"],
+            requires_pillow=True,
+        ),
+        Step(
             "gradient-like noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,
