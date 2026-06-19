@@ -169,6 +169,18 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_RULES = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_field16_replay_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_transform_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_ROWS = Path(
+    "output/tex_large_shifted_2a30_field16_transform_probe/transforms.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_RULES = Path(
+    "output/tex_large_shifted_2a30_field16_transform_probe/rules.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_transform_probe/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -864,6 +876,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_probe_low_mod4_rows",
     "tex_large_shifted_2a30_field16_replay_probe_candidates",
     "tex_large_shifted_2a30_field16_replay_probe_best_prefix",
+    "tex_large_shifted_2a30_field16_transform_probe_rows",
+    "tex_large_shifted_2a30_field16_transform_probe_best_direct",
+    "tex_large_shifted_2a30_field16_transform_probe_selector_needed",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -3418,6 +3433,130 @@ def audit_tex_large_shifted_2a30_field16_replay_probe(
         ),
         candidate_count if ok else 0,
         best_prefix if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_transform_probe(
+    summary: Path,
+    transforms_path: Path,
+    rules_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_transform_probe", summary), 0, 0, 0
+    if not transforms_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_transform_probe", transforms_path), 0, 0, 0
+    if not rules_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_transform_probe", rules_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_transform_probe", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    transform_rows = read_csv(transforms_path)
+    rule_rows = read_csv(rules_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    standard_rows = int_value(total, "standard_rows")
+    oracle_rows = int_value(total, "oracle_rows")
+    marker_bridge_rows = int_value(total, "marker_bridge_rows")
+    prologue_rows = int_value(total, "prologue_rows")
+    distinct_oracle_extra = int_value(total, "distinct_oracle_extra")
+    field16_unit_direct_rows = int_value(total, "field16_unit_direct_rows")
+    field16_low_direct_rows = int_value(total, "field16_low_direct_rows")
+    post1_direct_rows = int_value(total, "post1_direct_rows")
+    next_word_low_x4_rows = int_value(total, "next_word_low_x4_rows")
+    next_word_low_delta_values = int_value(total, "next_word_low_delta_values")
+    best_direct_rows = int_value(total, "best_direct_rows")
+    selector_needed_rows = int_value(total, "selector_needed_rows")
+    rule_count = int_value(total, "rule_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    oracle_transform_rows = [row for row in transform_rows if row.get("oracle_extra")]
+    if standard_rows != len(transform_rows):
+        issues.append("field16_transform_standard_count_mismatch")
+    if oracle_rows != len(oracle_transform_rows):
+        issues.append("field16_transform_oracle_count_mismatch")
+    if marker_bridge_rows != sum(1 for row in transform_rows if row.get("marker_pos")):
+        issues.append("field16_transform_marker_bridge_count_mismatch")
+    if prologue_rows != sum(1 for row in transform_rows if row.get("prologue_family")):
+        issues.append("field16_transform_prologue_count_mismatch")
+    if distinct_oracle_extra != len({row.get("oracle_extra", "") for row in oracle_transform_rows}):
+        issues.append("field16_transform_oracle_extra_count_mismatch")
+    if field16_unit_direct_rows != sum(
+        1 for row in oracle_transform_rows if row.get("field16_unit_direct_match") == "yes"
+    ):
+        issues.append("field16_transform_unit_direct_count_mismatch")
+    if field16_low_direct_rows != sum(
+        1 for row in oracle_transform_rows if row.get("field16_low_direct_match") == "yes"
+    ):
+        issues.append("field16_transform_low_direct_count_mismatch")
+    if post1_direct_rows != sum(1 for row in oracle_transform_rows if row.get("post1_direct_match") == "yes"):
+        issues.append("field16_transform_post1_direct_count_mismatch")
+    if next_word_low_x4_rows != sum(
+        1 for row in oracle_transform_rows if row.get("next_word_low_x4_match") == "yes"
+    ):
+        issues.append("field16_transform_next_low_x4_count_mismatch")
+    if next_word_low_delta_values != len(
+        {row.get("next_word_low_delta", "") for row in oracle_transform_rows if row.get("next_word_low_delta", "")}
+    ):
+        issues.append("field16_transform_delta_value_count_mismatch")
+    if best_direct_rows != max(
+        field16_unit_direct_rows,
+        field16_low_direct_rows,
+        post1_direct_rows,
+        next_word_low_x4_rows,
+    ):
+        issues.append("field16_transform_best_direct_mismatch")
+    if selector_needed_rows != max(0, oracle_rows - best_direct_rows):
+        issues.append("field16_transform_selector_needed_mismatch")
+    if field16_unit_direct_rows != 0:
+        issues.append("field16_transform_unit_direct_unexpected")
+    if field16_low_direct_rows != 0:
+        issues.append("field16_transform_low_direct_unexpected")
+    if not oracle_rows or best_direct_rows >= oracle_rows:
+        issues.append("field16_transform_direct_rule_overpromoted")
+    if selector_needed_rows <= 0:
+        issues.append("field16_transform_selector_not_needed")
+    if next_word_low_delta_values <= 1:
+        issues.append("field16_transform_delta_selector_not_split")
+    if rule_count != len(rule_rows):
+        issues.append("field16_transform_rule_count_mismatch")
+    rule_verdicts = {row.get("rule_id", ""): row.get("verdict", "") for row in rule_rows}
+    if rule_verdicts.get("field16_low_unit_direct_start") != "rejected":
+        issues.append("field16_transform_unit_rule_mismatch")
+    if rule_verdicts.get("field16_low_direct_start") != "rejected":
+        issues.append("field16_transform_low_rule_mismatch")
+    if rule_verdicts.get("next_word_low_delta_selector") != "selector_needed":
+        issues.append("field16_transform_delta_rule_mismatch")
+    if issue_rows != sum(1 for row in transform_rows if row.get("issues")):
+        issues.append("field16_transform_issue_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_transform_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_transform_probe",
+            ok,
+            expected="shifted 0x2a30 field16 start transform is derived and kept split before promotion",
+            actual=(
+                f"standard={standard_rows}, oracle={oracle_rows}, best_direct={best_direct_rows}, "
+                f"selector_needed={selector_needed_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        standard_rows if ok else 0,
+        best_direct_rows if ok else 0,
+        selector_needed_rows if ok else 0,
     )
 
 
@@ -12704,6 +12843,18 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_replay_probe_gate)
+    (
+        tex_large_shifted_2a30_field16_transform_probe_gate,
+        tex_large_shifted_2a30_field16_transform_probe_rows,
+        tex_large_shifted_2a30_field16_transform_probe_best_direct,
+        tex_large_shifted_2a30_field16_transform_probe_selector_needed,
+    ) = audit_tex_large_shifted_2a30_field16_transform_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_ROWS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_RULES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_transform_probe_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -18073,6 +18224,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_replay_probe_best_prefix": str(
             tex_large_shifted_2a30_field16_replay_probe_best_prefix
+        ),
+        "tex_large_shifted_2a30_field16_transform_probe_rows": str(
+            tex_large_shifted_2a30_field16_transform_probe_rows
+        ),
+        "tex_large_shifted_2a30_field16_transform_probe_best_direct": str(
+            tex_large_shifted_2a30_field16_transform_probe_best_direct
+        ),
+        "tex_large_shifted_2a30_field16_transform_probe_selector_needed": str(
+            tex_large_shifted_2a30_field16_transform_probe_selector_needed
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
