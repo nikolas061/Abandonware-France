@@ -495,8 +495,9 @@ def build_summary(
     elif improved:
         verdict = "shared_2700302b_op4_emitarg1_local_context_guard_improves"
         next_action = (
-            "inspect shared 0x2700302b op4 emit-arg1 local-context guard "
-            f"{best.get('guard_id', '')}; avg score {float_text(best.get('avg_score')):.4f} remains noisy"
+            "generalize shared 0x2700302b op4 emit-arg1 local-context denylist beyond exact atom matches; "
+            f"best guard {best.get('guard_id', '')} avg score "
+            f"{float_text(best.get('avg_score')):.4f} remains noisy"
         )
     else:
         verdict = "shared_2700302b_op4_emitarg1_local_context_guard_no_improvement"
