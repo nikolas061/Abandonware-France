@@ -1023,6 +1023,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_SINGLETON_HEADER_PROBE_SUMMARY = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HEADER_START_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_branch_header_start_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_branch_start_guard_promoted_replay/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_probe/summary.csv"
 )
@@ -1886,6 +1889,7 @@ def apply_old_clean_byte_union(
     tex_large_shifted_2a30_branch_selector_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_singleton_header_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_header_start_probe: dict[str, str] | None,
+    tex_large_shifted_2a30_branch_start_guard_promoted_replay: dict[str, str] | None,
     tex_large_shifted_2a30_field16_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_replay_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_transform_probe: dict[str, str] | None,
@@ -5001,6 +5005,21 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shifted_2a30_branch_start_guard_promoted_replay:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_branch_start_guard_promoted="
+                    f"{tex_large_shifted_2a30_branch_start_guard_promoted_replay.get('promoted_start_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_start_guard_extra="
+                    f"{tex_large_shifted_2a30_branch_start_guard_promoted_replay.get('target_predicted_extra', '')}",
+                    "tex_large_shifted_2a30_branch_start_guard_renderer_promoted="
+                    f"{tex_large_shifted_2a30_branch_start_guard_promoted_replay.get('renderer_promoted_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_start_guard_fingerprint="
+                    f"{tex_large_shifted_2a30_branch_start_guard_promoted_replay.get('target_trace_fingerprint', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_field16_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5794,6 +5813,20 @@ def apply_old_clean_byte_union(
                 and int_value(tex_large_shifted_2a30_branch_header_start_probe, "selector_renderer_candidate_rows")
                 == int_value(tex_large_shifted_2a30_branch_selector_probe, "renderer_candidate_rows")
             )
+            shifted_2a30_branch_start_guard_promoted_replay_current = (
+                shifted_2a30_branch_header_start_probe_current
+                and tex_large_shifted_2a30_branch_start_guard_promoted_replay is not None
+                and int_value(
+                    tex_large_shifted_2a30_branch_start_guard_promoted_replay,
+                    "header_start_formula_best_rows",
+                )
+                == int_value(tex_large_shifted_2a30_branch_header_start_probe, "formula_best_rows")
+                and int_value(
+                    tex_large_shifted_2a30_branch_start_guard_promoted_replay,
+                    "selector_renderer_candidate_rows",
+                )
+                == int_value(tex_large_shifted_2a30_branch_selector_probe, "renderer_candidate_rows")
+            )
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -5922,6 +5955,14 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_field16_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
+            elif (
+                tex_large_shifted_2a30_branch_start_guard_promoted_replay
+                and shifted_2a30_branch_start_guard_promoted_replay_current
+                and int_value(tex_large_shifted_2a30_branch_start_guard_promoted_replay, "promoted_start_rows") > 0
+                and int_value(tex_large_shifted_2a30_branch_start_guard_promoted_replay, "issue_rows") == 0
+                and tex_large_shifted_2a30_branch_start_guard_promoted_replay.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_branch_start_guard_promoted_replay.get("next_action"))
             elif (
                 tex_large_shifted_2a30_branch_header_start_probe
                 and shifted_2a30_branch_header_start_probe_current
@@ -22062,6 +22103,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HEADER_START_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-branch-start-guard-promoted-replay-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_PROMOTED_REPLAY_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-field16-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY,
@@ -24703,6 +24749,9 @@ def main() -> None:
     tex_large_shifted_2a30_branch_header_start_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_branch_header_start_probe_summary
     )
+    tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary
+    )
     tex_large_shifted_2a30_field16_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_field16_probe_summary
     )
@@ -26274,6 +26323,7 @@ def main() -> None:
         tex_large_shifted_2a30_branch_selector_probe=tex_large_shifted_2a30_branch_selector_probe_summary,
         tex_large_shifted_2a30_branch_singleton_header_probe=tex_large_shifted_2a30_branch_singleton_header_probe_summary,
         tex_large_shifted_2a30_branch_header_start_probe=tex_large_shifted_2a30_branch_header_start_probe_summary,
+        tex_large_shifted_2a30_branch_start_guard_promoted_replay=tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary,
         tex_large_shifted_2a30_field16_probe=tex_large_shifted_2a30_field16_probe_summary,
         tex_large_shifted_2a30_field16_replay_probe=tex_large_shifted_2a30_field16_replay_probe_summary,
         tex_large_shifted_2a30_field16_transform_probe=tex_large_shifted_2a30_field16_transform_probe_summary,
