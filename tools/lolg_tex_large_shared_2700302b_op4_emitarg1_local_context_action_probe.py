@@ -176,8 +176,57 @@ def exact6_condition(context: dict[str, int]) -> bool:
     )
 
 
+EXTENDED_SPLIT_RULES: tuple[tuple[str, str], ...] = (
+    ("arg2_03", "deny_skip1"),
+    ("arg2_05", "deny_skip1"),
+    ("prev1_22", "emit_arg2_skip1"),
+    ("prev1_7d", "deny_skip6"),
+    ("arg2_arg3_37_c7", "deny_skip4"),
+    ("prev2_prev1_26_e1", "deny_skip6"),
+    ("arg2_arg3_00_02", "deny_skip6"),
+)
+
+
 def generalized_condition(context: dict[str, int]) -> bool:
     return is_op4_candidate(context["arg1"]) or context["arg3"] == 0x0A
+
+
+def extra_condition_passes(condition_id: str, context: dict[str, int]) -> bool:
+    if condition_id == "arg2_03":
+        return context["arg2"] == 0x03
+    if condition_id == "arg2_05":
+        return context["arg2"] == 0x05
+    if condition_id == "prev1_22":
+        return context["prev1"] == 0x22
+    if condition_id == "prev1_7d":
+        return context["prev1"] == 0x7D
+    if condition_id == "arg2_arg3_37_c7":
+        return (context["arg2"], context["arg3"]) == (0x37, 0xC7)
+    if condition_id == "prev2_prev1_26_e1":
+        return (context["prev2"], context["prev1"]) == (0x26, 0xE1)
+    if condition_id == "arg2_arg3_00_02":
+        return (context["arg2"], context["arg3"]) == (0x00, 0x02)
+    return False
+
+
+def extended_split_count(condition_id: str) -> int:
+    if not condition_id.startswith("extended_split_greedy_"):
+        return 0
+    try:
+        return int(condition_id.rsplit("_", 1)[1])
+    except ValueError:
+        return 0
+
+
+def extended_split_action(condition_id: str, context: dict[str, int]) -> str:
+    if context["arg3"] == 0x0A:
+        return "deny_skip5"
+    if is_op4_candidate(context["arg1"]):
+        return "emit_arg2_reprocess"
+    for extra_condition_id, action in EXTENDED_SPLIT_RULES[: extended_split_count(condition_id)]:
+        if extra_condition_passes(extra_condition_id, context):
+            return action
+    return ""
 
 
 def condition_passes(condition_id: str, context: dict[str, int]) -> bool:
@@ -193,6 +242,8 @@ def condition_passes(condition_id: str, context: dict[str, int]) -> bool:
         return exact6_condition(context)
     if condition_id == "split_arg1_op4_arg3_0a":
         return is_op4_candidate(context["arg1"]) or context["arg3"] == 0x0A
+    if condition_id.startswith("extended_split_greedy_"):
+        return bool(extended_split_action(condition_id, context))
     return False
 
 
@@ -244,6 +295,14 @@ def action_specs() -> list[dict[str, object]]:
                         "action": f"split|{arg1_action}|{arg3_action}|{priority}",
                     }
                 )
+    for index in range(1, len(EXTENDED_SPLIT_RULES) + 1):
+        specs.append(
+            {
+                "action_id": f"extended_split_greedy_{index}",
+                "condition_id": f"extended_split_greedy_{index}",
+                "action": "extended_split",
+            }
+        )
     return specs
 
 
@@ -289,10 +348,14 @@ def decode_action(
             op4_events += 1
             if pos < len(payload) and low <= payload[pos] <= high:
                 context = event_context(payload, pos, stream_pos, byte)
-                guarded = base_action != "all_ops" and condition_passes(condition_id, context)
+                selected_action = base_action
+                if base_action == "extended_split":
+                    selected_action = extended_split_action(condition_id, context)
+                    guarded = bool(selected_action)
+                else:
+                    guarded = base_action != "all_ops" and condition_passes(condition_id, context)
                 if guarded:
                     guard_events += 1
-                    selected_action = base_action
                     if selected_action.startswith("split|"):
                         _split, arg1_action, arg3_action, priority = selected_action.split("|", 3)
                         arg1_match = is_op4_candidate(context["arg1"])
