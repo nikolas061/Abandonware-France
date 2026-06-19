@@ -155,6 +155,21 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_RULES = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_standard_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_branch_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_BRANCHES = Path(
+    "output/tex_large_shifted_2a30_branch_probe/branches.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_BYTES = Path(
+    "output/tex_large_shifted_2a30_branch_probe/bytes.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_RULES = Path(
+    "output/tex_large_shifted_2a30_branch_probe/rules.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_branch_probe/index.html"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_probe/summary.csv"
 )
@@ -1002,6 +1017,8 @@ SUMMARY_FIELDNAMES = [
     "tex_large_rejected_decoder_profile_shifted_2a30_anchors",
     "tex_large_shifted_2a30_standard_probe_rows",
     "tex_large_shifted_2a30_standard_probe_branch_rows",
+    "tex_large_shifted_2a30_branch_probe_rows",
+    "tex_large_shifted_2a30_branch_probe_byte_rows",
     "tex_large_shifted_2a30_field16_probe_rows",
     "tex_large_shifted_2a30_field16_probe_low_mod4_rows",
     "tex_large_shifted_2a30_field16_replay_probe_candidates",
@@ -3419,6 +3436,133 @@ def audit_tex_large_shifted_2a30_standard_probe(
         ),
         standard_rows if ok else 0,
         branch_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_branch_probe(
+    summary: Path,
+    branches_path: Path,
+    bytes_path: Path,
+    rules_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_branch_probe", summary), 0, 0
+    if not branches_path.exists():
+        return missing_gate("tex_large_shifted_2a30_branch_probe", branches_path), 0, 0
+    if not bytes_path.exists():
+        return missing_gate("tex_large_shifted_2a30_branch_probe", bytes_path), 0, 0
+    if not rules_path.exists():
+        return missing_gate("tex_large_shifted_2a30_branch_probe", rules_path), 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_branch_probe", html_report), 0, 0
+
+    summary_rows = read_csv(summary)
+    branch_rows_data = read_csv(branches_path)
+    byte_rows = read_csv(bytes_path)
+    rule_rows = read_csv(rules_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    branch_rows = int_value(total, "branch_rows")
+    branch_key_groups = int_value(total, "branch_key_groups")
+    dominant_branch_key = total.get("dominant_branch_key", "")
+    dominant_branch_key_rows = int_value(total, "dominant_branch_key_rows")
+    zero_other_branch_rows = int_value(total, "zero_other_branch_rows")
+    nonzero_branch_rows = int_value(total, "nonzero_branch_rows")
+    post_zero_rows = int_value(total, "post_zero_rows")
+    selector_values = int_value(total, "selector_values")
+    selector_mod8_values = int_value(total, "selector_mod8_values")
+    post_field16_values = int_value(total, "post_field16_values")
+    post_field16_min = int_value(total, "post_field16_min")
+    post_field16_max = int_value(total, "post_field16_max")
+    next_word16_values = int_value(total, "next_word16_values")
+    body_first_word_groups = int_value(total, "body_first_word_groups")
+    byte_count = int_value(total, "byte_rows")
+    rule_count = int_value(total, "rule_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    branch_keys = Counter(row.get("branch_key", "") for row in branch_rows_data if row.get("branch_key"))
+    expected_dominant_key, expected_dominant_rows = ("", 0)
+    if branch_keys:
+        expected_dominant_key, expected_dominant_rows = branch_keys.most_common(1)[0]
+    post_fields = [
+        int_value(row, "post_field16_le_dec")
+        for row in branch_rows_data
+        if row.get("post_field16_le_dec")
+    ]
+    branch_ids = {row.get("branch_id", "") for row in branch_rows_data if row.get("branch_id")}
+    byte_branch_ids = {row.get("branch_id", "") for row in byte_rows if row.get("branch_id")}
+    byte_roles = Counter(row.get("role", "") for row in byte_rows if row.get("role"))
+
+    if branch_rows != len(branch_rows_data):
+        issues.append("shifted_2a30_branch_probe_row_count_mismatch")
+    if branch_key_groups != len(branch_keys):
+        issues.append("shifted_2a30_branch_probe_key_group_mismatch")
+    if dominant_branch_key != expected_dominant_key or dominant_branch_key_rows != expected_dominant_rows:
+        issues.append("shifted_2a30_branch_probe_dominant_key_mismatch")
+    if zero_other_branch_rows != sum(1 for row in branch_rows_data if row.get("anchor_branch") == "zero_other_branch"):
+        issues.append("shifted_2a30_branch_probe_zero_other_count_mismatch")
+    if nonzero_branch_rows != sum(1 for row in branch_rows_data if row.get("anchor_branch") == "nonzero_branch"):
+        issues.append("shifted_2a30_branch_probe_nonzero_count_mismatch")
+    if post_zero_rows != sum(1 for row in branch_rows_data if row.get("post0_hex") == "0x00"):
+        issues.append("shifted_2a30_branch_probe_post_zero_count_mismatch")
+    if selector_values != len({row.get("selector_byte_hex", "") for row in branch_rows_data if row.get("selector_byte_hex")}):
+        issues.append("shifted_2a30_branch_probe_selector_count_mismatch")
+    if selector_mod8_values != len({row.get("selector_mod8", "") for row in branch_rows_data if row.get("selector_mod8")}):
+        issues.append("shifted_2a30_branch_probe_selector_mod8_count_mismatch")
+    if post_field16_values != len(set(post_fields)):
+        issues.append("shifted_2a30_branch_probe_post_field16_count_mismatch")
+    if post_fields and post_field16_min != min(post_fields):
+        issues.append("shifted_2a30_branch_probe_post_field16_min_mismatch")
+    if post_fields and post_field16_max != max(post_fields):
+        issues.append("shifted_2a30_branch_probe_post_field16_max_mismatch")
+    if next_word16_values != len(
+        {row.get("next_word16_le_hex", "") for row in branch_rows_data if row.get("next_word16_le_hex")}
+    ):
+        issues.append("shifted_2a30_branch_probe_next_word_count_mismatch")
+    if body_first_word_groups != len(
+        {row.get("body_first_word", "") for row in branch_rows_data if row.get("body_first_word")}
+    ):
+        issues.append("shifted_2a30_branch_probe_body_first_group_mismatch")
+    if byte_count != len(byte_rows):
+        issues.append("shifted_2a30_branch_probe_byte_count_mismatch")
+    if rule_count != len(rule_rows):
+        issues.append("shifted_2a30_branch_probe_rule_count_mismatch")
+    if byte_branch_ids - branch_ids:
+        issues.append("shifted_2a30_branch_probe_orphan_byte_rows")
+    for role in ("selector", "control_2a", "control_30", "branch_post0", "branch_post1"):
+        if branch_rows and byte_roles.get(role, 0) < branch_rows:
+            issues.append(f"shifted_2a30_branch_probe_missing_role:{role}")
+    if any(row.get("branch_key") == "0x00_0x28" for row in branch_rows_data):
+        issues.append("shifted_2a30_branch_probe_standard_key_included")
+    if issue_rows != sum(1 for row in branch_rows_data if row.get("issues")):
+        issues.append("shifted_2a30_branch_probe_issue_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    if "const TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_branch_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_branch_probe",
+            ok,
+            expected="non-standard shifted 0x2a30 branch rows are isolated with annotated head bytes",
+            actual=(
+                f"branches={branch_rows}, keys={branch_key_groups}, bytes={byte_count}, "
+                f"issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        branch_rows if ok else 0,
+        byte_count if ok else 0,
     )
 
 
@@ -14474,6 +14618,22 @@ def main() -> None:
     )
     rows.append(tex_large_shifted_2a30_standard_probe_gate)
     (
+        tex_large_shifted_2a30_branch_probe_rows,
+        tex_large_shifted_2a30_branch_probe_byte_rows,
+    ) = (0, 0)
+    (
+        tex_large_shifted_2a30_branch_probe_gate,
+        tex_large_shifted_2a30_branch_probe_rows,
+        tex_large_shifted_2a30_branch_probe_byte_rows,
+    ) = audit_tex_large_shifted_2a30_branch_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_BRANCHES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_BYTES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_RULES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_branch_probe_gate)
+    (
         tex_large_shifted_2a30_field16_probe_gate,
         tex_large_shifted_2a30_field16_probe_rows,
         tex_large_shifted_2a30_field16_probe_low_mod4_rows,
@@ -19985,6 +20145,8 @@ def main() -> None:
         "tex_large_shifted_2a30_standard_probe_branch_rows": str(
             tex_large_shifted_2a30_standard_probe_branch_rows
         ),
+        "tex_large_shifted_2a30_branch_probe_rows": str(tex_large_shifted_2a30_branch_probe_rows),
+        "tex_large_shifted_2a30_branch_probe_byte_rows": str(tex_large_shifted_2a30_branch_probe_byte_rows),
         "tex_large_shifted_2a30_field16_probe_rows": str(tex_large_shifted_2a30_field16_probe_rows),
         "tex_large_shifted_2a30_field16_probe_low_mod4_rows": str(
             tex_large_shifted_2a30_field16_probe_low_mod4_rows
