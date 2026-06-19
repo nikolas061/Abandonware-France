@@ -223,6 +223,24 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_GUARDS = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_field16_small_delta_guard_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_review/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_TARGETS = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_review/targets.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_SUPPORT = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_review/support.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_GUARDS = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_review/guards.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_DECISIONS = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_review/decisions_template.tsv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_review/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -930,6 +948,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_small_delta_guard_probe_applicable",
     "tex_large_shifted_2a30_field16_small_delta_guard_probe_large_exact",
     "tex_large_shifted_2a30_field16_small_delta_guard_probe_remaining_exact",
+    "tex_large_shifted_2a30_field16_small_delta_guard_review_targets",
+    "tex_large_shifted_2a30_field16_small_delta_guard_review_remaining_exact",
+    "tex_large_shifted_2a30_field16_small_delta_guard_review_selected_guards",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -4019,6 +4040,197 @@ def audit_tex_large_shifted_2a30_field16_small_delta_guard_probe(
         applicable_rows if ok else 0,
         large_exact_rows if ok else 0,
         remaining_exact_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_small_delta_guard_review(
+    summary: Path,
+    targets_path: Path,
+    support_path: Path,
+    guards_path: Path,
+    decisions_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_review", summary), 0, 0, 0
+    if not targets_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_review", targets_path), 0, 0, 0
+    if not support_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_review", support_path), 0, 0, 0
+    if not guards_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_review", guards_path), 0, 0, 0
+    if not decisions_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_review", decisions_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_review", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    target_rows = read_csv(targets_path)
+    support_rows = read_csv(support_path)
+    guard_rows_data = read_csv(guards_path)
+    decision_rows = read_tsv(decisions_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    candidate_rows = int_value(total, "candidate_rows")
+    applicable_rows = int_value(total, "applicable_rows")
+    exact_rows = int_value(total, "exact_rows")
+    false_positive_rows = int_value(total, "false_positive_rows")
+    large_rows = int_value(total, "large_rows")
+    large_target_rows = int_value(total, "large_target_rows")
+    large_target_exact_rows = int_value(total, "large_target_exact_rows")
+    remaining_large_rows = int_value(total, "remaining_large_rows")
+    remaining_target_rows = int_value(total, "remaining_target_rows")
+    remaining_target_exact_rows = int_value(total, "remaining_target_exact_rows")
+    support_count = int_value(total, "support_rows")
+    skipped_context_rows = int_value(total, "skipped_context_rows")
+    positive_target_rows = int_value(total, "positive_target_rows")
+    negative_target_rows = int_value(total, "negative_target_rows")
+    zero_target_rows = int_value(total, "zero_target_rows")
+    selected_guard_rows = int_value(total, "selected_guard_rows")
+    guard_rows = int_value(total, "guard_rows")
+    decision_template_rows = int_value(total, "decision_template_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    if candidate_rows != 10:
+        issues.append("field16_small_delta_review_candidate_count_mismatch")
+    if applicable_rows != 6 or exact_rows != 6:
+        issues.append("field16_small_delta_review_applicable_exact_mismatch")
+    if false_positive_rows != 0:
+        issues.append(f"false_positive_rows:{false_positive_rows}")
+    if large_rows != 4:
+        issues.append("field16_small_delta_review_large_count_mismatch")
+    if large_target_rows != len(target_rows):
+        issues.append("field16_small_delta_review_target_summary_count_mismatch")
+    if large_target_rows != 4 or large_target_exact_rows != 4:
+        issues.append("field16_small_delta_review_target_coverage_mismatch")
+    if remaining_large_rows != 2 or remaining_target_rows != 2 or remaining_target_exact_rows != 2:
+        issues.append("field16_small_delta_review_remaining_coverage_mismatch")
+    if support_count != sum(1 for row in support_rows if row.get("support_role") == "nonlarge_guard_support"):
+        issues.append("field16_small_delta_review_support_count_mismatch")
+    if support_count != 2:
+        issues.append("field16_small_delta_review_support_expected_count_mismatch")
+    if skipped_context_rows != sum(
+        1 for row in support_rows if row.get("support_role") == "skipped_large_negative_context"
+    ):
+        issues.append("field16_small_delta_review_context_count_mismatch")
+    if skipped_context_rows != 4:
+        issues.append("field16_small_delta_review_context_expected_count_mismatch")
+    if positive_target_rows != 1 or negative_target_rows != 1 or zero_target_rows != 2:
+        issues.append("field16_small_delta_review_target_group_count_mismatch")
+    if selected_guard_rows != 3:
+        issues.append("field16_small_delta_review_selected_guard_count_mismatch")
+    if guard_rows != len(guard_rows_data) or guard_rows != 4:
+        issues.append("field16_small_delta_review_guard_count_mismatch")
+    if decision_template_rows != len(decision_rows) or decision_template_rows != 4:
+        issues.append("field16_small_delta_review_decision_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    target_by_name = {row.get("pcx_name", ""): row for row in target_rows}
+    expected_targets = {
+        "barsgld.pcx": ("L14_HT", "positive_small_nextlow_minus2", "24", "yes"),
+        "dragend.pcx": ("L3_DH", "negative_small_extra36", "36", "yes"),
+        "stump2.pcx": ("L12_CM", "zero_delta_extra40", "40", "no"),
+        "catbas.pcx": ("L5_HC", "zero_delta_extra40", "40", "no"),
+    }
+    if set(target_by_name) != set(expected_targets):
+        issues.append("field16_small_delta_review_targets_unexpected")
+    else:
+        for pcx_name, (archive_tag, guard_id, predicted_extra, remaining_large) in expected_targets.items():
+            row = target_by_name[pcx_name]
+            if row.get("archive_tag") != archive_tag:
+                issues.append(f"field16_small_delta_review_{pcx_name}_archive_mismatch")
+            if row.get("guard_id") != guard_id:
+                issues.append(f"field16_small_delta_review_{pcx_name}_guard_mismatch")
+            if row.get("predicted_extra") != predicted_extra or row.get("oracle_extra") != predicted_extra:
+                issues.append(f"field16_small_delta_review_{pcx_name}_extra_mismatch")
+            if row.get("remaining_large") != remaining_large:
+                issues.append(f"field16_small_delta_review_{pcx_name}_remaining_mismatch")
+            if row.get("exact_match") != "yes" or row.get("promotion_status") != "ready" or row.get("issues"):
+                issues.append(f"field16_small_delta_review_{pcx_name}_not_ready")
+
+    support_by_name = {row.get("pcx_name", ""): row for row in support_rows}
+    expected_support = {
+        "6.pcx": ("nonlarge_guard_support", "positive_small_nextlow_minus2", "32"),
+        "pillar.pcx": ("nonlarge_guard_support", "negative_small_extra36", "36"),
+        "ggbridge2.pcx": ("skipped_large_negative_context", "skip_large_negative_context", ""),
+        "colapse.pcx": ("skipped_large_negative_context", "skip_large_negative_context", ""),
+        "hrglass.pcx": ("skipped_large_negative_context", "skip_large_negative_context", ""),
+        "lantern.pcx": ("skipped_large_negative_context", "skip_large_negative_context", ""),
+    }
+    if set(support_by_name) != set(expected_support):
+        issues.append("field16_small_delta_review_support_unexpected")
+    else:
+        for pcx_name, (support_role, guard_id, predicted_extra) in expected_support.items():
+            row = support_by_name[pcx_name]
+            if row.get("support_role") != support_role:
+                issues.append(f"field16_small_delta_review_{pcx_name}_support_role_mismatch")
+            if row.get("guard_id") != guard_id:
+                issues.append(f"field16_small_delta_review_{pcx_name}_support_guard_mismatch")
+            if row.get("predicted_extra") != predicted_extra:
+                issues.append(f"field16_small_delta_review_{pcx_name}_support_prediction_mismatch")
+            if row.get("issues"):
+                issues.append(f"field16_small_delta_review_{pcx_name}_support_issue")
+
+    guard_by_id = {row.get("guard_id", ""): row for row in guard_rows_data}
+    expected_guard_rows = {
+        "positive_small_nextlow_minus2": ("2", "1", "1", "1", "0", "promote_large_exact_targets", "ready"),
+        "negative_small_extra36": ("2", "1", "1", "1", "0", "promote_large_exact_targets", "ready"),
+        "zero_delta_extra40": ("2", "2", "2", "0", "0", "promote_large_exact_targets", "ready"),
+        "skip_large_negative_context": ("4", "0", "0", "4", "4", "context_only", "not_promoted_context_skipped"),
+    }
+    if set(guard_by_id) != set(expected_guard_rows):
+        issues.append("field16_small_delta_review_guard_ids_mismatch")
+    else:
+        for guard_id, expected in expected_guard_rows.items():
+            row = guard_by_id[guard_id]
+            actual = (
+                row.get("source_rows"),
+                row.get("target_rows"),
+                row.get("target_exact_rows"),
+                row.get("support_rows"),
+                row.get("context_rows"),
+                row.get("promotion_scope"),
+                row.get("verdict"),
+            )
+            if actual != expected:
+                issues.append(f"field16_small_delta_review_{guard_id}_counts_mismatch")
+            if row.get("false_positive_rows") != "0":
+                issues.append(f"field16_small_delta_review_{guard_id}_false_positive")
+
+    decision_by_id = {row.get("promotion_id", ""): row for row in decision_rows}
+    target_ids = {row.get("promotion_id", "") for row in target_rows}
+    if set(decision_by_id) != target_ids:
+        issues.append("field16_small_delta_review_decision_ids_mismatch")
+    if any(row.get("review_status") != "ready" for row in decision_rows):
+        issues.append("field16_small_delta_review_decision_status_mismatch")
+    if total.get("review_verdict") != "small_delta_guard_review_ready":
+        issues.append("field16_small_delta_review_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_small_delta_guard_review_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_small_delta_guard_review",
+            ok,
+            expected="guarded shifted 0x2a30 field16 small-delta review selects exactly 4 ready large targets",
+            actual=(
+                f"targets={large_target_exact_rows}/{large_rows}, remaining={remaining_target_exact_rows}/"
+                f"{remaining_large_rows}, guards={selected_guard_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        large_target_exact_rows if ok else 0,
+        remaining_target_exact_rows if ok else 0,
+        selected_guard_rows if ok else 0,
     )
 
 
@@ -13355,6 +13567,20 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_small_delta_guard_probe_gate)
+    (
+        tex_large_shifted_2a30_field16_small_delta_guard_review_gate,
+        tex_large_shifted_2a30_field16_small_delta_guard_review_targets,
+        tex_large_shifted_2a30_field16_small_delta_guard_review_remaining_exact,
+        tex_large_shifted_2a30_field16_small_delta_guard_review_selected_guards,
+    ) = audit_tex_large_shifted_2a30_field16_small_delta_guard_review(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_TARGETS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_SUPPORT,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_GUARDS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_DECISIONS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_small_delta_guard_review_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -18760,6 +18986,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_small_delta_guard_probe_remaining_exact": str(
             tex_large_shifted_2a30_field16_small_delta_guard_probe_remaining_exact
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_review_targets": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_review_targets
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_review_remaining_exact": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_review_remaining_exact
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_review_selected_guards": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_review_selected_guards
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
