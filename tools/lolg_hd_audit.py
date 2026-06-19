@@ -157,6 +157,18 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_RULES = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_field16_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_replay_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_CANDIDATES = Path(
+    "output/tex_large_shifted_2a30_field16_replay_probe/candidates.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_RULES = Path(
+    "output/tex_large_shifted_2a30_field16_replay_probe/rules.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_replay_probe/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -850,6 +862,8 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_standard_probe_branch_rows",
     "tex_large_shifted_2a30_field16_probe_rows",
     "tex_large_shifted_2a30_field16_probe_low_mod4_rows",
+    "tex_large_shifted_2a30_field16_replay_probe_candidates",
+    "tex_large_shifted_2a30_field16_replay_probe_best_prefix",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -3300,6 +3314,110 @@ def audit_tex_large_shifted_2a30_field16_probe(
         ),
         standard_rows if ok else 0,
         low_mod4_zero_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_replay_probe(
+    summary: Path,
+    candidates_path: Path,
+    rules_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_replay_probe", summary), 0, 0
+    if not candidates_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_replay_probe", candidates_path), 0, 0
+    if not rules_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_replay_probe", rules_path), 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_replay_probe", html_report), 0, 0
+
+    summary_rows = read_csv(summary)
+    candidate_rows = read_csv(candidates_path)
+    rule_rows = read_csv(rules_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    standard_rows = int_value(total, "standard_rows")
+    candidate_count = int_value(total, "candidate_rows")
+    unit_relation_rows = int_value(total, "unit_relation_rows")
+    candidate_labels = int_value(total, "candidate_labels")
+    target_rows = int_value(total, "target_rows")
+    best_prefix = int_value(total, "best_exact_prefix_bytes")
+    exact_ge4 = int_value(total, "exact_prefix_ge4_rows")
+    exact_ge2 = int_value(total, "exact_prefix_ge2_rows")
+    zero_prefix_rows = int_value(total, "zero_prefix_rows")
+    transform_needed_rows = int_value(total, "transform_needed_rows")
+    rule_count = int_value(total, "rule_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    segments = {row.get("segment_id", "") for row in candidate_rows if row.get("segment_id")}
+    labels = {row.get("candidate_label", "") for row in candidate_rows if row.get("candidate_label")}
+    targets = {(row.get("segment_id", ""), row.get("target_offset", "")) for row in candidate_rows}
+    if standard_rows != len(segments):
+        issues.append("field16_replay_standard_count_mismatch")
+    if candidate_count != len(candidate_rows):
+        issues.append("field16_replay_candidate_count_mismatch")
+    if unit_relation_rows != len(
+        {
+            row.get("segment_id", "")
+            for row in candidate_rows
+            if int_value(row, "field16_low_dec") == int_value(row, "field16_low_div4") * 4
+        }
+    ):
+        issues.append("field16_replay_unit_relation_count_mismatch")
+    if candidate_labels != len(labels):
+        issues.append("field16_replay_label_count_mismatch")
+    if target_rows != len(targets):
+        issues.append("field16_replay_target_count_mismatch")
+    if best_prefix != max((int_value(row, "exact_prefix_bytes") for row in candidate_rows), default=0):
+        issues.append("field16_replay_best_prefix_mismatch")
+    if exact_ge4 != sum(1 for row in candidate_rows if int_value(row, "exact_prefix_bytes") >= 4):
+        issues.append("field16_replay_ge4_count_mismatch")
+    if exact_ge2 != sum(1 for row in candidate_rows if int_value(row, "exact_prefix_bytes") >= 2):
+        issues.append("field16_replay_ge2_count_mismatch")
+    if zero_prefix_rows != sum(1 for row in candidate_rows if int_value(row, "exact_prefix_bytes") == 0):
+        issues.append("field16_replay_zero_prefix_count_mismatch")
+    if transform_needed_rows != (len(segments) if exact_ge4 == 0 and segments else 0):
+        issues.append("field16_replay_transform_needed_count_mismatch")
+    if exact_ge4:
+        issues.append("field16_replay_direct_candidates_present")
+    if best_prefix > 1:
+        issues.append("field16_replay_best_prefix_unexpected")
+    if rule_count != len(rule_rows):
+        issues.append("field16_replay_rule_count_mismatch")
+    rule_verdicts = {row.get("rule_id", ""): row.get("verdict", "") for row in rule_rows}
+    if rule_verdicts.get("all_candidates_direct_replay") != "no_direct_replay":
+        issues.append("field16_replay_direct_rule_mismatch")
+    if rule_verdicts.get("weak_prefix_noise") != "weak_only":
+        issues.append("field16_replay_weak_prefix_rule_mismatch")
+    if issue_rows != sum(1 for row in candidate_rows if row.get("issues")):
+        issues.append("field16_replay_issue_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_replay_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_replay_probe",
+            ok,
+            expected="shifted 0x2a30 field16 direct replay hypotheses are rejected before transform work",
+            actual=(
+                f"standard={standard_rows}, candidates={candidate_count}, "
+                f"best_prefix={best_prefix}, direct_ge4={exact_ge4}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        candidate_count if ok else 0,
+        best_prefix if ok else 0,
     )
 
 
@@ -12575,6 +12693,17 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_probe_gate)
+    (
+        tex_large_shifted_2a30_field16_replay_probe_gate,
+        tex_large_shifted_2a30_field16_replay_probe_candidates,
+        tex_large_shifted_2a30_field16_replay_probe_best_prefix,
+    ) = audit_tex_large_shifted_2a30_field16_replay_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_CANDIDATES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_RULES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_REPLAY_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_replay_probe_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -17938,6 +18067,12 @@ def main() -> None:
         "tex_large_shifted_2a30_field16_probe_rows": str(tex_large_shifted_2a30_field16_probe_rows),
         "tex_large_shifted_2a30_field16_probe_low_mod4_rows": str(
             tex_large_shifted_2a30_field16_probe_low_mod4_rows
+        ),
+        "tex_large_shifted_2a30_field16_replay_probe_candidates": str(
+            tex_large_shifted_2a30_field16_replay_probe_candidates
+        ),
+        "tex_large_shifted_2a30_field16_replay_probe_best_prefix": str(
+            tex_large_shifted_2a30_field16_replay_probe_best_prefix
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
