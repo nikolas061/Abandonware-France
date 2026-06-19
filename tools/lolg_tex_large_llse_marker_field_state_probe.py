@@ -335,9 +335,10 @@ def summary_row(
         next_action = "fix LLSE marker field state probe inputs"
     elif total and f1_mod4_zero / max(1, total) >= 0.5 and float_text(best_delta) < 0:
         verdict = "llse_marker_field_state_guard_signal"
-        if variant.action.endswith("_yforward"):
+        if "_yforward" in variant.action:
             next_action = (
-                "isolate 19 LLSE 2730 yforward events by field/context guard before decoder promotion; "
+                "isolate LLSE 2730 yforward field/context guard "
+                f"for {stats.get('actions_applied', 0)} events before decoder promotion; "
                 f"candidate {variant.action}"
             )
         else:

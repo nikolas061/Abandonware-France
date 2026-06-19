@@ -147,6 +147,14 @@ ACTIONS = [
     "setxy_f1div4_f0x2_if_f1mod4",
     "setxy_f1div4_f0_if_f1mod4_yback",
     "setxy_f1div4_f0_if_f1mod4_yforward",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge10",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge30",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge40",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge80",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ltc0",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f2ge30",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f2ltc0",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f3lt80",
     "setxy_f1div4_f0_if_f1mod4_ysame",
     "setxy_f1div4_f0_if_f1mod4_yjump_le4",
     "setxy_f1div4_f0_if_f1mod4_yjump_gt4",
@@ -384,13 +392,24 @@ def apply_field_action(
         next_x = (f1 // 4) % max(1, width)
         next_y = clamp_y(f0, height)
         y_delta = next_y - y
-        if (
+        direction_ok = (
             (action.endswith("_yback") and y_delta < 0)
-            or (action.endswith("_yforward") and y_delta > 0)
+            or ("_yforward" in action and y_delta > 0)
             or (action.endswith("_ysame") and y_delta == 0)
             or (action.endswith("_yjump_le4") and abs(y_delta) <= 4)
             or (action.endswith("_yjump_gt4") and abs(y_delta) > 4)
-        ):
+        )
+        guard_ok = (
+            (not action.endswith("_f0ge10") or f0 >= 0x10)
+            and (not action.endswith("_f0ge30") or f0 >= 0x30)
+            and (not action.endswith("_f0ge40") or f0 >= 0x40)
+            and (not action.endswith("_f0ge80") or f0 >= 0x80)
+            and (not action.endswith("_f0ltc0") or f0 < 0xC0)
+            and (not action.endswith("_f2ge30") or f2 >= 0x30)
+            and (not action.endswith("_f2ltc0") or f2 < 0xC0)
+            and (not action.endswith("_f3lt80") or f3 < 0x80)
+        )
+        if direction_ok and guard_ok:
             x = next_x
             y = next_y
             applied = True
