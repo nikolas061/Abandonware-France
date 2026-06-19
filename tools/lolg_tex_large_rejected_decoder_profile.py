@@ -36,6 +36,12 @@ SUMMARY_FIELDNAMES = [
     "window_invalid_rows",
     "high_entropy_rows",
     "raw_probe_rejected_rows",
+    "control_path_groups",
+    "dominant_control_path",
+    "dominant_control_path_rows",
+    "shifted_2a30_rows",
+    "shared_2700302b_rows",
+    "llse_signature_rows",
     "issue_rows",
     "next_action",
 ]
@@ -56,6 +62,12 @@ SEGMENT_FIELDNAMES = [
     "skips_tried",
     "best_structure_score",
     "body_first_word",
+    "raw_head4_hex",
+    "le16_0_hex",
+    "le16_1_hex",
+    "pair_2a30_offset",
+    "pair_2930_offset",
+    "control_path",
     "body_first_byte_hex",
     "body_lcw_status",
     "body_window_status",
@@ -89,6 +101,20 @@ GROUP_FIELDNAMES = [
     "lcw_statuses",
     "window_statuses",
     "top_bytes",
+    "sample_segments",
+    "next_probe",
+]
+
+CONTROL_FIELDNAMES = [
+    "control_path",
+    "rows",
+    "body_first_words",
+    "archives",
+    "pcx_names",
+    "pair_2a30_rows",
+    "pair_2930_rows",
+    "total_segment_bytes",
+    "sampled_bytes",
     "sample_segments",
     "next_probe",
 ]
@@ -208,6 +234,23 @@ def top_word_le(data: bytes) -> tuple[str, float]:
     return f"0x{word:04x}", count / (limit // 2)
 
 
+def pair_offset(data: bytes, pair: bytes) -> str:
+    offset = data[:16].find(pair)
+    return str(offset) if offset >= 0 else ""
+
+
+def classify_control_path(body: bytes, body_first_word: str) -> str:
+    if body.startswith(b"LLSE"):
+        return "llse_signature"
+    if body_first_word == "2700302b":
+        return "shared_2700302b_header"
+    if body[:16].find(b"\x2a\x30") >= 0:
+        return "shifted_2a30_header"
+    if body[:16].find(b"\x29\x30") >= 0:
+        return "shifted_2930_header"
+    return "unclassified_header"
+
+
 def texture_segment_lookup(rows: list[dict[str, str]]) -> dict[tuple[str, str, str, str], dict[str, str]]:
     lookup: dict[tuple[str, str, str, str], dict[str, str]] = {}
     for row in rows:
@@ -280,6 +323,12 @@ def build_segment_rows(
         best_score = max((float_value(row, "structure_score") for row in group), default=0.0)
         top_byte_hex, top_byte_value = top_byte(sample)
         top_word_hex, top_word_value = top_word_le(sample)
+        body_first_word = first.get("body_first_word", "") or texture_row.get("body_first_word", "")
+        raw_head4 = body[:4]
+        le16_values = list(struct.unpack("<HH", raw_head4)) if len(raw_head4) == 4 else []
+        pair_2a30_offset = pair_offset(body, b"\x2a\x30")
+        pair_2930_offset = pair_offset(body, b"\x29\x30")
+        control_path = classify_control_path(body, body_first_word)
         rows.append(
             {
                 "segment_id": segment_id(first),
@@ -296,7 +345,13 @@ def build_segment_rows(
                 "widths_tried": "|".join(sorted({row.get("width", "") for row in group if row.get("width")})),
                 "skips_tried": "|".join(sorted({row.get("skip", "") for row in group if row.get("skip")})),
                 "best_structure_score": ratio(best_score),
-                "body_first_word": first.get("body_first_word", "") or texture_row.get("body_first_word", ""),
+                "body_first_word": body_first_word,
+                "raw_head4_hex": raw_head4.hex(),
+                "le16_0_hex": f"0x{le16_values[0]:04x}" if le16_values else "",
+                "le16_1_hex": f"0x{le16_values[1]:04x}" if len(le16_values) > 1 else "",
+                "pair_2a30_offset": pair_2a30_offset,
+                "pair_2930_offset": pair_2930_offset,
+                "control_path": control_path,
                 "body_first_byte_hex": f"0x{body[0]:02x}" if body else "",
                 "body_lcw_status": texture_row.get("body_lcw_status", ""),
                 "body_window_status": texture_row.get("body_window_status", ""),
@@ -360,12 +415,48 @@ def build_group_rows(segment_rows: list[dict[str, str]]) -> list[dict[str, str]]
     return output
 
 
-def build_summary(segment_rows: list[dict[str, str]], group_rows: list[dict[str, str]]) -> dict[str, str]:
+def build_control_rows(segment_rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    grouped: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for row in segment_rows:
+        grouped[row.get("control_path", "")].append(row)
+
+    output: list[dict[str, str]] = []
+    for control_path, rows in sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])):
+        next_probe = f"probe {control_path or 'unknown'} across {len(rows)} rejected large .tex segments"
+        output.append(
+            {
+                "control_path": control_path,
+                "rows": str(len(rows)),
+                "body_first_words": "|".join(
+                    word for word, _count in Counter(row.get("body_first_word", "") for row in rows).most_common()
+                ),
+                "archives": str(len({row.get("archive", "") for row in rows if row.get("archive")})),
+                "pcx_names": str(len({normalize_name(row.get("pcx_name", "")) for row in rows if row.get("pcx_name")})),
+                "pair_2a30_rows": str(sum(1 for row in rows if row.get("pair_2a30_offset"))),
+                "pair_2930_rows": str(sum(1 for row in rows if row.get("pair_2930_offset"))),
+                "total_segment_bytes": str(sum(int_value(row, "segment_size") for row in rows)),
+                "sampled_bytes": str(sum(int_value(row, "sample_bytes") for row in rows)),
+                "sample_segments": "|".join(row.get("segment_id", "") for row in rows[:4]),
+                "next_probe": next_probe,
+            }
+        )
+    return output
+
+
+def build_summary(
+    segment_rows: list[dict[str, str]],
+    group_rows: list[dict[str, str]],
+    control_rows: list[dict[str, str]],
+) -> dict[str, str]:
     issue_rows = sum(1 for row in segment_rows if row.get("issues"))
     body_first_counts = Counter(row.get("body_first_word", "") for row in segment_rows)
+    control_path_counts = Counter(row.get("control_path", "") for row in segment_rows)
     dominant_body_first_word, dominant_rows = ("", 0)
     if body_first_counts:
         dominant_body_first_word, dominant_rows = body_first_counts.most_common(1)[0]
+    dominant_control_path, dominant_control_path_rows = ("", 0)
+    if control_path_counts:
+        dominant_control_path, dominant_control_path_rows = control_path_counts.most_common(1)[0]
 
     high_entropy_rows = sum(1 for row in segment_rows if float_value(row, "entropy") >= 7.0)
     lcw_invalid_rows = sum(1 for row in segment_rows if row.get("body_lcw_status", "").startswith("invalid"))
@@ -374,12 +465,20 @@ def build_summary(segment_rows: list[dict[str, str]], group_rows: list[dict[str,
         for row in segment_rows
         if row.get("body_window_status") and row.get("body_window_status") not in {"ok", "decoded"}
     )
+    shifted_2a30_rows = control_path_counts["shifted_2a30_header"]
+    shared_2700302b_rows = control_path_counts["shared_2700302b_header"]
+    llse_signature_rows = control_path_counts["llse_signature"]
     if issue_rows:
         next_action = "fix rejected large .tex decoder profile issues"
+    elif shifted_2a30_rows:
+        next_action = (
+            f"probe shifted 0x2a30 body-control header across {shifted_2a30_rows} "
+            "rejected large .tex segments"
+        )
     elif segment_rows:
         next_action = (
             f"trace .tex body control grammar for {len(segment_rows)} rejected large segments "
-            f"({len(group_rows)} body-first-word families)"
+            f"({len(control_rows)} control paths)"
         )
     else:
         next_action = "no rejected large .tex segments to profile"
@@ -399,6 +498,12 @@ def build_summary(segment_rows: list[dict[str, str]], group_rows: list[dict[str,
         "window_invalid_rows": str(window_invalid_rows),
         "high_entropy_rows": str(high_entropy_rows),
         "raw_probe_rejected_rows": str(sum(int_value(row, "rejected_candidates") for row in segment_rows)),
+        "control_path_groups": str(len(control_rows)),
+        "dominant_control_path": dominant_control_path,
+        "dominant_control_path_rows": str(dominant_control_path_rows),
+        "shifted_2a30_rows": str(shifted_2a30_rows),
+        "shared_2700302b_rows": str(shared_2700302b_rows),
+        "llse_signature_rows": str(llse_signature_rows),
         "issue_rows": str(issue_rows),
         "next_action": next_action,
     }
@@ -426,10 +531,11 @@ def build_html(
     summary: dict[str, str],
     segments: list[dict[str, str]],
     groups: list[dict[str, str]],
+    control_rows: list[dict[str, str]],
     output_dir: Path,
     title: str,
 ) -> str:
-    payload = {"summary": summary, "segments": segments, "groups": groups}
+    payload = {"summary": summary, "segments": segments, "groups": groups, "control_paths": control_rows}
     data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
     links = " ".join(
         f'<a href="{html.escape(relative_href(path, output_dir))}">{html.escape(label)}</a>'
@@ -437,6 +543,7 @@ def build_html(
             ("summary.csv", output_dir / "summary.csv"),
             ("segments.csv", output_dir / "segments.csv"),
             ("body_first_word_groups.csv", output_dir / "body_first_word_groups.csv"),
+            ("control_paths.csv", output_dir / "control_paths.csv"),
         )
     )
     return f"""<!doctype html>
@@ -469,6 +576,8 @@ code {{ color: #cce7ff; }}
 {render_table([summary], SUMMARY_FIELDNAMES)}
 <h2>Body First Word Groups</h2>
 {render_table(groups, GROUP_FIELDNAMES)}
+<h2>Control Paths</h2>
+{render_table(control_rows, CONTROL_FIELDNAMES)}
 <h2>Rejected Segments</h2>
 {render_table(segments, SEGMENT_FIELDNAMES)}
 </main>
@@ -486,7 +595,7 @@ def write_report(
     mix_entry_index: int,
     max_sample_bytes: int,
     title: str,
-) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
+) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     output_dir.mkdir(parents=True, exist_ok=True)
     candidates = read_csv(candidates_path)
     segment_rows = build_segment_rows(
@@ -497,12 +606,16 @@ def write_report(
         max_sample_bytes=max_sample_bytes,
     )
     group_rows = build_group_rows(segment_rows)
-    summary = build_summary(segment_rows, group_rows)
+    control_rows = build_control_rows(segment_rows)
+    summary = build_summary(segment_rows, group_rows, control_rows)
     write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(output_dir / "segments.csv", SEGMENT_FIELDNAMES, segment_rows)
     write_csv(output_dir / "body_first_word_groups.csv", GROUP_FIELDNAMES, group_rows)
-    (output_dir / "index.html").write_text(build_html(summary, segment_rows, group_rows, output_dir, title))
-    return summary, segment_rows, group_rows
+    write_csv(output_dir / "control_paths.csv", CONTROL_FIELDNAMES, control_rows)
+    (output_dir / "index.html").write_text(
+        build_html(summary, segment_rows, group_rows, control_rows, output_dir, title)
+    )
+    return summary, segment_rows, group_rows, control_rows
 
 
 def main() -> None:
@@ -516,7 +629,7 @@ def main() -> None:
     parser.add_argument("--title", default="Lands of Lore II .tex Large Rejected Decoder Profile")
     args = parser.parse_args()
 
-    summary, segments, groups = write_report(
+    summary, segments, groups, control_rows = write_report(
         args.output,
         args.candidates,
         args.texture_segments,
@@ -528,6 +641,7 @@ def main() -> None:
     print(f"Rejected large segments: {summary['rejected_segment_rows']}")
     print(f"Rejected candidates: {summary['rejected_candidate_rows']}")
     print(f"Body-first-word groups: {summary['body_first_word_groups']}")
+    print(f"Control paths: {summary['control_path_groups']}")
     print(f"High entropy rows: {summary['high_entropy_rows']}")
     print(f"Issue rows: {summary['issue_rows']}")
     print(f"Next action: {summary['next_action']}")
