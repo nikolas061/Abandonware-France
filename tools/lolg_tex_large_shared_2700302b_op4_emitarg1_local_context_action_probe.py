@@ -191,6 +191,8 @@ def condition_passes(condition_id: str, context: dict[str, int]) -> bool:
         return generalized_condition(context)
     if condition_id == "exact6":
         return exact6_condition(context)
+    if condition_id == "split_arg1_op4_arg3_0a":
+        return is_op4_candidate(context["arg1"]) or context["arg3"] == 0x0A
     return False
 
 
@@ -220,6 +222,28 @@ def action_specs() -> list[dict[str, object]]:
                     "action": action,
                 }
             )
+    split_actions = (
+        "deny_reprocess",
+        "deny_skip1",
+        "deny_skip2",
+        "deny_skip3",
+        "deny_skip4",
+        "deny_skip5",
+        "deny_skip6",
+        "emit_arg2_reprocess",
+        "emit_arg2_skip1",
+        "emit_arg3_reprocess",
+    )
+    for arg1_action in split_actions:
+        for arg3_action in split_actions:
+            for priority in ("arg1", "arg3"):
+                specs.append(
+                    {
+                        "action_id": f"split_arg1_{arg1_action}__arg3_{arg3_action}__both_{priority}",
+                        "condition_id": "split_arg1_op4_arg3_0a",
+                        "action": f"split|{arg1_action}|{arg3_action}|{priority}",
+                    }
+                )
     return specs
 
 
@@ -242,7 +266,7 @@ def decode_action(
     cmd20_sig_noops = 0
     markerknown_skips = 0
     condition_id = str(spec["condition_id"])
-    action = str(spec["action"])
+    base_action = str(spec["action"])
     while pos < len(payload) and y < height:
         stream_pos = pos
         byte = payload[pos]
@@ -265,30 +289,41 @@ def decode_action(
             op4_events += 1
             if pos < len(payload) and low <= payload[pos] <= high:
                 context = event_context(payload, pos, stream_pos, byte)
-                guarded = action != "all_ops" and condition_passes(condition_id, context)
+                guarded = base_action != "all_ops" and condition_passes(condition_id, context)
                 if guarded:
                     guard_events += 1
-                    if action.startswith("deny_skip"):
-                        pos = min(len(payload), pos + int(action.replace("deny_skip", "")))
-                    elif action == "emit_arg2_reprocess" and pos + 1 < len(payload) and low <= payload[pos + 1] <= high:
+                    selected_action = base_action
+                    if selected_action.startswith("split|"):
+                        _split, arg1_action, arg3_action, priority = selected_action.split("|", 3)
+                        arg1_match = is_op4_candidate(context["arg1"])
+                        arg3_match = context["arg3"] == 0x0A
+                        if arg1_match and arg3_match:
+                            selected_action = arg1_action if priority == "arg1" else arg3_action
+                        elif arg1_match:
+                            selected_action = arg1_action
+                        elif arg3_match:
+                            selected_action = arg3_action
+                    if selected_action.startswith("deny_skip"):
+                        pos = min(len(payload), pos + int(selected_action.replace("deny_skip", "")))
+                    elif selected_action == "emit_arg2_reprocess" and pos + 1 < len(payload) and low <= payload[pos + 1] <= high:
                         put_pixel(pixels, width, height, x, y, payload[pos + 1])
                         x, y = advance(x, y, width, 1)
                         emitted += 1
                         action_emit_events += 1
-                    elif action == "emit_arg2_skip1" and pos + 1 < len(payload) and low <= payload[pos + 1] <= high:
+                    elif selected_action == "emit_arg2_skip1" and pos + 1 < len(payload) and low <= payload[pos + 1] <= high:
                         put_pixel(pixels, width, height, x, y, payload[pos + 1])
                         x, y = advance(x, y, width, 1)
                         emitted += 1
                         action_emit_events += 1
                         pos = min(len(payload), pos + 1)
-                    elif action == "emit_arg3_reprocess" and pos + 2 < len(payload) and low <= payload[pos + 2] <= high:
+                    elif selected_action == "emit_arg3_reprocess" and pos + 2 < len(payload) and low <= payload[pos + 2] <= high:
                         put_pixel(pixels, width, height, x, y, payload[pos + 2])
                         x, y = advance(x, y, width, 1)
                         emitted += 1
                         action_emit_events += 1
-                    elif action == "advance_code":
+                    elif selected_action == "advance_code":
                         x, y = advance(x, y, width, (byte - 0x40) // 4)
-                    elif action == "advance_arg2" and pos + 1 < len(payload):
+                    elif selected_action == "advance_arg2" and pos + 1 < len(payload):
                         x, y = advance(x, y, width, payload[pos + 1])
                 else:
                     put_pixel(pixels, width, height, x, y, payload[pos])
