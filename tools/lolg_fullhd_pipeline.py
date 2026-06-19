@@ -2805,6 +2805,11 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "probe longueurs par paire de marqueurs LLSE gros segments .tex rejetes",
+            [sys.executable, "tools/lolg_tex_large_llse_marker_pair_length_probe.py"],
+            requires_pillow=True,
+        ),
+        Step(
             "probe header partage 2700302b gros segments .tex rejetes",
             [sys.executable, "tools/lolg_tex_large_shared_2700302b_header_probe.py"],
         ),
