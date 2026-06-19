@@ -180,7 +180,7 @@ def gap_summary_row(
         ready_rows,
         key=lambda row: int_field(row, "source_segment_offset"),
     )
-    verdict = "zero_gap_anchor_seed_bridge_ready" if ready_bytes == residual_bytes else "zero_gap_anchor_seed_bridge_partial"
+    verdict = "zero_gap_anchor_seed_bridge_validated" if ready_bytes == residual_bytes else "zero_gap_anchor_seed_bridge_partial"
     return {
         "target_id": gap.get("target_id", ""),
         "pcx_name": gap.get("pcx_name", ""),
@@ -199,7 +199,7 @@ def gap_summary_row(
         "anchor_relative_offsets": " ".join(row.get("source_anchor_delta", "") for row in ready_rows),
         "source_order_token_indices": " ".join(row.get("token_index", "") for row in source_order),
         "verdict": verdict,
-        "next_probe": "validate zero-gap anchor-source seed replay over structural residual zero-gap corpus",
+        "next_probe": "derive guarded zero-gap anchor-source replay rule",
     }
 
 
@@ -208,8 +208,8 @@ def total_summary(gap_rows: list[dict[str, str]], anchor_rows: list[dict[str, st
     residual_bytes = sum(int_field(row, "residual_token_bytes") for row in gap_rows)
     ready_bytes = sum(int_field(row, "replay_seed_bytes") for row in ready_rows)
     offsets = sorted({row.get("source_anchor_delta", "") for row in ready_rows if row.get("source_anchor_delta")})
-    verdict = "frontier80_structural_zero_gap_anchor_seed_bridge_profiled"
-    next_probe = "validate zero-gap anchor-source seed replay over structural residual zero-gap corpus"
+    verdict = "frontier80_structural_zero_gap_anchor_seed_bridge_validated"
+    next_probe = "derive guarded zero-gap anchor-source replay rule"
     if ready_bytes < residual_bytes:
         verdict = "frontier80_structural_zero_gap_anchor_seed_bridge_partial"
         next_probe = "split zero-gap anchor seed misses by source side"
