@@ -505,11 +505,19 @@ def build_summary(
             f"{best.get('action_id', '')} previews before decoder promotion"
         )
     elif improved:
-        verdict = "shared_2700302b_op4_emitarg1_local_context_action_improves"
-        next_action = (
-            "inspect shared 0x2700302b op4 emit-arg1 local-context action "
-            f"{best.get('action_id', '')}; avg score {float_text(best.get('avg_score')):.4f} remains noisy"
-        )
+        if best.get("condition_id") == "split_arg1_op4_arg3_0a":
+            verdict = "shared_2700302b_op4_emitarg1_local_context_split_action_improves"
+            next_action = (
+                "broaden shared 0x2700302b op4 split action semantics beyond arg1_op4/arg3_0a; "
+                f"best action {best.get('action_id', '')} avg score "
+                f"{float_text(best.get('avg_score')):.4f} remains noisy"
+            )
+        else:
+            verdict = "shared_2700302b_op4_emitarg1_local_context_action_improves"
+            next_action = (
+                "inspect shared 0x2700302b op4 emit-arg1 local-context action "
+                f"{best.get('action_id', '')}; avg score {float_text(best.get('avg_score')):.4f} remains noisy"
+            )
     else:
         verdict = "shared_2700302b_op4_emitarg1_local_context_action_no_improvement"
         next_action = "broaden shared 0x2700302b op4 emit-arg1 action semantics beyond local context"
