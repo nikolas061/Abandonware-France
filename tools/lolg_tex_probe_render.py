@@ -155,6 +155,20 @@ def load_probe_rows(report_dir: Path, names: set[str]) -> list[dict[str, str]]:
     return rows
 
 
+def load_profile_names(path: Path, priority: str) -> set[str]:
+    names: set[str] = set()
+    if not path.exists():
+        return names
+    with path.open(newline="") as handle:
+        for row in csv.DictReader(handle):
+            if priority and row.get("priority") != priority:
+                continue
+            name = row.get("normalized_pcx_name") or row.get("pcx_name")
+            if name:
+                names.add(Path(name.replace("\\", "/")).name.lower())
+    return names
+
+
 def write_manifest(path: Path, rows: list[dict[str, str]]) -> None:
     fieldnames = [
         "archive",
@@ -188,6 +202,17 @@ def main() -> None:
     parser.add_argument("--report-dir", type=Path, default=Path("output/texture_report"))
     parser.add_argument("-o", "--output", type=Path, default=Path("output/tex_probe_render"))
     parser.add_argument("--names", default="", help="Comma-separated PCX basenames to render.")
+    parser.add_argument(
+        "--names-from-profile",
+        type=Path,
+        default=None,
+        help="Optional remaining-reference profile CSV used to add PCX basenames.",
+    )
+    parser.add_argument(
+        "--profile-priority",
+        default="",
+        help="When --names-from-profile is set, only include rows with this priority.",
+    )
     parser.add_argument("--widths", default="64,128,256")
     parser.add_argument("--skips", default="0,4,8,12,16,24,32")
     parser.add_argument("--max-rows", type=int, default=512)
@@ -205,6 +230,8 @@ def main() -> None:
         for item in args.names.split(",")
         if item.strip()
     }
+    if args.names_from_profile is not None:
+        names.update(load_profile_names(args.names_from_profile, args.profile_priority))
     widths = parse_int_list(args.widths)
     skips = parse_int_list(args.skips)
     probe_rows = load_probe_rows(args.report_dir, names)[: args.max_samples]
@@ -272,6 +299,7 @@ def main() -> None:
     manifest_path = args.output / "manifest.csv"
     write_manifest(manifest_path, manifest_rows)
     print(f"Rendered {len(manifest_rows)} probe previews to {args.output}")
+    print(f"Name filters: {len(names)}")
     print(f"Manifest: {manifest_path}")
 
 

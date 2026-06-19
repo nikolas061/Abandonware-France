@@ -99,6 +99,17 @@ DEFAULT_TEX_PROBE_ANALYSIS_SUMMARY = Path(
 DEFAULT_TEX_PROBE_ANALYSIS_ROWS = Path("output/tex_unresolved_material_probe_render/analysis.csv")
 DEFAULT_TEX_PROBE_ANALYSIS_BEST = Path("output/tex_unresolved_material_probe_render/best_candidates.csv")
 DEFAULT_TEX_PROBE_ANALYSIS_HTML = Path("output/tex_unresolved_material_probe_render/analysis.html")
+DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_SUMMARY = Path("output/tex_large_unresolved_probe_render/summary.csv")
+DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_MANIFEST = Path(
+    "output/tex_large_unresolved_probe_render/gallery_manifest.csv"
+)
+DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_HTML = Path("output/tex_large_unresolved_probe_render/index.html")
+DEFAULT_TEX_LARGE_PROBE_ANALYSIS_SUMMARY = Path(
+    "output/tex_large_unresolved_probe_render/analysis_summary.csv"
+)
+DEFAULT_TEX_LARGE_PROBE_ANALYSIS_ROWS = Path("output/tex_large_unresolved_probe_render/analysis.csv")
+DEFAULT_TEX_LARGE_PROBE_ANALYSIS_BEST = Path("output/tex_large_unresolved_probe_render/best_candidates.csv")
+DEFAULT_TEX_LARGE_PROBE_ANALYSIS_HTML = Path("output/tex_large_unresolved_probe_render/analysis.html")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -779,6 +790,10 @@ SUMMARY_FIELDNAMES = [
     "tex_unresolved_material_probe_unique_pcx",
     "tex_probe_analysis_best_candidates",
     "tex_probe_analysis_segments",
+    "tex_large_unresolved_probe_fullhd_previews",
+    "tex_large_unresolved_probe_unique_pcx",
+    "tex_large_probe_analysis_best_candidates",
+    "tex_large_probe_analysis_segments",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -2527,13 +2542,15 @@ def audit_tex_unresolved_material_probe(
     summary: Path,
     manifest: Path,
     html_report: Path,
+    gate_name: str = "tex_unresolved_material_probe",
+    expected: str = "unresolved .tex material probes have valid 1920x1080 diagnostic previews",
 ) -> tuple[dict[str, str], int, int]:
     if not summary.exists():
-        return missing_gate("tex_unresolved_material_probe", summary), 0, 0
+        return missing_gate(gate_name, summary), 0, 0
     if not manifest.exists():
-        return missing_gate("tex_unresolved_material_probe", manifest), 0, 0
+        return missing_gate(gate_name, manifest), 0, 0
     if not html_report.exists():
-        return missing_gate("tex_unresolved_material_probe", html_report), 0, 0
+        return missing_gate(gate_name, html_report), 0, 0
 
     summary_rows = read_csv(summary)
     manifest_rows = read_csv(manifest)
@@ -2603,9 +2620,9 @@ def audit_tex_unresolved_material_probe(
     ok = not issues
     return (
         gate(
-            "tex_unresolved_material_probe",
+            gate_name,
             ok,
-            expected="unresolved .tex material probes have valid 1920x1080 diagnostic previews",
+            expected=expected,
             actual=(
                 f"previews={preview_rows}, fullhd={fullhd_previews}, "
                 f"unique={unique_pcx}, segments={segments}, issues={issue_rows}"
@@ -2623,15 +2640,17 @@ def audit_tex_probe_analysis(
     analysis_rows_path: Path,
     best_rows_path: Path,
     html_report: Path,
+    gate_name: str = "tex_probe_analysis",
+    expected: str = ".tex probe ranking report is internally consistent and links to existing previews",
 ) -> tuple[dict[str, str], int, int]:
     if not summary.exists():
-        return missing_gate("tex_probe_analysis", summary), 0, 0
+        return missing_gate(gate_name, summary), 0, 0
     if not analysis_rows_path.exists():
-        return missing_gate("tex_probe_analysis", analysis_rows_path), 0, 0
+        return missing_gate(gate_name, analysis_rows_path), 0, 0
     if not best_rows_path.exists():
-        return missing_gate("tex_probe_analysis", best_rows_path), 0, 0
+        return missing_gate(gate_name, best_rows_path), 0, 0
     if not html_report.exists():
-        return missing_gate("tex_probe_analysis", html_report), 0, 0
+        return missing_gate(gate_name, html_report), 0, 0
 
     summary_rows = read_csv(summary)
     analysis_rows = read_csv(analysis_rows_path)
@@ -2683,9 +2702,9 @@ def audit_tex_probe_analysis(
     ok = not issues
     return (
         gate(
-            "tex_probe_analysis",
+            gate_name,
             ok,
-            expected=".tex probe ranking report is internally consistent and links to existing previews",
+            expected=expected,
             actual=(
                 f"analyzed={analyzed_rows}/{preview_rows}, segments={segments}, "
                 f"best={best_candidate_rows}, issues={issue_rows}"
@@ -11904,6 +11923,27 @@ def main() -> None:
         )
     )
     rows.append(tex_probe_analysis_gate)
+    tex_large_probe_gate, tex_large_probe_previews, tex_large_probe_unique_pcx = (
+        audit_tex_unresolved_material_probe(
+            DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_SUMMARY,
+            DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_MANIFEST,
+            DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_HTML,
+            gate_name="tex_large_unresolved_probe",
+            expected="large unresolved .tex probes have valid 1920x1080 diagnostic previews",
+        )
+    )
+    rows.append(tex_large_probe_gate)
+    tex_large_probe_analysis_gate, tex_large_probe_analysis_best, tex_large_probe_analysis_segments = (
+        audit_tex_probe_analysis(
+            DEFAULT_TEX_LARGE_PROBE_ANALYSIS_SUMMARY,
+            DEFAULT_TEX_LARGE_PROBE_ANALYSIS_ROWS,
+            DEFAULT_TEX_LARGE_PROBE_ANALYSIS_BEST,
+            DEFAULT_TEX_LARGE_PROBE_ANALYSIS_HTML,
+            gate_name="tex_large_probe_analysis",
+            expected="large unresolved .tex probe ranking report is internally consistent",
+        )
+    )
+    rows.append(tex_large_probe_analysis_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -17247,6 +17287,10 @@ def main() -> None:
         "tex_unresolved_material_probe_unique_pcx": str(tex_probe_unique_pcx),
         "tex_probe_analysis_best_candidates": str(tex_probe_analysis_best),
         "tex_probe_analysis_segments": str(tex_probe_analysis_segments),
+        "tex_large_unresolved_probe_fullhd_previews": str(tex_large_probe_previews),
+        "tex_large_unresolved_probe_unique_pcx": str(tex_large_probe_unique_pcx),
+        "tex_large_probe_analysis_best_candidates": str(tex_large_probe_analysis_best),
+        "tex_large_probe_analysis_segments": str(tex_large_probe_analysis_segments),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
         "tex_remaining_reference_profile_unique": str(tex_remaining_profile_unique),
