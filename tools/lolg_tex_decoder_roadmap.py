@@ -1101,6 +1101,9 @@ DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_HIGH3_LARGE_DELTA_GUA
 DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_LARGE_DELTA_RESIDUAL_PROFILE_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_LARGE_DELTA_NEXT_LARGE_SOURCE_PROBE_SUMMARY = Path(
+    "output/tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_standard_probe/summary.csv"
 )
@@ -2041,6 +2044,7 @@ def apply_old_clean_byte_union(
     tex_large_shared_2700302b_reference_fixed_dy1_post_high3_large_delta_selector_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_fixed_dy1_post_high3_large_delta_guarded_replay_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe: dict[str, str] | None,
+    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe: dict[str, str] | None,
     tex_large_shifted_2a30_standard_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_decoder_path_probe: dict[str, str] | None,
@@ -5476,6 +5480,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_best="
+                    f"{tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe.get('best_large_value_source_id', '')}",
+                    "tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_lcs="
+                    f"{tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe.get('best_large_value_lcs_ratio', '0')}",
+                    "tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_verdict="
+                    f"{tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe.get('next_large_source_verdict', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_standard_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -7383,6 +7400,56 @@ def apply_old_clean_byte_union(
                 )
                 == 0
             )
+            shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe_current = (
+                shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe_current
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe is not None
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe.get(
+                    "frontier_id"
+                )
+                == tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe.get(
+                    "frontier_id"
+                )
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe.get(
+                    "pcx_name"
+                )
+                == tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe.get(
+                    "pcx_name"
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe,
+                    "remaining_nonzero_pixels",
+                )
+                == int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe,
+                    "remaining_nonzero_pixels",
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe,
+                    "large_delta_pixels",
+                )
+                == int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe,
+                    "remaining_large_delta_pixels",
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe,
+                    "source_zero_large_delta_pixels",
+                )
+                == int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe,
+                    "remaining_source_zero_pixels",
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe,
+                    "dy",
+                )
+                == 1
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe,
+                    "shift",
+                )
+                == 0
+            )
             shifted_2a30_standard_probe_current = (
                 large_rejected_profile_current
                 and tex_large_shifted_2a30_standard_probe is not None
@@ -7833,6 +7900,23 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_standard_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
+            elif (
+                tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe
+                and shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe_current
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe,
+                    "issue_rows",
+                )
+                == 0
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe.get(
+                    "next_action"
+                )
+            ):
+                next_action = str(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe.get(
+                        "next_action"
+                    )
+                )
             elif (
                 tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe
                 and shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe_current
@@ -24540,6 +24624,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_LARGE_DELTA_RESIDUAL_PROFILE_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shared-2700302b-reference-fixed-dy1-post-large-delta-next-large-source-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_LARGE_DELTA_NEXT_LARGE_SOURCE_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-standard-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY,
@@ -27368,6 +27457,11 @@ def main() -> None:
             args.tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe_summary
         )
     )
+    tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe_summary = (
+        read_optional_summary(
+            args.tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe_summary
+        )
+    )
     tex_large_shifted_2a30_standard_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_standard_probe_summary
     )
@@ -29069,6 +29163,9 @@ def main() -> None:
         ),
         tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe=(
             tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_residual_profile_probe_summary
+        ),
+        tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe=(
+            tex_large_shared_2700302b_reference_fixed_dy1_post_large_delta_next_large_source_probe_summary
         ),
         tex_large_shifted_2a30_standard_probe=tex_large_shifted_2a30_standard_probe_summary,
         tex_large_shifted_2a30_branch_probe=tex_large_shifted_2a30_branch_probe_summary,
