@@ -500,6 +500,12 @@ DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALU
 DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY = Path(
     "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_final_zero_gap_fixture_replay/index.html"
 )
+DEFAULT_TEX_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_FRONTIER80_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_frontier80_structural_nonzero_final_zero_gap_fixture_replay/index.html"
+)
+DEFAULT_TEX_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_FRONTIER80_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY_RESIDUAL_CORE = Path(
+    "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_frontier80_structural_nonzero_final_zero_gap_fixture_replay_residual_core/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1507,6 +1513,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Runs gaps clean apres replay fixture final gaps zero frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY,
+        ),
+        (
+            "Dependances source aval apres base clean finale frontier80 .tex",
+            DEFAULT_TEX_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_FRONTIER80_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY,
+        ),
+        (
+            "Noyau residuel aval apres base clean finale frontier80 .tex",
+            DEFAULT_TEX_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_FRONTIER80_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY_RESIDUAL_CORE,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
