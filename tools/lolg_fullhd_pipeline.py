@@ -2832,6 +2832,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_large_llse_marker_field_state_probe.py"],
         ),
         Step(
+            "probe impact replay garde marqueur 2730 LLSE gros segments .tex rejetes",
+            [sys.executable, "tools/lolg_tex_large_llse_marker_guard_replay_impact_probe.py"],
+        ),
+        Step(
             "probe header partage 2700302b gros segments .tex rejetes",
             [sys.executable, "tools/lolg_tex_large_shared_2700302b_header_probe.py"],
         ),
