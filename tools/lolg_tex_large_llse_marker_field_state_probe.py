@@ -41,6 +41,7 @@ from lolg_tex_large_llse_marker_semantics_probe import (
 
 DEFAULT_OUTPUT = Path("output/tex_large_llse_marker_field_state_probe")
 DEFAULT_FIELD_SEMANTICS_SUMMARY = _FIELD_SEMANTICS_OUTPUT / "summary.csv"
+DEFAULT_RECORDS = Path("output/tex_large_llse_marker_record_profile/records.csv")
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -76,6 +77,11 @@ SUMMARY_FIELDNAMES = [
     "f0_zero",
     "f0_low",
     "f0_high",
+    "record_target_rows",
+    "record_static_guard_rows",
+    "trace_static_guard_rows",
+    "record_static_guard_untraced_rows",
+    "record_static_guard_sample_offsets",
     "final_x",
     "final_y",
     "emitted",
@@ -180,6 +186,37 @@ def byte_value(row: dict[str, str], field: str) -> int:
         return int(row.get(field, "0"), 16)
     except ValueError:
         return 0
+
+
+def record_static_guard_profile(records_path: Path, target_pair: str, target_record_len: int) -> dict[str, str]:
+    target_rows = 0
+    guard_rows = 0
+    offsets: list[str] = []
+    for row in read_csv(records_path):
+        if (
+            row.get("kind") != "pair"
+            or row.get("pair") != target_pair
+            or int_value(row, "record_len") != target_record_len
+        ):
+            continue
+        record_hex = row.get("record_hex", "")
+        if len(record_hex) < 14:
+            continue
+        target_rows += 1
+        try:
+            f0 = int(record_hex[4:6], 16)
+            f1 = int(record_hex[6:8], 16)
+        except ValueError:
+            continue
+        if f0 >= 0x40 and f1 % 4 == 0:
+            guard_rows += 1
+            if len(offsets) < 16:
+                offsets.append(row.get("record_offset", ""))
+    return {
+        "record_target_rows": str(target_rows),
+        "record_static_guard_rows": str(guard_rows),
+        "record_static_guard_sample_offsets": "|".join(offsets),
+    }
 
 
 def trace_body(
@@ -472,6 +509,7 @@ def summary_row(
     issue_rows: int,
     sample_limit: int,
     segment_count: int,
+    record_guard: dict[str, str],
 ) -> dict[str, str]:
     total = len(events)
     f1_mod4_zero = sum(1 for row in events if row.get("f1_mod4") == "0")
@@ -487,6 +525,12 @@ def summary_row(
     target_y_same = total - target_y_forward - target_y_backward
     y_values = [int_value(row, "y_after") for row in events]
     f0_values = [int(row.get("field0", "0"), 16) for row in events]
+    trace_static_guard_rows = sum(
+        1
+        for row in events
+        if byte_value(row, "field0") >= 0x40 and row_num(row, "f1_mod4") == 0
+    )
+    record_static_guard_rows = int_value(record_guard, "record_static_guard_rows")
     best_delta = semantics_summary.get("best_delta_vs_pair", "")
     if issue_rows:
         verdict = "llse_marker_field_state_probe_issues"
@@ -495,8 +539,9 @@ def summary_row(
         verdict = "llse_marker_field_state_guard_signal"
         if "f0ge40" in variant.action:
             next_action = (
-                "validate LLSE 2730 static guard field1 mod4 and field0>=0x40 "
-                f"for {stats.get('actions_applied', 0)} events before decoder promotion; "
+                "validate LLSE 2730 static guard field1 mod4 and field0>=0x40 on "
+                f"{max(0, record_static_guard_rows - trace_static_guard_rows)} off-trace records "
+                "before decoder promotion; "
                 f"candidate {variant.action}"
             )
         elif "_yforward" in variant.action:
@@ -553,6 +598,11 @@ def summary_row(
         "f0_zero": str(sum(1 for value in f0_values if value == 0)),
         "f0_low": str(sum(1 for value in f0_values if value < 0x30)),
         "f0_high": str(sum(1 for value in f0_values if value >= 0xC0)),
+        "record_target_rows": record_guard.get("record_target_rows", ""),
+        "record_static_guard_rows": str(record_static_guard_rows),
+        "trace_static_guard_rows": str(trace_static_guard_rows),
+        "record_static_guard_untraced_rows": str(max(0, record_static_guard_rows - trace_static_guard_rows)),
+        "record_static_guard_sample_offsets": record_guard.get("record_static_guard_sample_offsets", ""),
         "final_x": str(stats.get("final_x", "")),
         "final_y": str(stats.get("final_y", "")),
         "emitted": str(stats.get("emitted", "")),
@@ -654,6 +704,7 @@ def write_report(
     semantics_summary = read_summary(args.field_semantics_summary)
     action = args.action if args.action != "best" else semantics_summary.get("best_action", "baseline")
     variant = choose_variant(higharg2_summary, pair_summary, field_summary, action)
+    record_guard = record_static_guard_profile(args.records, variant.target_pair, variant.target_record_len)
     segment_rows = [row for row in read_csv(args.segments) if row.get("control_path") == TARGET_CONTROL_PATH]
     payload_cache: dict[Path, bytes] = {}
     all_events: list[dict[str, str]] = []
@@ -689,6 +740,7 @@ def write_report(
         issue_rows,
         args.sample_limit,
         len(segment_rows),
+        record_guard,
     )
     sampled_events = all_events[: args.sample_limit]
     guards = guard_candidate_rows(all_events, args.guard_limit)
@@ -711,6 +763,7 @@ def main() -> None:
     parser.add_argument("--pair-length-summary", type=Path, default=DEFAULT_PAIR_LENGTH_SUMMARY)
     parser.add_argument("--field-profile-summary", type=Path, default=DEFAULT_FIELD_PROFILE_SUMMARY)
     parser.add_argument("--field-semantics-summary", type=Path, default=DEFAULT_FIELD_SEMANTICS_SUMMARY)
+    parser.add_argument("--records", type=Path, default=DEFAULT_RECORDS)
     parser.add_argument("--mix-entry-index", type=int, default=DEFAULT_MIX_ENTRY_INDEX)
     parser.add_argument("--width", type=int, default=64)
     parser.add_argument("--height", type=int, default=512)
@@ -730,6 +783,11 @@ def main() -> None:
     print(f"f1 mod4 zero: {summary['f1_mod4_zero']} ({summary['f1_mod4_zero_ratio']})")
     print(f"x delta <=4: {summary['x_delta_abs_le4']} ({summary['x_delta_abs_le4_ratio']})")
     print(f"y delta <=4: {summary['y_delta_abs_le4']} ({summary['y_delta_abs_le4_ratio']})")
+    print(
+        "Record static guard: "
+        f"{summary['record_static_guard_rows']}/{summary['record_target_rows']} "
+        f"(trace {summary['trace_static_guard_rows']})"
+    )
     print(f"Issue rows: {summary['issue_rows']}")
     print(f"State verdict: {summary['state_verdict']}")
     print(f"Next action: {summary['next_action']}")
