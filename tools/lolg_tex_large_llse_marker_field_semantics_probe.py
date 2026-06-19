@@ -146,6 +146,15 @@ ACTIONS = [
     "setxy_f1div4_f0_if_f1mod4",
     "setxy_f1div4_f0x2_if_f1mod4",
     "setxy_f1div4_f0_if_f1mod4_f0ge30",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_ylt128",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_ylt256",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_ylt320",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_ylt384",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_ylt448",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_ylt512",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_f0ltf0_ylt512",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_f2ge10_ylt512",
+    "setxy_f1div4_f0_if_f1mod4_f0ge40_f2ge10_f0ltf0_ylt512",
     "setxy_f1div4_f0_if_f1mod4_f0ge40",
     "setxy_f1div4_f0_if_f1mod4_f0ge60",
     "setxy_f1div4_f0_if_f1mod4_f0ge80",
@@ -284,6 +293,33 @@ def clamp_y(value: int, height: int) -> int:
     return max(0, min(height, value))
 
 
+def action_y_limit(action: str) -> int | None:
+    marker = "_ylt"
+    if marker not in action:
+        return None
+    suffix = action.rsplit(marker, 1)[1]
+    if not suffix.isdecimal():
+        return None
+    return int(suffix)
+
+
+def static_f0_guard_ok(action: str, f0: int, f2: int, y: int) -> bool:
+    limit = action_y_limit(action)
+    if limit is not None and y >= limit:
+        return False
+    f0_floor_ok = (
+        ("f0ge30" in action and f0 >= 0x30)
+        or ("f0ge40" in action and f0 >= 0x40)
+        or ("f0ge60" in action and f0 >= 0x60)
+        or ("f0ge80" in action and f0 >= 0x80)
+    )
+    return (
+        f0_floor_ok
+        and ("f0ltf0" not in action or f0 < 0xF0)
+        and ("f2ge10" not in action or f2 >= 0x10)
+    )
+
+
 def apply_field_action(
     x: int,
     y: int,
@@ -400,12 +436,7 @@ def apply_field_action(
     elif (
         action.startswith("setxy_f1div4_f0_if_f1mod4_f0ge")
         and f1 % 4 == 0
-        and (
-            (action.endswith("f0ge30") and f0 >= 0x30)
-            or (action.endswith("f0ge40") and f0 >= 0x40)
-            or (action.endswith("f0ge60") and f0 >= 0x60)
-            or (action.endswith("f0ge80") and f0 >= 0x80)
-        )
+        and static_f0_guard_ok(action, f0, f2, y)
     ):
         x = (f1 // 4) % max(1, width)
         y = clamp_y(f0, height)

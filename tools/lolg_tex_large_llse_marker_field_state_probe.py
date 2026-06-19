@@ -156,6 +156,21 @@ GUARD_FIELDNAMES = [
     "example_events",
 ]
 
+RECORD_GUARD_FIELDNAMES = [
+    "rank",
+    "guard",
+    "guard_scope",
+    "clauses",
+    "matched",
+    "trace_matched",
+    "late_matched",
+    "precision",
+    "recall",
+    "false_positive_ratio",
+    "missed_trace",
+    "example_offsets",
+]
+
 
 def ratio(count: int, total: int) -> str:
     return f"{count / max(1, total):.6f}"
@@ -191,6 +206,10 @@ def byte_value(row: dict[str, str], field: str) -> int:
         return int(row.get(field, "0"), 16)
     except ValueError:
         return 0
+
+
+def first_hex_byte(value: str) -> str:
+    return value[:2] if len(value) >= 2 else "00"
 
 
 def record_static_guard_profile(records_path: Path, target_pair: str, target_record_len: int) -> dict[str, str]:
@@ -506,6 +525,230 @@ def guard_candidate_rows(events: list[dict[str, str]], limit: int) -> list[dict[
     return rows
 
 
+def trace_record_offsets(events: list[dict[str, str]]) -> set[int]:
+    offsets: set[int] = set()
+    for row in events:
+        if row.get("applied") != "yes":
+            continue
+        offset = int_value(row, "record_offset")
+        offsets.add(offset)
+        if offset >= 4:
+            offsets.add(offset - 4)
+    return offsets
+
+
+def record_guard_rows(
+    records_path: Path,
+    target_pair: str,
+    target_record_len: int,
+    trace_offsets: set[int],
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for row in read_csv(records_path):
+        if (
+            row.get("kind") != "pair"
+            or row.get("pair") != target_pair
+            or int_value(row, "record_len") != target_record_len
+        ):
+            continue
+        record_hex = row.get("record_hex", "")
+        if len(record_hex) < 14:
+            continue
+        try:
+            f0, f1, f2, f3, f4 = (int(record_hex[index : index + 2], 16) for index in range(4, 14, 2))
+        except ValueError:
+            continue
+        if f0 < 0x40 or f1 % 4 != 0:
+            continue
+        record_offset = int_value(row, "record_offset")
+        rows.append(
+            {
+                "record_offset": str(record_offset),
+                "record_hex": record_hex,
+                "field0": f"{f0:02x}",
+                "field1": f"{f1:02x}",
+                "field2": f"{f2:02x}",
+                "field3": f"{f3:02x}",
+                "field4": f"{f4:02x}",
+                "f1_mod4": str(f1 % 4),
+                "f1_div4": str(f1 // 4),
+                "target_x": str(f1 // 4),
+                "target_y": str(f0),
+                "before0": first_hex_byte(row.get("before4_hex", "")),
+                "after0": first_hex_byte(row.get("after4_hex", "")),
+                "next_byte": first_hex_byte(row.get("next_byte", "")),
+                "trace_label": "trace" if record_offset in trace_offsets else "late",
+            }
+        )
+    return rows
+
+
+def build_record_guard_atoms(rows: list[dict[str, str]]) -> list[tuple[str, str, object]]:
+    trace_rows = [row for row in rows if row.get("trace_label") == "trace"]
+    atoms: list[tuple[str, str, object]] = []
+    for field in ("field0", "field1", "field2", "field3", "field4"):
+        values = sorted({byte_value(row, field) for row in trace_rows})
+        for value in values:
+            atoms.append(
+                (
+                    f"{field}==0x{value:02x}",
+                    "field",
+                    lambda row, field=field, value=value: byte_value(row, field) == value,
+                )
+            )
+        for threshold in (0x10, 0x20, 0x30, 0x40, 0x60, 0x80, 0xC0, 0xE0, 0xF0):
+            atoms.append(
+                (
+                    f"{field}>=0x{threshold:02x}",
+                    "field",
+                    lambda row, field=field, threshold=threshold: byte_value(row, field) >= threshold,
+                )
+            )
+            atoms.append(
+                (
+                    f"{field}<0x{threshold:02x}",
+                    "field",
+                    lambda row, field=field, threshold=threshold: byte_value(row, field) < threshold,
+                )
+            )
+    for mod in range(4):
+        atoms.append(("f1_mod4=={mod}".format(mod=mod), "field", lambda row, mod=mod: row_num(row, "f1_mod4") == mod))
+    atoms.extend(
+        [
+            ("field1==0", "field", lambda row: byte_value(row, "field1") == 0),
+            ("field1!=0", "field", lambda row: byte_value(row, "field1") != 0),
+        ]
+    )
+    for field in ("target_x", "target_y"):
+        values = sorted({row_num(row, field) for row in trace_rows})
+        for value in values:
+            atoms.append((f"{field}=={value}", "field", lambda row, field=field, value=value: row_num(row, field) == value))
+        for threshold in (4, 8, 16, 32, 64, 80, 96, 128, 160, 192, 224):
+            atoms.append(
+                (
+                    f"{field}>={threshold}",
+                    "field",
+                    lambda row, field=field, threshold=threshold: row_num(row, field) >= threshold,
+                )
+            )
+            atoms.append(
+                (
+                    f"{field}<{threshold}",
+                    "field",
+                    lambda row, field=field, threshold=threshold: row_num(row, field) < threshold,
+                )
+            )
+    for field in ("before0", "after0", "next_byte"):
+        values = sorted({byte_value(row, field) for row in trace_rows})
+        for value in values:
+            atoms.append(
+                (
+                    f"{field}==0x{value:02x}",
+                    "byte_context",
+                    lambda row, field=field, value=value: byte_value(row, field) == value,
+                )
+            )
+        for threshold in (0x10, 0x20, 0x30, 0x40, 0x60, 0x80, 0xC0, 0xE0, 0xF0):
+            atoms.append(
+                (
+                    f"{field}>=0x{threshold:02x}",
+                    "byte_context",
+                    lambda row, field=field, threshold=threshold: byte_value(row, field) >= threshold,
+                )
+            )
+            atoms.append(
+                (
+                    f"{field}<0x{threshold:02x}",
+                    "byte_context",
+                    lambda row, field=field, threshold=threshold: byte_value(row, field) < threshold,
+                )
+            )
+    return atoms
+
+
+def record_guard_scope(scopes: list[str]) -> str:
+    unique = sorted(set(scopes))
+    if len(unique) == 1:
+        return unique[0]
+    return "+".join(unique)
+
+
+def record_guard_candidate_rows(
+    events: list[dict[str, str]],
+    records_path: Path,
+    target_pair: str,
+    target_record_len: int,
+    limit: int,
+) -> list[dict[str, str]]:
+    rows = record_guard_rows(records_path, target_pair, target_record_len, trace_record_offsets(events))
+    total_trace = sum(1 for row in rows if row.get("trace_label") == "trace")
+    total_late = max(0, len(rows) - total_trace)
+    atoms = build_record_guard_atoms(rows)
+    candidates: list[tuple[float, float, int, str, list[str], list[str], list[dict[str, str]]]] = []
+    seen: set[str] = set()
+
+    def add_candidate(clauses: list[tuple[str, str, object]]) -> None:
+        guard = " && ".join(name for name, _scope, _predicate in clauses)
+        if guard in seen:
+            return
+        seen.add(guard)
+        matched = [
+            row
+            for row in rows
+            if all(predicate(row) for _name, _scope, predicate in clauses)  # type: ignore[misc]
+        ]
+        trace_matched = sum(1 for row in matched if row.get("trace_label") == "trace")
+        if trace_matched <= 0 or len(matched) <= 1:
+            return
+        late_matched = len(matched) - trace_matched
+        precision = trace_matched / max(1, len(matched))
+        recall = trace_matched / max(1, total_trace)
+        false_positive_ratio = late_matched / max(1, total_late)
+        score = (precision * 4.0) + (recall * 2.0) - false_positive_ratio
+        candidates.append(
+            (
+                score,
+                precision,
+                trace_matched,
+                guard,
+                [scope for _name, scope, _predicate in clauses],
+                [name for name, _scope, _predicate in clauses],
+                matched,
+            )
+        )
+
+    for atom in atoms:
+        add_candidate([atom])
+    for left_index, left in enumerate(atoms):
+        for right in atoms[left_index + 1 :]:
+            add_candidate([left, right])
+
+    candidates.sort(key=lambda item: (-item[0], -item[1], -item[2], item[3]))
+    candidate_rows: list[dict[str, str]] = []
+    for rank, (_score, precision, trace_matched, guard, scopes, _clauses, matched) in enumerate(candidates[:limit], 1):
+        late_matched = len(matched) - trace_matched
+        recall = trace_matched / max(1, total_trace)
+        false_positive_ratio = late_matched / max(1, total_late)
+        examples = [row.get("record_offset", "") for row in matched if row.get("trace_label") == "trace"]
+        candidate_rows.append(
+            {
+                "rank": str(rank),
+                "guard": guard,
+                "guard_scope": record_guard_scope(scopes),
+                "clauses": str(len(scopes)),
+                "matched": str(len(matched)),
+                "trace_matched": str(trace_matched),
+                "late_matched": str(late_matched),
+                "precision": f"{precision:.6f}",
+                "recall": f"{recall:.6f}",
+                "false_positive_ratio": f"{false_positive_ratio:.6f}",
+                "missed_trace": str(total_trace - trace_matched),
+                "example_offsets": "|".join(examples[:16]),
+            }
+        )
+    return candidate_rows
+
+
 def summary_row(
     events: list[dict[str, str]],
     validation_events: list[dict[str, str]],
@@ -652,10 +895,17 @@ def build_html(
     events: list[dict[str, str]],
     buckets: list[dict[str, str]],
     guards: list[dict[str, str]],
+    record_guards: list[dict[str, str]],
     output_dir: Path,
     title: str,
 ) -> str:
-    payload = {"summary": summary, "events": events, "buckets": buckets, "guards": guards}
+    payload = {
+        "summary": summary,
+        "events": events,
+        "buckets": buckets,
+        "guards": guards,
+        "record_guards": record_guards,
+    }
     data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
     links = " ".join(
         f"<a href=\"{html.escape(relative_href(path, output_dir))}\">{html.escape(label)}</a>"
@@ -664,6 +914,7 @@ def build_html(
             ("events.csv", output_dir / "events.csv"),
             ("buckets.csv", output_dir / "buckets.csv"),
             ("guard_candidates.csv", output_dir / "guard_candidates.csv"),
+            ("record_guard_candidates.csv", output_dir / "record_guard_candidates.csv"),
         )
     )
     return f"""<!doctype html>
@@ -707,6 +958,7 @@ section {{ margin-bottom: 20px; }}
   </section>
   <section class="panel"><h2>Summary</h2>{render_table([summary], SUMMARY_FIELDNAMES)}</section>
   <section class="panel"><h2>Guard Candidates</h2>{render_table(guards, GUARD_FIELDNAMES)}</section>
+  <section class="panel"><h2>Record Guard Candidates</h2>{render_table(record_guards, RECORD_GUARD_FIELDNAMES)}</section>
   <section class="panel"><h2>Buckets</h2>{render_table(buckets, BUCKET_FIELDNAMES)}</section>
   <section class="panel"><h2>Events</h2>{render_table(events, EVENT_FIELDNAMES)}</section>
 </main>
@@ -718,7 +970,13 @@ section {{ margin-bottom: 20px; }}
 
 def write_report(
     args: argparse.Namespace,
-) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
+) -> tuple[
+    dict[str, str],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+]:
     args.output.mkdir(parents=True, exist_ok=True)
     higharg2_summary = read_summary(args.higharg2_summary)
     pair_summary = read_summary(args.pair_length_summary)
@@ -789,15 +1047,23 @@ def write_report(
     )
     sampled_events = all_events[: args.sample_limit]
     guards = guard_candidate_rows(all_events, args.guard_limit)
+    record_guards = record_guard_candidate_rows(
+        all_events,
+        args.records,
+        variant.target_pair,
+        variant.target_record_len,
+        args.guard_limit,
+    )
     write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(args.output / "events.csv", EVENT_FIELDNAMES, sampled_events)
     write_csv(args.output / "buckets.csv", BUCKET_FIELDNAMES, buckets)
     write_csv(args.output / "guard_candidates.csv", GUARD_FIELDNAMES, guards)
+    write_csv(args.output / "record_guard_candidates.csv", RECORD_GUARD_FIELDNAMES, record_guards)
     (args.output / "index.html").write_text(
-        build_html(summary, sampled_events, buckets, guards, args.output, args.title),
+        build_html(summary, sampled_events, buckets, guards, record_guards, args.output, args.title),
         encoding="utf-8",
     )
-    return summary, sampled_events, buckets, guards
+    return summary, sampled_events, buckets, guards, record_guards
 
 
 def main() -> None:
@@ -821,7 +1087,7 @@ def main() -> None:
     parser.add_argument("--title", default="Lands of Lore II .tex LLSE Marker Field State Probe")
     args = parser.parse_args()
 
-    summary, _events, _buckets, guards = write_report(args)
+    summary, _events, _buckets, guards, record_guards = write_report(args)
     print(f"Events: {summary['event_rows']}")
     print(f"Candidate action: {summary['candidate_action']}")
     print(f"Candidate delta: {summary['candidate_delta']}")
@@ -844,6 +1110,12 @@ def main() -> None:
     print(f"Next action: {summary['next_action']}")
     if guards:
         print(f"Top guard: {guards[0]['guard']} precision {guards[0]['precision']} recall {guards[0]['recall']}")
+    if record_guards:
+        print(
+            "Top record guard: "
+            f"{record_guards[0]['guard']} precision {record_guards[0]['precision']} "
+            f"recall {record_guards[0]['recall']}"
+        )
     print(f"HTML: {args.output / 'index.html'}")
 
 
