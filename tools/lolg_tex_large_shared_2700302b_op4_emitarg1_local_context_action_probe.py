@@ -184,6 +184,9 @@ EXTENDED_SPLIT_RULES: tuple[tuple[str, str], ...] = (
     ("arg2_arg3_37_c7", "deny_skip4"),
     ("prev2_prev1_26_e1", "deny_skip6"),
     ("arg2_arg3_00_02", "deny_skip6"),
+    ("arg1_38", "deny_skip4"),
+    ("arg1_43", "deny_skip6"),
+    ("arg4_43", "deny_skip6"),
 )
 
 
@@ -206,6 +209,12 @@ def extra_condition_passes(condition_id: str, context: dict[str, int]) -> bool:
         return (context["prev2"], context["prev1"]) == (0x26, 0xE1)
     if condition_id == "arg2_arg3_00_02":
         return (context["arg2"], context["arg3"]) == (0x00, 0x02)
+    if condition_id == "arg1_38":
+        return context["arg1"] == 0x38
+    if condition_id == "arg1_43":
+        return context["arg1"] == 0x43
+    if condition_id == "arg4_43":
+        return context["arg4"] == 0x43
     return False
 
 
@@ -572,6 +581,13 @@ def build_summary(
             verdict = "shared_2700302b_op4_emitarg1_local_context_split_action_improves"
             next_action = (
                 "broaden shared 0x2700302b op4 split action semantics beyond arg1_op4/arg3_0a; "
+                f"best action {best.get('action_id', '')} avg score "
+                f"{float_text(best.get('avg_score')):.4f} remains noisy"
+            )
+        elif best.get("condition_id", "").startswith("extended_split_greedy_"):
+            verdict = "shared_2700302b_op4_emitarg1_local_context_extended_split_action_improves"
+            next_action = (
+                "continue shared 0x2700302b op4 extended split context sweep; "
                 f"best action {best.get('action_id', '')} avg score "
                 f"{float_text(best.get('avg_score')):.4f} remains noisy"
             )
