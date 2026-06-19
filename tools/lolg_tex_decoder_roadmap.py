@@ -1005,6 +1005,9 @@ DEFAULT_TEX_LARGE_LLSE_SIGNATURE_CONTROL_PROBE_SUMMARY = Path(
 DEFAULT_TEX_LARGE_LLSE_SIGNATURE_STRUCTURE_PROBE_SUMMARY = Path(
     "output/tex_large_llse_signature_structure_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_LLSE_COMMAND_RECORD_PROBE_SUMMARY = Path(
+    "output/tex_large_llse_command_record_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHARED_2700302B_HEADER_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_header_probe/summary.csv"
 )
@@ -2069,6 +2072,7 @@ def apply_old_clean_byte_union(
     tex_large_body_control_grammar_probe: dict[str, str] | None,
     tex_large_llse_signature_control_probe: dict[str, str] | None,
     tex_large_llse_signature_structure_probe: dict[str, str] | None,
+    tex_large_llse_command_record_probe: dict[str, str] | None,
     tex_large_shared_2700302b_header_probe: dict[str, str] | None,
     tex_large_shared_2700302b_payload_replay: dict[str, str] | None,
     tex_large_shared_2700302b_renderer_grammar_probe: dict[str, str] | None,
@@ -5160,6 +5164,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_llse_command_record_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_llse_cmd20="
+                    f"{tex_large_llse_command_record_probe.get('cmd20_occurrences', '0')}",
+                    "tex_large_llse_cmd20_dense_spans="
+                    f"{tex_large_llse_command_record_probe.get('cmd20_dense_spans', '0')}",
+                    "tex_large_llse_command_verdict="
+                    f"{tex_large_llse_command_record_probe.get('record_verdict', '')}",
+                ],
+            )
+
         if tex_large_shared_2700302b_header_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -6836,6 +6853,12 @@ def apply_old_clean_byte_union(
                 and tex_large_llse_signature_structure_probe is not None
                 and int_value(tex_large_llse_signature_structure_probe, "segment_rows")
                 == int_value(tex_large_llse_signature_control_probe, "segment_rows")
+            )
+            llse_command_record_probe_current = (
+                llse_signature_structure_probe_current
+                and tex_large_llse_command_record_probe is not None
+                and int_value(tex_large_llse_command_record_probe, "segment_rows")
+                == int_value(tex_large_llse_signature_structure_probe, "segment_rows")
             )
             shared_2700302b_header_probe_current = (
                 large_body_control_grammar_current
@@ -9663,6 +9686,13 @@ def apply_old_clean_byte_union(
                 and tex_large_shared_2700302b_header_probe.get("next_action")
             ):
                 next_action = str(tex_large_shared_2700302b_header_probe.get("next_action"))
+            elif (
+                tex_large_llse_command_record_probe
+                and llse_command_record_probe_current
+                and int_value(tex_large_llse_command_record_probe, "issue_rows") == 0
+                and tex_large_llse_command_record_probe.get("next_action")
+            ):
+                next_action = str(tex_large_llse_command_record_probe.get("next_action"))
             elif (
                 tex_large_llse_signature_structure_probe
                 and llse_signature_structure_probe_current
@@ -25819,6 +25849,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_LLSE_SIGNATURE_STRUCTURE_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-llse-command-record-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_LLSE_COMMAND_RECORD_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shared-2700302b-header-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_HEADER_PROBE_SUMMARY,
@@ -28787,6 +28822,9 @@ def main() -> None:
     tex_large_llse_signature_structure_probe_summary = read_optional_summary(
         args.tex_large_llse_signature_structure_probe_summary
     )
+    tex_large_llse_command_record_probe_summary = read_optional_summary(
+        args.tex_large_llse_command_record_probe_summary
+    )
     tex_large_shared_2700302b_header_probe_summary = read_optional_summary(
         args.tex_large_shared_2700302b_header_probe_summary
     )
@@ -30615,6 +30653,7 @@ def main() -> None:
         tex_large_body_control_grammar_probe=tex_large_body_control_grammar_probe_summary,
         tex_large_llse_signature_control_probe=tex_large_llse_signature_control_probe_summary,
         tex_large_llse_signature_structure_probe=tex_large_llse_signature_structure_probe_summary,
+        tex_large_llse_command_record_probe=tex_large_llse_command_record_probe_summary,
         tex_large_shared_2700302b_header_probe=tex_large_shared_2700302b_header_probe_summary,
         tex_large_shared_2700302b_payload_replay=tex_large_shared_2700302b_payload_replay_summary,
         tex_large_shared_2700302b_renderer_grammar_probe=tex_large_shared_2700302b_renderer_grammar_probe_summary,
