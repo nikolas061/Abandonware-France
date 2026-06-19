@@ -1029,6 +1029,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_PROMOTED_REPLAY_SUMMARY = Path
 DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_ROUTE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_branch_start_guard_route/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_GUARDED_RENDERER_GRAMMAR_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_probe/summary.csv"
 )
@@ -1894,6 +1897,7 @@ def apply_old_clean_byte_union(
     tex_large_shifted_2a30_branch_header_start_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_start_guard_promoted_replay: dict[str, str] | None,
     tex_large_shifted_2a30_branch_start_guard_route: dict[str, str] | None,
+    tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_replay_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_transform_probe: dict[str, str] | None,
@@ -5039,6 +5043,21 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_branch_guarded_renderer_high_arg2="
+                    f"{tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get('target_sig_high_arg2_skip_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_guarded_renderer_support_rank1_high_arg2="
+                    f"{tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get('support_rank1_sig_high_arg2_skip_max', '0')}",
+                    "tex_large_shifted_2a30_branch_guarded_renderer_arg2_safe_delta="
+                    f"{tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get('best_arg2_safe_score_delta', '')}",
+                    "tex_large_shifted_2a30_branch_guarded_renderer_verdict="
+                    f"{tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get('grammar_verdict', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_field16_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5856,6 +5875,22 @@ def apply_old_clean_byte_union(
                 == int_value(tex_large_shifted_2a30_branch_start_guard_promoted_replay, "operation_rows")
                 and int_value(tex_large_shifted_2a30_branch_start_guard_route, "base_branch_blocked_rows") > 0
             )
+            shifted_2a30_branch_guarded_renderer_grammar_probe_current = (
+                shifted_2a30_branch_start_guard_route_current
+                and tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe is not None
+                and int_value(
+                    tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe,
+                    "route_branch_start_guard_rows",
+                )
+                == int_value(tex_large_shifted_2a30_branch_start_guard_route, "branch_start_guard_rows")
+                and int_value(
+                    tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe,
+                    "route_renderer_blocked_rows",
+                )
+                == int_value(tex_large_shifted_2a30_branch_start_guard_route, "branch_renderer_blocked_rows")
+                and tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get("target_archive_tag")
+                == tex_large_shifted_2a30_branch_start_guard_route.get("target_archive_tag")
+            )
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -5984,6 +6019,18 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_field16_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
+            elif (
+                tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe
+                and shifted_2a30_branch_guarded_renderer_grammar_probe_current
+                and int_value(
+                    tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe,
+                    "target_sig_high_arg2_skip_rows",
+                )
+                > 0
+                and int_value(tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe, "issue_rows") == 0
+                and tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get("next_action"))
             elif (
                 tex_large_shifted_2a30_branch_start_guard_route
                 and shifted_2a30_branch_start_guard_route_current
@@ -22150,6 +22197,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_ROUTE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-branch-guarded-renderer-grammar-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_GUARDED_RENDERER_GRAMMAR_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-field16-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY,
@@ -24797,6 +24849,9 @@ def main() -> None:
     tex_large_shifted_2a30_branch_start_guard_route_summary = read_optional_summary(
         args.tex_large_shifted_2a30_branch_start_guard_route_summary
     )
+    tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe_summary
+    )
     tex_large_shifted_2a30_field16_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_field16_probe_summary
     )
@@ -26370,6 +26425,7 @@ def main() -> None:
         tex_large_shifted_2a30_branch_header_start_probe=tex_large_shifted_2a30_branch_header_start_probe_summary,
         tex_large_shifted_2a30_branch_start_guard_promoted_replay=tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary,
         tex_large_shifted_2a30_branch_start_guard_route=tex_large_shifted_2a30_branch_start_guard_route_summary,
+        tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe=tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe_summary,
         tex_large_shifted_2a30_field16_probe=tex_large_shifted_2a30_field16_probe_summary,
         tex_large_shifted_2a30_field16_replay_probe=tex_large_shifted_2a30_field16_replay_probe_summary,
         tex_large_shifted_2a30_field16_transform_probe=tex_large_shifted_2a30_field16_transform_probe_summary,

@@ -2725,6 +2725,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_large_shifted_2a30_branch_start_guard_route.py"],
         ),
         Step(
+            "probe grammaire rendu garde branche 2a30 gros segments .tex rejetes apres promotions field16 2a30",
+            [sys.executable, "tools/lolg_tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.py"],
+        ),
+        Step(
             "gradient-like noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,
