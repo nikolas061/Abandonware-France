@@ -23,6 +23,9 @@ DEFAULT_FIELD16_DECODER_PROMOTED_PACK = Path(
 DEFAULT_BRANCH_HIGH_ARG2_PROMOTED_PACK = Path(
     "output/tex_large_shifted_2a30_branch_high_arg2_promoted_pack/manifest.csv"
 )
+DEFAULT_SHARED_2700302B_OP4_SEGMENT_RULE_PROMOTED_PACK = Path(
+    "output/tex_large_shared_2700302b_op4_segment_rule_promoted_pack/manifest.csv"
+)
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -45,11 +48,15 @@ SUMMARY_FIELDNAMES = [
     "branch_high_arg2_reference_rows",
     "branch_high_arg2_unique_pcx",
     "branch_high_arg2_assets",
+    "shared_2700302b_op4_segment_rule_reference_rows",
+    "shared_2700302b_op4_segment_rule_unique_pcx",
+    "shared_2700302b_op4_segment_rule_assets",
     "exact_or_alias_unique_pcx",
     "exact_alias_or_decoded_unique_pcx",
     "exact_alias_decoded_or_raw_unique_pcx",
     "exact_alias_decoded_raw_or_field16_unique_pcx",
     "exact_alias_decoded_raw_field16_or_branch_unique_pcx",
+    "exact_alias_decoded_raw_field16_branch_or_shared2700302b_unique_pcx",
     "unresolved_reference_rows",
     "unresolved_unique_pcx",
     "issue_rows",
@@ -76,6 +83,8 @@ ROW_FIELDNAMES = [
     "field16_decoder_pack_paths",
     "branch_high_arg2_assets",
     "branch_high_arg2_pack_paths",
+    "shared_2700302b_op4_segment_rule_assets",
+    "shared_2700302b_op4_segment_rule_pack_paths",
     "issues",
 ]
 
@@ -130,6 +139,23 @@ BRANCH_HIGH_ARG2_FIELDNAMES = [
     "decoder_extra",
     "renderer_mode",
     "high_arg2_skips",
+    "review_status",
+    "coverage_eligible",
+    "promoted_fullhd_path",
+    "issues",
+]
+
+SHARED_2700302B_OP4_SEGMENT_RULE_FIELDNAMES = [
+    "asset_id",
+    "archive",
+    "archive_tag",
+    "pcx_name",
+    "normalized_pcx_name",
+    "texture_path",
+    "decoder_rule",
+    "decoder_extra",
+    "selected_condition_id",
+    "selected_action",
     "review_status",
     "coverage_eligible",
     "promoted_fullhd_path",
@@ -224,6 +250,19 @@ def branch_promotions_by_archive_name(rows: list[dict[str, str]]) -> dict[tuple[
     return output
 
 
+def shared_2700302b_promotions_by_archive_name(
+    rows: list[dict[str, str]],
+) -> dict[tuple[str, str], list[dict[str, str]]]:
+    output: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        if row.get("coverage_eligible") != "yes":
+            continue
+        key = (row.get("archive", ""), normalize_pcx(row.get("normalized_pcx_name", "") or row.get("pcx_name", "")))
+        if key[0] and key[1]:
+            output[key].append(row)
+    return output
+
+
 def read_optional_rows(path: Path) -> list[dict[str, str]]:
     if not path.exists():
         return []
@@ -237,7 +276,9 @@ def build_rows(
     raw_promotions: list[dict[str, str]],
     field16_promotions: list[dict[str, str]],
     branch_promotions: list[dict[str, str]],
+    shared_2700302b_promotions: list[dict[str, str]],
 ) -> tuple[
+    list[dict[str, str]],
     list[dict[str, str]],
     list[dict[str, str]],
     list[dict[str, str]],
@@ -250,12 +291,14 @@ def build_rows(
     raw_lookup = raw_promotions_by_archive_name(raw_promotions)
     field16_lookup = field16_promotions_by_archive_name(field16_promotions)
     branch_lookup = branch_promotions_by_archive_name(branch_promotions)
+    shared_2700302b_lookup = shared_2700302b_promotions_by_archive_name(shared_2700302b_promotions)
     rows: list[dict[str, str]] = []
     alias_rows: list[dict[str, str]] = []
     decoded_rows: list[dict[str, str]] = []
     raw_rows: list[dict[str, str]] = []
     field16_rows: list[dict[str, str]] = []
     branch_rows: list[dict[str, str]] = []
+    shared_2700302b_rows: list[dict[str, str]] = []
     for reference in references:
         archive = reference.get("archive", "")
         name = normalize_pcx(reference.get("normalized_pcx_name", "") or reference.get("pcx_name", ""))
@@ -265,6 +308,7 @@ def build_rows(
         matching_raw = raw_lookup.get((archive, name), [])
         matching_field16 = field16_lookup.get((archive, name), [])
         matching_branch = branch_lookup.get((archive, name), [])
+        matching_shared_2700302b = shared_2700302b_lookup.get((archive, name), [])
         issues = []
         for alias in matching_aliases:
             if alias.get("issues"):
@@ -291,6 +335,11 @@ def build_rows(
                 issues.append("branch_high_arg2_has_issues")
             if branch.get("promoted_fullhd_exists") != "yes" or not Path(branch.get("promoted_fullhd_path", "")).exists():
                 issues.append("missing_branch_high_arg2_path")
+        for shared in matching_shared_2700302b:
+            if shared.get("issues"):
+                issues.append("shared_2700302b_op4_segment_rule_has_issues")
+            if shared.get("promoted_fullhd_exists") != "yes" or not Path(shared.get("promoted_fullhd_path", "")).exists():
+                issues.append("missing_shared_2700302b_op4_segment_rule_path")
         if exact_covered:
             status = "exact"
         elif matching_aliases:
@@ -301,6 +350,8 @@ def build_rows(
             status = "field16_decoder"
         elif matching_branch:
             status = "branch_high_arg2"
+        elif matching_shared_2700302b:
+            status = "shared_2700302b_op4_segment_rule"
         elif matching_raw:
             status = "raw_same_archive"
         else:
@@ -336,6 +387,10 @@ def build_rows(
                 "branch_high_arg2_assets": str(len(matching_branch)),
                 "branch_high_arg2_pack_paths": ";".join(
                     row.get("promoted_fullhd_path", "") for row in matching_branch
+                ),
+                "shared_2700302b_op4_segment_rule_assets": str(len(matching_shared_2700302b)),
+                "shared_2700302b_op4_segment_rule_pack_paths": ";".join(
+                    row.get("promoted_fullhd_path", "") for row in matching_shared_2700302b
                 ),
                 "issues": ";".join(sorted(set(issues))),
             }
@@ -428,7 +483,27 @@ def build_rows(
                 "issues": branch.get("issues", ""),
             }
         )
-    return rows, alias_rows, decoded_rows, raw_rows, field16_rows, branch_rows
+
+    for shared in shared_2700302b_promotions:
+        shared_2700302b_rows.append(
+            {
+                "asset_id": shared.get("asset_id", ""),
+                "archive": shared.get("archive", ""),
+                "archive_tag": shared.get("archive_tag", ""),
+                "pcx_name": shared.get("pcx_name", ""),
+                "normalized_pcx_name": shared.get("normalized_pcx_name", ""),
+                "texture_path": shared.get("texture_path", ""),
+                "decoder_rule": shared.get("decoder_rule", ""),
+                "decoder_extra": shared.get("decoder_extra", ""),
+                "selected_condition_id": shared.get("selected_condition_id", ""),
+                "selected_action": shared.get("selected_action", ""),
+                "review_status": shared.get("review_status", ""),
+                "coverage_eligible": shared.get("coverage_eligible", ""),
+                "promoted_fullhd_path": shared.get("promoted_fullhd_path", ""),
+                "issues": shared.get("issues", ""),
+            }
+        )
+    return rows, alias_rows, decoded_rows, raw_rows, field16_rows, branch_rows, shared_2700302b_rows
 
 
 def summary_row(
@@ -438,6 +513,7 @@ def summary_row(
     raw_promotions: list[dict[str, str]],
     field16_promotions: list[dict[str, str]],
     branch_promotions: list[dict[str, str]],
+    shared_2700302b_promotions: list[dict[str, str]],
 ) -> dict[str, str]:
     unique_names = {row["normalized_pcx_name"] for row in rows}
     exact_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "exact"}
@@ -450,10 +526,18 @@ def summary_row(
     raw_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "raw_same_archive"}
     field16_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "field16_decoder"}
     branch_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "branch_high_arg2"}
+    shared_2700302b_names = {
+        row["normalized_pcx_name"]
+        for row in rows
+        if row["coverage_status"] == "shared_2700302b_op4_segment_rule"
+    }
     unresolved_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "unresolved"}
     eligible_raw = [row for row in raw_promotions if row.get("coverage_eligible") == "yes"]
     eligible_field16 = [row for row in field16_promotions if row.get("coverage_eligible") == "yes"]
     eligible_branch = [row for row in branch_promotions if row.get("coverage_eligible") == "yes"]
+    eligible_shared_2700302b = [
+        row for row in shared_2700302b_promotions if row.get("coverage_eligible") == "yes"
+    ]
     return {
         "scope": "total",
         "reference_rows": str(len(rows)),
@@ -479,6 +563,11 @@ def summary_row(
         ),
         "branch_high_arg2_unique_pcx": str(len(branch_names)),
         "branch_high_arg2_assets": str(len(eligible_branch)),
+        "shared_2700302b_op4_segment_rule_reference_rows": str(
+            sum(1 for row in rows if row["coverage_status"] == "shared_2700302b_op4_segment_rule")
+        ),
+        "shared_2700302b_op4_segment_rule_unique_pcx": str(len(shared_2700302b_names)),
+        "shared_2700302b_op4_segment_rule_assets": str(len(eligible_shared_2700302b)),
         "exact_or_alias_unique_pcx": str(len(exact_names | alias_names)),
         "exact_alias_or_decoded_unique_pcx": str(len(exact_names | alias_names | decoded_names)),
         "exact_alias_decoded_or_raw_unique_pcx": str(len(exact_names | alias_names | decoded_names | raw_names)),
@@ -487,6 +576,9 @@ def summary_row(
         ),
         "exact_alias_decoded_raw_field16_or_branch_unique_pcx": str(
             len(exact_names | alias_names | decoded_names | raw_names | field16_names | branch_names)
+        ),
+        "exact_alias_decoded_raw_field16_branch_or_shared2700302b_unique_pcx": str(
+            len(exact_names | alias_names | decoded_names | raw_names | field16_names | branch_names | shared_2700302b_names)
         ),
         "unresolved_reference_rows": str(sum(1 for row in rows if row["coverage_status"] == "unresolved")),
         "unresolved_unique_pcx": str(len(unresolved_names)),
@@ -497,6 +589,7 @@ def summary_row(
             + sum(1 for row in eligible_raw if row.get("issues"))
             + sum(1 for row in eligible_field16 if row.get("issues"))
             + sum(1 for row in eligible_branch if row.get("issues"))
+            + sum(1 for row in eligible_shared_2700302b if row.get("issues"))
         ),
     }
 
@@ -525,6 +618,7 @@ def build_html(
     raw_promotions: list[dict[str, str]],
     field16_promotions: list[dict[str, str]],
     branch_promotions: list[dict[str, str]],
+    shared_2700302b_promotions: list[dict[str, str]],
     output_dir: Path,
     title: str,
 ) -> str:
@@ -536,6 +630,7 @@ def build_html(
         "raw_same_archive_promotions": raw_promotions,
         "field16_decoder_promotions": field16_promotions,
         "branch_high_arg2_promotions": branch_promotions,
+        "shared_2700302b_op4_segment_rule_promotions": shared_2700302b_promotions,
     }
     data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
     links = " ".join(
@@ -548,6 +643,10 @@ def build_html(
             ("raw_same_archive_promotions.csv", output_dir / "raw_same_archive_promotions.csv"),
             ("field16_decoder_promotions.csv", output_dir / "field16_decoder_promotions.csv"),
             ("branch_high_arg2_promotions.csv", output_dir / "branch_high_arg2_promotions.csv"),
+            (
+                "shared_2700302b_op4_segment_rule_promotions.csv",
+                output_dir / "shared_2700302b_op4_segment_rule_promotions.csv",
+            ),
         )
     )
     alias_rows = [row for row in rows if row["coverage_status"] == "alias"]
@@ -555,6 +654,9 @@ def build_html(
     raw_rows = [row for row in rows if row["coverage_status"] == "raw_same_archive"]
     field16_rows = [row for row in rows if row["coverage_status"] == "field16_decoder"]
     branch_rows = [row for row in rows if row["coverage_status"] == "branch_high_arg2"]
+    shared_2700302b_rows = [
+        row for row in rows if row["coverage_status"] == "shared_2700302b_op4_segment_rule"
+    ]
     unresolved_rows = [row for row in rows if row["coverage_status"] == "unresolved"]
     return f"""<!doctype html>
 <html lang="fr">
@@ -634,7 +736,8 @@ a {{ color: var(--accent); text-decoration: none; margin-right: 10px; }}
     <div class="stat"><div class="label">Raw same-archive</div><div class="value">{html.escape(summary['raw_same_archive_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Field16 decoder</div><div class="value">{html.escape(summary['field16_decoder_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Branch high-arg2</div><div class="value">{html.escape(summary['branch_high_arg2_unique_pcx'])}</div></div>
-    <div class="stat"><div class="label">Couverts augmentes</div><div class="value">{html.escape(summary['exact_alias_decoded_raw_field16_or_branch_unique_pcx'])}</div></div>
+    <div class="stat"><div class="label">2700302b OP4</div><div class="value">{html.escape(summary['shared_2700302b_op4_segment_rule_unique_pcx'])}</div></div>
+    <div class="stat"><div class="label">Couverts augmentes</div><div class="value">{html.escape(summary['exact_alias_decoded_raw_field16_branch_or_shared2700302b_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Restants</div><div class="value warn">{html.escape(summary['unresolved_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Issues</div><div class="value ok">{html.escape(summary['issue_rows'])}</div></div>
   </section>
@@ -667,6 +770,10 @@ a {{ color: var(--accent); text-decoration: none; margin-right: 10px; }}
     {render_table(branch_rows, ROW_FIELDNAMES)}
   </section>
   <section class="panel">
+    <h2>References 2700302b OP4 par segment promues</h2>
+    {render_table(shared_2700302b_rows, ROW_FIELDNAMES)}
+  </section>
+  <section class="panel">
     <h2>References restantes</h2>
     {render_table(unresolved_rows, ROW_FIELDNAMES)}
   </section>
@@ -687,6 +794,7 @@ def write_report(
     raw_same_archive_promoted_pack_path: Path,
     field16_decoder_promoted_pack_path: Path,
     branch_high_arg2_promoted_pack_path: Path,
+    shared_2700302b_op4_segment_rule_promoted_pack_path: Path,
     title: str,
 ) -> tuple[
     dict[str, str],
@@ -696,17 +804,27 @@ def write_report(
     list[dict[str, str]],
     list[dict[str, str]],
     list[dict[str, str]],
+    list[dict[str, str]],
 ]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    rows, aliases, decoded_materials, raw_promotions, field16_promotions, branch_promotions = build_rows(
+    rows, aliases, decoded_materials, raw_promotions, field16_promotions, branch_promotions, shared_2700302b = build_rows(
         read_rows(references_path),
         read_rows(alias_pack_path),
         read_optional_rows(material_decode_pack_path),
         read_optional_rows(raw_same_archive_promoted_pack_path),
         read_optional_rows(field16_decoder_promoted_pack_path),
         read_optional_rows(branch_high_arg2_promoted_pack_path),
+        read_optional_rows(shared_2700302b_op4_segment_rule_promoted_pack_path),
     )
-    summary = summary_row(rows, aliases, decoded_materials, raw_promotions, field16_promotions, branch_promotions)
+    summary = summary_row(
+        rows,
+        aliases,
+        decoded_materials,
+        raw_promotions,
+        field16_promotions,
+        branch_promotions,
+        shared_2700302b,
+    )
     write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(output_dir / "references.csv", ROW_FIELDNAMES, rows)
     write_csv(output_dir / "aliases.csv", ALIAS_FIELDNAMES, aliases)
@@ -714,6 +832,11 @@ def write_report(
     write_csv(output_dir / "raw_same_archive_promotions.csv", RAW_SAME_ARCHIVE_FIELDNAMES, raw_promotions)
     write_csv(output_dir / "field16_decoder_promotions.csv", FIELD16_DECODER_FIELDNAMES, field16_promotions)
     write_csv(output_dir / "branch_high_arg2_promotions.csv", BRANCH_HIGH_ARG2_FIELDNAMES, branch_promotions)
+    write_csv(
+        output_dir / "shared_2700302b_op4_segment_rule_promotions.csv",
+        SHARED_2700302B_OP4_SEGMENT_RULE_FIELDNAMES,
+        shared_2700302b,
+    )
     (output_dir / "index.html").write_text(
         build_html(
             summary,
@@ -723,11 +846,12 @@ def write_report(
             raw_promotions,
             field16_promotions,
             branch_promotions,
+            shared_2700302b,
             output_dir,
             title,
         )
     )
-    return summary, rows, aliases, decoded_materials, raw_promotions, field16_promotions, branch_promotions
+    return summary, rows, aliases, decoded_materials, raw_promotions, field16_promotions, branch_promotions, shared_2700302b
 
 
 def main() -> None:
@@ -739,10 +863,15 @@ def main() -> None:
     parser.add_argument("--raw-same-archive-promoted-pack", type=Path, default=DEFAULT_RAW_SAME_ARCHIVE_PROMOTED_PACK)
     parser.add_argument("--field16-decoder-promoted-pack", type=Path, default=DEFAULT_FIELD16_DECODER_PROMOTED_PACK)
     parser.add_argument("--branch-high-arg2-promoted-pack", type=Path, default=DEFAULT_BRANCH_HIGH_ARG2_PROMOTED_PACK)
+    parser.add_argument(
+        "--shared-2700302b-op4-segment-rule-promoted-pack",
+        type=Path,
+        default=DEFAULT_SHARED_2700302B_OP4_SEGMENT_RULE_PROMOTED_PACK,
+    )
     parser.add_argument("--title", default="Lands of Lore II .tex Augmented Coverage")
     args = parser.parse_args()
 
-    summary, _rows, _aliases, _decoded, _raw, _field16, _branch = write_report(
+    summary, _rows, _aliases, _decoded, _raw, _field16, _branch, _shared_2700302b = write_report(
         args.output,
         args.references,
         args.alias_pack,
@@ -750,17 +879,19 @@ def main() -> None:
         args.raw_same_archive_promoted_pack,
         args.field16_decoder_promoted_pack,
         args.branch_high_arg2_promoted_pack,
+        args.shared_2700302b_op4_segment_rule_promoted_pack,
         args.title,
     )
     print(f"Unique likely PCX: {summary['unique_likely_pcx']}")
     print(
-        "Exact/alias/decoded/raw/field16/branch/unresolved unique: "
+        "Exact/alias/decoded/raw/field16/branch/2700302b/unresolved unique: "
         f"{summary['exact_covered_unique_pcx']}/"
         f"{summary['alias_unique_pcx']}/"
         f"{summary['decoded_material_unique_pcx']}/"
         f"{summary['raw_same_archive_unique_pcx']}/"
         f"{summary['field16_decoder_unique_pcx']}/"
         f"{summary['branch_high_arg2_unique_pcx']}/"
+        f"{summary['shared_2700302b_op4_segment_rule_unique_pcx']}/"
         f"{summary['unresolved_unique_pcx']}"
     )
     print(f"Issue rows: {summary['issue_rows']}")

@@ -2852,6 +2852,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "couverture augmentee .tex apres promotion regles op4 2700302b",
+            [sys.executable, "tools/lolg_tex_augmented_coverage.py"],
+        ),
+        Step(
             "probe gaps reference 2700302b gros segments .tex rejetes",
             [sys.executable, "tools/lolg_tex_large_shared_2700302b_reference_gap_probe.py"],
             requires_pillow=True,
