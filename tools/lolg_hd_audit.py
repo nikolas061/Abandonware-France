@@ -181,6 +181,21 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_RULES = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_field16_transform_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_selector_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_CORPUS = Path(
+    "output/tex_large_shifted_2a30_field16_selector_probe/corpus.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_FORMULAS = Path(
+    "output/tex_large_shifted_2a30_field16_selector_probe/formulas.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_SELECTORS = Path(
+    "output/tex_large_shifted_2a30_field16_selector_probe/selectors.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_selector_probe/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -879,6 +894,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_transform_probe_rows",
     "tex_large_shifted_2a30_field16_transform_probe_best_direct",
     "tex_large_shifted_2a30_field16_transform_probe_selector_needed",
+    "tex_large_shifted_2a30_field16_selector_probe_corpus_rows",
+    "tex_large_shifted_2a30_field16_selector_probe_large_rows",
+    "tex_large_shifted_2a30_field16_selector_probe_remaining",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -3557,6 +3575,117 @@ def audit_tex_large_shifted_2a30_field16_transform_probe(
         standard_rows if ok else 0,
         best_direct_rows if ok else 0,
         selector_needed_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_selector_probe(
+    summary: Path,
+    corpus_path: Path,
+    formulas_path: Path,
+    selectors_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_selector_probe", summary), 0, 0, 0
+    if not corpus_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_selector_probe", corpus_path), 0, 0, 0
+    if not formulas_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_selector_probe", formulas_path), 0, 0, 0
+    if not selectors_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_selector_probe", selectors_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_selector_probe", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    corpus_rows = read_csv(corpus_path)
+    formula_rows = read_csv(formulas_path)
+    selector_rows = read_csv(selectors_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    corpus_count = int_value(total, "corpus_rows")
+    large_rows = int_value(total, "large_rejected_rows")
+    oracle_extra_values = int_value(total, "oracle_extra_values")
+    delta_values = int_value(total, "next_word_low_delta_values")
+    formula_count = int_value(total, "formula_rows")
+    best_formula = total.get("best_formula", "")
+    best_formula_rows = int_value(total, "best_formula_rows")
+    best_formula_large_rows = int_value(total, "best_formula_large_rows")
+    large_remaining = int_value(total, "large_remaining_after_best_formula")
+    selector_count = int_value(total, "selector_rows")
+    source_only_selectors = int_value(total, "source_only_selector_rows")
+    best_source_repeated = int_value(total, "best_source_only_repeated_rows")
+    best_source_conflicted = int_value(total, "best_source_only_conflicted_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    large_corpus_rows = [row for row in corpus_rows if row.get("large_rejected") == "yes"]
+    remaining_large = [
+        row.get("pcx_name", "")
+        for row in large_corpus_rows
+        if row.get("large_remaining_after_best_formula") == "yes"
+    ]
+    if corpus_count != len(corpus_rows):
+        issues.append("field16_selector_corpus_count_mismatch")
+    if large_rows != len(large_corpus_rows):
+        issues.append("field16_selector_large_count_mismatch")
+    if oracle_extra_values != len({row.get("oracle_extra", "") for row in corpus_rows if row.get("oracle_extra")}):
+        issues.append("field16_selector_oracle_extra_count_mismatch")
+    if delta_values != len(
+        {row.get("next_word_low_delta", "") for row in corpus_rows if row.get("next_word_low_delta", "")}
+    ):
+        issues.append("field16_selector_delta_count_mismatch")
+    if formula_count != len(formula_rows):
+        issues.append("field16_selector_formula_count_mismatch")
+    if selector_count != len(selector_rows):
+        issues.append("field16_selector_selector_count_mismatch")
+    if source_only_selectors != sum(1 for row in selector_rows if row.get("selector_kind") == "source_only"):
+        issues.append("field16_selector_source_only_count_mismatch")
+    if issue_rows != sum(1 for row in corpus_rows if row.get("issues")):
+        issues.append("field16_selector_issue_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    if corpus_count <= large_rows:
+        issues.append("field16_selector_corpus_not_expanded")
+    if best_formula != "post1_direct_extra":
+        issues.append("field16_selector_best_formula_unexpected")
+    if best_formula_rows >= corpus_count:
+        issues.append("field16_selector_formula_overpromoted")
+    if best_formula_large_rows >= large_rows:
+        issues.append("field16_selector_large_formula_overpromoted")
+    if large_remaining != len(remaining_large):
+        issues.append("field16_selector_large_remaining_mismatch")
+    if sorted(remaining_large) != ["barsgld.pcx", "dragend.pcx"]:
+        issues.append("field16_selector_remaining_large_rows_unexpected")
+    if best_source_repeated >= corpus_count:
+        issues.append("field16_selector_source_only_overpromoted")
+    if best_source_conflicted <= 0:
+        issues.append("field16_selector_source_conflicts_missing")
+    if total.get("review_verdict") != "start_selector_split_needed":
+        issues.append("field16_selector_review_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_selector_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_selector_probe",
+            ok,
+            expected="shifted 0x2a30 field16 start selector corpus stays split before promotion",
+            actual=(
+                f"corpus={corpus_count}, large={large_rows}, best_formula={best_formula}, "
+                f"remaining={large_remaining}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        corpus_count if ok else 0,
+        large_rows if ok else 0,
+        large_remaining if ok else 0,
     )
 
 
@@ -12855,6 +12984,19 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_TRANSFORM_PROBE_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_transform_probe_gate)
+    (
+        tex_large_shifted_2a30_field16_selector_probe_gate,
+        tex_large_shifted_2a30_field16_selector_probe_corpus_rows,
+        tex_large_shifted_2a30_field16_selector_probe_large_rows,
+        tex_large_shifted_2a30_field16_selector_probe_remaining,
+    ) = audit_tex_large_shifted_2a30_field16_selector_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_CORPUS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_FORMULAS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_SELECTORS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_selector_probe_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -18233,6 +18375,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_transform_probe_selector_needed": str(
             tex_large_shifted_2a30_field16_transform_probe_selector_needed
+        ),
+        "tex_large_shifted_2a30_field16_selector_probe_corpus_rows": str(
+            tex_large_shifted_2a30_field16_selector_probe_corpus_rows
+        ),
+        "tex_large_shifted_2a30_field16_selector_probe_large_rows": str(
+            tex_large_shifted_2a30_field16_selector_probe_large_rows
+        ),
+        "tex_large_shifted_2a30_field16_selector_probe_remaining": str(
+            tex_large_shifted_2a30_field16_selector_probe_remaining
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
