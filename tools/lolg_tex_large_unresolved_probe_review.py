@@ -17,7 +17,9 @@ from PIL import Image, ImageDraw, ImageFont
 DEFAULT_OUTPUT = Path("output/tex_large_unresolved_probe_review")
 DEFAULT_BEST_CANDIDATES = Path("output/tex_large_unresolved_probe_render/best_candidates.csv")
 DEFAULT_REMAINING_PROFILE = Path("output/tex_remaining_reference_profile/profile.csv")
+DEFAULT_REVIEW_DECISIONS = Path("review_decisions/tex_large_unresolved_probe_decisions.tsv")
 SHEET_SIZE = (1800, 1000)
+ALLOWED_REVIEW_STATUSES = {"accepted", "rejected", "deferred"}
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -30,12 +32,20 @@ SUMMARY_FIELDNAMES = [
     "missing_native_paths",
     "missing_fullhd_paths",
     "missing_sheet_paths",
+    "decision_file_rows",
+    "accepted_rows",
+    "rejected_rows",
+    "deferred_rows",
+    "undecided_rows",
+    "decision_issue_rows",
     "issue_rows",
     "next_action",
 ]
 
 CANDIDATE_FIELDNAMES = [
     "review_id",
+    "review_status",
+    "review_note",
     "rank",
     "archive",
     "archive_tag",
@@ -105,6 +115,13 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def read_tsv(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open(newline="") as handle:
+        return list(csv.DictReader(handle, delimiter="\t"))
+
+
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -160,6 +177,15 @@ def profile_lookup(rows: list[dict[str, str]]) -> dict[tuple[str, str], dict[str
         name = normalize_name(row.get("normalized_pcx_name") or row.get("pcx_name", ""))
         if archive_tag and name:
             lookup[(archive_tag, name)] = row
+    return lookup
+
+
+def decision_lookup(rows: list[dict[str, str]]) -> dict[str, dict[str, str]]:
+    lookup: dict[str, dict[str, str]] = {}
+    for row in rows:
+        rid = row.get("review_id", "")
+        if rid:
+            lookup[rid] = row
     return lookup
 
 
@@ -271,6 +297,7 @@ def build_rows(
     output_dir: Path,
     best_rows: list[dict[str, str]],
     profiles: dict[tuple[str, str], dict[str, str]],
+    decisions_by_id: dict[str, dict[str, str]],
 ) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     grouped: dict[tuple[str, str, str, str], list[dict[str, str]]] = {}
     for row in best_rows:
@@ -321,6 +348,11 @@ def build_rows(
             if not sheet_path.exists():
                 issues.append("missing_review_sheet")
             rid = review_id(row)
+            decision = decisions_by_id.get(rid, {})
+            review_status = decision.get("review_status", "")
+            review_note = decision.get("review_note", "")
+            if review_status and review_status not in ALLOWED_REVIEW_STATUSES:
+                issues.append(f"review_status:{review_status}")
             decision_line = (
                 f"{row.get('archive_tag', '')}\t{row.get('pcx_name', '')}\t"
                 f"{row.get('segment_index', '')}\t{row.get('body_offset_hex', '')}\t"
@@ -329,6 +361,8 @@ def build_rows(
             candidate_rows.append(
                 {
                     "review_id": rid,
+                    "review_status": review_status,
+                    "review_note": review_note,
                     "rank": row.get("rank", ""),
                     "archive": row.get("archive", ""),
                     "archive_tag": row.get("archive_tag", ""),
@@ -381,12 +415,33 @@ def summary_row(
     candidate_rows: list[dict[str, str]],
     segment_rows: list[dict[str, str]],
     decision_rows: list[dict[str, str]],
+    review_decision_rows: list[dict[str, str]],
 ) -> dict[str, str]:
     issue_rows = sum(1 for row in candidate_rows if row.get("issues")) + sum(
         1 for row in segment_rows if row.get("issues")
     )
-    if candidate_rows:
+    accepted_rows = sum(1 for row in candidate_rows if row.get("review_status") == "accepted")
+    rejected_rows = sum(1 for row in candidate_rows if row.get("review_status") == "rejected")
+    deferred_rows = sum(1 for row in candidate_rows if row.get("review_status") == "deferred")
+    undecided_rows = sum(1 for row in candidate_rows if not row.get("review_status"))
+    decision_issue_rows = sum(
+        1
+        for row in candidate_rows
+        if row.get("review_status") and row.get("review_status") not in ALLOWED_REVIEW_STATUSES
+    )
+    if accepted_rows:
+        next_action = f"integrate {accepted_rows} accepted large unresolved .tex probe candidates"
+    elif undecided_rows:
         next_action = f"complete decisions_template.tsv for {len(candidate_rows)} large unresolved .tex probe candidates"
+    elif rejected_rows and not deferred_rows:
+        next_action = f"derive decoder path after rejecting {rejected_rows} large unresolved .tex probe candidates"
+    elif rejected_rows or deferred_rows:
+        next_action = (
+            f"derive decoder path after {rejected_rows} rejected and {deferred_rows} deferred "
+            "large unresolved .tex probe candidates"
+        )
+    elif candidate_rows:
+        next_action = "derive decoder path after large unresolved .tex probe review"
     else:
         next_action = "no large unresolved .tex probe candidates"
     return {
@@ -400,6 +455,12 @@ def summary_row(
         "missing_native_paths": str(sum(1 for row in candidate_rows if row.get("native_exists") != "yes")),
         "missing_fullhd_paths": str(sum(1 for row in candidate_rows if row.get("fullhd_exists") != "yes")),
         "missing_sheet_paths": str(sum(1 for row in segment_rows if row.get("review_sheet_exists") != "yes")),
+        "decision_file_rows": str(len(review_decision_rows)),
+        "accepted_rows": str(accepted_rows),
+        "rejected_rows": str(rejected_rows),
+        "deferred_rows": str(deferred_rows),
+        "undecided_rows": str(undecided_rows),
+        "decision_issue_rows": str(decision_issue_rows),
         "issue_rows": str(issue_rows),
         "next_action": next_action,
     }
@@ -541,12 +602,19 @@ def write_report(
     output_dir: Path,
     best_candidates: Path,
     remaining_profile: Path,
+    review_decisions: Path,
     title: str,
 ) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
     output_dir.mkdir(parents=True, exist_ok=True)
     profiles = profile_lookup(read_csv(remaining_profile)) if remaining_profile.exists() else {}
-    candidates, segments, decisions = build_rows(output_dir, read_csv(best_candidates), profiles)
-    summary = summary_row(candidates, segments, decisions)
+    review_decision_rows = read_tsv(review_decisions)
+    candidates, segments, decisions = build_rows(
+        output_dir,
+        read_csv(best_candidates),
+        profiles,
+        decision_lookup(review_decision_rows),
+    )
+    summary = summary_row(candidates, segments, decisions, review_decision_rows)
     write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(output_dir / "candidates.csv", CANDIDATE_FIELDNAMES, candidates)
     write_csv(output_dir / "segments.csv", SEGMENT_FIELDNAMES, segments)
@@ -562,6 +630,7 @@ def main() -> None:
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--best-candidates", type=Path, default=DEFAULT_BEST_CANDIDATES)
     parser.add_argument("--remaining-profile", type=Path, default=DEFAULT_REMAINING_PROFILE)
+    parser.add_argument("--review-decisions", type=Path, default=DEFAULT_REVIEW_DECISIONS)
     parser.add_argument("--title", default="Lands of Lore II .tex Large Unresolved Probe Review")
     args = parser.parse_args()
 
@@ -569,12 +638,15 @@ def main() -> None:
         args.output,
         args.best_candidates,
         args.remaining_profile,
+        args.review_decisions,
         args.title,
     )
     print(f"Large probe candidates: {summary['candidate_rows']}")
     print(f"Segments: {summary['segment_rows']}")
     print(f"Review ready rows: {summary['review_ready_rows']}")
     print(f"Decision template rows: {summary['decision_template_rows']}")
+    print(f"Rejected rows: {summary['rejected_rows']}")
+    print(f"Undecided rows: {summary['undecided_rows']}")
     print(f"Issue rows: {summary['issue_rows']}")
     print(f"Next action: {summary['next_action']}")
     print(f"HTML: {args.output / 'index.html'}")

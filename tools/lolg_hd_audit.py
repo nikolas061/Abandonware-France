@@ -2762,6 +2762,12 @@ def audit_tex_large_probe_review(
     missing_native = int_value(total, "missing_native_paths")
     missing_fullhd = int_value(total, "missing_fullhd_paths")
     missing_sheets = int_value(total, "missing_sheet_paths")
+    decision_file_rows = int_value(total, "decision_file_rows")
+    accepted_rows = int_value(total, "accepted_rows")
+    rejected_rows = int_value(total, "rejected_rows")
+    deferred_rows = int_value(total, "deferred_rows")
+    undecided_rows = int_value(total, "undecided_rows")
+    decision_issue_rows = int_value(total, "decision_issue_rows")
     issue_rows = int_value(total, "issue_rows")
 
     unique_names = {
@@ -2769,6 +2775,12 @@ def audit_tex_large_probe_review(
         for row in candidate_rows
         if row.get("pcx_name")
     }
+    status_counts = Counter(row.get("review_status", "") for row in candidate_rows)
+    decision_issue_count = sum(
+        1
+        for row in candidate_rows
+        if row.get("review_status") and row.get("review_status") not in {"accepted", "rejected", "deferred"}
+    )
     if candidate_count != len(candidate_rows):
         issues.append("large_probe_review_candidate_count_mismatch")
     if segment_count != len(segment_rows):
@@ -2787,6 +2799,20 @@ def audit_tex_large_probe_review(
         issues.append("large_probe_review_missing_fullhd_count_mismatch")
     if missing_sheets != sum(1 for row in segment_rows if row.get("review_sheet_exists") != "yes"):
         issues.append("large_probe_review_missing_sheet_count_mismatch")
+    if accepted_rows != status_counts["accepted"]:
+        issues.append("large_probe_review_accepted_count_mismatch")
+    if rejected_rows != status_counts["rejected"]:
+        issues.append("large_probe_review_rejected_count_mismatch")
+    if deferred_rows != status_counts["deferred"]:
+        issues.append("large_probe_review_deferred_count_mismatch")
+    if undecided_rows != status_counts[""]:
+        issues.append("large_probe_review_undecided_count_mismatch")
+    if decision_issue_rows != decision_issue_count:
+        issues.append("large_probe_review_decision_issue_count_mismatch")
+    if decision_file_rows != accepted_rows + rejected_rows + deferred_rows + decision_issue_rows:
+        issues.append("large_probe_review_decision_file_count_mismatch")
+    if decision_issue_rows:
+        issues.append(f"decision_issue_rows:{decision_issue_rows}")
     if issue_rows:
         issues.append(f"issue_rows:{issue_rows}")
 
@@ -2820,10 +2846,14 @@ def audit_tex_large_probe_review(
         gate(
             "tex_large_probe_review",
             ok,
-            expected="large unresolved .tex probe candidates have review sheets and a blank decision template",
+            expected=(
+                "large unresolved .tex probe candidates have review sheets, "
+                "a blank decision template, and valid applied review decisions"
+            ),
             actual=(
                 f"candidates={candidate_count}, segments={segment_count}, "
-                f"decisions={decision_template_rows}, sheets={sheet_rows}, issues={issue_rows}"
+                f"decisions={decision_template_rows}, rejected={rejected_rows}, "
+                f"undecided={undecided_rows}, sheets={sheet_rows}, issues={issue_rows}"
             ),
             evidence=f"{summary};{html_report}",
             issues=issues,
