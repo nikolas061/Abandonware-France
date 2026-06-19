@@ -164,6 +164,7 @@ def candidate_modes(row: dict[str, str]) -> list[str]:
         row.get("known_mode", ""),
         row.get("prologue_mode", ""),
         "filter",
+        "cmd20_high_arg2_skip4_markerknown",
         "cmd20_sig_skip4_markerknown",
         "cmd20_skip4_markerknown",
         "op4_skip2",

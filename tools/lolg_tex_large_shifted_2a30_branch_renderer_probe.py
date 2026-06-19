@@ -30,6 +30,8 @@ DEFAULT_MODES = [
     "cmd20_skip4_markerknownadv",
     "cmd20_skip4_markerknownsymadv",
     "cmd20_skip4_markersymadv",
+    "cmd20_high_arg2_skip4",
+    "cmd20_high_arg2_skip4_markerknown",
     "cmd20_sig_skip4",
     "cmd20_sig_skip4_markerknown",
     "op4_cmd20_skip4",

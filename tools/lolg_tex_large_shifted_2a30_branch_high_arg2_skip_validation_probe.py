@@ -8,13 +8,12 @@ import csv
 import html
 import json
 import os
-from collections import Counter
 from pathlib import Path
 
 from export_shp import read_palette
 from export_te_span_previews import render_indexed
 from lolg_tex_large_shifted_2a30_branch_bounded_family_probe import catalog_payloads, key_for
-from probe_te_span_decode import decode_span, is_known_marker_pair
+from probe_te_span_decode import decode_span
 from score_te_raw_layouts import row_score
 
 
@@ -25,8 +24,6 @@ DEFAULT_SUPPORT_TRACE = Path("output/tex_large_shifted_2a30_branch_trace_probe/c
 DEFAULT_BOUNDED_FAMILY = Path("output/tex_large_shifted_2a30_branch_bounded_family_probe/family.csv")
 DEFAULT_CATALOG = Path("reports/te_resources.tsv")
 DEFAULT_PALETTE = Path("extracted/LOCAL/7231c8f9.pal")
-
-HIGH_ARG2_SIGNATURES = {0xE0, 0xFC, 0xFD, 0xFE, 0xFF}
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -119,14 +116,6 @@ def safe_name(value: str) -> str:
     return "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in value)
 
 
-def advance(x: int, y: int, width: int, amount: int) -> tuple[int, int]:
-    x += amount
-    while x >= width:
-        x -= width
-        y += 1
-    return x, y
-
-
 def visible_ratio(pixels: bytes) -> float:
     return sum(1 for pixel in pixels if pixel) / max(1, len(pixels))
 
@@ -141,57 +130,6 @@ def changed_ratio(pixels: bytes, baseline: bytes) -> float:
 def score_pixels(pixels: bytes, width: int, height: int) -> float:
     score = row_score(pixels, width, height)
     return float(score) if score is not None else 999999.0
-
-
-def is_high_arg2_signature(arg1: int | None, arg2: int | None, arg3: int | None) -> bool:
-    return arg1 is not None and arg2 in HIGH_ARG2_SIGNATURES and arg3 is not None
-
-
-def is_zero_signature(arg1: int | None, arg2: int | None, arg3: int | None) -> bool:
-    return (arg1, arg2, arg3) == (0, 0, 0)
-
-
-def local_high_arg2_decode(
-    payload: bytes,
-    width: int,
-    height: int,
-    low: int,
-    high: int,
-    *,
-    markerknown: bool,
-    skip: int,
-) -> tuple[bytes, dict[str, int]]:
-    pixels = bytearray(width * height)
-    x = y = 0
-    pos = 0
-    stats = Counter()
-    while pos < len(payload) and y < height:
-        byte = payload[pos]
-        pos += 1
-        arg1 = payload[pos] if pos < len(payload) else None
-        arg2 = payload[pos + 1] if pos + 1 < len(payload) else None
-        arg3 = payload[pos + 2] if pos + 2 < len(payload) else None
-        if markerknown and pos < len(payload) and is_known_marker_pair(byte, payload[pos]):
-            stats["markerknown_skips"] += 1
-            pos += 1
-            continue
-        if byte == 0x20 and is_high_arg2_signature(arg1, arg2, arg3):
-            stats["high_arg2_skips"] += 1
-            pos = min(len(payload), pos + skip)
-            continue
-        if byte == 0x20 and is_zero_signature(arg1, arg2, arg3):
-            stats["zero_signature_seen"] += 1
-        if low <= byte <= high:
-            pixels[y * width + x] = byte
-            x, y = advance(x, y, width, 1)
-            stats["emitted"] += 1
-        elif byte < low:
-            stats["ignored_low"] += 1
-        else:
-            stats["ignored_high"] += 1
-    stats["final_x"] = x
-    stats["final_y"] = y
-    return bytes(pixels), dict(stats)
 
 
 def marker_lookup(family_rows: list[dict[str, str]]) -> dict[tuple[str, str], int]:
@@ -335,14 +273,14 @@ def build_variant_rows(
         variant_rows.append(current_variant)
 
         local_mode = proposed_mode(current_mode)
-        proposed_pixels, proposed_stats = local_high_arg2_decode(
+        proposed_pixels, proposed_stats = decode_span(
             payload[start:],
             width,
             height,
+            local_mode,
             low,
             high,
-            markerknown=local_mode.endswith("_markerknown"),
-            skip=4,
+            return_stats=True,
         )
         proposed_score = score_pixels(proposed_pixels, width, height)
         proposed_preview = render_variant_preview(
@@ -425,8 +363,8 @@ def build_summary(grammar_summary: dict[str, str], variant_rows: list[dict[str, 
         verdict = "high_arg2_skip_validation_issues"
         next_action = "fix guarded high-arg2 skip validation inputs"
     elif target_exact and target_high > 0 and support_applicable_high_max == 0:
-        verdict = "high_arg2_skip_only_validated_for_guarded_extra64"
-        next_action = "integrate high-arg2 skip-only renderer mode for guarded 0x2a30 extra64"
+        verdict = "high_arg2_skip_only_integrated_for_guarded_extra64"
+        next_action = "promote high-arg2 skip-only renderer through guarded 0x2a30 branch route"
     elif target_high <= 0:
         verdict = "high_arg2_skip_validation_missing_target_commands"
         next_action = "recheck guarded 0x2a30 target command extraction"

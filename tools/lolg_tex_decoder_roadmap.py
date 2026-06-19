@@ -7688,6 +7688,27 @@ def apply_old_clean_byte_union(
         elif final_residual and final_residual.get("dominant_blocker"):
             next_action = "split post-union residual source dependency blockers"
 
+        high_arg2_validation_ready = (
+            tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe is not None
+            and tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe is not None
+            and int_value(
+                tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe,
+                "grammar_target_high_arg2_rows",
+            )
+            == int_value(
+                tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe,
+                "target_sig_high_arg2_skip_rows",
+            )
+            and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("target_archive_tag")
+            == tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get("target_archive_tag")
+            and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("target_pixels_equal") == "yes"
+            and int_value(tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe, "target_high_arg2_skips") > 0
+            and int_value(tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe, "issue_rows") == 0
+            and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("next_action")
+        )
+        if high_arg2_validation_ready and "2a30" in next_action:
+            next_action = str(tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("next_action"))
+
         status = "promotion_ready" if row_ready > 0 else row.get("status", "blocked_review")
         updated.append(
             {
