@@ -145,6 +145,11 @@ ACTIONS = [
     "setxy_f1div4_f4",
     "setxy_f1div4_f0_if_f1mod4",
     "setxy_f1div4_f0x2_if_f1mod4",
+    "setxy_f1div4_f0_if_f1mod4_yback",
+    "setxy_f1div4_f0_if_f1mod4_yforward",
+    "setxy_f1div4_f0_if_f1mod4_ysame",
+    "setxy_f1div4_f0_if_f1mod4_yjump_le4",
+    "setxy_f1div4_f0_if_f1mod4_yjump_gt4",
     "setxy_f1div4_f2_if_f1mod4",
     "setxy_f1div4_f2_if_f0zero",
     "setxy_f1div4_f2_if_tuple2000",
@@ -375,6 +380,20 @@ def apply_field_action(
         x = (f1 // 4) % max(1, width)
         y = clamp_y(f0 * 2, height)
         applied = True
+    elif action.startswith("setxy_f1div4_f0_if_f1mod4_y") and f1 % 4 == 0:
+        next_x = (f1 // 4) % max(1, width)
+        next_y = clamp_y(f0, height)
+        y_delta = next_y - y
+        if (
+            (action.endswith("_yback") and y_delta < 0)
+            or (action.endswith("_yforward") and y_delta > 0)
+            or (action.endswith("_ysame") and y_delta == 0)
+            or (action.endswith("_yjump_le4") and abs(y_delta) <= 4)
+            or (action.endswith("_yjump_gt4") and abs(y_delta) > 4)
+        ):
+            x = next_x
+            y = next_y
+            applied = True
     elif action == "setxy_f1div4_f2_if_f1mod4" and f1 % 4 == 0:
         x = (f1 // 4) % max(1, width)
         y = clamp_y(f2, height)

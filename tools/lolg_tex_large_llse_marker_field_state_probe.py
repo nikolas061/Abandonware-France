@@ -99,6 +99,7 @@ EVENT_FIELDNAMES = [
     "f1_mod4",
     "f1_div4",
     "tuple2000",
+    "applied",
     "x_before",
     "y_before",
     "x_after",
@@ -208,6 +209,7 @@ def trace_body(
                     )
                     stats["actions_applied"] += action_stats["actions_applied"]
                     stats["tuple2000_seen"] += action_stats["tuple2000_seen"]
+                    applied = action_stats["actions_applied"] > 0
                     dx = after_x - before_x
                     dy = after_y - before_y
                     absolute_start = payload_base + start
@@ -217,6 +219,7 @@ def trace_body(
                     add_bucket(counters, "f0", f"{f0:02x}")
                     add_bucket(counters, "field2", f"{f2:02x}")
                     add_bucket(counters, "field3", f"{f3:02x}")
+                    add_bucket(counters, "applied", "yes" if applied else "no")
                     add_bucket(counters, "y_direction", "forward" if dy > 0 else "backward" if dy < 0 else "same")
                     add_bucket(counters, "x_delta_abs", "<=4" if abs(dx) <= 4 else ">4")
                     add_bucket(counters, "y_delta_abs", "<=4" if abs(dy) <= 4 else ">4")
@@ -239,6 +242,7 @@ def trace_body(
                             "f1_mod4": str(f1 % 4),
                             "f1_div4": str(f1 // 4),
                             "tuple2000": "yes" if tuple2000 else "no",
+                            "applied": "yes" if applied else "no",
                             "x_before": str(before_x),
                             "y_before": str(before_y),
                             "x_after": str(after_x),
@@ -331,10 +335,16 @@ def summary_row(
         next_action = "fix LLSE marker field state probe inputs"
     elif total and f1_mod4_zero / max(1, total) >= 0.5 and float_text(best_delta) < 0:
         verdict = "llse_marker_field_state_guard_signal"
-        next_action = (
-            "split LLSE 2730 field semantics by f1 mod4 and cursor jump direction; "
-            f"candidate {variant.action}"
-        )
+        if variant.action.endswith("_yforward"):
+            next_action = (
+                "isolate 19 LLSE 2730 yforward events by field/context guard before decoder promotion; "
+                f"candidate {variant.action}"
+            )
+        else:
+            next_action = (
+                "split LLSE 2730 field semantics by f1 mod4 and cursor jump direction; "
+                f"candidate {variant.action}"
+            )
     elif total:
         verdict = "llse_marker_field_state_weak_signal"
         next_action = (
