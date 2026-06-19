@@ -196,6 +196,21 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_SELECTORS = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_field16_selector_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_delta_split_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_DELTAS = Path(
+    "output/tex_large_shifted_2a30_field16_delta_split_probe/deltas.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_SPLITS = Path(
+    "output/tex_large_shifted_2a30_field16_delta_split_probe/splits.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_TARGETS = Path(
+    "output/tex_large_shifted_2a30_field16_delta_split_probe/targets.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_delta_split_probe/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -897,6 +912,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_selector_probe_corpus_rows",
     "tex_large_shifted_2a30_field16_selector_probe_large_rows",
     "tex_large_shifted_2a30_field16_selector_probe_remaining",
+    "tex_large_shifted_2a30_field16_delta_split_probe_remaining",
+    "tex_large_shifted_2a30_field16_delta_split_probe_exact_singletons",
+    "tex_large_shifted_2a30_field16_delta_split_probe_near_supported",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -3686,6 +3704,120 @@ def audit_tex_large_shifted_2a30_field16_selector_probe(
         corpus_count if ok else 0,
         large_rows if ok else 0,
         large_remaining if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_delta_split_probe(
+    summary: Path,
+    deltas_path: Path,
+    splits_path: Path,
+    targets_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_delta_split_probe", summary), 0, 0, 0
+    if not deltas_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_delta_split_probe", deltas_path), 0, 0, 0
+    if not splits_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_delta_split_probe", splits_path), 0, 0, 0
+    if not targets_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_delta_split_probe", targets_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_delta_split_probe", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    delta_rows = read_csv(deltas_path)
+    split_rows = read_csv(splits_path)
+    target_rows = read_csv(targets_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    corpus_rows = int_value(total, "corpus_rows")
+    large_rows = int_value(total, "large_rejected_rows")
+    remaining_rows = int_value(total, "remaining_large_rows")
+    delta_values = int_value(total, "delta_values")
+    small_signed_rows = int_value(total, "small_signed_delta_rows")
+    positive_small_rows = int_value(total, "positive_small_delta_rows")
+    negative_small_rows = int_value(total, "negative_small_delta_rows")
+    exact_singletons = int_value(total, "remaining_exact_delta_singletons")
+    near_supported = int_value(total, "remaining_near_delta_supported")
+    split_group_rows = int_value(total, "split_group_rows")
+    target_count = int_value(total, "target_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    remaining_delta_rows = [row for row in delta_rows if row.get("remaining_large") == "yes"]
+    if corpus_rows != len(delta_rows):
+        issues.append("field16_delta_split_corpus_count_mismatch")
+    if large_rows != sum(1 for row in delta_rows if row.get("large_rejected") == "yes"):
+        issues.append("field16_delta_split_large_count_mismatch")
+    if remaining_rows != len(remaining_delta_rows):
+        issues.append("field16_delta_split_remaining_count_mismatch")
+    if delta_values != len({row.get("next_word_low_delta", "") for row in delta_rows}):
+        issues.append("field16_delta_split_delta_value_count_mismatch")
+    if small_signed_rows != sum(
+        1
+        for row in delta_rows
+        if row.get("delta_group") in {"positive_small_delta", "negative_small_delta"}
+    ):
+        issues.append("field16_delta_split_small_signed_count_mismatch")
+    if positive_small_rows != sum(1 for row in delta_rows if row.get("delta_group") == "positive_small_delta"):
+        issues.append("field16_delta_split_positive_count_mismatch")
+    if negative_small_rows != sum(1 for row in delta_rows if row.get("delta_group") == "negative_small_delta"):
+        issues.append("field16_delta_split_negative_count_mismatch")
+    if split_group_rows != len(split_rows):
+        issues.append("field16_delta_split_group_count_mismatch")
+    if target_count != len(target_rows):
+        issues.append("field16_delta_split_target_count_mismatch")
+    if exact_singletons != sum(1 for row in target_rows if row.get("exact_delta_verdict") == "singleton_exact_delta"):
+        issues.append("field16_delta_split_singleton_count_mismatch")
+    if near_supported != sum(1 for row in target_rows if row.get("near_delta_verdict") == "has_near_nonlarge_support"):
+        issues.append("field16_delta_split_near_support_count_mismatch")
+    if issue_rows != sum(1 for row in delta_rows if row.get("issues")):
+        issues.append("field16_delta_split_issue_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    target_by_name = {row.get("pcx_name", ""): row for row in target_rows}
+    if set(target_by_name) != {"barsgld.pcx", "dragend.pcx"}:
+        issues.append("field16_delta_split_targets_unexpected")
+    else:
+        if target_by_name["barsgld.pcx"].get("target_delta") != "2":
+            issues.append("field16_delta_split_barsgld_delta_mismatch")
+        if target_by_name["barsgld.pcx"].get("near_support_pcx") != "6.pcx":
+            issues.append("field16_delta_split_barsgld_support_mismatch")
+        if target_by_name["dragend.pcx"].get("target_delta") != "-2":
+            issues.append("field16_delta_split_dragend_delta_mismatch")
+        if target_by_name["dragend.pcx"].get("near_support_pcx") != "pillar.pcx":
+            issues.append("field16_delta_split_dragend_support_mismatch")
+    if exact_singletons != remaining_rows:
+        issues.append("field16_delta_split_exact_not_singleton")
+    if near_supported != remaining_rows:
+        issues.append("field16_delta_split_near_support_missing")
+    if total.get("review_verdict") != "delta_split_near_support_ready":
+        issues.append("field16_delta_split_review_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_delta_split_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_delta_split_probe",
+            ok,
+            expected="shifted 0x2a30 field16 remaining rows are split by signed near-supported deltas",
+            actual=(
+                f"remaining={remaining_rows}, exact_singletons={exact_singletons}, "
+                f"near_supported={near_supported}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        remaining_rows if ok else 0,
+        exact_singletons if ok else 0,
+        near_supported if ok else 0,
     )
 
 
@@ -12997,6 +13129,19 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SELECTOR_PROBE_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_selector_probe_gate)
+    (
+        tex_large_shifted_2a30_field16_delta_split_probe_gate,
+        tex_large_shifted_2a30_field16_delta_split_probe_remaining,
+        tex_large_shifted_2a30_field16_delta_split_probe_exact_singletons,
+        tex_large_shifted_2a30_field16_delta_split_probe_near_supported,
+    ) = audit_tex_large_shifted_2a30_field16_delta_split_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_DELTAS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_SPLITS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_TARGETS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_delta_split_probe_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -18384,6 +18529,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_selector_probe_remaining": str(
             tex_large_shifted_2a30_field16_selector_probe_remaining
+        ),
+        "tex_large_shifted_2a30_field16_delta_split_probe_remaining": str(
+            tex_large_shifted_2a30_field16_delta_split_probe_remaining
+        ),
+        "tex_large_shifted_2a30_field16_delta_split_probe_exact_singletons": str(
+            tex_large_shifted_2a30_field16_delta_split_probe_exact_singletons
+        ),
+        "tex_large_shifted_2a30_field16_delta_split_probe_near_supported": str(
+            tex_large_shifted_2a30_field16_delta_split_probe_near_supported
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
