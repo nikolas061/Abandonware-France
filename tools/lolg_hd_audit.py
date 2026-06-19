@@ -211,6 +211,18 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_TARGETS = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_field16_delta_split_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_CANDIDATES = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_probe/candidates.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_GUARDS = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_probe/guards.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_probe/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -915,6 +927,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_delta_split_probe_remaining",
     "tex_large_shifted_2a30_field16_delta_split_probe_exact_singletons",
     "tex_large_shifted_2a30_field16_delta_split_probe_near_supported",
+    "tex_large_shifted_2a30_field16_small_delta_guard_probe_applicable",
+    "tex_large_shifted_2a30_field16_small_delta_guard_probe_large_exact",
+    "tex_large_shifted_2a30_field16_small_delta_guard_probe_remaining_exact",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -3818,6 +3833,192 @@ def audit_tex_large_shifted_2a30_field16_delta_split_probe(
         remaining_rows if ok else 0,
         exact_singletons if ok else 0,
         near_supported if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_small_delta_guard_probe(
+    summary: Path,
+    candidates_path: Path,
+    guards_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_probe", summary), 0, 0, 0
+    if not candidates_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_probe", candidates_path), 0, 0, 0
+    if not guards_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_probe", guards_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_probe", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    candidate_rows = read_csv(candidates_path)
+    guard_rows_data = read_csv(guards_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    corpus_rows = int_value(total, "corpus_rows")
+    applicable_rows = int_value(total, "applicable_rows")
+    exact_rows = int_value(total, "exact_rows")
+    false_positive_rows = int_value(total, "false_positive_rows")
+    skipped_rows = int_value(total, "skipped_rows")
+    large_rows = int_value(total, "large_rows")
+    large_applicable_rows = int_value(total, "large_applicable_rows")
+    large_exact_rows = int_value(total, "large_exact_rows")
+    remaining_large_rows = int_value(total, "remaining_large_rows")
+    remaining_applicable_rows = int_value(total, "remaining_applicable_rows")
+    remaining_exact_rows = int_value(total, "remaining_exact_rows")
+    positive_guard_rows = int_value(total, "positive_guard_rows")
+    negative_guard_rows = int_value(total, "negative_guard_rows")
+    zero_guard_rows = int_value(total, "zero_guard_rows")
+    skipped_large_negative_rows = int_value(total, "skipped_large_negative_rows")
+    guard_rows = int_value(total, "guard_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    applicable_candidate_rows = [row for row in candidate_rows if row.get("predicted_extra") != ""]
+    exact_candidate_rows = [row for row in applicable_candidate_rows if row.get("exact_match") == "yes"]
+    false_positive_candidate_rows = [row for row in candidate_rows if row.get("false_positive") == "yes"]
+    large_candidate_rows = [row for row in candidate_rows if row.get("large_rejected") == "yes"]
+    large_applicable_candidate_rows = [row for row in large_candidate_rows if row.get("predicted_extra") != ""]
+    large_exact_candidate_rows = [row for row in large_candidate_rows if row.get("exact_match") == "yes"]
+    remaining_candidate_rows = [row for row in candidate_rows if row.get("remaining_large") == "yes"]
+    remaining_applicable_candidate_rows = [row for row in remaining_candidate_rows if row.get("predicted_extra") != ""]
+    remaining_exact_candidate_rows = [row for row in remaining_candidate_rows if row.get("exact_match") == "yes"]
+    issue_candidate_rows = [row for row in candidate_rows if row.get("issues")]
+
+    if corpus_rows != len(candidate_rows):
+        issues.append("field16_small_delta_guard_corpus_count_mismatch")
+    if applicable_rows != len(applicable_candidate_rows):
+        issues.append("field16_small_delta_guard_applicable_count_mismatch")
+    if exact_rows != len(exact_candidate_rows):
+        issues.append("field16_small_delta_guard_exact_count_mismatch")
+    if false_positive_rows != len(false_positive_candidate_rows):
+        issues.append("field16_small_delta_guard_false_positive_count_mismatch")
+    if skipped_rows != len(candidate_rows) - len(applicable_candidate_rows):
+        issues.append("field16_small_delta_guard_skipped_count_mismatch")
+    if large_rows != len(large_candidate_rows):
+        issues.append("field16_small_delta_guard_large_count_mismatch")
+    if large_applicable_rows != len(large_applicable_candidate_rows):
+        issues.append("field16_small_delta_guard_large_applicable_count_mismatch")
+    if large_exact_rows != len(large_exact_candidate_rows):
+        issues.append("field16_small_delta_guard_large_exact_count_mismatch")
+    if remaining_large_rows != len(remaining_candidate_rows):
+        issues.append("field16_small_delta_guard_remaining_count_mismatch")
+    if remaining_applicable_rows != len(remaining_applicable_candidate_rows):
+        issues.append("field16_small_delta_guard_remaining_applicable_count_mismatch")
+    if remaining_exact_rows != len(remaining_exact_candidate_rows):
+        issues.append("field16_small_delta_guard_remaining_exact_count_mismatch")
+    if positive_guard_rows != sum(
+        1 for row in candidate_rows if row.get("guard_id") == "positive_small_nextlow_minus2"
+    ):
+        issues.append("field16_small_delta_guard_positive_count_mismatch")
+    if negative_guard_rows != sum(1 for row in candidate_rows if row.get("guard_id") == "negative_small_extra36"):
+        issues.append("field16_small_delta_guard_negative_count_mismatch")
+    if zero_guard_rows != sum(1 for row in candidate_rows if row.get("guard_id") == "zero_delta_extra40"):
+        issues.append("field16_small_delta_guard_zero_count_mismatch")
+    if skipped_large_negative_rows != sum(
+        1
+        for row in candidate_rows
+        if row.get("guard_id") == "skip_large_negative_context" and row.get("delta_group") == "large_negative_delta"
+    ):
+        issues.append("field16_small_delta_guard_large_negative_skip_count_mismatch")
+    if guard_rows != len(guard_rows_data):
+        issues.append("field16_small_delta_guard_guard_count_mismatch")
+    if issue_rows != len(issue_candidate_rows):
+        issues.append("field16_small_delta_guard_issue_count_mismatch")
+    if false_positive_rows:
+        issues.append(f"false_positive_rows:{false_positive_rows}")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    if applicable_rows != exact_rows:
+        issues.append("field16_small_delta_guard_applicable_not_exact")
+    if large_rows != 4 or large_exact_rows != 4 or large_applicable_rows != 4:
+        issues.append("field16_small_delta_guard_large_coverage_mismatch")
+    if remaining_large_rows != 2 or remaining_exact_rows != 2 or remaining_applicable_rows != 2:
+        issues.append("field16_small_delta_guard_remaining_coverage_mismatch")
+    if positive_guard_rows != 2 or negative_guard_rows != 2 or zero_guard_rows != 2:
+        issues.append("field16_small_delta_guard_expected_group_counts_mismatch")
+    if skipped_large_negative_rows != 4:
+        issues.append("field16_small_delta_guard_large_negative_skip_mismatch")
+    if guard_rows != 4:
+        issues.append("field16_small_delta_guard_expected_guard_rows_mismatch")
+
+    candidate_by_name = {row.get("pcx_name", ""): row for row in candidate_rows}
+    expected_candidates = {
+        "barsgld.pcx": ("positive_small_nextlow_minus2", "24", "yes"),
+        "dragend.pcx": ("negative_small_extra36", "36", "yes"),
+        "stump2.pcx": ("zero_delta_extra40", "40", "yes"),
+        "catbas.pcx": ("zero_delta_extra40", "40", "yes"),
+    }
+    for pcx_name, (guard_id, predicted_extra, exact_match) in expected_candidates.items():
+        row = candidate_by_name.get(pcx_name)
+        if not row:
+            issues.append(f"field16_small_delta_guard_missing_{pcx_name}")
+            continue
+        if row.get("guard_id") != guard_id:
+            issues.append(f"field16_small_delta_guard_{pcx_name}_guard_mismatch")
+        if row.get("predicted_extra") != predicted_extra:
+            issues.append(f"field16_small_delta_guard_{pcx_name}_prediction_mismatch")
+        if row.get("exact_match") != exact_match:
+            issues.append(f"field16_small_delta_guard_{pcx_name}_exact_mismatch")
+    large_negative_rows = [row for row in candidate_rows if row.get("delta_group") == "large_negative_delta"]
+    if len(large_negative_rows) != 4:
+        issues.append("field16_small_delta_guard_large_negative_count_mismatch")
+    if any(
+        row.get("guard_id") != "skip_large_negative_context" or row.get("predicted_extra") != ""
+        for row in large_negative_rows
+    ):
+        issues.append("field16_small_delta_guard_large_negative_not_skipped")
+
+    guard_by_id = {row.get("guard_id", ""): row for row in guard_rows_data}
+    expected_guard_rows = {
+        "positive_small_nextlow_minus2": ("2", "2", "1", "1", "1", "1"),
+        "negative_small_extra36": ("2", "2", "1", "1", "1", "1"),
+        "zero_delta_extra40": ("2", "2", "2", "2", "0", "0"),
+        "skip_large_negative_context": ("4", "0", "0", "0", "0", "0"),
+    }
+    if set(guard_by_id) != set(expected_guard_rows):
+        issues.append("field16_small_delta_guard_ids_mismatch")
+    else:
+        for guard_id, expected in expected_guard_rows.items():
+            row = guard_by_id[guard_id]
+            actual = (
+                row.get("rows"),
+                row.get("exact_rows"),
+                row.get("large_rows"),
+                row.get("large_exact_rows"),
+                row.get("remaining_rows"),
+                row.get("remaining_exact_rows"),
+            )
+            if actual != expected:
+                issues.append(f"field16_small_delta_guard_{guard_id}_counts_mismatch")
+    if total.get("review_verdict") != "small_delta_guard_ready_for_review":
+        issues.append("field16_small_delta_guard_review_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_small_delta_guard_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_small_delta_guard_probe",
+            ok,
+            expected="guarded shifted 0x2a30 field16 small-delta formulas cover all 4 large rows without false positives",
+            actual=(
+                f"applicable={applicable_rows}, large_exact={large_exact_rows}/{large_rows}, "
+                f"remaining_exact={remaining_exact_rows}/{remaining_large_rows}, "
+                f"false_positive={false_positive_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        applicable_rows if ok else 0,
+        large_exact_rows if ok else 0,
+        remaining_exact_rows if ok else 0,
     )
 
 
@@ -13142,6 +13343,18 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DELTA_SPLIT_PROBE_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_delta_split_probe_gate)
+    (
+        tex_large_shifted_2a30_field16_small_delta_guard_probe_gate,
+        tex_large_shifted_2a30_field16_small_delta_guard_probe_applicable,
+        tex_large_shifted_2a30_field16_small_delta_guard_probe_large_exact,
+        tex_large_shifted_2a30_field16_small_delta_guard_probe_remaining_exact,
+    ) = audit_tex_large_shifted_2a30_field16_small_delta_guard_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_CANDIDATES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_GUARDS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_small_delta_guard_probe_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -18538,6 +18751,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_delta_split_probe_near_supported": str(
             tex_large_shifted_2a30_field16_delta_split_probe_near_supported
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_probe_applicable": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_probe_applicable
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_probe_large_exact": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_probe_large_exact
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_probe_remaining_exact": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_probe_remaining_exact
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
