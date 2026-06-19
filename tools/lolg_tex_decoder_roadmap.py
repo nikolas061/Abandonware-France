@@ -1038,6 +1038,9 @@ DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_SEGMENT_R
 DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_SEGMENT_RULE_PREVIEWS_VALIDATION_SUMMARY = Path(
     "output/tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_SEGMENT_RULE_PROMOTED_PACK_SUMMARY = Path(
+    "output/tex_large_shared_2700302b_op4_segment_rule_promoted_pack/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_GAP_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_reference_gap_probe/summary.csv"
 )
@@ -2073,6 +2076,7 @@ def apply_old_clean_byte_union(
     tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation: (
         dict[str, str] | None
     ),
+    tex_large_shared_2700302b_op4_segment_rule_promoted_pack: dict[str, str] | None,
     tex_large_shared_2700302b_reference_gap_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_frontier_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_literal_stream_probe: dict[str, str] | None,
@@ -5271,6 +5275,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shared_2700302b_op4_segment_rule_promoted_pack:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shared_2700302b_op4_segment_rule_pack_eligible="
+                    f"{tex_large_shared_2700302b_op4_segment_rule_promoted_pack.get('coverage_eligible_rows', '0')}",
+                    "tex_large_shared_2700302b_op4_segment_rule_pack_fullhd="
+                    f"{tex_large_shared_2700302b_op4_segment_rule_promoted_pack.get('fullhd_assets', '0')}",
+                    "tex_large_shared_2700302b_op4_segment_rule_pack_verdict="
+                    f"{tex_large_shared_2700302b_op4_segment_rule_promoted_pack.get('review_verdict', '')}",
+                ],
+            )
+
         if tex_large_shared_2700302b_reference_gap_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -6982,6 +6999,30 @@ def apply_old_clean_byte_union(
                 )
                 == tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get(
                     "replay_delta_vs_base_avg"
+                )
+            )
+            shared_2700302b_op4_segment_rule_promoted_pack_current = (
+                shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation_current
+                and tex_large_shared_2700302b_op4_segment_rule_promoted_pack is not None
+                and int_value(tex_large_shared_2700302b_op4_segment_rule_promoted_pack, "validation_rows")
+                == int_value(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation,
+                    "segment_rows",
+                )
+                and int_value(tex_large_shared_2700302b_op4_segment_rule_promoted_pack, "ready_rows")
+                == int_value(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation,
+                    "ready_rows",
+                )
+                and int_value(tex_large_shared_2700302b_op4_segment_rule_promoted_pack, "coverage_eligible_rows")
+                == int_value(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation,
+                    "ready_rows",
+                )
+                and int_value(tex_large_shared_2700302b_op4_segment_rule_promoted_pack, "fullhd_assets")
+                == int_value(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation,
+                    "fullhd_previews",
                 )
             )
             shared_2700302b_reference_gap_probe_current = (
@@ -8879,6 +8920,13 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_standard_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
+            elif (
+                tex_large_shared_2700302b_op4_segment_rule_promoted_pack
+                and shared_2700302b_op4_segment_rule_promoted_pack_current
+                and int_value(tex_large_shared_2700302b_op4_segment_rule_promoted_pack, "issue_rows") == 0
+                and tex_large_shared_2700302b_op4_segment_rule_promoted_pack.get("next_action")
+            ):
+                next_action = str(tex_large_shared_2700302b_op4_segment_rule_promoted_pack.get("next_action"))
             elif (
                 tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation
                 and shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation_current
@@ -25770,6 +25818,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_SEGMENT_RULE_PREVIEWS_VALIDATION_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shared-2700302b-op4-segment-rule-promoted-pack-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_SEGMENT_RULE_PROMOTED_PACK_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shared-2700302b-reference-gap-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_GAP_PROBE_SUMMARY,
@@ -28709,6 +28762,9 @@ def main() -> None:
             args.tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation_summary
         )
     )
+    tex_large_shared_2700302b_op4_segment_rule_promoted_pack_summary = read_optional_summary(
+        args.tex_large_shared_2700302b_op4_segment_rule_promoted_pack_summary
+    )
     tex_large_shared_2700302b_reference_gap_probe_summary = read_optional_summary(
         args.tex_large_shared_2700302b_reference_gap_probe_summary
     )
@@ -30513,6 +30569,9 @@ def main() -> None:
         ),
         tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation=(
             tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_previews_validation_summary
+        ),
+        tex_large_shared_2700302b_op4_segment_rule_promoted_pack=(
+            tex_large_shared_2700302b_op4_segment_rule_promoted_pack_summary
         ),
         tex_large_shared_2700302b_reference_gap_probe=tex_large_shared_2700302b_reference_gap_probe_summary,
         tex_large_shared_2700302b_reference_frontier_probe=tex_large_shared_2700302b_reference_frontier_probe_summary,
