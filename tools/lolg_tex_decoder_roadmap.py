@@ -1008,6 +1008,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_DECODER_PATH_PROBE_SUMMARY = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_RENDERER_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_branch_renderer_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_BOUNDED_FAMILY_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_branch_bounded_family_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_probe/summary.csv"
 )
@@ -1866,6 +1869,7 @@ def apply_old_clean_byte_union(
     tex_large_shifted_2a30_branch_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_decoder_path_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_renderer_probe: dict[str, str] | None,
+    tex_large_shifted_2a30_branch_bounded_family_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_replay_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_transform_probe: dict[str, str] | None,
@@ -4899,6 +4903,23 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shifted_2a30_branch_bounded_family_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_branch_bounded_family_rows="
+                    f"{tex_large_shifted_2a30_branch_bounded_family_probe.get('family_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_bounded_family_support="
+                    f"{tex_large_shifted_2a30_branch_bounded_family_probe.get('family_support_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_bounded_family_best="
+                    f"{tex_large_shifted_2a30_branch_bounded_family_probe.get('target_best_source', '')}"
+                    f":start{tex_large_shifted_2a30_branch_bounded_family_probe.get('target_best_start', '')}"
+                    f":{tex_large_shifted_2a30_branch_bounded_family_probe.get('target_best_mode', '')}",
+                    "tex_large_shifted_2a30_branch_bounded_family_final_y160="
+                    f"{tex_large_shifted_2a30_branch_bounded_family_probe.get('target_best_final_y_160', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_field16_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5659,6 +5680,12 @@ def apply_old_clean_byte_union(
                 and int_value(tex_large_shifted_2a30_branch_renderer_probe, "branch_rows")
                 == int_value(tex_large_shifted_2a30_branch_decoder_path_probe, "branch_rows")
             )
+            shifted_2a30_branch_bounded_family_probe_current = (
+                shifted_2a30_branch_decoder_path_current
+                and tex_large_shifted_2a30_branch_bounded_family_probe is not None
+                and int_value(tex_large_shifted_2a30_branch_bounded_family_probe, "target_branch_rows")
+                == int_value(tex_large_shifted_2a30_branch_decoder_path_probe, "branch_rows")
+            )
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -5787,6 +5814,14 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_field16_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
+            elif (
+                tex_large_shifted_2a30_branch_bounded_family_probe
+                and shifted_2a30_branch_bounded_family_probe_current
+                and int_value(tex_large_shifted_2a30_branch_bounded_family_probe, "family_rows") > 0
+                and int_value(tex_large_shifted_2a30_branch_bounded_family_probe, "issue_rows") == 0
+                and tex_large_shifted_2a30_branch_bounded_family_probe.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_branch_bounded_family_probe.get("next_action"))
             elif (
                 tex_large_shifted_2a30_branch_renderer_probe
                 and shifted_2a30_branch_renderer_probe_current
@@ -21862,6 +21897,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_RENDERER_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-branch-bounded-family-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_BOUNDED_FAMILY_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-field16-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY,
@@ -24488,6 +24528,9 @@ def main() -> None:
     tex_large_shifted_2a30_branch_renderer_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_branch_renderer_probe_summary
     )
+    tex_large_shifted_2a30_branch_bounded_family_probe_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_branch_bounded_family_probe_summary
+    )
     tex_large_shifted_2a30_field16_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_field16_probe_summary
     )
@@ -26054,6 +26097,7 @@ def main() -> None:
         tex_large_shifted_2a30_branch_probe=tex_large_shifted_2a30_branch_probe_summary,
         tex_large_shifted_2a30_branch_decoder_path_probe=tex_large_shifted_2a30_branch_decoder_path_probe_summary,
         tex_large_shifted_2a30_branch_renderer_probe=tex_large_shifted_2a30_branch_renderer_probe_summary,
+        tex_large_shifted_2a30_branch_bounded_family_probe=tex_large_shifted_2a30_branch_bounded_family_probe_summary,
         tex_large_shifted_2a30_field16_probe=tex_large_shifted_2a30_field16_probe_summary,
         tex_large_shifted_2a30_field16_replay_probe=tex_large_shifted_2a30_field16_replay_probe_summary,
         tex_large_shifted_2a30_field16_transform_probe=tex_large_shifted_2a30_field16_transform_probe_summary,
