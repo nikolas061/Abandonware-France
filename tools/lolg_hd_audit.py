@@ -93,6 +93,11 @@ DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_q
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_HTML = Path("output/tex_material_decoder_queue/index.html")
+DEFAULT_TEX_REMAINING_PROFILE_SUMMARY = Path("output/tex_remaining_reference_profile/summary.csv")
+DEFAULT_TEX_REMAINING_PROFILE_ROWS = Path("output/tex_remaining_reference_profile/profile.csv")
+DEFAULT_TEX_REMAINING_PROFILE_ARCHIVES = Path("output/tex_remaining_reference_profile/by_archive.csv")
+DEFAULT_TEX_REMAINING_PROFILE_PREFIXES = Path("output/tex_remaining_reference_profile/by_prefix.csv")
+DEFAULT_TEX_REMAINING_PROFILE_HTML = Path("output/tex_remaining_reference_profile/index.html")
 DEFAULT_TEX_EXACT_CDCACHE_COMPARE_SUMMARY = Path("output/tex_exact_cdcache_compare/summary.csv")
 DEFAULT_TEX_EXACT_CDCACHE_COMPARE_ROWS = Path("output/tex_exact_cdcache_compare/comparisons.csv")
 DEFAULT_TEX_EXACT_CDCACHE_COMPARE_HTML = Path("output/tex_exact_cdcache_compare/index.html")
@@ -763,6 +768,7 @@ SUMMARY_FIELDNAMES = [
     "tex_probe_analysis_segments",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
+    "tex_remaining_reference_profile_unique",
     "tex_exact_cdcache_compare_segments",
     "tex_exact_cdcache_compare_32b_matches",
     "tex_exact_cdcache_compare_16b_matches",
@@ -2556,6 +2562,104 @@ def audit_tex_material_decoder_queue(
         ),
         material_rows if ok else 0,
         queued_probe_segments if ok else 0,
+    )
+
+
+def audit_tex_remaining_reference_profile(
+    summary: Path,
+    profile_rows_path: Path,
+    archive_rows_path: Path,
+    prefix_rows_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int]:
+    if not summary.exists():
+        return missing_gate("tex_remaining_reference_profile", summary), 0
+    if not profile_rows_path.exists():
+        return missing_gate("tex_remaining_reference_profile", profile_rows_path), 0
+    if not archive_rows_path.exists():
+        return missing_gate("tex_remaining_reference_profile", archive_rows_path), 0
+    if not prefix_rows_path.exists():
+        return missing_gate("tex_remaining_reference_profile", prefix_rows_path), 0
+    if not html_report.exists():
+        return missing_gate("tex_remaining_reference_profile", html_report), 0
+
+    summary_rows = read_csv(summary)
+    profile_rows = read_csv(profile_rows_path)
+    archive_rows = read_csv(archive_rows_path)
+    prefix_rows = read_csv(prefix_rows_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    unresolved_rows = int_value(total, "unresolved_reference_rows")
+    unresolved_unique = int_value(total, "unresolved_unique_pcx")
+    archives = int_value(total, "archives")
+    raw_same_archive_unique = int_value(total, "raw_same_archive_unique")
+    tex_segment_only_unique = int_value(total, "tex_segment_only_unique")
+    large_segment_unique = int_value(total, "large_segment_unique")
+    issue_rows = int_value(total, "issue_rows")
+
+    unique_names = {
+        row.get("normalized_pcx_name", "")
+        for row in profile_rows
+        if row.get("normalized_pcx_name")
+    }
+    archive_keys = {row.get("archive", "") for row in profile_rows if row.get("archive")}
+    raw_same_names = {
+        row.get("normalized_pcx_name", "")
+        for row in profile_rows
+        if row.get("normalized_pcx_name") and int_value(row, "raw_cache_same_archive_refs") > 0
+    }
+    segment_only_names = {
+        row.get("normalized_pcx_name", "")
+        for row in profile_rows
+        if row.get("normalized_pcx_name") and row.get("evidence_class") == "tex_segment_only"
+    }
+    large_segment_names = {
+        row.get("normalized_pcx_name", "")
+        for row in profile_rows
+        if row.get("normalized_pcx_name") and int_value(row, "texture_segment_size_total") >= 1_000_000
+    }
+
+    if unresolved_rows != len(profile_rows):
+        issues.append("remaining_profile_row_count_mismatch")
+    if unresolved_unique != len(unique_names):
+        issues.append("remaining_profile_unique_pcx_mismatch")
+    if archives != len(archive_keys):
+        issues.append("remaining_profile_archive_count_mismatch")
+    if raw_same_archive_unique != len(raw_same_names):
+        issues.append("remaining_profile_raw_same_archive_mismatch")
+    if tex_segment_only_unique != len(segment_only_names):
+        issues.append("remaining_profile_segment_only_mismatch")
+    if large_segment_unique != len(large_segment_names):
+        issues.append("remaining_profile_large_segment_mismatch")
+    if issue_rows or issue_rows != sum(1 for row in profile_rows if row.get("issues")):
+        issues.append(f"issue_rows:{issue_rows}")
+    if len(archive_rows) != len(archive_keys):
+        issues.append("remaining_profile_archive_rows_mismatch")
+    if profile_rows and not prefix_rows:
+        issues.append("remaining_profile_missing_prefix_rows")
+    if "const TEX_REMAINING_REFERENCE_PROFILE = " not in text:
+        issues.append("missing_tex_remaining_reference_profile_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_remaining_reference_profile",
+            ok,
+            expected="remaining unresolved .tex references are profiled consistently",
+            actual=(
+                f"rows={unresolved_rows}, unique={unresolved_unique}, "
+                f"raw_same_archive={raw_same_archive_unique}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        unresolved_unique if ok else 0,
     )
 
 
@@ -11535,6 +11639,14 @@ def main() -> None:
         )
     )
     rows.append(tex_decoder_queue_gate)
+    tex_remaining_profile_gate, tex_remaining_profile_unique = audit_tex_remaining_reference_profile(
+        DEFAULT_TEX_REMAINING_PROFILE_SUMMARY,
+        DEFAULT_TEX_REMAINING_PROFILE_ROWS,
+        DEFAULT_TEX_REMAINING_PROFILE_ARCHIVES,
+        DEFAULT_TEX_REMAINING_PROFILE_PREFIXES,
+        DEFAULT_TEX_REMAINING_PROFILE_HTML,
+    )
+    rows.append(tex_remaining_profile_gate)
     tex_exact_compare_gate, tex_exact_compare_segments, tex_exact_compare_32b, tex_exact_compare_16b = (
         audit_tex_exact_cdcache_compare(
             DEFAULT_TEX_EXACT_CDCACHE_COMPARE_SUMMARY,
@@ -16858,6 +16970,7 @@ def main() -> None:
         "tex_probe_analysis_segments": str(tex_probe_analysis_segments),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
+        "tex_remaining_reference_profile_unique": str(tex_remaining_profile_unique),
         "tex_exact_cdcache_compare_segments": str(tex_exact_compare_segments),
         "tex_exact_cdcache_compare_32b_matches": str(tex_exact_compare_32b),
         "tex_exact_cdcache_compare_16b_matches": str(tex_exact_compare_16b),

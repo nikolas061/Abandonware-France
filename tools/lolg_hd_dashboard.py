@@ -37,6 +37,7 @@ DEFAULT_TEX_UNRESOLVED_PROBE = Path("output/tex_unresolved_material_probe_render
 DEFAULT_TEX_PROBE_ANALYSIS = Path("output/tex_unresolved_material_probe_render/analysis.html")
 DEFAULT_TEX_MATERIAL_DECODE_PACK = Path("output/tex_material_decode_pack/index.html")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE = Path("output/tex_material_decoder_queue/index.html")
+DEFAULT_TEX_REMAINING_REFERENCE_PROFILE = Path("output/tex_remaining_reference_profile/index.html")
 DEFAULT_TEX_EXACT_CDCACHE_COMPARE = Path("output/tex_exact_cdcache_compare/index.html")
 DEFAULT_TEX_EXACT_CHUNK_EVIDENCE = Path("output/tex_exact_chunk_evidence/index.html")
 DEFAULT_TEX_EXACT_MATCH_OVERLAYS = Path("output/tex_exact_match_overlays/index.html")
@@ -912,6 +913,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Analyse sondes .tex", DEFAULT_TEX_PROBE_ANALYSIS),
         ("Pack decode matériaux .tex", DEFAULT_TEX_MATERIAL_DECODE_PACK),
         ("File décodeur .tex", DEFAULT_TEX_MATERIAL_DECODER_QUEUE),
+        ("Profil références restantes .tex", DEFAULT_TEX_REMAINING_REFERENCE_PROFILE),
         ("Comparaison exact .tex", DEFAULT_TEX_EXACT_CDCACHE_COMPARE),
         ("Preuves chunks .tex", DEFAULT_TEX_EXACT_CHUNK_EVIDENCE),
         ("Overlays chunks .tex", DEFAULT_TEX_EXACT_MATCH_OVERLAYS),

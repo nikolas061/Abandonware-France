@@ -981,6 +981,7 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_FRONTIER80_S
 )
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_AUGMENTED_COVERAGE_SUMMARY = Path("output/tex_augmented_coverage/summary.csv")
+DEFAULT_TEX_REMAINING_REFERENCE_PROFILE_SUMMARY = Path("output/tex_remaining_reference_profile/summary.csv")
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1792,6 +1793,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core: dict[str, str] | None,
     tex_material_decoder_queue: dict[str, str] | None,
     tex_augmented_coverage: dict[str, str] | None,
+    tex_remaining_reference_profile: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -4663,6 +4665,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_remaining_reference_profile:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_remaining_reference_profile_unique="
+                    f"{tex_remaining_reference_profile.get('unresolved_unique_pcx', '0')}",
+                    "tex_remaining_reference_profile_raw_same_archive_unique="
+                    f"{tex_remaining_reference_profile.get('raw_same_archive_unique', '0')}",
+                    "tex_remaining_reference_profile_large_segment_unique="
+                    f"{tex_remaining_reference_profile.get('large_segment_unique', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5203,6 +5218,22 @@ def apply_old_clean_byte_union(
                 f"{tex_material_decoder_queue.get('queued_probe_segments', '0')} queued material .tex segments "
                 "after completed frontier80 downstream base"
             )
+        elif (
+            outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency
+            and int_value(outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency, "source_unknown_slots") == 0
+            and outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core
+            and outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core.get("dominant_blocker")
+            == "no residual high-safe roots"
+            and tex_material_decoder_queue
+            and int_value(tex_material_decoder_queue, "queued_probe_segments") == 0
+            and int_value(tex_material_decoder_queue, "unresolved_segments") == 0
+            and int_value(tex_material_decoder_queue, "decoded_material_segments") > 0
+            and tex_augmented_coverage
+            and int_value(tex_augmented_coverage, "unresolved_unique_pcx") > 0
+            and tex_remaining_reference_profile
+            and tex_remaining_reference_profile.get("next_action")
+        ):
+            next_action = str(tex_remaining_reference_profile.get("next_action"))
         elif (
             outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency
             and int_value(outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency, "source_unknown_slots") == 0
@@ -21162,6 +21193,11 @@ def main() -> None:
         default=DEFAULT_TEX_AUGMENTED_COVERAGE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-remaining-reference-profile-summary",
+        type=Path,
+        default=DEFAULT_TEX_REMAINING_REFERENCE_PROFILE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -23697,6 +23733,7 @@ def main() -> None:
     )
     tex_material_decoder_queue_summary = read_optional_summary(args.tex_material_decoder_queue_summary)
     tex_augmented_coverage_summary = read_optional_summary(args.tex_augmented_coverage_summary)
+    tex_remaining_reference_profile_summary = read_optional_summary(args.tex_remaining_reference_profile_summary)
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -25216,6 +25253,7 @@ def main() -> None:
         outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core=gradient_sequence_high_safe_low_exception_source_dependency_frontier80_structural_nonzero_final_zero_gap_fixture_replay_residual_core_summary,
         tex_material_decoder_queue=tex_material_decoder_queue_summary,
         tex_augmented_coverage=tex_augmented_coverage_summary,
+        tex_remaining_reference_profile=tex_remaining_reference_profile_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
