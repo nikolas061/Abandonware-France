@@ -1008,6 +1008,9 @@ DEFAULT_TEX_LARGE_SHARED_2700302B_PAYLOAD_REPLAY_SUMMARY = Path(
 DEFAULT_TEX_LARGE_SHARED_2700302B_RENDERER_GRAMMAR_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_renderer_grammar_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_ARGUMENT_SEMANTICS_PROBE_SUMMARY = Path(
+    "output/tex_large_shared_2700302b_op4_argument_semantics_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_standard_probe/summary.csv"
 )
@@ -1917,6 +1920,7 @@ def apply_old_clean_byte_union(
     tex_large_shared_2700302b_header_probe: dict[str, str] | None,
     tex_large_shared_2700302b_payload_replay: dict[str, str] | None,
     tex_large_shared_2700302b_renderer_grammar_probe: dict[str, str] | None,
+    tex_large_shared_2700302b_op4_argument_semantics_probe: dict[str, str] | None,
     tex_large_shifted_2a30_standard_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_decoder_path_probe: dict[str, str] | None,
@@ -4963,6 +4967,17 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shared_2700302b_op4_argument_semantics_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shared_2700302b_op4_semantics="
+                    f"{tex_large_shared_2700302b_op4_argument_semantics_probe.get('semantic_rows', '0')}",
+                    "tex_large_shared_2700302b_op4_verdict="
+                    f"{tex_large_shared_2700302b_op4_argument_semantics_probe.get('semantic_verdict', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_standard_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5992,6 +6007,16 @@ def apply_old_clean_byte_union(
                 and tex_large_shared_2700302b_renderer_grammar_probe.get("baseline_mode")
                 == tex_large_shared_2700302b_payload_replay.get("mode")
             )
+            shared_2700302b_op4_argument_semantics_probe_current = (
+                shared_2700302b_renderer_grammar_probe_current
+                and tex_large_shared_2700302b_op4_argument_semantics_probe is not None
+                and int_value(tex_large_shared_2700302b_op4_argument_semantics_probe, "segment_rows")
+                == int_value(tex_large_shared_2700302b_renderer_grammar_probe, "segment_rows")
+                and tex_large_shared_2700302b_op4_argument_semantics_probe.get("offset")
+                == tex_large_shared_2700302b_renderer_grammar_probe.get("offset")
+                and tex_large_shared_2700302b_op4_argument_semantics_probe.get("baseline_mode")
+                == tex_large_shared_2700302b_renderer_grammar_probe.get("baseline_mode")
+            )
             shifted_2a30_standard_probe_current = (
                 large_rejected_profile_current
                 and tex_large_shifted_2a30_standard_probe is not None
@@ -6442,6 +6467,13 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_standard_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
+            elif (
+                tex_large_shared_2700302b_op4_argument_semantics_probe
+                and shared_2700302b_op4_argument_semantics_probe_current
+                and int_value(tex_large_shared_2700302b_op4_argument_semantics_probe, "issue_rows") == 0
+                and tex_large_shared_2700302b_op4_argument_semantics_probe.get("next_action")
+            ):
+                next_action = str(tex_large_shared_2700302b_op4_argument_semantics_probe.get("next_action"))
             elif (
                 tex_large_shared_2700302b_renderer_grammar_probe
                 and shared_2700302b_renderer_grammar_probe_current
@@ -22610,6 +22642,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_RENDERER_GRAMMAR_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shared-2700302b-op4-argument-semantics-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_ARGUMENT_SEMANTICS_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-standard-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY,
@@ -25321,6 +25358,9 @@ def main() -> None:
     tex_large_shared_2700302b_renderer_grammar_probe_summary = read_optional_summary(
         args.tex_large_shared_2700302b_renderer_grammar_probe_summary
     )
+    tex_large_shared_2700302b_op4_argument_semantics_probe_summary = read_optional_summary(
+        args.tex_large_shared_2700302b_op4_argument_semantics_probe_summary
+    )
     tex_large_shifted_2a30_standard_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_standard_probe_summary
     )
@@ -26938,6 +26978,7 @@ def main() -> None:
         tex_large_shared_2700302b_header_probe=tex_large_shared_2700302b_header_probe_summary,
         tex_large_shared_2700302b_payload_replay=tex_large_shared_2700302b_payload_replay_summary,
         tex_large_shared_2700302b_renderer_grammar_probe=tex_large_shared_2700302b_renderer_grammar_probe_summary,
+        tex_large_shared_2700302b_op4_argument_semantics_probe=tex_large_shared_2700302b_op4_argument_semantics_probe_summary,
         tex_large_shifted_2a30_standard_probe=tex_large_shifted_2a30_standard_probe_summary,
         tex_large_shifted_2a30_branch_probe=tex_large_shifted_2a30_branch_probe_summary,
         tex_large_shifted_2a30_branch_decoder_path_probe=tex_large_shifted_2a30_branch_decoder_path_probe_summary,
