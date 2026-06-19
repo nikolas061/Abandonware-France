@@ -70,9 +70,13 @@ DEFAULT_ALIAS_TILE_VERIFICATION = Path("output/cdcache_alias_candidate_textures/
 DEFAULT_ALIAS_PACK_SUMMARY = Path("output/cdcache_tex_alias_pack/summary.csv")
 DEFAULT_ALIAS_PACK_MANIFEST = Path("output/cdcache_tex_alias_pack/manifest.csv")
 DEFAULT_ALIAS_PACK_HTML = Path("output/cdcache_tex_alias_pack/index.html")
+DEFAULT_TEX_MATERIAL_DECODE_PACK_SUMMARY = Path("output/tex_material_decode_pack/summary.csv")
+DEFAULT_TEX_MATERIAL_DECODE_PACK_MANIFEST = Path("output/tex_material_decode_pack/manifest.csv")
+DEFAULT_TEX_MATERIAL_DECODE_PACK_HTML = Path("output/tex_material_decode_pack/index.html")
 DEFAULT_TEX_AUGMENTED_SUMMARY = Path("output/tex_augmented_coverage/summary.csv")
 DEFAULT_TEX_AUGMENTED_REFERENCES = Path("output/tex_augmented_coverage/references.csv")
 DEFAULT_TEX_AUGMENTED_ALIASES = Path("output/tex_augmented_coverage/aliases.csv")
+DEFAULT_TEX_AUGMENTED_MATERIAL_DECODES = Path("output/tex_augmented_coverage/material_decodes.csv")
 DEFAULT_TEX_AUGMENTED_HTML = Path("output/tex_augmented_coverage/index.html")
 DEFAULT_TEX_UNRESOLVED_PROBE_SUMMARY = Path("output/tex_unresolved_material_probe_render/summary.csv")
 DEFAULT_TEX_UNRESOLVED_PROBE_MANIFEST = Path(
@@ -749,7 +753,9 @@ SUMMARY_FIELDNAMES = [
     "cdcache_alias_synthetic_descriptors",
     "cdcache_alias_fullhd_outputs",
     "cdcache_tex_alias_pack_assets",
+    "tex_material_decode_pack_assets",
     "tex_augmented_exact_or_alias_unique_pcx",
+    "tex_augmented_exact_alias_or_decoded_unique_pcx",
     "tex_augmented_unresolved_unique_pcx",
     "tex_unresolved_material_probe_fullhd_previews",
     "tex_unresolved_material_probe_unique_pcx",
@@ -2046,24 +2052,106 @@ def audit_alias_pack(
     )
 
 
+def audit_tex_material_decode_pack(
+    summary: Path,
+    manifest: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int]:
+    if not summary.exists():
+        return missing_gate("tex_material_decode_pack", summary), 0
+    if not manifest.exists():
+        return missing_gate("tex_material_decode_pack", manifest), 0
+    if not html_report.exists():
+        return missing_gate("tex_material_decode_pack", html_report), 0
+
+    summary_rows = read_csv(summary)
+    manifest_rows = read_csv(manifest)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    decoded_assets = int_value(total, "decoded_assets")
+    unique_pcx = int_value(total, "unique_pcx")
+    segments = int_value(total, "segments")
+    fullhd_assets = int_value(total, "fullhd_assets")
+    native_assets = int_value(total, "native_assets")
+    issue_rows = int_value(total, "issue_rows")
+
+    unique_names = {
+        row.get("normalized_pcx_name", "")
+        for row in manifest_rows
+        if row.get("normalized_pcx_name")
+    }
+    segment_keys = {
+        (row.get("archive", ""), row.get("normalized_pcx_name", ""), row.get("segment_index", ""), row.get("body_offset", ""))
+        for row in manifest_rows
+    }
+    if decoded_assets != len(manifest_rows):
+        issues.append("material_decode_asset_count_mismatch")
+    if unique_pcx != len(unique_names):
+        issues.append("material_decode_unique_pcx_mismatch")
+    if segments != len(segment_keys):
+        issues.append("material_decode_segment_count_mismatch")
+    if fullhd_assets != sum(1 for row in manifest_rows if row.get("decoded_fullhd_exists") == "yes"):
+        issues.append("material_decode_fullhd_asset_count_mismatch")
+    if native_assets != sum(1 for row in manifest_rows if row.get("decoded_native_exists") == "yes"):
+        issues.append("material_decode_native_asset_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    missing_paths = 0
+    for row in manifest_rows:
+        for field in ("source_fullhd_path", "source_native_path", "decoded_fullhd_path", "decoded_native_path"):
+            value = row.get(field, "")
+            if value and not Path(value).exists():
+                missing_paths += 1
+    if missing_paths:
+        issues.append(f"missing_material_decode_paths:{missing_paths}")
+    if "const TEX_MATERIAL_DECODE_PACK = " not in text:
+        issues.append("missing_tex_material_decode_pack_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_material_decode_pack",
+            ok,
+            expected=".tex material decode pack has valid source and output paths",
+            actual=(
+                f"assets={decoded_assets}, unique={unique_pcx}, segments={segments}, "
+                f"issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        decoded_assets if ok else 0,
+    )
+
+
 def audit_tex_augmented_coverage(
     summary: Path,
     references: Path,
     aliases: Path,
+    material_decodes: Path,
     html_report: Path,
-) -> tuple[dict[str, str], int, int]:
+) -> tuple[dict[str, str], int, int, int]:
     if not summary.exists():
-        return missing_gate("tex_augmented_coverage", summary), 0, 0
+        return missing_gate("tex_augmented_coverage", summary), 0, 0, 0
     if not references.exists():
-        return missing_gate("tex_augmented_coverage", references), 0, 0
+        return missing_gate("tex_augmented_coverage", references), 0, 0, 0
     if not aliases.exists():
-        return missing_gate("tex_augmented_coverage", aliases), 0, 0
+        return missing_gate("tex_augmented_coverage", aliases), 0, 0, 0
+    if not material_decodes.exists():
+        return missing_gate("tex_augmented_coverage", material_decodes), 0, 0, 0
     if not html_report.exists():
-        return missing_gate("tex_augmented_coverage", html_report), 0, 0
+        return missing_gate("tex_augmented_coverage", html_report), 0, 0, 0
 
     summary_rows = read_csv(summary)
     reference_rows = read_csv(references)
     alias_rows = read_csv(aliases)
+    material_decode_rows = read_csv(material_decodes)
     text = html_report.read_text(errors="replace")
     issues: list[str] = []
     if len(summary_rows) != 1:
@@ -2078,7 +2166,11 @@ def audit_tex_augmented_coverage(
     alias_reference_rows = int_value(total, "alias_reference_rows")
     alias_unique = int_value(total, "alias_unique_pcx")
     alias_assets = int_value(total, "alias_assets")
+    decoded_reference_rows = int_value(total, "decoded_material_reference_rows")
+    decoded_unique = int_value(total, "decoded_material_unique_pcx")
+    decoded_assets = int_value(total, "decoded_material_assets")
     exact_or_alias = int_value(total, "exact_or_alias_unique_pcx")
+    exact_alias_or_decoded = int_value(total, "exact_alias_or_decoded_unique_pcx")
     unresolved_unique = int_value(total, "unresolved_unique_pcx")
     issue_rows = int_value(total, "issue_rows")
 
@@ -2092,6 +2184,11 @@ def audit_tex_augmented_coverage(
         row.get("normalized_pcx_name", "")
         for row in reference_rows
         if row.get("coverage_status") == "alias"
+    }
+    decoded_names = {
+        row.get("normalized_pcx_name", "")
+        for row in reference_rows
+        if row.get("coverage_status") == "decoded_material"
     }
     unresolved_names = {
         row.get("normalized_pcx_name", "")
@@ -2110,8 +2207,16 @@ def audit_tex_augmented_coverage(
         issues.append("tex_augmented_alias_unique_count_mismatch")
     if alias_assets != len(alias_rows):
         issues.append("tex_augmented_alias_asset_count_mismatch")
+    if decoded_reference_rows != sum(1 for row in reference_rows if row.get("coverage_status") == "decoded_material"):
+        issues.append("tex_augmented_decoded_reference_count_mismatch")
+    if decoded_unique != len(decoded_names):
+        issues.append("tex_augmented_decoded_unique_count_mismatch")
+    if decoded_assets != len(material_decode_rows):
+        issues.append("tex_augmented_decoded_asset_count_mismatch")
     if exact_or_alias != len(exact_names | alias_names):
         issues.append("tex_augmented_exact_or_alias_count_mismatch")
+    if exact_alias_or_decoded != len(exact_names | alias_names | decoded_names):
+        issues.append("tex_augmented_exact_alias_or_decoded_count_mismatch")
     if unresolved_unique != len(unresolved_names):
         issues.append("tex_augmented_unresolved_unique_count_mismatch")
     if issue_rows:
@@ -2123,6 +2228,15 @@ def audit_tex_augmented_coverage(
             missing_alias_paths += 1
     if missing_alias_paths:
         issues.append(f"missing_alias_paths:{missing_alias_paths}")
+    missing_decoded_paths = 0
+    for row in material_decode_rows:
+        value = row.get("decoded_fullhd_path", "")
+        if value and not Path(value).exists():
+            missing_decoded_paths += 1
+        if row.get("issues"):
+            issues.append("material_decode_row_has_issues")
+    if missing_decoded_paths:
+        issues.append(f"missing_material_decode_paths:{missing_decoded_paths}")
     if "const TEX_AUGMENTED_COVERAGE = " not in text:
         issues.append("missing_tex_augmented_coverage_json")
 
@@ -2131,15 +2245,17 @@ def audit_tex_augmented_coverage(
         gate(
             "tex_augmented_coverage",
             ok,
-            expected=".tex exact and alias coverage report is internally consistent",
+            expected=".tex exact, alias and material decode coverage report is internally consistent",
             actual=(
                 f"unique={unique_likely}, exact={exact_unique}, alias={alias_unique}, "
-                f"exact_or_alias={exact_or_alias}, unresolved={unresolved_unique}, issues={issue_rows}"
+                f"decoded={decoded_unique}, exact_alias_decoded={exact_alias_or_decoded}, "
+                f"unresolved={unresolved_unique}, issues={issue_rows}"
             ),
             evidence=f"{summary};{html_report}",
             issues=issues,
         ),
         exact_or_alias if ok else 0,
+        exact_alias_or_decoded if ok else 0,
         unresolved_unique if ok else 0,
     )
 
@@ -2349,6 +2465,8 @@ def audit_tex_material_decoder_queue(
     unique_pcx = int_value(total, "unique_pcx")
     exact_rows = int_value(total, "exact_rows")
     alias_rows = int_value(total, "alias_rows")
+    decoded_material_rows = int_value(total, "decoded_material_rows")
+    decoded_material_segments = int_value(total, "decoded_material_segments")
     unresolved_rows = int_value(total, "unresolved_rows")
     unresolved_unique = int_value(total, "unresolved_unique_pcx")
     unresolved_segments = int_value(total, "unresolved_segments")
@@ -2363,6 +2481,11 @@ def audit_tex_material_decoder_queue(
         row.get("normalized_pcx_name", "")
         for row in queue_rows
         if row.get("coverage_status") == "unresolved"
+    }
+    decoded_material_segment_keys = {
+        (row.get("archive", ""), row.get("normalized_pcx_name", ""), row.get("texture_segment_index", ""), row.get("texture_body_offset", ""))
+        for row in queue_rows
+        if row.get("coverage_status") == "decoded_material"
     }
     unresolved_segment_keys = {
         (row.get("archive", ""), row.get("normalized_pcx_name", ""), row.get("texture_segment_index", ""), row.get("texture_body_offset", ""))
@@ -2387,6 +2510,10 @@ def audit_tex_material_decoder_queue(
         issues.append("decoder_queue_exact_count_mismatch")
     if alias_rows != status_counts.get("alias", 0):
         issues.append("decoder_queue_alias_count_mismatch")
+    if decoded_material_rows != status_counts.get("decoded_material", 0):
+        issues.append("decoder_queue_decoded_material_count_mismatch")
+    if decoded_material_segments != len(decoded_material_segment_keys):
+        issues.append("decoder_queue_decoded_material_segment_count_mismatch")
     if unresolved_rows != status_counts.get("unresolved", 0):
         issues.append("decoder_queue_unresolved_count_mismatch")
     if unresolved_unique != len(unresolved_names):
@@ -11363,11 +11490,23 @@ def main() -> None:
         DEFAULT_ALIAS_PACK_HTML,
     )
     rows.append(alias_pack_gate)
-    tex_augmented_gate, tex_augmented_exact_or_alias, tex_augmented_unresolved = (
+    tex_material_decode_gate, tex_material_decode_assets = audit_tex_material_decode_pack(
+        DEFAULT_TEX_MATERIAL_DECODE_PACK_SUMMARY,
+        DEFAULT_TEX_MATERIAL_DECODE_PACK_MANIFEST,
+        DEFAULT_TEX_MATERIAL_DECODE_PACK_HTML,
+    )
+    rows.append(tex_material_decode_gate)
+    (
+        tex_augmented_gate,
+        tex_augmented_exact_or_alias,
+        tex_augmented_exact_alias_or_decoded,
+        tex_augmented_unresolved,
+    ) = (
         audit_tex_augmented_coverage(
             DEFAULT_TEX_AUGMENTED_SUMMARY,
             DEFAULT_TEX_AUGMENTED_REFERENCES,
             DEFAULT_TEX_AUGMENTED_ALIASES,
+            DEFAULT_TEX_AUGMENTED_MATERIAL_DECODES,
             DEFAULT_TEX_AUGMENTED_HTML,
         )
     )
@@ -16709,7 +16848,9 @@ def main() -> None:
         "cdcache_alias_synthetic_descriptors": str(alias_synthetic_descriptors),
         "cdcache_alias_fullhd_outputs": str(alias_descriptor_count + alias_tile_count),
         "cdcache_tex_alias_pack_assets": str(alias_pack_assets),
+        "tex_material_decode_pack_assets": str(tex_material_decode_assets),
         "tex_augmented_exact_or_alias_unique_pcx": str(tex_augmented_exact_or_alias),
+        "tex_augmented_exact_alias_or_decoded_unique_pcx": str(tex_augmented_exact_alias_or_decoded),
         "tex_augmented_unresolved_unique_pcx": str(tex_augmented_unresolved),
         "tex_unresolved_material_probe_fullhd_previews": str(tex_probe_previews),
         "tex_unresolved_material_probe_unique_pcx": str(tex_probe_unique_pcx),

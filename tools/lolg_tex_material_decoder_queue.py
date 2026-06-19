@@ -23,6 +23,8 @@ SUMMARY_FIELDNAMES = [
     "unique_pcx",
     "exact_rows",
     "alias_rows",
+    "decoded_material_rows",
+    "decoded_material_segments",
     "unresolved_rows",
     "unresolved_unique_pcx",
     "unresolved_segments",
@@ -58,6 +60,8 @@ QUEUE_FIELDNAMES = [
     "prefix_delta",
     "alias_assets",
     "alias_candidate_base_names",
+    "decoded_material_assets",
+    "decoded_material_pack_paths",
     "best_probe_rank",
     "best_probe_width",
     "best_probe_skip",
@@ -157,6 +161,8 @@ def priority_for(status: str, row: dict[str, str], best_probe: dict[str, str]) -
         return "map_segment"
     if status == "alias":
         return "verify_alias"
+    if status == "decoded_material":
+        return "decoded"
     if status == "exact":
         return "covered"
     return "classify"
@@ -220,6 +226,8 @@ def build_queue_rows(
                 "prefix_delta": row.get("prefix_delta", ""),
                 "alias_assets": coverage_row.get("alias_assets", ""),
                 "alias_candidate_base_names": coverage_row.get("alias_candidate_base_names", ""),
+                "decoded_material_assets": coverage_row.get("decoded_material_assets", ""),
+                "decoded_material_pack_paths": coverage_row.get("decoded_material_pack_paths", ""),
                 "best_probe_rank": best_probe.get("rank", ""),
                 "best_probe_width": best_probe.get("width", ""),
                 "best_probe_skip": best_probe.get("skip", ""),
@@ -232,7 +240,7 @@ def build_queue_rows(
     return sorted(
         rows,
         key=lambda item: (
-            {"decode_probe": 0, "map_segment": 1, "verify_alias": 2, "covered": 3}.get(
+            {"decode_probe": 0, "map_segment": 1, "verify_alias": 2, "decoded": 3, "covered": 4}.get(
                 item["priority"],
                 4,
             ),
@@ -270,6 +278,11 @@ def build_prefix_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
 
 def summary_row(rows: list[dict[str, str]]) -> dict[str, str]:
     statuses = Counter(row["coverage_status"] for row in rows)
+    decoded_material_segments = {
+        (row["archive"], row["normalized_pcx_name"], row["texture_segment_index"], row["texture_body_offset"])
+        for row in rows
+        if row["coverage_status"] == "decoded_material"
+    }
     unresolved_names = {
         row["normalized_pcx_name"]
         for row in rows
@@ -291,6 +304,8 @@ def summary_row(rows: list[dict[str, str]]) -> dict[str, str]:
         "unique_pcx": str(len({row["normalized_pcx_name"] for row in rows})),
         "exact_rows": str(statuses.get("exact", 0)),
         "alias_rows": str(statuses.get("alias", 0)),
+        "decoded_material_rows": str(statuses.get("decoded_material", 0)),
+        "decoded_material_segments": str(len(decoded_material_segments)),
         "unresolved_rows": str(statuses.get("unresolved", 0)),
         "unresolved_unique_pcx": str(len(unresolved_names)),
         "unresolved_segments": str(len(unresolved_segments)),
@@ -411,6 +426,7 @@ a {{ color: var(--accent); text-decoration: none; margin-right: 10px; }}
   <section class="stats">
     <div class="stat"><div class="label">Liens materiau</div><div class="value">{html.escape(summary['material_link_rows'])}</div></div>
     <div class="stat"><div class="label">Segments a decoder</div><div class="value">{html.escape(summary['queued_probe_segments'])}</div></div>
+    <div class="stat"><div class="label">Segments decodes</div><div class="value">{html.escape(summary['decoded_material_segments'])}</div></div>
     <div class="stat"><div class="label">Unresolved uniques</div><div class="value">{html.escape(summary['unresolved_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Issues</div><div class="value ok">{html.escape(summary['issue_rows'])}</div></div>
   </section>

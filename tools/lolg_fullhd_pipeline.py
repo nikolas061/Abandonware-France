@@ -2469,7 +2469,6 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step("sonde references brutes CDCACHE .tex", [sys.executable, "tools/lolg_cdcache_raw_reference_probe.py"]),
         Step("candidats alias CDCACHE pour .tex", [sys.executable, "tools/lolg_cdcache_alias_candidates.py"]),
         Step("pack alias CDCACHE pour .tex", [sys.executable, "tools/lolg_cdcache_tex_alias_pack.py"]),
-        Step("couverture augmentee .tex", [sys.executable, "tools/lolg_tex_augmented_coverage.py"]),
         Step(
             "previews sondes materiaux .tex",
             [
@@ -2503,6 +2502,8 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
             requires_pillow=True,
         ),
+        Step("pack decode materiaux .tex", [sys.executable, "tools/lolg_tex_material_decode_pack.py"]),
+        Step("couverture augmentee .tex", [sys.executable, "tools/lolg_tex_augmented_coverage.py"]),
         Step("file decodeur materiaux .tex", [sys.executable, "tools/lolg_tex_material_decoder_queue.py"]),
         Step(
             "gradient-like noisy .tex",

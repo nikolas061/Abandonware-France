@@ -35,6 +35,7 @@ DEFAULT_TEX_ALIAS_PACK = Path("output/cdcache_tex_alias_pack/index.html")
 DEFAULT_TEX_AUGMENTED_COVERAGE = Path("output/tex_augmented_coverage/index.html")
 DEFAULT_TEX_UNRESOLVED_PROBE = Path("output/tex_unresolved_material_probe_render/index.html")
 DEFAULT_TEX_PROBE_ANALYSIS = Path("output/tex_unresolved_material_probe_render/analysis.html")
+DEFAULT_TEX_MATERIAL_DECODE_PACK = Path("output/tex_material_decode_pack/index.html")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE = Path("output/tex_material_decoder_queue/index.html")
 DEFAULT_TEX_EXACT_CDCACHE_COMPARE = Path("output/tex_exact_cdcache_compare/index.html")
 DEFAULT_TEX_EXACT_CHUNK_EVIDENCE = Path("output/tex_exact_chunk_evidence/index.html")
@@ -909,6 +910,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Couverture augmentée .tex", DEFAULT_TEX_AUGMENTED_COVERAGE),
         ("Sondes matériaux .tex", DEFAULT_TEX_UNRESOLVED_PROBE),
         ("Analyse sondes .tex", DEFAULT_TEX_PROBE_ANALYSIS),
+        ("Pack decode matériaux .tex", DEFAULT_TEX_MATERIAL_DECODE_PACK),
         ("File décodeur .tex", DEFAULT_TEX_MATERIAL_DECODER_QUEUE),
         ("Comparaison exact .tex", DEFAULT_TEX_EXACT_CDCACHE_COMPARE),
         ("Preuves chunks .tex", DEFAULT_TEX_EXACT_CHUNK_EVIDENCE),

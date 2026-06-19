@@ -15,6 +15,7 @@ from pathlib import Path
 DEFAULT_OUTPUT = Path("output/tex_augmented_coverage")
 DEFAULT_REFERENCES = Path("output/tex_reference_coverage/references.csv")
 DEFAULT_ALIAS_PACK = Path("output/cdcache_tex_alias_pack/manifest.csv")
+DEFAULT_MATERIAL_DECODE_PACK = Path("output/tex_material_decode_pack/manifest.csv")
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -25,7 +26,11 @@ SUMMARY_FIELDNAMES = [
     "alias_reference_rows",
     "alias_unique_pcx",
     "alias_assets",
+    "decoded_material_reference_rows",
+    "decoded_material_unique_pcx",
+    "decoded_material_assets",
     "exact_or_alias_unique_pcx",
+    "exact_alias_or_decoded_unique_pcx",
     "unresolved_reference_rows",
     "unresolved_unique_pcx",
     "issue_rows",
@@ -44,6 +49,8 @@ ROW_FIELDNAMES = [
     "alias_kinds",
     "alias_candidate_base_names",
     "alias_pack_paths",
+    "decoded_material_assets",
+    "decoded_material_pack_paths",
     "issues",
 ]
 
@@ -58,6 +65,22 @@ ALIAS_FIELDNAMES = [
     "width",
     "height",
     "alias_pack_path",
+    "issues",
+]
+
+DECODED_MATERIAL_FIELDNAMES = [
+    "archive",
+    "archive_tag",
+    "pcx_name",
+    "normalized_pcx_name",
+    "material_clean_text",
+    "segment_index",
+    "body_offset_hex",
+    "width",
+    "height",
+    "skip",
+    "structure_score",
+    "decoded_fullhd_path",
     "issues",
 ]
 
@@ -91,28 +114,54 @@ def aliases_by_archive_name(rows: list[dict[str, str]]) -> dict[tuple[str, str],
     return output
 
 
+def decoded_by_archive_name(rows: list[dict[str, str]]) -> dict[tuple[str, str], list[dict[str, str]]]:
+    output: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        key = (row.get("archive", ""), normalize_pcx(row.get("normalized_pcx_name", "") or row.get("pcx_name", "")))
+        if key[0] and key[1]:
+            output[key].append(row)
+    return output
+
+
+def read_optional_rows(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    return read_rows(path)
+
+
 def build_rows(
     references: list[dict[str, str]],
     aliases: list[dict[str, str]],
-) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    decoded_materials: list[dict[str, str]],
+) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     alias_lookup = aliases_by_archive_name(aliases)
+    decoded_lookup = decoded_by_archive_name(decoded_materials)
     rows: list[dict[str, str]] = []
     alias_rows: list[dict[str, str]] = []
+    decoded_rows: list[dict[str, str]] = []
     for reference in references:
         archive = reference.get("archive", "")
         name = normalize_pcx(reference.get("normalized_pcx_name", "") or reference.get("pcx_name", ""))
         exact_covered = reference.get("covered") == "yes"
         matching_aliases = alias_lookup.get((archive, name), [])
+        matching_decoded = decoded_lookup.get((archive, name), [])
         issues = []
         for alias in matching_aliases:
             if alias.get("issues"):
                 issues.append("alias_has_issues")
             if alias.get("alias_exists") != "yes" or not Path(alias.get("alias_pack_path", "")).exists():
                 issues.append("missing_alias_pack_path")
+        for decoded in matching_decoded:
+            if decoded.get("issues"):
+                issues.append("decoded_material_has_issues")
+            if decoded.get("decoded_fullhd_exists") != "yes" or not Path(decoded.get("decoded_fullhd_path", "")).exists():
+                issues.append("missing_decoded_material_path")
         if exact_covered:
             status = "exact"
         elif matching_aliases:
             status = "alias"
+        elif matching_decoded:
+            status = "decoded_material"
         else:
             status = "unresolved"
         rows.append(
@@ -131,6 +180,10 @@ def build_rows(
                     sorted({row.get("candidate_base_name", "") for row in matching_aliases if row.get("candidate_base_name")})
                 ),
                 "alias_pack_paths": ";".join(row.get("alias_pack_path", "") for row in matching_aliases),
+                "decoded_material_assets": str(len(matching_decoded)),
+                "decoded_material_pack_paths": ";".join(
+                    row.get("decoded_fullhd_path", "") for row in matching_decoded
+                ),
                 "issues": ";".join(sorted(set(issues))),
             }
         )
@@ -151,13 +204,41 @@ def build_rows(
                 "issues": alias.get("issues", ""),
             }
         )
-    return rows, alias_rows
+
+    for decoded in decoded_materials:
+        decoded_rows.append(
+            {
+                "archive": decoded.get("archive", ""),
+                "archive_tag": decoded.get("archive_tag", ""),
+                "pcx_name": decoded.get("pcx_name", ""),
+                "normalized_pcx_name": decoded.get("normalized_pcx_name", ""),
+                "material_clean_text": decoded.get("material_clean_text", ""),
+                "segment_index": decoded.get("segment_index", ""),
+                "body_offset_hex": decoded.get("body_offset_hex", ""),
+                "width": decoded.get("width", ""),
+                "height": decoded.get("height", ""),
+                "skip": decoded.get("skip", ""),
+                "structure_score": decoded.get("structure_score", ""),
+                "decoded_fullhd_path": decoded.get("decoded_fullhd_path", ""),
+                "issues": decoded.get("issues", ""),
+            }
+        )
+    return rows, alias_rows, decoded_rows
 
 
-def summary_row(rows: list[dict[str, str]], aliases: list[dict[str, str]]) -> dict[str, str]:
+def summary_row(
+    rows: list[dict[str, str]],
+    aliases: list[dict[str, str]],
+    decoded_materials: list[dict[str, str]],
+) -> dict[str, str]:
     unique_names = {row["normalized_pcx_name"] for row in rows}
     exact_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "exact"}
     alias_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "alias"}
+    decoded_names = {
+        row["normalized_pcx_name"]
+        for row in rows
+        if row["coverage_status"] == "decoded_material"
+    }
     unresolved_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "unresolved"}
     return {
         "scope": "total",
@@ -168,10 +249,20 @@ def summary_row(rows: list[dict[str, str]], aliases: list[dict[str, str]]) -> di
         "alias_reference_rows": str(sum(1 for row in rows if row["coverage_status"] == "alias")),
         "alias_unique_pcx": str(len(alias_names)),
         "alias_assets": str(len(aliases)),
+        "decoded_material_reference_rows": str(
+            sum(1 for row in rows if row["coverage_status"] == "decoded_material")
+        ),
+        "decoded_material_unique_pcx": str(len(decoded_names)),
+        "decoded_material_assets": str(len(decoded_materials)),
         "exact_or_alias_unique_pcx": str(len(exact_names | alias_names)),
+        "exact_alias_or_decoded_unique_pcx": str(len(exact_names | alias_names | decoded_names)),
         "unresolved_reference_rows": str(sum(1 for row in rows if row["coverage_status"] == "unresolved")),
         "unresolved_unique_pcx": str(len(unresolved_names)),
-        "issue_rows": str(sum(1 for row in rows if row["issues"]) + sum(1 for row in aliases if row["issues"])),
+        "issue_rows": str(
+            sum(1 for row in rows if row["issues"])
+            + sum(1 for row in aliases if row["issues"])
+            + sum(1 for row in decoded_materials if row.get("issues"))
+        ),
     }
 
 
@@ -195,10 +286,11 @@ def build_html(
     summary: dict[str, str],
     rows: list[dict[str, str]],
     aliases: list[dict[str, str]],
+    decoded_materials: list[dict[str, str]],
     output_dir: Path,
     title: str,
 ) -> str:
-    payload = {"summary": summary, "references": rows, "aliases": aliases}
+    payload = {"summary": summary, "references": rows, "aliases": aliases, "decoded_materials": decoded_materials}
     data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
     links = " ".join(
         f'<a href="{html.escape(relative_href(path, output_dir))}">{html.escape(label)}</a>'
@@ -206,9 +298,11 @@ def build_html(
             ("summary.csv", output_dir / "summary.csv"),
             ("references.csv", output_dir / "references.csv"),
             ("aliases.csv", output_dir / "aliases.csv"),
+            ("material_decodes.csv", output_dir / "material_decodes.csv"),
         )
     )
     alias_rows = [row for row in rows if row["coverage_status"] == "alias"]
+    decoded_rows = [row for row in rows if row["coverage_status"] == "decoded_material"]
     unresolved_rows = [row for row in rows if row["coverage_status"] == "unresolved"]
     return f"""<!doctype html>
 <html lang="fr">
@@ -284,7 +378,8 @@ a {{ color: var(--accent); text-decoration: none; margin-right: 10px; }}
   <section class="stats">
     <div class="stat"><div class="label">Exact unique</div><div class="value ok">{html.escape(summary['exact_covered_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Alias unique</div><div class="value">{html.escape(summary['alias_unique_pcx'])}</div></div>
-    <div class="stat"><div class="label">Exact ou alias</div><div class="value">{html.escape(summary['exact_or_alias_unique_pcx'])}</div></div>
+    <div class="stat"><div class="label">Decodes materiaux</div><div class="value">{html.escape(summary['decoded_material_unique_pcx'])}</div></div>
+    <div class="stat"><div class="label">Exact/alias/decoded</div><div class="value">{html.escape(summary['exact_alias_or_decoded_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Restants</div><div class="value warn">{html.escape(summary['unresolved_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Issues</div><div class="value ok">{html.escape(summary['issue_rows'])}</div></div>
   </section>
@@ -299,6 +394,10 @@ a {{ color: var(--accent); text-decoration: none; margin-right: 10px; }}
   <section class="panel">
     <h2>References avec alias</h2>
     {render_table(alias_rows, ROW_FIELDNAMES)}
+  </section>
+  <section class="panel">
+    <h2>References decodees materiaux</h2>
+    {render_table(decoded_rows, ROW_FIELDNAMES)}
   </section>
   <section class="panel">
     <h2>References restantes</h2>
@@ -317,16 +416,22 @@ def write_report(
     output_dir: Path,
     references_path: Path,
     alias_pack_path: Path,
+    material_decode_pack_path: Path,
     title: str,
-) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
+) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    rows, aliases = build_rows(read_rows(references_path), read_rows(alias_pack_path))
-    summary = summary_row(rows, aliases)
+    rows, aliases, decoded_materials = build_rows(
+        read_rows(references_path),
+        read_rows(alias_pack_path),
+        read_optional_rows(material_decode_pack_path),
+    )
+    summary = summary_row(rows, aliases, decoded_materials)
     write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(output_dir / "references.csv", ROW_FIELDNAMES, rows)
     write_csv(output_dir / "aliases.csv", ALIAS_FIELDNAMES, aliases)
-    (output_dir / "index.html").write_text(build_html(summary, rows, aliases, output_dir, title))
-    return summary, rows, aliases
+    write_csv(output_dir / "material_decodes.csv", DECODED_MATERIAL_FIELDNAMES, decoded_materials)
+    (output_dir / "index.html").write_text(build_html(summary, rows, aliases, decoded_materials, output_dir, title))
+    return summary, rows, aliases, decoded_materials
 
 
 def main() -> None:
@@ -334,20 +439,23 @@ def main() -> None:
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--references", type=Path, default=DEFAULT_REFERENCES)
     parser.add_argument("--alias-pack", type=Path, default=DEFAULT_ALIAS_PACK)
+    parser.add_argument("--material-decode-pack", type=Path, default=DEFAULT_MATERIAL_DECODE_PACK)
     parser.add_argument("--title", default="Lands of Lore II .tex Augmented Coverage")
     args = parser.parse_args()
 
-    summary, _rows, _aliases = write_report(
+    summary, _rows, _aliases, _decoded = write_report(
         args.output,
         args.references,
         args.alias_pack,
+        args.material_decode_pack,
         args.title,
     )
     print(f"Unique likely PCX: {summary['unique_likely_pcx']}")
     print(
-        "Exact/alias/unresolved unique: "
+        "Exact/alias/decoded/unresolved unique: "
         f"{summary['exact_covered_unique_pcx']}/"
         f"{summary['alias_unique_pcx']}/"
+        f"{summary['decoded_material_unique_pcx']}/"
         f"{summary['unresolved_unique_pcx']}"
     )
     print(f"Issue rows: {summary['issue_rows']}")

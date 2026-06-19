@@ -4640,6 +4640,10 @@ def apply_old_clean_byte_union(
                     f"{tex_material_decoder_queue.get('unresolved_segments', '0')}",
                     "tex_material_decoder_queue_queued_probe_segments="
                     f"{tex_material_decoder_queue.get('queued_probe_segments', '0')}",
+                    "tex_material_decoder_queue_decoded_material_rows="
+                    f"{tex_material_decoder_queue.get('decoded_material_rows', '0')}",
+                    "tex_material_decoder_queue_decoded_material_segments="
+                    f"{tex_material_decoder_queue.get('decoded_material_segments', '0')}",
                     "tex_material_decoder_queue_unresolved_unique_pcx="
                     f"{tex_material_decoder_queue.get('unresolved_unique_pcx', '0')}",
                 ],
@@ -5184,6 +5188,22 @@ def apply_old_clean_byte_union(
                 "decode "
                 f"{tex_material_decoder_queue.get('queued_probe_segments', '0')} queued material .tex segments "
                 "after completed frontier80 downstream base"
+            )
+        elif (
+            outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency
+            and int_value(outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency, "source_unknown_slots") == 0
+            and outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core
+            and outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core.get("dominant_blocker")
+            == "no residual high-safe roots"
+            and tex_material_decoder_queue
+            and int_value(tex_material_decoder_queue, "queued_probe_segments") == 0
+            and int_value(tex_material_decoder_queue, "unresolved_segments") == 0
+            and int_value(tex_material_decoder_queue, "decoded_material_segments") > 0
+        ):
+            next_action = (
+                "integrate "
+                f"{tex_material_decoder_queue.get('decoded_material_segments', '0')} decoded material .tex segments "
+                "into final Full HD asset pass"
             )
         elif (
             outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency
