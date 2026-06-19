@@ -167,7 +167,10 @@ def atom_specs() -> list[dict[str, object]]:
         {"atom_id": "arg2_arg3_37_c7", "kind": "pair", "field_a": "arg2", "field_b": "arg3", "value_a": 0x37, "value_b": 0xC7},
         {"atom_id": "arg2_arg3_00_02", "kind": "pair", "field_a": "arg2", "field_b": "arg3", "value_a": 0x00, "value_b": 0x02},
         {"atom_id": "arg2_05", "kind": "eq", "field": "arg2", "value": 0x05},
+        {"atom_id": "prev1_22", "kind": "eq", "field": "prev1", "value": 0x22},
+        {"atom_id": "arg3_0a", "kind": "eq", "field": "arg3", "value": 0x0A},
         {"atom_id": "prev1_7d", "kind": "eq", "field": "prev1", "value": 0x7D},
+        {"atom_id": "arg4_7e", "kind": "eq", "field": "arg4", "value": 0x7E},
         {"atom_id": "prev1_arg1_00_58", "kind": "pair", "field_a": "prev1", "field_b": "arg1", "value_a": 0x00, "value_b": 0x58},
         {"atom_id": "prev1_arg1_12_85", "kind": "pair", "field_a": "prev1", "field_b": "arg1", "value_a": 0x12, "value_b": 0x85},
         {"atom_id": "arg1_arg2_68_69", "kind": "pair", "field_a": "arg1", "field_b": "arg2", "value_a": 0x68, "value_b": 0x69},
@@ -175,11 +178,13 @@ def atom_specs() -> list[dict[str, object]]:
         {"atom_id": "arg2_arg3_00_20", "kind": "pair", "field_a": "arg2", "field_b": "arg3", "value_a": 0x00, "value_b": 0x20},
         {"atom_id": "arg1_arg2_32_00", "kind": "pair", "field_a": "arg1", "field_b": "arg2", "value_a": 0x32, "value_b": 0x00},
         {"atom_id": "arg1_arg2_40_20", "kind": "pair", "field_a": "arg1", "field_b": "arg2", "value_a": 0x40, "value_b": 0x20},
+        {"atom_id": "arg1_arg2_53_00", "kind": "pair", "field_a": "arg1", "field_b": "arg2", "value_a": 0x53, "value_b": 0x00},
         {"atom_id": "arg2_arg3_22_e0", "kind": "pair", "field_a": "arg2", "field_b": "arg3", "value_a": 0x22, "value_b": 0xE0},
         {"atom_id": "prev1_arg1_e0_5c", "kind": "pair", "field_a": "prev1", "field_b": "arg1", "value_a": 0xE0, "value_b": 0x5C},
         {"atom_id": "prev1_arg1_01_81", "kind": "pair", "field_a": "prev1", "field_b": "arg1", "value_a": 0x01, "value_b": 0x81},
         {"atom_id": "prev1_arg1_00_50", "kind": "pair", "field_a": "prev1", "field_b": "arg1", "value_a": 0x00, "value_b": 0x50},
         {"atom_id": "prev2_prev1_22_e3", "kind": "pair", "field_a": "prev2", "field_b": "prev1", "value_a": 0x22, "value_b": 0xE3},
+        {"atom_id": "prev2_prev1_26_e1", "kind": "pair", "field_a": "prev2", "field_b": "prev1", "value_a": 0x26, "value_b": 0xE1},
         {"atom_id": "arg2_arg3_20_18", "kind": "pair", "field_a": "arg2", "field_b": "arg3", "value_a": 0x20, "value_b": 0x18},
         {"atom_id": "prev2_prev1_22_e0", "kind": "pair", "field_a": "prev2", "field_b": "prev1", "value_a": 0x22, "value_b": 0xE0},
         {"atom_id": "prev2_prev1_00_00", "kind": "pair", "field_a": "prev2", "field_b": "prev1", "value_a": 0x00, "value_b": 0x00},
@@ -222,16 +227,23 @@ def guard_specs(atoms: list[dict[str, object]]) -> list[dict[str, object]]:
         specs.append({"guard_id": f"deny_{atom_id}", "kind": "deny_single", "atoms": [atom_id]})
     for left, right in combinations(atom_ids, 2):
         specs.append({"guard_id": f"deny_{left}__{right}", "kind": "deny_pair", "atoms": [left, right]})
-    greedy_atoms = ["arg2_03", "prev1_7d", "arg1_arg2_40_20", "prev1_arg1_01_81"]
-    for index in range(1, len(greedy_atoms) + 1):
-        selected = greedy_atoms[:index]
-        specs.append(
-            {
-                "guard_id": "deny_" + "__".join(selected),
-                "kind": f"deny_greedy_{index}",
-                "atoms": selected,
-            }
-        )
+    greedy_sequences = [
+        ("seed", ["arg2_03", "prev1_7d", "arg1_arg2_40_20", "prev1_arg1_01_81"]),
+        (
+            "broad",
+            ["arg2_03", "prev1_22", "arg3_0a", "arg4_7e", "prev2_prev1_26_e1", "arg1_arg2_53_00"],
+        ),
+    ]
+    for sequence_name, greedy_atoms in greedy_sequences:
+        for index in range(1, len(greedy_atoms) + 1):
+            selected = greedy_atoms[:index]
+            specs.append(
+                {
+                    "guard_id": "deny_" + "__".join(selected),
+                    "kind": f"deny_greedy_{sequence_name}_{index}",
+                    "atoms": selected,
+                }
+            )
     seen: set[str] = set()
     unique: list[dict[str, object]] = []
     for spec in specs:
