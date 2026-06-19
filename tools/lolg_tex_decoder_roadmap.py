@@ -1029,6 +1029,9 @@ DEFAULT_TEX_LARGE_LLSE_MARKER_PAIR_COMBO_PROBE_SUMMARY = Path(
 DEFAULT_TEX_LARGE_LLSE_MARKER_RECORD_PROFILE_SUMMARY = Path(
     "output/tex_large_llse_marker_record_profile/summary.csv"
 )
+DEFAULT_TEX_LARGE_LLSE_MARKER_RECORD_FIELD_PROFILE_SUMMARY = Path(
+    "output/tex_large_llse_marker_record_field_profile/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHARED_2700302B_HEADER_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_header_probe/summary.csv"
 )
@@ -2101,6 +2104,7 @@ def apply_old_clean_byte_union(
     tex_large_llse_marker_pair_length_probe: dict[str, str] | None,
     tex_large_llse_marker_pair_combo_probe: dict[str, str] | None,
     tex_large_llse_marker_record_profile: dict[str, str] | None,
+    tex_large_llse_marker_record_field_profile: dict[str, str] | None,
     tex_large_shared_2700302b_header_probe: dict[str, str] | None,
     tex_large_shared_2700302b_payload_replay: dict[str, str] | None,
     tex_large_shared_2700302b_renderer_grammar_probe: dict[str, str] | None,
@@ -5302,6 +5306,23 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_llse_marker_record_field_profile:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_llse_marker_field_target="
+                    f"{tex_large_llse_marker_record_field_profile.get('target_pair', '')}:"
+                    f"{tex_large_llse_marker_record_field_profile.get('target_record_len', '')}",
+                    "tex_large_llse_marker_field_mod4="
+                    f"{tex_large_llse_marker_record_field_profile.get('top_mod4_field', '')}:"
+                    f"{tex_large_llse_marker_record_field_profile.get('top_mod4_ratio', '')}",
+                    "tex_large_llse_marker_field_tuple="
+                    f"{tex_large_llse_marker_record_field_profile.get('top_tuple_hex', '')}",
+                    "tex_large_llse_marker_field_verdict="
+                    f"{tex_large_llse_marker_record_field_profile.get('field_profile_verdict', '')}",
+                ],
+            )
+
         if tex_large_shared_2700302b_header_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -7026,6 +7047,13 @@ def apply_old_clean_byte_union(
                 and tex_large_llse_marker_record_profile is not None
                 and int_value(tex_large_llse_marker_record_profile, "segment_rows")
                 == int_value(tex_large_llse_marker_pair_combo_probe, "segment_rows")
+            )
+            llse_marker_record_field_profile_current = (
+                llse_marker_record_profile_current
+                and tex_large_llse_marker_record_field_profile is not None
+                and int_value(tex_large_llse_marker_record_field_profile, "record_rows")
+                <= int_value(tex_large_llse_marker_record_profile, "marker_record_rows")
+                and int_value(tex_large_llse_marker_record_field_profile, "record_rows") > 0
             )
             shared_2700302b_header_probe_current = (
                 large_body_control_grammar_current
@@ -9853,6 +9881,13 @@ def apply_old_clean_byte_union(
                 and tex_large_shared_2700302b_header_probe.get("next_action")
             ):
                 next_action = str(tex_large_shared_2700302b_header_probe.get("next_action"))
+            elif (
+                tex_large_llse_marker_record_field_profile
+                and llse_marker_record_field_profile_current
+                and int_value(tex_large_llse_marker_record_field_profile, "issue_rows") == 0
+                and tex_large_llse_marker_record_field_profile.get("next_action")
+            ):
+                next_action = str(tex_large_llse_marker_record_field_profile.get("next_action"))
             elif (
                 tex_large_llse_marker_record_profile
                 and llse_marker_record_profile_current
@@ -26105,6 +26140,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_LLSE_MARKER_RECORD_PROFILE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-llse-marker-record-field-profile-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_LLSE_MARKER_RECORD_FIELD_PROFILE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shared-2700302b-header-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_HEADER_PROBE_SUMMARY,
@@ -29097,6 +29137,9 @@ def main() -> None:
     tex_large_llse_marker_record_profile_summary = read_optional_summary(
         args.tex_large_llse_marker_record_profile_summary
     )
+    tex_large_llse_marker_record_field_profile_summary = read_optional_summary(
+        args.tex_large_llse_marker_record_field_profile_summary
+    )
     tex_large_shared_2700302b_header_probe_summary = read_optional_summary(
         args.tex_large_shared_2700302b_header_probe_summary
     )
@@ -30933,6 +30976,7 @@ def main() -> None:
         tex_large_llse_marker_pair_length_probe=tex_large_llse_marker_pair_length_probe_summary,
         tex_large_llse_marker_pair_combo_probe=tex_large_llse_marker_pair_combo_probe_summary,
         tex_large_llse_marker_record_profile=tex_large_llse_marker_record_profile_summary,
+        tex_large_llse_marker_record_field_profile=tex_large_llse_marker_record_field_profile_summary,
         tex_large_shared_2700302b_header_probe=tex_large_shared_2700302b_header_probe_summary,
         tex_large_shared_2700302b_payload_replay=tex_large_shared_2700302b_payload_replay_summary,
         tex_large_shared_2700302b_renderer_grammar_probe=tex_large_shared_2700302b_renderer_grammar_probe_summary,
