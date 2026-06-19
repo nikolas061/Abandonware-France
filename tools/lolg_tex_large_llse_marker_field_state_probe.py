@@ -68,6 +68,9 @@ SUMMARY_FIELDNAMES = [
     "y_forward",
     "y_backward",
     "y_same",
+    "target_y_forward",
+    "target_y_backward",
+    "target_y_same",
     "candidate_y_min",
     "candidate_y_max",
     "f0_zero",
@@ -99,6 +102,13 @@ EVENT_FIELDNAMES = [
     "f1_mod4",
     "f1_div4",
     "tuple2000",
+    "target_x",
+    "target_y",
+    "target_x_delta",
+    "target_x_delta_abs",
+    "target_y_delta",
+    "target_y_delta_abs",
+    "target_y_direction",
     "applied",
     "x_before",
     "y_before",
@@ -119,6 +129,20 @@ BUCKET_FIELDNAMES = [
     "value",
     "count",
     "ratio",
+]
+
+GUARD_FIELDNAMES = [
+    "rank",
+    "guard",
+    "clauses",
+    "matched",
+    "applied_matched",
+    "nonapplied_matched",
+    "precision",
+    "recall",
+    "false_positive_ratio",
+    "missed_applied",
+    "example_events",
 ]
 
 
@@ -149,6 +173,13 @@ def context_hex(body: bytes, start: int, total: int) -> tuple[str, str, str]:
 
 def add_bucket(counters: dict[str, Counter[str]], bucket: str, value: str) -> None:
     counters.setdefault(bucket, Counter())[value] += 1
+
+
+def byte_value(row: dict[str, str], field: str) -> int:
+    try:
+        return int(row.get(field, "0"), 16)
+    except ValueError:
+        return 0
 
 
 def trace_body(
@@ -210,6 +241,10 @@ def trace_body(
                     stats["actions_applied"] += action_stats["actions_applied"]
                     stats["tuple2000_seen"] += action_stats["tuple2000_seen"]
                     applied = action_stats["actions_applied"] > 0
+                    target_x = (f1 // 4) % max(1, width)
+                    target_y = max(0, min(height, f0))
+                    target_dx = target_x - before_x
+                    target_dy = target_y - before_y
                     dx = after_x - before_x
                     dy = after_y - before_y
                     absolute_start = payload_base + start
@@ -220,6 +255,11 @@ def trace_body(
                     add_bucket(counters, "field2", f"{f2:02x}")
                     add_bucket(counters, "field3", f"{f3:02x}")
                     add_bucket(counters, "applied", "yes" if applied else "no")
+                    add_bucket(
+                        counters,
+                        "target_y_direction",
+                        "forward" if target_dy > 0 else "backward" if target_dy < 0 else "same",
+                    )
                     add_bucket(counters, "y_direction", "forward" if dy > 0 else "backward" if dy < 0 else "same")
                     add_bucket(counters, "x_delta_abs", "<=4" if abs(dx) <= 4 else ">4")
                     add_bucket(counters, "y_delta_abs", "<=4" if abs(dy) <= 4 else ">4")
@@ -242,6 +282,15 @@ def trace_body(
                             "f1_mod4": str(f1 % 4),
                             "f1_div4": str(f1 // 4),
                             "tuple2000": "yes" if tuple2000 else "no",
+                            "target_x": str(target_x),
+                            "target_y": str(target_y),
+                            "target_x_delta": str(target_dx),
+                            "target_x_delta_abs": str(abs(target_dx)),
+                            "target_y_delta": str(target_dy),
+                            "target_y_delta_abs": str(abs(target_dy)),
+                            "target_y_direction": (
+                                "forward" if target_dy > 0 else "backward" if target_dy < 0 else "same"
+                            ),
                             "applied": "yes" if applied else "no",
                             "x_before": str(before_x),
                             "y_before": str(before_y),
@@ -309,6 +358,112 @@ def bucket_rows(counters: dict[str, Counter[str]], event_count: int) -> list[dic
     return rows
 
 
+def row_num(row: dict[str, str], field: str) -> int:
+    return int_value(row, field)
+
+
+def build_guard_atoms(events: list[dict[str, str]]) -> list[tuple[str, object]]:
+    applied_events = [row for row in events if row.get("applied") == "yes"]
+    atoms: list[tuple[str, object]] = []
+    for field in ("field0", "field1", "field2", "field3", "field4"):
+        values = sorted({byte_value(row, field) for row in applied_events})
+        for value in values:
+            atoms.append((f"{field}==0x{value:02x}", lambda row, field=field, value=value: byte_value(row, field) == value))
+        for threshold in (0x10, 0x20, 0x30, 0x40, 0x60, 0x80, 0xC0):
+            atoms.append((f"{field}>=0x{threshold:02x}", lambda row, field=field, threshold=threshold: byte_value(row, field) >= threshold))
+            atoms.append((f"{field}<0x{threshold:02x}", lambda row, field=field, threshold=threshold: byte_value(row, field) < threshold))
+    for mod in range(4):
+        atoms.append((f"f1_mod4=={mod}", lambda row, mod=mod: row_num(row, "f1_mod4") == mod))
+    atoms.extend(
+        [
+            ("field1==0", lambda row: byte_value(row, "field1") == 0),
+            ("field1!=0", lambda row: byte_value(row, "field1") != 0),
+            ("tuple2000", lambda row: row.get("tuple2000") == "yes"),
+            ("not_tuple2000", lambda row: row.get("tuple2000") != "yes"),
+            ("target_y_forward", lambda row: row.get("target_y_direction") == "forward"),
+            ("target_y_backward", lambda row: row.get("target_y_direction") == "backward"),
+            ("target_y_same", lambda row: row.get("target_y_direction") == "same"),
+            ("target_x_delta_abs<=4", lambda row: row_num(row, "target_x_delta_abs") <= 4),
+            ("target_x_delta_abs>4", lambda row: row_num(row, "target_x_delta_abs") > 4),
+            ("target_y_delta_abs<=4", lambda row: row_num(row, "target_y_delta_abs") <= 4),
+            ("target_y_delta_abs>4", lambda row: row_num(row, "target_y_delta_abs") > 4),
+            ("target_y_delta_abs>=16", lambda row: row_num(row, "target_y_delta_abs") >= 16),
+            ("target_y_delta_abs>=32", lambda row: row_num(row, "target_y_delta_abs") >= 32),
+            ("target_y_delta_abs>=64", lambda row: row_num(row, "target_y_delta_abs") >= 64),
+            ("target_y_delta_abs>=128", lambda row: row_num(row, "target_y_delta_abs") >= 128),
+        ]
+    )
+    for field in ("x_before", "y_before", "target_x", "target_y"):
+        for threshold in (4, 8, 16, 32, 64, 128, 192):
+            atoms.append((f"{field}>={threshold}", lambda row, field=field, threshold=threshold: row_num(row, field) >= threshold))
+            atoms.append((f"{field}<{threshold}", lambda row, field=field, threshold=threshold: row_num(row, field) < threshold))
+    for field in ("next_byte",):
+        values = sorted({byte_value(row, field) for row in applied_events})
+        for value in values:
+            atoms.append((f"{field}==0x{value:02x}", lambda row, field=field, value=value: byte_value(row, field) == value))
+        for threshold in (0x10, 0x20, 0x30, 0x40, 0x80, 0xC0):
+            atoms.append((f"{field}>=0x{threshold:02x}", lambda row, field=field, threshold=threshold: byte_value(row, field) >= threshold))
+            atoms.append((f"{field}<0x{threshold:02x}", lambda row, field=field, threshold=threshold: byte_value(row, field) < threshold))
+    return atoms
+
+
+def guard_candidate_rows(events: list[dict[str, str]], limit: int) -> list[dict[str, str]]:
+    total_applied = sum(1 for row in events if row.get("applied") == "yes")
+    total_nonapplied = max(0, len(events) - total_applied)
+    atoms = build_guard_atoms(events)
+    candidates: list[tuple[float, float, int, str, list[str], list[dict[str, str]]]] = []
+    seen: set[str] = set()
+
+    def add_candidate(clauses: list[tuple[str, object]]) -> None:
+        guard = " && ".join(name for name, _predicate in clauses)
+        if guard in seen:
+            return
+        seen.add(guard)
+        matched = [
+            row
+            for row in events
+            if all(predicate(row) for _name, predicate in clauses)  # type: ignore[misc]
+        ]
+        applied_matched = sum(1 for row in matched if row.get("applied") == "yes")
+        if applied_matched <= 0 or len(matched) <= 1:
+            return
+        precision = applied_matched / max(1, len(matched))
+        recall = applied_matched / max(1, total_applied)
+        false_positive_ratio = (len(matched) - applied_matched) / max(1, total_nonapplied)
+        score = (precision * 4.0) + (recall * 2.0) - false_positive_ratio
+        candidates.append((score, precision, applied_matched, guard, [name for name, _predicate in clauses], matched))
+
+    for atom in atoms:
+        add_candidate([atom])
+    for left_index, left in enumerate(atoms):
+        for right in atoms[left_index + 1 :]:
+            add_candidate([left, right])
+
+    candidates.sort(key=lambda item: (-item[0], -item[1], -item[2], item[3]))
+    rows: list[dict[str, str]] = []
+    for rank, (_score, precision, applied_matched, guard, clauses, matched) in enumerate(candidates[:limit], 1):
+        nonapplied_matched = len(matched) - applied_matched
+        recall = applied_matched / max(1, total_applied)
+        false_positive_ratio = nonapplied_matched / max(1, total_nonapplied)
+        examples = [row.get("event_index", "") for row in matched if row.get("applied") == "yes"]
+        rows.append(
+            {
+                "rank": str(rank),
+                "guard": guard,
+                "clauses": str(len(clauses)),
+                "matched": str(len(matched)),
+                "applied_matched": str(applied_matched),
+                "nonapplied_matched": str(nonapplied_matched),
+                "precision": f"{precision:.6f}",
+                "recall": f"{recall:.6f}",
+                "false_positive_ratio": f"{false_positive_ratio:.6f}",
+                "missed_applied": str(total_applied - applied_matched),
+                "example_events": "|".join(examples[:16]),
+            }
+        )
+    return rows
+
+
 def summary_row(
     events: list[dict[str, str]],
     stats: dict[str, int],
@@ -327,6 +482,9 @@ def summary_row(
     y_forward = sum(1 for row in events if int_value(row, "y_delta") > 0)
     y_backward = sum(1 for row in events if int_value(row, "y_delta") < 0)
     y_same = total - y_forward - y_backward
+    target_y_forward = sum(1 for row in events if row.get("target_y_direction") == "forward")
+    target_y_backward = sum(1 for row in events if row.get("target_y_direction") == "backward")
+    target_y_same = total - target_y_forward - target_y_backward
     y_values = [int_value(row, "y_after") for row in events]
     f0_values = [int(row.get("field0", "0"), 16) for row in events]
     best_delta = semantics_summary.get("best_delta_vs_pair", "")
@@ -335,7 +493,13 @@ def summary_row(
         next_action = "fix LLSE marker field state probe inputs"
     elif total and f1_mod4_zero / max(1, total) >= 0.5 and float_text(best_delta) < 0:
         verdict = "llse_marker_field_state_guard_signal"
-        if "_yforward" in variant.action:
+        if "f0ge40" in variant.action:
+            next_action = (
+                "validate LLSE 2730 static guard field1 mod4 and field0>=0x40 "
+                f"for {stats.get('actions_applied', 0)} events before decoder promotion; "
+                f"candidate {variant.action}"
+            )
+        elif "_yforward" in variant.action:
             next_action = (
                 "isolate LLSE 2730 yforward field/context guard "
                 f"for {stats.get('actions_applied', 0)} events before decoder promotion; "
@@ -381,6 +545,9 @@ def summary_row(
         "y_forward": str(y_forward),
         "y_backward": str(y_backward),
         "y_same": str(y_same),
+        "target_y_forward": str(target_y_forward),
+        "target_y_backward": str(target_y_backward),
+        "target_y_same": str(target_y_same),
         "candidate_y_min": str(min(y_values)) if y_values else "",
         "candidate_y_max": str(max(y_values)) if y_values else "",
         "f0_zero": str(sum(1 for value in f0_values if value == 0)),
@@ -412,10 +579,11 @@ def build_html(
     summary: dict[str, str],
     events: list[dict[str, str]],
     buckets: list[dict[str, str]],
+    guards: list[dict[str, str]],
     output_dir: Path,
     title: str,
 ) -> str:
-    payload = {"summary": summary, "events": events, "buckets": buckets}
+    payload = {"summary": summary, "events": events, "buckets": buckets, "guards": guards}
     data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
     links = " ".join(
         f"<a href=\"{html.escape(relative_href(path, output_dir))}\">{html.escape(label)}</a>"
@@ -423,6 +591,7 @@ def build_html(
             ("summary.csv", output_dir / "summary.csv"),
             ("events.csv", output_dir / "events.csv"),
             ("buckets.csv", output_dir / "buckets.csv"),
+            ("guard_candidates.csv", output_dir / "guard_candidates.csv"),
         )
     )
     return f"""<!doctype html>
@@ -465,6 +634,7 @@ section {{ margin-bottom: 20px; }}
     <div class="stat"><div class="label">Issues</div><div class="value ok">{html.escape(summary['issue_rows'])}</div></div>
   </section>
   <section class="panel"><h2>Summary</h2>{render_table([summary], SUMMARY_FIELDNAMES)}</section>
+  <section class="panel"><h2>Guard Candidates</h2>{render_table(guards, GUARD_FIELDNAMES)}</section>
   <section class="panel"><h2>Buckets</h2>{render_table(buckets, BUCKET_FIELDNAMES)}</section>
   <section class="panel"><h2>Events</h2>{render_table(events, EVENT_FIELDNAMES)}</section>
 </main>
@@ -474,7 +644,9 @@ section {{ margin-bottom: 20px; }}
 """
 
 
-def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
+def write_report(
+    args: argparse.Namespace,
+) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     args.output.mkdir(parents=True, exist_ok=True)
     higharg2_summary = read_summary(args.higharg2_summary)
     pair_summary = read_summary(args.pair_length_summary)
@@ -519,14 +691,16 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[st
         len(segment_rows),
     )
     sampled_events = all_events[: args.sample_limit]
+    guards = guard_candidate_rows(all_events, args.guard_limit)
     write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(args.output / "events.csv", EVENT_FIELDNAMES, sampled_events)
     write_csv(args.output / "buckets.csv", BUCKET_FIELDNAMES, buckets)
+    write_csv(args.output / "guard_candidates.csv", GUARD_FIELDNAMES, guards)
     (args.output / "index.html").write_text(
-        build_html(summary, sampled_events, buckets, args.output, args.title),
+        build_html(summary, sampled_events, buckets, guards, args.output, args.title),
         encoding="utf-8",
     )
-    return summary, sampled_events, buckets
+    return summary, sampled_events, buckets, guards
 
 
 def main() -> None:
@@ -544,10 +718,11 @@ def main() -> None:
     parser.add_argument("--high", type=lambda value: int(value, 0), default=0xBF)
     parser.add_argument("--action", default="best")
     parser.add_argument("--sample-limit", type=int, default=240)
+    parser.add_argument("--guard-limit", type=int, default=160)
     parser.add_argument("--title", default="Lands of Lore II .tex LLSE Marker Field State Probe")
     args = parser.parse_args()
 
-    summary, _events, _buckets = write_report(args)
+    summary, _events, _buckets, guards = write_report(args)
     print(f"Events: {summary['event_rows']}")
     print(f"Candidate action: {summary['candidate_action']}")
     print(f"Candidate delta: {summary['candidate_delta']}")
@@ -558,6 +733,8 @@ def main() -> None:
     print(f"Issue rows: {summary['issue_rows']}")
     print(f"State verdict: {summary['state_verdict']}")
     print(f"Next action: {summary['next_action']}")
+    if guards:
+        print(f"Top guard: {guards[0]['guard']} precision {guards[0]['precision']} recall {guards[0]['recall']}")
     print(f"HTML: {args.output / 'index.html'}")
 
 
