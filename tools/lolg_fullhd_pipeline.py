@@ -1849,6 +1849,23 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Nonzero Palette Walk Low-Tail Anchor Guard Value Producer Probe After Compact Target Delta Guard Fixture Replay",
                 ],
             ),
+            Step(
+                "replay fixture guard low-tail palette-walk nonzero apres replay fixture target-delta compact high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay.py",
+                    "--base-fixtures",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_fixture_replay/fixtures.csv",
+                    "--value-runs",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_value_producer_probe/runs.csv",
+                    "--value-rows",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_value_producer_probe/value_rows.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Nonzero Palette Walk Low-Tail Anchor Guard Fixture Replay After Compact Target Delta Guard Fixture Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -7208,6 +7225,23 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_value_producer_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Nonzero Palette Walk Low-Tail Anchor Guard Value Producer Probe After Compact Target Delta Guard Fixture Replay",
+            ],
+        ),
+        Step(
+            "replay fixture guard low-tail palette-walk nonzero apres replay fixture target-delta compact high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay.py",
+                "--base-fixtures",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_fixture_replay/fixtures.csv",
+                "--value-runs",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_value_producer_probe/runs.csv",
+                "--value-rows",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_value_producer_probe/value_rows.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Nonzero Palette Walk Low-Tail Anchor Guard Fixture Replay After Compact Target Delta Guard Fixture Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
