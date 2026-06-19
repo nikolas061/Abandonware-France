@@ -3042,6 +3042,14 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             ],
         ),
         Step(
+            "pack promu replay complet reference 2700302b gros segments .tex rejetes",
+            [
+                sys.executable,
+                "tools/lolg_tex_large_shared_2700302b_full_replay_promoted_pack.py",
+            ],
+            requires_pillow=True,
+        ),
+        Step(
             "gradient-like noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,
