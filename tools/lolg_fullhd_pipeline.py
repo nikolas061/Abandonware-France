@@ -2090,6 +2090,21 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Structural Extended Local Seed Transform Validation",
                 ],
             ),
+            Step(
+                "probe regle source near-anchor compact-control structurel nonzero frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_compact_control_near_anchor_source_rule_probe.py",
+                    "--remaining-tokens",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_extended_local_seed_transform_validation_probe/remaining_tokens.csv",
+                    "--source-candidates",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_residual_value_family_probe/source_candidates.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_near_anchor_source_rule_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Structural Near-Anchor Source Rule Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -7690,6 +7705,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_extended_local_seed_transform_validation_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Structural Extended Local Seed Transform Validation",
+            ],
+        ),
+        Step(
+            "probe regle source near-anchor compact-control structurel nonzero frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_compact_control_near_anchor_source_rule_probe.py",
+                "--remaining-tokens",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_extended_local_seed_transform_validation_probe/remaining_tokens.csv",
+                "--source-candidates",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_residual_value_family_probe/source_candidates.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_near_anchor_source_rule_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Structural Near-Anchor Source Rule Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),

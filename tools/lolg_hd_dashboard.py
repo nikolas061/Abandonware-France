@@ -437,6 +437,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_COMPACT_CONTROL_EXTENDED_LOCAL_SEED_TRANSFORM_VALIDATION_PROBE = Path(
     "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_extended_local_seed_transform_validation_probe/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_COMPACT_CONTROL_NEAR_ANCHOR_SOURCE_RULE_PROBE = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_compact_control_near_anchor_source_rule_probe/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1360,6 +1363,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Validation transforms seed locaux etendus compact-control structurel nonzero frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_COMPACT_CONTROL_EXTENDED_LOCAL_SEED_TRANSFORM_VALIDATION_PROBE,
+        ),
+        (
+            "Probe regle source near-anchor compact-control structurel nonzero frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_COMPACT_CONTROL_NEAR_ANCHOR_SOURCE_RULE_PROBE,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
