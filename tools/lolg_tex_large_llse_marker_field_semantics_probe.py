@@ -155,6 +155,11 @@ ACTIONS = [
     "setxy_f1div4_f0_if_f1mod4_yforward_f2ge30",
     "setxy_f1div4_f0_if_f1mod4_yforward_f2ltc0",
     "setxy_f1div4_f0_if_f1mod4_yforward_f3lt80",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge40_f1nz",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge40_f1zero",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge40_f0lt80",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge40_f2ge30",
+    "setxy_f1div4_f0_if_f1mod4_yforward_f0ge40_f3lt80",
     "setxy_f1div4_f0_if_f1mod4_ysame",
     "setxy_f1div4_f0_if_f1mod4_yjump_le4",
     "setxy_f1div4_f0_if_f1mod4_yjump_gt4",
@@ -400,14 +405,17 @@ def apply_field_action(
             or (action.endswith("_yjump_gt4") and abs(y_delta) > 4)
         )
         guard_ok = (
-            (not action.endswith("_f0ge10") or f0 >= 0x10)
-            and (not action.endswith("_f0ge30") or f0 >= 0x30)
-            and (not action.endswith("_f0ge40") or f0 >= 0x40)
-            and (not action.endswith("_f0ge80") or f0 >= 0x80)
-            and (not action.endswith("_f0ltc0") or f0 < 0xC0)
-            and (not action.endswith("_f2ge30") or f2 >= 0x30)
-            and (not action.endswith("_f2ltc0") or f2 < 0xC0)
-            and (not action.endswith("_f3lt80") or f3 < 0x80)
+            ("f0ge10" not in action or f0 >= 0x10)
+            and ("f0ge30" not in action or f0 >= 0x30)
+            and ("f0ge40" not in action or f0 >= 0x40)
+            and ("f0ge80" not in action or f0 >= 0x80)
+            and ("f0lt80" not in action or f0 < 0x80)
+            and ("f0ltc0" not in action or f0 < 0xC0)
+            and ("f1nz" not in action or f1 != 0)
+            and ("f1zero" not in action or f1 == 0)
+            and ("f2ge30" not in action or f2 >= 0x30)
+            and ("f2ltc0" not in action or f2 < 0xC0)
+            and ("f3lt80" not in action or f3 < 0x80)
         )
         if direction_ok and guard_ok:
             x = next_x
