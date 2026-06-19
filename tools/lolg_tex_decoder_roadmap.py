@@ -996,6 +996,9 @@ DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_REVIEW_SUMMARY = Path(
 DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_SUMMARY = Path(
     "output/tex_large_rejected_decoder_profile/summary.csv"
 )
+DEFAULT_TEX_LARGE_BODY_CONTROL_GRAMMAR_PROBE_SUMMARY = Path(
+    "output/tex_large_body_control_grammar_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_standard_probe/summary.csv"
 )
@@ -1901,6 +1904,7 @@ def apply_old_clean_byte_union(
     tex_large_unresolved_probe_analysis: dict[str, str] | None,
     tex_large_unresolved_probe_review: dict[str, str] | None,
     tex_large_rejected_decoder_profile: dict[str, str] | None,
+    tex_large_body_control_grammar_probe: dict[str, str] | None,
     tex_large_shifted_2a30_standard_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_decoder_path_probe: dict[str, str] | None,
@@ -4900,6 +4904,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_body_control_grammar_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_body_control_segments="
+                    f"{tex_large_body_control_grammar_probe.get('segment_rows', '0')}",
+                    "tex_large_body_control_paths="
+                    f"{tex_large_body_control_grammar_probe.get('control_path_groups', '0')}",
+                    "tex_large_body_control_top="
+                    f"{tex_large_body_control_grammar_probe.get('top_control_path', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_standard_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5896,6 +5913,13 @@ def apply_old_clean_byte_union(
                 tex_large_rejected_decoder_profile is not None
                 and int_value(tex_large_rejected_decoder_profile, "rejected_segment_rows") == remaining_large_segments
             )
+            large_body_control_grammar_current = (
+                large_rejected_profile_current
+                and tex_large_body_control_grammar_probe is not None
+                and int_value(tex_large_body_control_grammar_probe, "segment_rows") == remaining_large_segments
+                and int_value(tex_large_body_control_grammar_probe, "control_path_groups")
+                == int_value(tex_large_rejected_decoder_profile, "control_path_groups")
+            )
             shifted_2a30_standard_probe_current = (
                 large_rejected_profile_current
                 and tex_large_shifted_2a30_standard_probe is not None
@@ -6346,6 +6370,14 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_standard_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
+            elif (
+                tex_large_body_control_grammar_probe
+                and large_body_control_grammar_current
+                and remaining_large_segments > 0
+                and int_value(tex_large_body_control_grammar_probe, "issue_rows") == 0
+                and tex_large_body_control_grammar_probe.get("next_action")
+            ):
+                next_action = str(tex_large_body_control_grammar_probe.get("next_action"))
             elif (
                 tex_large_rejected_decoder_profile
                 and large_rejected_profile_current
@@ -22465,6 +22497,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-body-control-grammar-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_BODY_CONTROL_GRAMMAR_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-standard-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY,
@@ -25164,6 +25201,9 @@ def main() -> None:
     tex_large_rejected_decoder_profile_summary = read_optional_summary(
         args.tex_large_rejected_decoder_profile_summary
     )
+    tex_large_body_control_grammar_probe_summary = read_optional_summary(
+        args.tex_large_body_control_grammar_probe_summary
+    )
     tex_large_shifted_2a30_standard_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_standard_probe_summary
     )
@@ -26777,6 +26817,7 @@ def main() -> None:
         tex_large_unresolved_probe_analysis=tex_large_unresolved_probe_analysis_summary,
         tex_large_unresolved_probe_review=tex_large_unresolved_probe_review_summary,
         tex_large_rejected_decoder_profile=tex_large_rejected_decoder_profile_summary,
+        tex_large_body_control_grammar_probe=tex_large_body_control_grammar_probe_summary,
         tex_large_shifted_2a30_standard_probe=tex_large_shifted_2a30_standard_probe_summary,
         tex_large_shifted_2a30_branch_probe=tex_large_shifted_2a30_branch_probe_summary,
         tex_large_shifted_2a30_branch_decoder_path_probe=tex_large_shifted_2a30_branch_decoder_path_probe_summary,
