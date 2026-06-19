@@ -169,7 +169,24 @@ def build_variants(summary: dict[str, str]) -> list[MarkerVariant]:
     skip = int_value(summary, "best_skip") or 3
     variants: list[MarkerVariant] = []
     for symmetric_policy in ("current", "skip2", "skip4", "skip4_advance", "skip4_line"):
-        for pair_policy in ("skip2", "skip2_advance", "skip2_line", "skip4", "skip4_advance", "skip4_line"):
+        for pair_policy in (
+            "skip2",
+            "skip2_advance",
+            "skip2_line",
+            "skip3",
+            "skip3_advance",
+            "skip4",
+            "skip4_advance",
+            "skip4_line",
+            "skip5",
+            "skip5_advance",
+            "skip6",
+            "skip6_advance",
+            "skip7",
+            "skip7_advance",
+            "skip8",
+            "skip8_advance",
+        ):
             variants.append(
                 MarkerVariant(
                     symmetric_policy=symmetric_policy,
@@ -182,6 +199,49 @@ def build_variants(summary: dict[str, str]) -> list[MarkerVariant]:
                 )
             )
     return variants
+
+
+def parse_skip_policy(policy: str) -> tuple[int, str] | None:
+    action = "none"
+    base = policy
+    for suffix, suffix_action in (("_advance", "advance"), ("_line", "line")):
+        if policy.endswith(suffix):
+            action = suffix_action
+            base = policy[: -len(suffix)]
+            break
+    if not base.startswith("skip"):
+        return None
+    try:
+        total = int(base[4:])
+    except ValueError:
+        return None
+    return max(2, total), action
+
+
+def apply_marker_skip_policy(
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+    pos: int,
+    payload_len: int,
+    policy: str,
+    stats: dict[str, int],
+) -> tuple[int, int, int]:
+    parsed = parse_skip_policy(policy)
+    if parsed is None:
+        return x, y, pos
+    total, action = parsed
+    stats["marker_bytes_skipped"] += max(0, total - 1)
+    next_pos = min(payload_len, pos + total - 1)
+    if action == "advance":
+        stats["marker_advances"] += 1
+        next_x, next_y = advance(x, y, width, 1)
+        return next_x, next_y, next_pos
+    if action == "line":
+        stats["marker_lines"] += 1
+        return 0, min(height, y + 1), next_pos
+    return x, y, next_pos
 
 
 def apply_symmetric_policy(
@@ -198,21 +258,7 @@ def apply_symmetric_policy(
         stats["marker_advances"] += 1
         stats["marker_bytes_skipped"] += 1
         return *advance(x, y, width, 1), min(payload_len, pos + 1)
-    if policy == "skip2":
-        stats["marker_bytes_skipped"] += 1
-        return x, y, min(payload_len, pos + 1)
-    if policy == "skip4":
-        stats["marker_bytes_skipped"] += 3
-        return x, y, min(payload_len, pos + 3)
-    if policy == "skip4_advance":
-        stats["marker_advances"] += 1
-        stats["marker_bytes_skipped"] += 3
-        return *advance(x, y, width, 1), min(payload_len, pos + 3)
-    if policy == "skip4_line":
-        stats["marker_lines"] += 1
-        stats["marker_bytes_skipped"] += 3
-        return 0, min(height, y + 1), min(payload_len, pos + 3)
-    return x, y, pos
+    return apply_marker_skip_policy(x, y, width, height, pos, payload_len, policy, stats)
 
 
 def apply_pair_policy(
@@ -225,29 +271,7 @@ def apply_pair_policy(
     policy: str,
     stats: dict[str, int],
 ) -> tuple[int, int, int]:
-    if policy == "skip2":
-        stats["marker_bytes_skipped"] += 1
-        return x, y, min(payload_len, pos + 1)
-    if policy == "skip2_advance":
-        stats["marker_advances"] += 1
-        stats["marker_bytes_skipped"] += 1
-        return *advance(x, y, width, 1), min(payload_len, pos + 1)
-    if policy == "skip2_line":
-        stats["marker_lines"] += 1
-        stats["marker_bytes_skipped"] += 1
-        return 0, min(height, y + 1), min(payload_len, pos + 1)
-    if policy == "skip4":
-        stats["marker_bytes_skipped"] += 3
-        return x, y, min(payload_len, pos + 3)
-    if policy == "skip4_advance":
-        stats["marker_advances"] += 1
-        stats["marker_bytes_skipped"] += 3
-        return *advance(x, y, width, 1), min(payload_len, pos + 3)
-    if policy == "skip4_line":
-        stats["marker_lines"] += 1
-        stats["marker_bytes_skipped"] += 3
-        return 0, min(height, y + 1), min(payload_len, pos + 3)
-    return x, y, pos
+    return apply_marker_skip_policy(x, y, width, height, pos, payload_len, policy, stats)
 
 
 def decode_marker_variant(
