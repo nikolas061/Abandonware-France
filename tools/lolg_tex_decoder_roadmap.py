@@ -1032,6 +1032,9 @@ DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_PLATEAU_R
 DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_SEGMENT_SPLIT_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_SEGMENT_RULE_REPLAY_PROBE_SUMMARY = Path(
+    "output/tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_GAP_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_reference_gap_probe/summary.csv"
 )
@@ -2063,6 +2066,7 @@ def apply_old_clean_byte_union(
     tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_probe: dict[str, str] | None,
     tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_plateau_review_probe: dict[str, str] | None,
     tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe: dict[str, str] | None,
+    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_gap_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_frontier_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_literal_stream_probe: dict[str, str] | None,
@@ -5238,6 +5242,17 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shared_2700302b_op4_emitarg1_segment_rule_replay_delta="
+                    f"{tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get('replay_delta_vs_base_avg', '')}",
+                    "tex_large_shared_2700302b_op4_emitarg1_segment_rule_replay_verdict="
+                    f"{tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get('segment_rule_replay_verdict', '')}",
+                ],
+            )
+
         if tex_large_shared_2700302b_reference_gap_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -6885,6 +6900,37 @@ def apply_old_clean_byte_union(
                 )
                 == tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_plateau_review_probe.get(
                     "plateau_verdict"
+                )
+            )
+            shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe_current = (
+                shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe_current
+                and tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe
+                is not None
+                and int_value(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe,
+                    "segment_rows",
+                )
+                == int_value(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe,
+                    "segment_rows",
+                )
+                and tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get(
+                    "base_action_id"
+                )
+                == tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe.get(
+                    "base_action_id"
+                )
+                and tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get(
+                    "best_segment_id"
+                )
+                == tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe.get(
+                    "best_segment_id"
+                )
+                and tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get(
+                    "best_condition_id"
+                )
+                == tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe.get(
+                    "best_condition_id"
                 )
             )
             shared_2700302b_reference_gap_probe_current = (
@@ -8782,6 +8828,23 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_standard_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
+            elif (
+                tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe
+                and shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe_current
+                and int_value(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe,
+                    "issue_rows",
+                )
+                == 0
+                and tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get(
+                    "next_action"
+                )
+            ):
+                next_action = str(
+                    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.get(
+                        "next_action"
+                    )
+                )
             elif (
                 tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe
                 and shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe_current
@@ -25629,6 +25692,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_SEGMENT_SPLIT_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shared-2700302b-op4-emitarg1-extended-split-residual-segment-rule-replay-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHARED_2700302B_OP4_EMITARG1_EXTENDED_SPLIT_RESIDUAL_SEGMENT_RULE_REPLAY_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shared-2700302b-reference-gap-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_GAP_PROBE_SUMMARY,
@@ -28558,6 +28626,11 @@ def main() -> None:
             args.tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe_summary
         )
     )
+    tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe_summary = (
+        read_optional_summary(
+            args.tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe_summary
+        )
+    )
     tex_large_shared_2700302b_reference_gap_probe_summary = read_optional_summary(
         args.tex_large_shared_2700302b_reference_gap_probe_summary
     )
@@ -30356,6 +30429,9 @@ def main() -> None:
         ),
         tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe=(
             tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_split_probe_summary
+        ),
+        tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe=(
+            tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe_summary
         ),
         tex_large_shared_2700302b_reference_gap_probe=tex_large_shared_2700302b_reference_gap_probe_summary,
         tex_large_shared_2700302b_reference_frontier_probe=tex_large_shared_2700302b_reference_frontier_probe_summary,

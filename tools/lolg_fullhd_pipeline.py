@@ -2831,6 +2831,14 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "replay regles par segment residuel op4 2700302b gros segments .tex rejetes",
+            [
+                sys.executable,
+                "tools/lolg_tex_large_shared_2700302b_op4_emitarg1_extended_split_residual_segment_rule_replay_probe.py",
+            ],
+            requires_pillow=True,
+        ),
+        Step(
             "probe gaps reference 2700302b gros segments .tex rejetes",
             [sys.executable, "tools/lolg_tex_large_shared_2700302b_reference_gap_probe.py"],
             requires_pillow=True,
