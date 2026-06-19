@@ -20,6 +20,7 @@ DEFAULT_OUTPUT = Path("output/tex_raw_same_archive_promoted_pack")
 DEFAULT_PROFILE = Path("output/tex_remaining_reference_profile/profile.csv")
 DEFAULT_REVIEW_DECISIONS = Path("reports/lvl_pcx_te_review_queue_decisions_smoke.tsv")
 DEFAULT_PENDING_REVIEWS = Path("reports/lvl_pcx_te_pending_review_batches.tsv")
+DEFAULT_RAW_SAME_ARCHIVE_REVIEW_DECISIONS = Path("review_decisions/tex_raw_same_archive_review_decisions.tsv")
 DEFAULT_PREVIEW_ROOTS = [
     Path("previews_lvl_pcx_payloads_v10_riskaware"),
     Path("previews_te_guarded_cmd20_v10_markerknown"),
@@ -132,19 +133,21 @@ def review_key(row: dict[str, str]) -> tuple[str, str]:
     return (row.get("archive", ""), normalize_pcx(row.get("name", "") or row.get("pcx_name", "")))
 
 
-def build_review_lookup(
-    decisions: list[dict[str, str]],
-    pending_reviews: list[dict[str, str]],
-) -> dict[tuple[str, str], dict[str, str]]:
+def merge_review_row(base: dict[str, str], overlay: dict[str, str]) -> dict[str, str]:
+    merged = dict(base)
+    for field, value in overlay.items():
+        if value:
+            merged[field] = value
+    return merged
+
+
+def build_review_lookup(*sources: list[dict[str, str]]) -> dict[tuple[str, str], dict[str, str]]:
     lookup: dict[tuple[str, str], dict[str, str]] = {}
-    for row in pending_reviews:
-        key = review_key(row)
-        if key[0] and key[1]:
-            lookup[key] = row
-    for row in decisions:
-        key = review_key(row)
-        if key[0] and key[1]:
-            lookup[key] = row
+    for rows in sources:
+        for row in rows:
+            key = review_key(row)
+            if key[0] and key[1]:
+                lookup[key] = merge_review_row(lookup.get(key, {}), row)
     return lookup
 
 
@@ -502,11 +505,16 @@ def write_report(
     profile: Path,
     review_decisions: Path,
     pending_reviews: Path,
+    raw_same_archive_review_decisions: Path,
     preview_roots: list[Path],
     title: str,
 ) -> tuple[dict[str, str], list[dict[str, str]]]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    reviews = build_review_lookup(read_tsv(review_decisions), read_tsv(pending_reviews))
+    reviews = build_review_lookup(
+        read_tsv(pending_reviews),
+        read_tsv(review_decisions),
+        read_tsv(raw_same_archive_review_decisions),
+    )
     existing_manifest = output_dir / "manifest.csv"
     existing_rows = read_csv(existing_manifest) if existing_manifest.exists() else []
     profile_candidates = carry_forward_accepted_rows(
@@ -533,6 +541,11 @@ def main() -> None:
     parser.add_argument("--review-decisions", type=Path, default=DEFAULT_REVIEW_DECISIONS)
     parser.add_argument("--pending-reviews", type=Path, default=DEFAULT_PENDING_REVIEWS)
     parser.add_argument(
+        "--raw-same-archive-review-decisions",
+        type=Path,
+        default=DEFAULT_RAW_SAME_ARCHIVE_REVIEW_DECISIONS,
+    )
+    parser.add_argument(
         "--preview-root",
         type=Path,
         action="append",
@@ -547,6 +560,7 @@ def main() -> None:
         args.profile,
         args.review_decisions,
         args.pending_reviews,
+        args.raw_same_archive_review_decisions,
         args.preview_root or DEFAULT_PREVIEW_ROOTS,
         args.title,
     )
