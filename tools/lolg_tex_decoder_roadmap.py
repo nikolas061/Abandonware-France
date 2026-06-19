@@ -5110,6 +5110,10 @@ def apply_old_clean_byte_union(
                 [
                     "tex_large_shared_2700302b_reference_spatial_backref_zero_plus_copy="
                     f"{tex_large_shared_2700302b_reference_spatial_backref_probe.get('zero_plus_copy_ratio', '0')}",
+                    "tex_large_shared_2700302b_reference_spatial_backref_dy1_zero_plus_copy="
+                    f"{tex_large_shared_2700302b_reference_spatial_backref_probe.get('dy1_shift0_zero_plus_copy_ratio', '0')}",
+                    "tex_large_shared_2700302b_reference_spatial_backref_dy1_gap_vs_best="
+                    f"{tex_large_shared_2700302b_reference_spatial_backref_probe.get('dy1_shift0_gap_vs_best', '0')}",
                     "tex_large_shared_2700302b_reference_spatial_backref_verdict="
                     f"{tex_large_shared_2700302b_reference_spatial_backref_probe.get('spatial_backref_verdict', '')}",
                 ],

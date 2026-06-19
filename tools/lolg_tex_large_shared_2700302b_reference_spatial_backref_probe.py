@@ -42,6 +42,9 @@ SUMMARY_FIELDNAMES = [
     "dominant_copy_nonzero_pixels",
     "dy1_shift0_rows",
     "dy1_shift0_nonzero_pixels",
+    "dy1_shift0_zero_plus_copy_pixels",
+    "dy1_shift0_zero_plus_copy_ratio",
+    "dy1_shift0_gap_vs_best",
     "issue_rows",
     "spatial_backref_verdict",
     "next_action",
@@ -235,11 +238,21 @@ def build_summary(
     )
     dy1_rows = sum(1 for row in row_rows if row.get("best_copy_key") == "dy1_sh0")
     dy1_nonzero = sum(int_value(row, "dy1_shift0_nonzero_matches") for row in row_rows)
+    dy1_zero_plus = min(target_pixels, target_zero + dy1_nonzero)
     issue_rows = len(issues)
     zero_plus_ratio = zero_plus_copy / target_pixels if target_pixels else 0.0
+    dy1_zero_plus_ratio = dy1_zero_plus / target_pixels if target_pixels else 0.0
+    dy1_gap_vs_best = zero_plus_copy - dy1_zero_plus
     if issue_rows:
         verdict = "shared_2700302b_reference_spatial_backref_probe_issues"
         next_action = "fix shared 0x2700302b reference spatial backref probe inputs"
+    elif dy1_zero_plus_ratio >= 0.60 and dy1_gap_vs_best <= 32:
+        verdict = "shared_2700302b_reference_spatial_backref_fixed_dy1_ready"
+        next_action = (
+            "validate fixed dy1/shift0 row-copy replay for shared 0x2700302b frontier "
+            f"{frontier.get('frontier_id', '')}; zero-fill plus dy1/shift0 covers "
+            f"{dy1_zero_plus}/{target_pixels} pixels"
+        )
     elif zero_plus_ratio >= 0.55:
         verdict = "shared_2700302b_reference_spatial_backref_promising"
         next_action = (
@@ -277,6 +290,9 @@ def build_summary(
         "dominant_copy_nonzero_pixels": str(dominant_nonzero),
         "dy1_shift0_rows": str(dy1_rows),
         "dy1_shift0_nonzero_pixels": str(dy1_nonzero),
+        "dy1_shift0_zero_plus_copy_pixels": str(dy1_zero_plus),
+        "dy1_shift0_zero_plus_copy_ratio": float_text(dy1_zero_plus_ratio),
+        "dy1_shift0_gap_vs_best": str(dy1_gap_vs_best),
         "issue_rows": str(issue_rows),
         "spatial_backref_verdict": verdict,
         "next_action": next_action,
@@ -328,6 +344,8 @@ th {{ color: #cfd6e4; background: #22252c; }}
   <div class="stat"><div class="label">Best Nonzero Copy</div><div class="value">{html.escape(summary['best_nonzero_copy_pixels'])}</div></div>
   <div class="stat"><div class="label">Zero + Copy</div><div class="value">{html.escape(summary['zero_plus_copy_pixels'])}</div></div>
   <div class="stat"><div class="label">Zero + Copy Ratio</div><div class="value">{html.escape(summary['zero_plus_copy_ratio'])}</div></div>
+  <div class="stat"><div class="label">dy1/sh0 Zero + Copy</div><div class="value">{html.escape(summary['dy1_shift0_zero_plus_copy_pixels'])}</div></div>
+  <div class="stat"><div class="label">dy1/sh0 Ratio</div><div class="value">{html.escape(summary['dy1_shift0_zero_plus_copy_ratio'])}</div></div>
   <div class="stat"><div class="label">Dominant</div><div class="value">{html.escape(summary['dominant_copy_key'])}</div></div>
 </div>
 <p>{html.escape(summary['next_action'])}</p>
