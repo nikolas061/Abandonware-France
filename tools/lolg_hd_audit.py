@@ -127,6 +127,9 @@ DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_GROUPS = Path(
 DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_CONTROL_PATHS = Path(
     "output/tex_large_rejected_decoder_profile/control_paths.csv"
 )
+DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_ANCHORS = Path(
+    "output/tex_large_rejected_decoder_profile/shifted_2a30_anchors.csv"
+)
 DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_HTML = Path(
     "output/tex_large_rejected_decoder_profile/index.html"
 )
@@ -818,6 +821,7 @@ SUMMARY_FIELDNAMES = [
     "tex_large_rejected_decoder_profile_segments",
     "tex_large_rejected_decoder_profile_groups",
     "tex_large_rejected_decoder_profile_control_paths",
+    "tex_large_rejected_decoder_profile_shifted_2a30_anchors",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -2890,23 +2894,27 @@ def audit_tex_large_rejected_decoder_profile(
     segments_path: Path,
     groups_path: Path,
     control_paths_path: Path,
+    anchors_path: Path,
     html_report: Path,
-) -> tuple[dict[str, str], int, int, int]:
+) -> tuple[dict[str, str], int, int, int, int]:
     if not summary.exists():
-        return missing_gate("tex_large_rejected_decoder_profile", summary), 0, 0, 0
+        return missing_gate("tex_large_rejected_decoder_profile", summary), 0, 0, 0, 0
     if not segments_path.exists():
-        return missing_gate("tex_large_rejected_decoder_profile", segments_path), 0, 0, 0
+        return missing_gate("tex_large_rejected_decoder_profile", segments_path), 0, 0, 0, 0
     if not groups_path.exists():
-        return missing_gate("tex_large_rejected_decoder_profile", groups_path), 0, 0, 0
+        return missing_gate("tex_large_rejected_decoder_profile", groups_path), 0, 0, 0, 0
     if not control_paths_path.exists():
-        return missing_gate("tex_large_rejected_decoder_profile", control_paths_path), 0, 0, 0
+        return missing_gate("tex_large_rejected_decoder_profile", control_paths_path), 0, 0, 0, 0
+    if not anchors_path.exists():
+        return missing_gate("tex_large_rejected_decoder_profile", anchors_path), 0, 0, 0, 0
     if not html_report.exists():
-        return missing_gate("tex_large_rejected_decoder_profile", html_report), 0, 0, 0
+        return missing_gate("tex_large_rejected_decoder_profile", html_report), 0, 0, 0, 0
 
     summary_rows = read_csv(summary)
     segment_rows = read_csv(segments_path)
     group_rows = read_csv(groups_path)
     control_rows = read_csv(control_paths_path)
+    anchor_rows = read_csv(anchors_path)
     text = html_report.read_text(errors="replace")
     issues: list[str] = []
     if len(summary_rows) != 1:
@@ -2934,6 +2942,10 @@ def audit_tex_large_rejected_decoder_profile(
     shifted_2a30_rows = int_value(total, "shifted_2a30_rows")
     shared_2700302b_rows = int_value(total, "shared_2700302b_rows")
     llse_signature_rows = int_value(total, "llse_signature_rows")
+    shifted_2a30_anchor_rows = int_value(total, "shifted_2a30_anchor_rows")
+    shifted_2a30_standard_rows = int_value(total, "shifted_2a30_standard_rows")
+    shifted_2a30_branch_rows = int_value(total, "shifted_2a30_branch_rows")
+    shifted_2a30_selector_values = int_value(total, "shifted_2a30_selector_values")
     issue_rows = int_value(total, "issue_rows")
 
     body_first_counts = Counter(row.get("body_first_word", "") for row in segment_rows)
@@ -2981,6 +2993,18 @@ def audit_tex_large_rejected_decoder_profile(
         issues.append("large_rejected_profile_shared_2700302b_count_mismatch")
     if llse_signature_rows != control_path_counts["llse_signature"]:
         issues.append("large_rejected_profile_llse_count_mismatch")
+    if shifted_2a30_anchor_rows != len(anchor_rows) or shifted_2a30_anchor_rows != shifted_2a30_rows:
+        issues.append("large_rejected_profile_anchor_count_mismatch")
+    if shifted_2a30_standard_rows != sum(1 for row in anchor_rows if row.get("anchor_branch") == "standard_zero_28"):
+        issues.append("large_rejected_profile_standard_anchor_count_mismatch")
+    if shifted_2a30_branch_rows != sum(1 for row in anchor_rows if row.get("anchor_branch") != "standard_zero_28"):
+        issues.append("large_rejected_profile_branch_anchor_count_mismatch")
+    if shifted_2a30_standard_rows + shifted_2a30_branch_rows != shifted_2a30_anchor_rows:
+        issues.append("large_rejected_profile_anchor_partition_mismatch")
+    if shifted_2a30_selector_values != len(
+        {row.get("selector_byte_hex", "") for row in anchor_rows if row.get("selector_byte_hex")}
+    ):
+        issues.append("large_rejected_profile_selector_value_count_mismatch")
     for row in control_rows:
         control_path = row.get("control_path", "")
         if int_value(row, "rows") != control_path_counts[control_path]:
@@ -2993,7 +3017,7 @@ def audit_tex_large_rejected_decoder_profile(
         issues.append("missing_tex_large_rejected_decoder_profile_json")
 
     missing_paths = 0
-    for path in (summary, segments_path, groups_path, control_paths_path, html_report):
+    for path in (summary, segments_path, groups_path, control_paths_path, anchors_path, html_report):
         if not path.exists():
             missing_paths += 1
     if missing_paths:
@@ -3008,7 +3032,8 @@ def audit_tex_large_rejected_decoder_profile(
             actual=(
                 f"segments={rejected_segments}, candidates={rejected_candidates}, "
                 f"families={body_first_word_groups}, control_paths={control_path_groups}, "
-                f"shifted_2a30={shifted_2a30_rows}, high_entropy={high_entropy_rows}, issues={issue_rows}"
+                f"shifted_2a30={shifted_2a30_rows}, standard={shifted_2a30_standard_rows}, "
+                f"branches={shifted_2a30_branch_rows}, high_entropy={high_entropy_rows}, issues={issue_rows}"
             ),
             evidence=f"{summary};{html_report}",
             issues=issues,
@@ -3016,6 +3041,7 @@ def audit_tex_large_rejected_decoder_profile(
         rejected_segments if ok else 0,
         body_first_word_groups if ok else 0,
         control_path_groups if ok else 0,
+        shifted_2a30_anchor_rows if ok else 0,
     )
 
 
@@ -12259,11 +12285,13 @@ def main() -> None:
         tex_large_rejected_decoder_profile_segments,
         tex_large_rejected_decoder_profile_groups,
         tex_large_rejected_decoder_profile_control_paths,
+        tex_large_rejected_decoder_profile_shifted_2a30_anchors,
     ) = audit_tex_large_rejected_decoder_profile(
         DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_SUMMARY,
         DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_SEGMENTS,
         DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_GROUPS,
         DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_CONTROL_PATHS,
+        DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_ANCHORS,
         DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_HTML,
     )
     rows.append(tex_large_rejected_decoder_profile_gate)
@@ -17619,6 +17647,9 @@ def main() -> None:
         "tex_large_rejected_decoder_profile_groups": str(tex_large_rejected_decoder_profile_groups),
         "tex_large_rejected_decoder_profile_control_paths": str(
             tex_large_rejected_decoder_profile_control_paths
+        ),
+        "tex_large_rejected_decoder_profile_shifted_2a30_anchors": str(
+            tex_large_rejected_decoder_profile_shifted_2a30_anchors
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),

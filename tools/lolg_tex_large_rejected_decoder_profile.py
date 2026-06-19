@@ -42,6 +42,10 @@ SUMMARY_FIELDNAMES = [
     "shifted_2a30_rows",
     "shared_2700302b_rows",
     "llse_signature_rows",
+    "shifted_2a30_anchor_rows",
+    "shifted_2a30_standard_rows",
+    "shifted_2a30_branch_rows",
+    "shifted_2a30_selector_values",
     "issue_rows",
     "next_action",
 ]
@@ -116,6 +120,22 @@ CONTROL_FIELDNAMES = [
     "total_segment_bytes",
     "sampled_bytes",
     "sample_segments",
+    "next_probe",
+]
+
+ANCHOR_FIELDNAMES = [
+    "segment_id",
+    "archive_tag",
+    "pcx_name",
+    "body_first_word",
+    "pair_2a30_offset",
+    "selector_byte_hex",
+    "post0_hex",
+    "post1_hex",
+    "post2_hex",
+    "post3_hex",
+    "anchor_window_hex",
+    "anchor_branch",
     "next_probe",
 ]
 
@@ -251,6 +271,10 @@ def classify_control_path(body: bytes, body_first_word: str) -> str:
     return "unclassified_header"
 
 
+def byte_at_hex(data: bytes, index: int) -> str:
+    return f"0x{data[index]:02x}" if 0 <= index < len(data) else ""
+
+
 def texture_segment_lookup(rows: list[dict[str, str]]) -> dict[tuple[str, str, str, str], dict[str, str]]:
     lookup: dict[tuple[str, str, str, str], dict[str, str]] = {}
     for row in rows:
@@ -371,6 +395,7 @@ def build_segment_rows(
                 "top_word_le_ratio": ratio(top_word_value),
                 "head32_hex": body[:32].hex(),
                 "tail32_hex": body[-32:].hex() if body else "",
+                "_body_sample_hex": body[:64].hex(),
                 "issues": ";".join(dict.fromkeys(issues)),
             }
         )
@@ -443,10 +468,51 @@ def build_control_rows(segment_rows: list[dict[str, str]]) -> list[dict[str, str
     return output
 
 
+def build_anchor_rows(segment_rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    output: list[dict[str, str]] = []
+    for row in segment_rows:
+        if row.get("control_path") != "shifted_2a30_header":
+            continue
+        offset = int_value(row, "pair_2a30_offset")
+        sample = bytes.fromhex(row.get("_body_sample_hex", ""))
+        post0 = byte_at_hex(sample, offset + 2)
+        post1 = byte_at_hex(sample, offset + 3)
+        if post0 == "0x00" and post1 == "0x28":
+            branch = "standard_zero_28"
+            next_probe = "test standard shifted 0x2a30 post-zero field decoder"
+        elif post0 == "0x00":
+            branch = "zero_other_branch"
+            next_probe = "isolate shifted 0x2a30 zero branch variant"
+        else:
+            branch = "nonzero_branch"
+            next_probe = "isolate shifted 0x2a30 nonzero branch variant"
+        start = max(0, offset - 4)
+        end = min(len(sample), offset + 12)
+        output.append(
+            {
+                "segment_id": row.get("segment_id", ""),
+                "archive_tag": row.get("archive_tag", ""),
+                "pcx_name": row.get("pcx_name", ""),
+                "body_first_word": row.get("body_first_word", ""),
+                "pair_2a30_offset": row.get("pair_2a30_offset", ""),
+                "selector_byte_hex": byte_at_hex(sample, offset - 1),
+                "post0_hex": post0,
+                "post1_hex": post1,
+                "post2_hex": byte_at_hex(sample, offset + 4),
+                "post3_hex": byte_at_hex(sample, offset + 5),
+                "anchor_window_hex": sample[start:end].hex(),
+                "anchor_branch": branch,
+                "next_probe": next_probe,
+            }
+        )
+    return output
+
+
 def build_summary(
     segment_rows: list[dict[str, str]],
     group_rows: list[dict[str, str]],
     control_rows: list[dict[str, str]],
+    anchor_rows: list[dict[str, str]],
 ) -> dict[str, str]:
     issue_rows = sum(1 for row in segment_rows if row.get("issues"))
     body_first_counts = Counter(row.get("body_first_word", "") for row in segment_rows)
@@ -468,13 +534,21 @@ def build_summary(
     shifted_2a30_rows = control_path_counts["shifted_2a30_header"]
     shared_2700302b_rows = control_path_counts["shared_2700302b_header"]
     llse_signature_rows = control_path_counts["llse_signature"]
+    shifted_2a30_standard_rows = sum(1 for row in anchor_rows if row.get("anchor_branch") == "standard_zero_28")
+    shifted_2a30_branch_rows = len(anchor_rows) - shifted_2a30_standard_rows
+    shifted_2a30_selector_values = len(
+        {row.get("selector_byte_hex", "") for row in anchor_rows if row.get("selector_byte_hex")}
+    )
     if issue_rows:
         next_action = "fix rejected large .tex decoder profile issues"
-    elif shifted_2a30_rows:
+    elif shifted_2a30_standard_rows:
+        branch_label = "row" if shifted_2a30_branch_rows == 1 else "rows"
         next_action = (
-            f"probe shifted 0x2a30 body-control header across {shifted_2a30_rows} "
-            "rejected large .tex segments"
+            f"test shifted 0x2a30 standard post-zero decoder on {shifted_2a30_standard_rows} rows "
+            f"and isolate {shifted_2a30_branch_rows} branch {branch_label}"
         )
+    elif shifted_2a30_rows:
+        next_action = f"probe shifted 0x2a30 body-control header across {shifted_2a30_rows} rejected large .tex segments"
     elif segment_rows:
         next_action = (
             f"trace .tex body control grammar for {len(segment_rows)} rejected large segments "
@@ -504,6 +578,10 @@ def build_summary(
         "shifted_2a30_rows": str(shifted_2a30_rows),
         "shared_2700302b_rows": str(shared_2700302b_rows),
         "llse_signature_rows": str(llse_signature_rows),
+        "shifted_2a30_anchor_rows": str(len(anchor_rows)),
+        "shifted_2a30_standard_rows": str(shifted_2a30_standard_rows),
+        "shifted_2a30_branch_rows": str(shifted_2a30_branch_rows),
+        "shifted_2a30_selector_values": str(shifted_2a30_selector_values),
         "issue_rows": str(issue_rows),
         "next_action": next_action,
     }
@@ -532,10 +610,17 @@ def build_html(
     segments: list[dict[str, str]],
     groups: list[dict[str, str]],
     control_rows: list[dict[str, str]],
+    anchor_rows: list[dict[str, str]],
     output_dir: Path,
     title: str,
 ) -> str:
-    payload = {"summary": summary, "segments": segments, "groups": groups, "control_paths": control_rows}
+    payload = {
+        "summary": summary,
+        "segments": segments,
+        "groups": groups,
+        "control_paths": control_rows,
+        "shifted_2a30_anchors": anchor_rows,
+    }
     data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
     links = " ".join(
         f'<a href="{html.escape(relative_href(path, output_dir))}">{html.escape(label)}</a>'
@@ -544,6 +629,7 @@ def build_html(
             ("segments.csv", output_dir / "segments.csv"),
             ("body_first_word_groups.csv", output_dir / "body_first_word_groups.csv"),
             ("control_paths.csv", output_dir / "control_paths.csv"),
+            ("shifted_2a30_anchors.csv", output_dir / "shifted_2a30_anchors.csv"),
         )
     )
     return f"""<!doctype html>
@@ -578,6 +664,8 @@ code {{ color: #cce7ff; }}
 {render_table(groups, GROUP_FIELDNAMES)}
 <h2>Control Paths</h2>
 {render_table(control_rows, CONTROL_FIELDNAMES)}
+<h2>Shifted 2a30 Anchors</h2>
+{render_table(anchor_rows, ANCHOR_FIELDNAMES)}
 <h2>Rejected Segments</h2>
 {render_table(segments, SEGMENT_FIELDNAMES)}
 </main>
@@ -595,7 +683,13 @@ def write_report(
     mix_entry_index: int,
     max_sample_bytes: int,
     title: str,
-) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
+) -> tuple[
+    dict[str, str],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+]:
     output_dir.mkdir(parents=True, exist_ok=True)
     candidates = read_csv(candidates_path)
     segment_rows = build_segment_rows(
@@ -607,15 +701,18 @@ def write_report(
     )
     group_rows = build_group_rows(segment_rows)
     control_rows = build_control_rows(segment_rows)
-    summary = build_summary(segment_rows, group_rows, control_rows)
+    anchor_rows = build_anchor_rows(segment_rows)
+    summary = build_summary(segment_rows, group_rows, control_rows, anchor_rows)
+    public_segment_rows = [{key: value for key, value in row.items() if not key.startswith("_")} for row in segment_rows]
     write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
-    write_csv(output_dir / "segments.csv", SEGMENT_FIELDNAMES, segment_rows)
+    write_csv(output_dir / "segments.csv", SEGMENT_FIELDNAMES, public_segment_rows)
     write_csv(output_dir / "body_first_word_groups.csv", GROUP_FIELDNAMES, group_rows)
     write_csv(output_dir / "control_paths.csv", CONTROL_FIELDNAMES, control_rows)
+    write_csv(output_dir / "shifted_2a30_anchors.csv", ANCHOR_FIELDNAMES, anchor_rows)
     (output_dir / "index.html").write_text(
-        build_html(summary, segment_rows, group_rows, control_rows, output_dir, title)
+        build_html(summary, public_segment_rows, group_rows, control_rows, anchor_rows, output_dir, title)
     )
-    return summary, segment_rows, group_rows, control_rows
+    return summary, public_segment_rows, group_rows, control_rows, anchor_rows
 
 
 def main() -> None:
@@ -629,7 +726,7 @@ def main() -> None:
     parser.add_argument("--title", default="Lands of Lore II .tex Large Rejected Decoder Profile")
     args = parser.parse_args()
 
-    summary, segments, groups, control_rows = write_report(
+    summary, segments, groups, control_rows, anchor_rows = write_report(
         args.output,
         args.candidates,
         args.texture_segments,
@@ -642,6 +739,7 @@ def main() -> None:
     print(f"Rejected candidates: {summary['rejected_candidate_rows']}")
     print(f"Body-first-word groups: {summary['body_first_word_groups']}")
     print(f"Control paths: {summary['control_path_groups']}")
+    print(f"Shifted 2a30 anchors: {summary['shifted_2a30_anchor_rows']}")
     print(f"High entropy rows: {summary['high_entropy_rows']}")
     print(f"Issue rows: {summary['issue_rows']}")
     print(f"Next action: {summary['next_action']}")
