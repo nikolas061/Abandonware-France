@@ -303,7 +303,7 @@ def build_summary(
     )
     if clean:
         verdict = "field16_small_delta_decoder_integrated"
-        next_action = "route integrated shifted 0x2a30 field16 decoder into large .tex material decode queue"
+        next_action = "route integrated shifted 0x2a30 field16 decoder into large .tex segment queue"
     elif issue_rows:
         verdict = "field16_small_delta_decoder_integration_issues"
         next_action = "fix integrated shifted 0x2a30 field16 decoder issues"

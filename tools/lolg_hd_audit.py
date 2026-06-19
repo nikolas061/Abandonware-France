@@ -268,6 +268,15 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_RULES = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_HTML = Path(
     "output/tex_large_shifted_2a30_field16_decoder_integration/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_route/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_ROWS = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_route/routes.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_route/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -984,6 +993,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_decoder_integration_rows",
     "tex_large_shifted_2a30_field16_decoder_integration_large_exact",
     "tex_large_shifted_2a30_field16_decoder_integration_blocked_context",
+    "tex_large_shifted_2a30_field16_decoder_route_routed_exact",
+    "tex_large_shifted_2a30_field16_decoder_route_branch_blocked",
+    "tex_large_shifted_2a30_field16_decoder_route_non_2a30",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -4643,6 +4655,113 @@ def audit_tex_large_shifted_2a30_field16_decoder_integration(
         decoder_exact_rows if ok else 0,
         large_rejected_exact_rows if ok else 0,
         blocked_context_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_decoder_route(
+    summary: Path,
+    routes_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_route", summary), 0, 0, 0
+    if not routes_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_route", routes_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_route", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    route_rows = read_csv(routes_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    profile_segment_rows = int_value(total, "profile_segment_rows")
+    shifted_2a30_segment_rows = int_value(total, "shifted_2a30_segment_rows")
+    integrated_decoder_rows = int_value(total, "integrated_decoder_rows")
+    integrated_large_rows = int_value(total, "integrated_large_rows")
+    routed_large_rows = int_value(total, "routed_large_rows")
+    routed_exact_rows = int_value(total, "routed_exact_rows")
+    branch_rows = int_value(total, "branch_rows")
+    branch_blocked_rows = int_value(total, "branch_blocked_rows")
+    non_2a30_rows = int_value(total, "non_2a30_rows")
+    missing_segment_rows = int_value(total, "missing_segment_rows")
+    route_count = int_value(total, "route_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    routed_rows = [row for row in route_rows if row.get("route_status") == "routed_field16_decoder"]
+    routed_exact = [row for row in routed_rows if row.get("decoder_exact") == "yes"]
+    branch_route_rows = [row for row in route_rows if row.get("route_status") == "blocked_shifted_2a30_branch"]
+    non_2a30_route_rows = [row for row in route_rows if row.get("route_status") == "outside_field16_decoder_scope"]
+    missing_rows = [row for row in route_rows if row.get("route_status") == "missing_profile_segment"]
+    row_issue_rows = [row for row in route_rows if row.get("issues")]
+
+    if profile_segment_rows != route_count or profile_segment_rows != len(route_rows) or profile_segment_rows != 9:
+        issues.append("field16_decoder_route_profile_count_mismatch")
+    if shifted_2a30_segment_rows != 5:
+        issues.append("field16_decoder_route_shifted_count_mismatch")
+    if integrated_decoder_rows != 6 or integrated_large_rows != 4:
+        issues.append("field16_decoder_route_integrated_count_mismatch")
+    if routed_large_rows != len(routed_rows) or routed_large_rows != 4:
+        issues.append("field16_decoder_route_routed_count_mismatch")
+    if routed_exact_rows != len(routed_exact) or routed_exact_rows != 4:
+        issues.append("field16_decoder_route_exact_count_mismatch")
+    if branch_rows != len(branch_route_rows) or branch_rows != 1:
+        issues.append("field16_decoder_route_branch_count_mismatch")
+    if branch_blocked_rows != len(branch_route_rows) or branch_blocked_rows != 1:
+        issues.append("field16_decoder_route_branch_blocked_count_mismatch")
+    if non_2a30_rows != len(non_2a30_route_rows) or non_2a30_rows != 4:
+        issues.append("field16_decoder_route_non_2a30_count_mismatch")
+    if missing_segment_rows != len(missing_rows) or missing_segment_rows != 0:
+        issues.append("field16_decoder_route_missing_count_mismatch")
+    if issue_rows != len(row_issue_rows) or issue_rows != 0:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    expected_routed = {
+        "stump2.pcx": ("L12_CM", "zero_delta_extra40", "40"),
+        "barsgld.pcx": ("L14_HT", "positive_small_nextlow_minus2", "24"),
+        "dragend.pcx": ("L3_DH", "negative_small_extra36", "36"),
+        "catbas.pcx": ("L5_HC", "zero_delta_extra40", "40"),
+    }
+    routed_by_name = {row.get("pcx_name", ""): row for row in routed_rows}
+    if set(routed_by_name) != set(expected_routed):
+        issues.append("field16_decoder_route_routed_rows_unexpected")
+    else:
+        for pcx_name, expected in expected_routed.items():
+            row = routed_by_name[pcx_name]
+            actual = (row.get("archive_tag"), row.get("decoder_rule"), row.get("decoder_extra"))
+            if actual != expected:
+                issues.append(f"field16_decoder_route_{pcx_name}_route_mismatch")
+            if row.get("decoder_exact") != "yes" or row.get("target_promoted") != "yes" or row.get("issues"):
+                issues.append(f"field16_decoder_route_{pcx_name}_not_exact")
+
+    if {row.get("pcx_name", "") for row in branch_route_rows} != {"MTMMgutz4.pcx"}:
+        issues.append("field16_decoder_route_branch_row_unexpected")
+    if total.get("review_verdict") != "field16_decoder_route_ready":
+        issues.append("field16_decoder_route_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_decoder_route_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_decoder_route",
+            ok,
+            expected="routed integrated shifted 0x2a30 field16 decoder onto 4 large segments with 1 branch blocked",
+            actual=(
+                f"routed={routed_exact_rows}/{routed_large_rows}, branch={branch_blocked_rows}, "
+                f"non_2a30={non_2a30_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        routed_exact_rows if ok else 0,
+        branch_blocked_rows if ok else 0,
+        non_2a30_rows if ok else 0,
     )
 
 
@@ -14018,6 +14137,17 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_decoder_integration_gate)
+    (
+        tex_large_shifted_2a30_field16_decoder_route_gate,
+        tex_large_shifted_2a30_field16_decoder_route_routed_exact,
+        tex_large_shifted_2a30_field16_decoder_route_branch_blocked,
+        tex_large_shifted_2a30_field16_decoder_route_non_2a30,
+    ) = audit_tex_large_shifted_2a30_field16_decoder_route(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_ROWS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_ROUTE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_decoder_route_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -19450,6 +19580,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_decoder_integration_blocked_context": str(
             tex_large_shifted_2a30_field16_decoder_integration_blocked_context
+        ),
+        "tex_large_shifted_2a30_field16_decoder_route_routed_exact": str(
+            tex_large_shifted_2a30_field16_decoder_route_routed_exact
+        ),
+        "tex_large_shifted_2a30_field16_decoder_route_branch_blocked": str(
+            tex_large_shifted_2a30_field16_decoder_route_branch_blocked
+        ),
+        "tex_large_shifted_2a30_field16_decoder_route_non_2a30": str(
+            tex_large_shifted_2a30_field16_decoder_route_non_2a30
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
