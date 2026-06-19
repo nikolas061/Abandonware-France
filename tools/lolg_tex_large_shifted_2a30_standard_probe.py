@@ -288,6 +288,13 @@ def build_summary(rows: list[dict[str, str]], rule_rows: list[dict[str, str]]) -
             f"derive shifted 0x2a30 post-field16 semantics for {len(standard)} standard rows "
             f"with {len(branch)} isolated branch {branch_label}"
         )
+    elif branch:
+        branch_label = "row" if len(branch) == 1 else "rows"
+        branch_key_text = ",".join(sorted(branch_only_keys)) or "unknown"
+        next_action = (
+            f"isolate shifted 0x2a30 non-standard branch {branch_key_text} "
+            f"across {len(branch)} {branch_label}"
+        )
     else:
         next_action = "no shifted 0x2a30 standard rows"
 

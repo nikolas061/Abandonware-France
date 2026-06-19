@@ -5578,6 +5578,17 @@ def apply_old_clean_byte_union(
             and tex_remaining_reference_profile.get("next_action")
         ):
             field16_decoder_covered = int_value(tex_augmented_coverage, "field16_decoder_unique_pcx") > 0
+            remaining_large_segments = int_value(tex_remaining_reference_profile, "large_segment_unique")
+            large_rejected_profile_current = (
+                tex_large_rejected_decoder_profile is not None
+                and int_value(tex_large_rejected_decoder_profile, "rejected_segment_rows") == remaining_large_segments
+            )
+            shifted_2a30_standard_probe_current = (
+                large_rejected_profile_current
+                and tex_large_shifted_2a30_standard_probe is not None
+                and int_value(tex_large_shifted_2a30_standard_probe, "anchor_rows")
+                == int_value(tex_large_rejected_decoder_profile, "shifted_2a30_anchor_rows")
+            )
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -5707,19 +5718,17 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
             elif (
-                not field16_decoder_covered
-                and
                 tex_large_shifted_2a30_standard_probe
-                and int_value(tex_large_shifted_2a30_standard_probe, "standard_rows") > 0
+                and shifted_2a30_standard_probe_current
+                and int_value(tex_large_shifted_2a30_standard_probe, "anchor_rows") > 0
                 and int_value(tex_large_shifted_2a30_standard_probe, "issue_rows") == 0
                 and tex_large_shifted_2a30_standard_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
             elif (
-                not field16_decoder_covered
-                and
                 tex_large_rejected_decoder_profile
-                and int_value(tex_large_rejected_decoder_profile, "rejected_segment_rows") > 0
+                and large_rejected_profile_current
+                and remaining_large_segments > 0
                 and int_value(tex_large_rejected_decoder_profile, "issue_rows") == 0
                 and tex_large_rejected_decoder_profile.get("next_action")
             ):
@@ -5728,15 +5737,14 @@ def apply_old_clean_byte_union(
                 tex_large_unresolved_probe_review
                 and int_value(tex_large_unresolved_probe_review, "candidate_rows") > 0
                 and int_value(tex_large_unresolved_probe_review, "segment_rows")
-                == int_value(tex_remaining_reference_profile, "large_segment_unique")
+                == remaining_large_segments
                 and tex_large_unresolved_probe_review.get("next_action")
             ):
                 next_action = str(tex_large_unresolved_probe_review.get("next_action"))
             elif (
                 tex_large_unresolved_probe_analysis
-                and int_value(tex_remaining_reference_profile, "large_segment_unique") > 0
-                and int_value(tex_large_unresolved_probe_analysis, "segments")
-                == int_value(tex_remaining_reference_profile, "large_segment_unique")
+                and remaining_large_segments > 0
+                and int_value(tex_large_unresolved_probe_analysis, "segments") == remaining_large_segments
                 and int_value(tex_large_unresolved_probe_analysis, "best_candidate_rows") > 0
             ):
                 next_action = (

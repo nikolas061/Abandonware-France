@@ -3348,6 +3348,16 @@ def audit_tex_large_shifted_2a30_standard_probe(
     standard_fields = [int_value(row, "post_field16_le_dec") for row in standard if row.get("post_field16_le_dec")]
     expected_branch_only = "|".join(sorted(branch_keys - standard_keys))
 
+    def expected_rule_verdict(field: str) -> str:
+        values = {row.get(field, "") for row in anchor_rows if row.get(field, "")}
+        standard_values = {row.get(field, "") for row in standard if row.get(field, "")}
+        branch_values = {row.get(field, "") for row in branch if row.get(field, "")}
+        if len(values) == 1:
+            return "constant"
+        if standard_values & branch_values:
+            return "collides_with_branch"
+        return "separates_current_branch"
+
     if anchor_count != len(anchor_rows):
         issues.append("shifted_2a30_anchor_count_mismatch")
     if standard_rows != len(standard):
@@ -3356,7 +3366,9 @@ def audit_tex_large_shifted_2a30_standard_probe(
         issues.append("shifted_2a30_branch_count_mismatch")
     if branch_key_groups != len(all_keys):
         issues.append("shifted_2a30_branch_key_group_mismatch")
-    if standard_branch_key != "0x00_0x28" or standard_keys != {"0x00_0x28"}:
+    if standard and (standard_branch_key != "0x00_0x28" or standard_keys != {"0x00_0x28"}):
+        issues.append("shifted_2a30_standard_branch_key_mismatch")
+    if not standard and (standard_branch_key or standard_keys):
         issues.append("shifted_2a30_standard_branch_key_mismatch")
     if branch_only_keys != expected_branch_only:
         issues.append("shifted_2a30_branch_only_key_mismatch")
@@ -3381,9 +3393,9 @@ def audit_tex_large_shifted_2a30_standard_probe(
     if rule_count != len(rule_rows):
         issues.append("shifted_2a30_rule_count_mismatch")
     rule_verdicts = {row.get("rule_id", ""): row.get("verdict", "") for row in rule_rows}
-    if rule_verdicts.get("branch_key") != "separates_current_branch":
+    if rule_verdicts.get("branch_key") != expected_rule_verdict("branch_key"):
         issues.append("shifted_2a30_branch_key_rule_mismatch")
-    if rule_verdicts.get("selector_byte") != "collides_with_branch":
+    if rule_verdicts.get("selector_byte") != expected_rule_verdict("selector_byte_hex"):
         issues.append("shifted_2a30_selector_rule_mismatch")
     if issue_rows != sum(1 for row in anchor_rows if row.get("issues")):
         issues.append("shifted_2a30_issue_count_mismatch")
