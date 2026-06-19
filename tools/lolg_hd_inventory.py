@@ -20,6 +20,7 @@ DEFAULT_CDCACHE_MANIFESTS = [
     Path("output/cdcache_textures_all_tiled_tiles_rgba/manifest.csv"),
     Path("output/cdcache_textures_all_tiled_tiles_rgba/tiles_manifest.csv"),
 ]
+DEFAULT_TEX_MATERIAL_DECODE_MANIFESTS = [Path("output/tex_material_decode_pack/manifest.csv")]
 
 INVENTORY_FIELDNAMES = [
     "category",
@@ -252,11 +253,29 @@ def iter_cdcache_rows(manifest: Path, inspect_images: bool) -> Iterable[dict[str
                 )
 
 
+def iter_tex_material_decode_rows(manifest: Path, inspect_images: bool) -> Iterable[dict[str, str]]:
+    with manifest.open(newline="") as handle:
+        for row in csv.DictReader(handle):
+            yield make_row(
+                category="tex_material_decode",
+                source_manifest=manifest,
+                source_archive=row.get("archive", ""),
+                source_index=row.get("segment_index", ""),
+                source_id=row.get("asset_id", ""),
+                variant="decoded_fullhd",
+                declared_width=str(TARGET_SIZE[0]),
+                declared_height=str(TARGET_SIZE[1]),
+                output_path=row.get("decoded_fullhd_path", ""),
+                inspect_images=inspect_images,
+            )
+
+
 def write_inventory(
     output_dir: Path,
     still_manifests: list[Path],
     vqa_manifests: list[Path],
     cdcache_manifests: list[Path],
+    tex_material_decode_manifests: list[Path],
     *,
     inspect_images: bool,
     progress_every: int,
@@ -275,6 +294,8 @@ def write_inventory(
         sources.append(iter_vqa_rows(manifest, inspect_images))
     for manifest in cdcache_manifests:
         sources.append(iter_cdcache_rows(manifest, inspect_images))
+    for manifest in tex_material_decode_manifests:
+        sources.append(iter_tex_material_decode_rows(manifest, inspect_images))
 
     with inventory_path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=INVENTORY_FIELDNAMES)
@@ -306,6 +327,7 @@ def main() -> None:
     parser.add_argument("--still-manifest", type=Path, action="append")
     parser.add_argument("--vqa-manifest", type=Path, action="append")
     parser.add_argument("--cdcache-manifest", type=Path, action="append")
+    parser.add_argument("--tex-material-decode-manifest", type=Path, action="append")
     parser.add_argument(
         "--no-image-inspection",
         action="store_true",
@@ -317,6 +339,9 @@ def main() -> None:
     still_manifests = args.still_manifest or existing_paths(DEFAULT_STILL_MANIFESTS)
     vqa_manifests = args.vqa_manifest or existing_paths(DEFAULT_VQA_MANIFESTS)
     cdcache_manifests = args.cdcache_manifest or existing_paths(DEFAULT_CDCACHE_MANIFESTS)
+    tex_material_decode_manifests = args.tex_material_decode_manifest or existing_paths(
+        DEFAULT_TEX_MATERIAL_DECODE_MANIFESTS
+    )
     inspect_images = not args.no_image_inspection
 
     inventory_path, summary_path, stats = write_inventory(
@@ -324,6 +349,7 @@ def main() -> None:
         still_manifests,
         vqa_manifests,
         cdcache_manifests,
+        tex_material_decode_manifests,
         inspect_images=inspect_images,
         progress_every=args.progress_every,
     )

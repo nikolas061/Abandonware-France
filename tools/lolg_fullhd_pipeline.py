@@ -2458,7 +2458,6 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
 def report_steps(fail_on_issues: bool) -> list[Step]:
     archive_args = [str(path) for path in DEFAULT_ARCHIVES]
     steps = [
-        Step("inventaire Full HD", [sys.executable, "tools/lolg_hd_inventory.py"], requires_pillow=True),
         Step(
             "couverture archives Full HD",
             [sys.executable, "tools/lolg_hd_archive_coverage.py", *archive_args],
@@ -8455,6 +8454,7 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
         Step("inventaire historique projet", [sys.executable, "tools/lolg_project_legacy_inventory.py"]),
         Step("revue ancien travail media externe", [sys.executable, "tools/lolg_external_legacy_media_review.py"]),
+        Step("inventaire Full HD", [sys.executable, "tools/lolg_hd_inventory.py"], requires_pillow=True),
     ]
     return steps + quick_steps(fail_on_issues)
 

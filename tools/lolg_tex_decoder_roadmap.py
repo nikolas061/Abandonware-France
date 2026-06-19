@@ -980,6 +980,7 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_FRONTIER80_S
     "output/tex_gradient_sequence_high_safe_low_exception_source_dependency_frontier80_structural_nonzero_final_zero_gap_fixture_replay_residual_core/summary.csv"
 )
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
+DEFAULT_TEX_AUGMENTED_COVERAGE_SUMMARY = Path("output/tex_augmented_coverage/summary.csv")
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1790,6 +1791,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency: dict[str, str] | None,
     outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core: dict[str, str] | None,
     tex_material_decoder_queue: dict[str, str] | None,
+    tex_augmented_coverage: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1956,6 +1958,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency,
             outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core,
             tex_material_decoder_queue,
+            tex_augmented_coverage,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -4649,6 +4652,17 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_augmented_coverage:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_augmented_decoded_material_unique="
+                    f"{tex_augmented_coverage.get('decoded_material_unique_pcx', '0')}",
+                    "tex_augmented_unresolved_unique="
+                    f"{tex_augmented_coverage.get('unresolved_unique_pcx', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5199,12 +5213,26 @@ def apply_old_clean_byte_union(
             and int_value(tex_material_decoder_queue, "queued_probe_segments") == 0
             and int_value(tex_material_decoder_queue, "unresolved_segments") == 0
             and int_value(tex_material_decoder_queue, "decoded_material_segments") > 0
+            and tex_augmented_coverage
+            and int_value(tex_augmented_coverage, "unresolved_unique_pcx") > 0
         ):
             next_action = (
-                "integrate "
-                f"{tex_material_decoder_queue.get('decoded_material_segments', '0')} decoded material .tex segments "
-                "into final Full HD asset pass"
+                "profile "
+                f"{tex_augmented_coverage.get('unresolved_unique_pcx', '0')} remaining unresolved .tex references "
+                f"after {tex_material_decoder_queue.get('decoded_material_segments', '0')} decoded material segments"
             )
+        elif (
+            outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency
+            and int_value(outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency, "source_unknown_slots") == 0
+            and outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core
+            and outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core.get("dominant_blocker")
+            == "no residual high-safe roots"
+            and tex_material_decoder_queue
+            and int_value(tex_material_decoder_queue, "queued_probe_segments") == 0
+            and int_value(tex_material_decoder_queue, "unresolved_segments") == 0
+            and int_value(tex_material_decoder_queue, "decoded_material_segments") > 0
+        ):
+            next_action = "refresh augmented .tex coverage after decoded material segments"
         elif (
             outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency
             and int_value(outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency, "source_unknown_slots") == 0
@@ -21129,6 +21157,11 @@ def main() -> None:
         default=DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-augmented-coverage-summary",
+        type=Path,
+        default=DEFAULT_TEX_AUGMENTED_COVERAGE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -23663,6 +23696,7 @@ def main() -> None:
         )
     )
     tex_material_decoder_queue_summary = read_optional_summary(args.tex_material_decoder_queue_summary)
+    tex_augmented_coverage_summary = read_optional_summary(args.tex_augmented_coverage_summary)
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -25181,6 +25215,7 @@ def main() -> None:
         outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency=gradient_sequence_high_safe_low_exception_source_dependency_frontier80_structural_nonzero_final_zero_gap_fixture_replay_summary,
         outside_source_frontier80_structural_nonzero_final_zero_gap_residual_core=gradient_sequence_high_safe_low_exception_source_dependency_frontier80_structural_nonzero_final_zero_gap_fixture_replay_residual_core_summary,
         tex_material_decoder_queue=tex_material_decoder_queue_summary,
+        tex_augmented_coverage=tex_augmented_coverage_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
