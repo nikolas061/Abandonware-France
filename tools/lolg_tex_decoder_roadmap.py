@@ -1038,6 +1038,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HIGH_ARG2_SKIP_VALIDATION_PROBE_SUMMARY = 
 DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HIGH_ARG2_RENDERER_ROUTE_PROMOTED_REPLAY_SUMMARY = Path(
     "output/tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_ROUTE_PREVIEWS_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_branch_route_previews/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_probe/summary.csv"
 )
@@ -1906,6 +1909,7 @@ def apply_old_clean_byte_union(
     tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay: dict[str, str] | None,
+    tex_large_shifted_2a30_branch_route_previews: dict[str, str] | None,
     tex_large_shifted_2a30_field16_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_replay_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_transform_probe: dict[str, str] | None,
@@ -5096,6 +5100,20 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shifted_2a30_branch_route_previews:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_branch_route_previews_fullhd="
+                    f"{tex_large_shifted_2a30_branch_route_previews.get('fullhd_previews', '0')}/"
+                    f"{tex_large_shifted_2a30_branch_route_previews.get('manifest_rows', '0')}",
+                    "tex_large_shifted_2a30_branch_route_previews_high_arg2="
+                    f"{tex_large_shifted_2a30_branch_route_previews.get('target_high_arg2_skips', '0')}",
+                    "tex_large_shifted_2a30_branch_route_previews_verdict="
+                    f"{tex_large_shifted_2a30_branch_route_previews.get('review_verdict', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_field16_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5957,6 +5975,17 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay.get("target_archive_tag")
                 == tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("target_archive_tag")
             )
+            shifted_2a30_branch_route_previews_current = (
+                shifted_2a30_branch_high_arg2_renderer_route_promoted_replay_current
+                and tex_large_shifted_2a30_branch_route_previews is not None
+                and int_value(tex_large_shifted_2a30_branch_route_previews, "target_high_arg2_skips")
+                == int_value(
+                    tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay,
+                    "validation_target_high_arg2_skips",
+                )
+                and tex_large_shifted_2a30_branch_route_previews.get("target_archive_tag")
+                == tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay.get("target_archive_tag")
+            )
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -6085,6 +6114,14 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_field16_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
+            elif (
+                tex_large_shifted_2a30_branch_route_previews
+                and shifted_2a30_branch_route_previews_current
+                and int_value(tex_large_shifted_2a30_branch_route_previews, "fullhd_previews") > 0
+                and int_value(tex_large_shifted_2a30_branch_route_previews, "issue_rows") == 0
+                and tex_large_shifted_2a30_branch_route_previews.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_branch_route_previews.get("next_action"))
             elif (
                 tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay
                 and shifted_2a30_branch_high_arg2_renderer_route_promoted_replay_current
@@ -7756,6 +7793,20 @@ def apply_old_clean_byte_union(
             and int_value(tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay, "issue_rows") == 0
             and tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay.get("next_action")
         )
+        high_arg2_route_previews_ready = (
+            tex_large_shifted_2a30_branch_route_previews is not None
+            and tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay is not None
+            and int_value(tex_large_shifted_2a30_branch_route_previews, "target_high_arg2_skips")
+            == int_value(
+                tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay,
+                "validation_target_high_arg2_skips",
+            )
+            and tex_large_shifted_2a30_branch_route_previews.get("target_archive_tag")
+            == tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay.get("target_archive_tag")
+            and int_value(tex_large_shifted_2a30_branch_route_previews, "fullhd_previews") > 0
+            and int_value(tex_large_shifted_2a30_branch_route_previews, "issue_rows") == 0
+            and tex_large_shifted_2a30_branch_route_previews.get("next_action")
+        )
         high_arg2_validation_ready = (
             tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe is not None
             and tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe is not None
@@ -7774,7 +7825,9 @@ def apply_old_clean_byte_union(
             and int_value(tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe, "issue_rows") == 0
             and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("next_action")
         )
-        if high_arg2_route_promoted_ready and "2a30" in next_action:
+        if high_arg2_route_previews_ready and "2a30" in next_action:
+            next_action = str(tex_large_shifted_2a30_branch_route_previews.get("next_action"))
+        elif high_arg2_route_promoted_ready and "2a30" in next_action:
             next_action = str(
                 tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay.get("next_action")
             )
@@ -22353,6 +22406,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HIGH_ARG2_RENDERER_ROUTE_PROMOTED_REPLAY_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-branch-route-previews-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_ROUTE_PREVIEWS_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-field16-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY,
@@ -25009,6 +25067,9 @@ def main() -> None:
     tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay_summary = read_optional_summary(
         args.tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay_summary
     )
+    tex_large_shifted_2a30_branch_route_previews_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_branch_route_previews_summary
+    )
     tex_large_shifted_2a30_field16_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_field16_probe_summary
     )
@@ -26585,6 +26646,7 @@ def main() -> None:
         tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe=tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe_summary,
         tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe=tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe_summary,
         tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay=tex_large_shifted_2a30_branch_high_arg2_renderer_route_promoted_replay_summary,
+        tex_large_shifted_2a30_branch_route_previews=tex_large_shifted_2a30_branch_route_previews_summary,
         tex_large_shifted_2a30_field16_probe=tex_large_shifted_2a30_field16_probe_summary,
         tex_large_shifted_2a30_field16_replay_probe=tex_large_shifted_2a30_field16_replay_probe_summary,
         tex_large_shifted_2a30_field16_transform_probe=tex_large_shifted_2a30_field16_transform_probe_summary,
