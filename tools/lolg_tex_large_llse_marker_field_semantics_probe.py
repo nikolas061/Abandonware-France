@@ -135,10 +135,16 @@ ACTIONS = [
     "setxy_f1div4_f2",
     "setxy_f1div8_f2",
     "setxy_f1div4_f0",
+    "setxy_f1div4_f0x2",
+    "setxy_f1div4_f0x4",
+    "setxy_f1div4_f0_plus_f1mod4",
+    "setxy_f1div4_f0x2_plus_f1mod4",
     "setxy_f1div4_f2x2",
     "setxy_f1div4_f2x4",
     "setxy_f1div4_f3",
     "setxy_f1div4_f4",
+    "setxy_f1div4_f0_if_f1mod4",
+    "setxy_f1div4_f0x2_if_f1mod4",
     "setxy_f1div4_f2_if_f1mod4",
     "setxy_f1div4_f2_if_f0zero",
     "setxy_f1div4_f2_if_tuple2000",
@@ -329,6 +335,22 @@ def apply_field_action(
         x = (f1 // 4) % max(1, width)
         y = clamp_y(f0, height)
         applied = True
+    elif action == "setxy_f1div4_f0x2":
+        x = (f1 // 4) % max(1, width)
+        y = clamp_y(f0 * 2, height)
+        applied = True
+    elif action == "setxy_f1div4_f0x4":
+        x = (f1 // 4) % max(1, width)
+        y = clamp_y(f0 * 4, height)
+        applied = True
+    elif action == "setxy_f1div4_f0_plus_f1mod4":
+        x = (f1 // 4) % max(1, width)
+        y = clamp_y(f0 + (f1 % 4), height)
+        applied = True
+    elif action == "setxy_f1div4_f0x2_plus_f1mod4":
+        x = (f1 // 4) % max(1, width)
+        y = clamp_y((f0 * 2) + (f1 % 4), height)
+        applied = True
     elif action == "setxy_f1div4_f2x2":
         x = (f1 // 4) % max(1, width)
         y = clamp_y(f2 * 2, height)
@@ -344,6 +366,14 @@ def apply_field_action(
     elif action == "setxy_f1div4_f4":
         x = (f1 // 4) % max(1, width)
         y = clamp_y(f4, height)
+        applied = True
+    elif action == "setxy_f1div4_f0_if_f1mod4" and f1 % 4 == 0:
+        x = (f1 // 4) % max(1, width)
+        y = clamp_y(f0, height)
+        applied = True
+    elif action == "setxy_f1div4_f0x2_if_f1mod4" and f1 % 4 == 0:
+        x = (f1 // 4) % max(1, width)
+        y = clamp_y(f0 * 2, height)
         applied = True
     elif action == "setxy_f1div4_f2_if_f1mod4" and f1 % 4 == 0:
         x = (f1 // 4) % max(1, width)

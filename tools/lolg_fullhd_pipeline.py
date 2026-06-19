@@ -2828,6 +2828,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             requires_pillow=True,
         ),
         Step(
+            "trace etat champs marqueur 2730 LLSE gros segments .tex rejetes",
+            [sys.executable, "tools/lolg_tex_large_llse_marker_field_state_probe.py"],
+        ),
+        Step(
             "probe header partage 2700302b gros segments .tex rejetes",
             [sys.executable, "tools/lolg_tex_large_shared_2700302b_header_probe.py"],
         ),
