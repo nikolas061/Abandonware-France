@@ -1937,6 +1937,21 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Structural Nonzero Producer After Palette-Walk Low-Tail Guard Fixture Replay",
                 ],
             ),
+            Step(
+                "probe parser rle-delta structurel nonzero apres replay fixture guard low-tail palette-walk frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_rle_delta_parser_probe.py",
+                    "--runs",
+                    "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay/runs.csv",
+                    "--clean-fixtures",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay/fixtures.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_rle_delta_parser_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Structural Nonzero RLE Delta Parser After Palette-Walk Low-Tail Guard Fixture Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -7384,6 +7399,21 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_producer_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Structural Nonzero Producer After Palette-Walk Low-Tail Guard Fixture Replay",
+            ],
+        ),
+        Step(
+            "probe parser rle-delta structurel nonzero apres replay fixture guard low-tail palette-walk frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_rle_delta_parser_probe.py",
+                "--runs",
+                "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay/runs.csv",
+                "--clean-fixtures",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_fixture_replay/fixtures.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_rle_delta_parser_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Structural Nonzero RLE Delta Parser After Palette-Walk Low-Tail Guard Fixture Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
