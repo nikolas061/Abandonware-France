@@ -241,6 +241,21 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_DECISIONS = Path
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_HTML = Path(
     "output/tex_large_shifted_2a30_field16_small_delta_guard_review/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_OPERATIONS = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay/operations.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_TARGETS = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay/targets.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_GUARDS = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay/guards.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -951,6 +966,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_small_delta_guard_review_targets",
     "tex_large_shifted_2a30_field16_small_delta_guard_review_remaining_exact",
     "tex_large_shifted_2a30_field16_small_delta_guard_review_selected_guards",
+    "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_rows",
+    "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_large",
+    "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_blocked_context",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -4231,6 +4249,199 @@ def audit_tex_large_shifted_2a30_field16_small_delta_guard_review(
         large_target_exact_rows if ok else 0,
         remaining_target_exact_rows if ok else 0,
         selected_guard_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay(
+    summary: Path,
+    operations_path: Path,
+    targets_path: Path,
+    guards_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay", summary), 0, 0, 0
+    if not operations_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay", operations_path), 0, 0, 0
+    if not targets_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay", targets_path), 0, 0, 0
+    if not guards_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay", guards_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    operation_rows = read_csv(operations_path)
+    target_rows = read_csv(targets_path)
+    guard_rows_data = read_csv(guards_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    candidate_rows = int_value(total, "candidate_rows")
+    review_target_rows = int_value(total, "review_target_rows")
+    promoted_rows = int_value(total, "promoted_rows")
+    promoted_exact_rows = int_value(total, "promoted_exact_rows")
+    promoted_large_rows = int_value(total, "promoted_large_rows")
+    promoted_remaining_rows = int_value(total, "promoted_remaining_rows")
+    promoted_support_rows = int_value(total, "promoted_support_rows")
+    promoted_positive_rows = int_value(total, "promoted_positive_rows")
+    promoted_negative_rows = int_value(total, "promoted_negative_rows")
+    promoted_zero_rows = int_value(total, "promoted_zero_rows")
+    blocked_context_rows = int_value(total, "blocked_context_rows")
+    false_positive_rows = int_value(total, "false_positive_rows")
+    unresolved_target_rows = int_value(total, "unresolved_target_rows")
+    guard_rows = int_value(total, "guard_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    promoted_operation_rows = [row for row in operation_rows if row.get("promoted") == "yes"]
+    promoted_exact_operation_rows = [row for row in promoted_operation_rows if row.get("exact_match") == "yes"]
+    promoted_large_operation_rows = [row for row in promoted_operation_rows if row.get("large_rejected") == "yes"]
+    promoted_remaining_operation_rows = [row for row in promoted_operation_rows if row.get("remaining_large") == "yes"]
+    promoted_support_operation_rows = [row for row in promoted_operation_rows if row.get("support_promoted") == "yes"]
+    blocked_context_operation_rows = [row for row in operation_rows if row.get("context_blocked") == "yes"]
+    false_positive_operation_rows = [row for row in promoted_operation_rows if row.get("false_positive") == "yes"]
+    operation_issue_rows = [row for row in operation_rows if row.get("issues")]
+    target_issue_rows = [row for row in target_rows if row.get("issues") or row.get("target_exact") != "yes"]
+
+    if candidate_rows != len(operation_rows) or candidate_rows != 10:
+        issues.append("field16_small_delta_replay_candidate_count_mismatch")
+    if review_target_rows != len(target_rows) or review_target_rows != 4:
+        issues.append("field16_small_delta_replay_target_count_mismatch")
+    if promoted_rows != len(promoted_operation_rows) or promoted_rows != 6:
+        issues.append("field16_small_delta_replay_promoted_count_mismatch")
+    if promoted_exact_rows != len(promoted_exact_operation_rows) or promoted_exact_rows != 6:
+        issues.append("field16_small_delta_replay_exact_count_mismatch")
+    if promoted_large_rows != len(promoted_large_operation_rows) or promoted_large_rows != 4:
+        issues.append("field16_small_delta_replay_large_count_mismatch")
+    if promoted_remaining_rows != len(promoted_remaining_operation_rows) or promoted_remaining_rows != 2:
+        issues.append("field16_small_delta_replay_remaining_count_mismatch")
+    if promoted_support_rows != len(promoted_support_operation_rows) or promoted_support_rows != 2:
+        issues.append("field16_small_delta_replay_support_count_mismatch")
+    if promoted_positive_rows != sum(
+        1 for row in promoted_operation_rows if row.get("guard_id") == "positive_small_nextlow_minus2"
+    ) or promoted_positive_rows != 2:
+        issues.append("field16_small_delta_replay_positive_count_mismatch")
+    if promoted_negative_rows != sum(
+        1 for row in promoted_operation_rows if row.get("guard_id") == "negative_small_extra36"
+    ) or promoted_negative_rows != 2:
+        issues.append("field16_small_delta_replay_negative_count_mismatch")
+    if promoted_zero_rows != sum(
+        1 for row in promoted_operation_rows if row.get("guard_id") == "zero_delta_extra40"
+    ) or promoted_zero_rows != 2:
+        issues.append("field16_small_delta_replay_zero_count_mismatch")
+    if blocked_context_rows != len(blocked_context_operation_rows) or blocked_context_rows != 4:
+        issues.append("field16_small_delta_replay_context_count_mismatch")
+    if false_positive_rows != len(false_positive_operation_rows) or false_positive_rows != 0:
+        issues.append(f"false_positive_rows:{false_positive_rows}")
+    if unresolved_target_rows != len(target_issue_rows) or unresolved_target_rows != 0:
+        issues.append("field16_small_delta_replay_unresolved_target_mismatch")
+    if guard_rows != len(guard_rows_data) or guard_rows != 4:
+        issues.append("field16_small_delta_replay_guard_count_mismatch")
+    if issue_rows != len(operation_issue_rows) or issue_rows != 0:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    target_by_name = {row.get("pcx_name", ""): row for row in target_rows}
+    expected_targets = {
+        "barsgld.pcx": ("L14_HT", "positive_small_nextlow_minus2", "24"),
+        "dragend.pcx": ("L3_DH", "negative_small_extra36", "36"),
+        "stump2.pcx": ("L12_CM", "zero_delta_extra40", "40"),
+        "catbas.pcx": ("L5_HC", "zero_delta_extra40", "40"),
+    }
+    if set(target_by_name) != set(expected_targets):
+        issues.append("field16_small_delta_replay_targets_unexpected")
+    else:
+        for pcx_name, (archive_tag, guard_id, chosen_extra) in expected_targets.items():
+            row = target_by_name[pcx_name]
+            if row.get("archive_tag") != archive_tag:
+                issues.append(f"field16_small_delta_replay_{pcx_name}_archive_mismatch")
+            if row.get("guard_id") != guard_id:
+                issues.append(f"field16_small_delta_replay_{pcx_name}_guard_mismatch")
+            if row.get("chosen_extra") != chosen_extra or row.get("oracle_extra") != chosen_extra:
+                issues.append(f"field16_small_delta_replay_{pcx_name}_extra_mismatch")
+            if row.get("target_replayed") != "yes" or row.get("target_exact") != "yes" or row.get("issues"):
+                issues.append(f"field16_small_delta_replay_{pcx_name}_not_exact")
+
+    operation_by_name = {row.get("pcx_name", ""): row for row in operation_rows}
+    expected_operations = {
+        "barsgld.pcx": ("promotion_target", "yes", "yes", "no", "no", "24"),
+        "dragend.pcx": ("promotion_target", "yes", "yes", "no", "no", "36"),
+        "stump2.pcx": ("promotion_target", "yes", "yes", "no", "no", "40"),
+        "catbas.pcx": ("promotion_target", "yes", "yes", "no", "no", "40"),
+        "pillar.pcx": ("nonlarge_support", "yes", "no", "yes", "no", "36"),
+        "6.pcx": ("nonlarge_support", "yes", "no", "yes", "no", "32"),
+        "ggbridge2.pcx": ("blocked_context", "no", "no", "no", "yes", ""),
+        "colapse.pcx": ("blocked_context", "no", "no", "no", "yes", ""),
+        "hrglass.pcx": ("blocked_context", "no", "no", "no", "yes", ""),
+        "lantern.pcx": ("blocked_context", "no", "no", "no", "yes", ""),
+    }
+    if set(operation_by_name) != set(expected_operations):
+        issues.append("field16_small_delta_replay_operations_unexpected")
+    else:
+        for pcx_name, expected in expected_operations.items():
+            row = operation_by_name[pcx_name]
+            actual = (
+                row.get("row_role"),
+                row.get("promoted"),
+                row.get("target_promoted"),
+                row.get("support_promoted"),
+                row.get("context_blocked"),
+                row.get("chosen_extra"),
+            )
+            if actual != expected:
+                issues.append(f"field16_small_delta_replay_{pcx_name}_operation_mismatch")
+            if row.get("issues"):
+                issues.append(f"field16_small_delta_replay_{pcx_name}_operation_issue")
+
+    guard_by_id = {row.get("guard_id", ""): row for row in guard_rows_data}
+    expected_guard_rows = {
+        "positive_small_nextlow_minus2": ("2", "2", "2", "1", "1", "0", "0", "promoted_exact"),
+        "negative_small_extra36": ("2", "2", "2", "1", "1", "0", "0", "promoted_exact"),
+        "zero_delta_extra40": ("2", "2", "2", "2", "0", "0", "0", "promoted_exact"),
+        "skip_large_negative_context": ("4", "0", "0", "0", "0", "4", "0", "context_blocked"),
+    }
+    if set(guard_by_id) != set(expected_guard_rows):
+        issues.append("field16_small_delta_replay_guard_ids_mismatch")
+    else:
+        for guard_id, expected in expected_guard_rows.items():
+            row = guard_by_id[guard_id]
+            actual = (
+                row.get("source_rows"),
+                row.get("promoted_rows"),
+                row.get("promoted_exact_rows"),
+                row.get("promoted_large_rows"),
+                row.get("promoted_remaining_rows"),
+                row.get("blocked_context_rows"),
+                row.get("false_positive_rows"),
+                row.get("verdict"),
+            )
+            if actual != expected:
+                issues.append(f"field16_small_delta_replay_{guard_id}_counts_mismatch")
+    if total.get("review_verdict") != "small_delta_guard_promoted_replay_ready":
+        issues.append("field16_small_delta_replay_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay",
+            ok,
+            expected="promoted shifted 0x2a30 field16 small-delta replay covers 6 exact rows and blocks 4 contexts",
+            actual=(
+                f"promoted={promoted_exact_rows}/{promoted_rows}, large={promoted_large_rows}, "
+                f"blocked_context={blocked_context_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        promoted_exact_rows if ok else 0,
+        promoted_large_rows if ok else 0,
+        blocked_context_rows if ok else 0,
     )
 
 
@@ -13581,6 +13792,19 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_small_delta_guard_review_gate)
+    (
+        tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_gate,
+        tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_rows,
+        tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_large,
+        tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_blocked_context,
+    ) = audit_tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_OPERATIONS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_TARGETS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_GUARDS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -18995,6 +19219,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_small_delta_guard_review_selected_guards": str(
             tex_large_shifted_2a30_field16_small_delta_guard_review_selected_guards
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_rows": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_rows
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_large": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_large
+        ),
+        "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_blocked_context": str(
+            tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_blocked_context
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
