@@ -984,6 +984,9 @@ DEFAULT_TEX_AUGMENTED_COVERAGE_SUMMARY = Path("output/tex_augmented_coverage/sum
 DEFAULT_TEX_REMAINING_REFERENCE_PROFILE_SUMMARY = Path("output/tex_remaining_reference_profile/summary.csv")
 DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_SUMMARY = Path("output/tex_raw_same_archive_promoted_pack/summary.csv")
 DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_SUMMARY = Path("output/tex_raw_same_archive_pending_review/summary.csv")
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PROMOTED_PACK_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_promoted_pack/summary.csv"
+)
 DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_ANALYSIS_SUMMARY = Path(
     "output/tex_large_unresolved_probe_render/analysis_summary.csv"
 )
@@ -1846,6 +1849,7 @@ def apply_old_clean_byte_union(
     tex_remaining_reference_profile: dict[str, str] | None,
     tex_raw_same_archive_promoted_pack: dict[str, str] | None,
     tex_raw_same_archive_pending_review: dict[str, str] | None,
+    tex_large_shifted_2a30_field16_decoder_promoted_pack: dict[str, str] | None,
     tex_large_unresolved_probe_analysis: dict[str, str] | None,
     tex_large_unresolved_probe_review: dict[str, str] | None,
     tex_large_rejected_decoder_profile: dict[str, str] | None,
@@ -4728,6 +4732,10 @@ def apply_old_clean_byte_union(
                 [
                     "tex_augmented_decoded_material_unique="
                     f"{tex_augmented_coverage.get('decoded_material_unique_pcx', '0')}",
+                    "tex_augmented_field16_decoder_unique="
+                    f"{tex_augmented_coverage.get('field16_decoder_unique_pcx', '0')}",
+                    "tex_augmented_exact_alias_decoded_raw_or_field16="
+                    f"{tex_augmented_coverage.get('exact_alias_decoded_raw_or_field16_unique_pcx', '0')}",
                     "tex_augmented_unresolved_unique="
                     f"{tex_augmented_coverage.get('unresolved_unique_pcx', '0')}",
                 ],
@@ -4756,6 +4764,19 @@ def apply_old_clean_byte_union(
                     f"{tex_raw_same_archive_promoted_pack.get('pending_rows', '0')}",
                     "tex_raw_same_archive_pack_coverage_eligible="
                     f"{tex_raw_same_archive_promoted_pack.get('coverage_eligible_rows', '0')}",
+                ],
+            )
+
+        if tex_large_shifted_2a30_field16_decoder_promoted_pack:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_field16_promoted_pack_eligible="
+                    f"{tex_large_shifted_2a30_field16_decoder_promoted_pack.get('coverage_eligible_rows', '0')}",
+                    "tex_large_shifted_2a30_field16_promoted_pack_fullhd="
+                    f"{tex_large_shifted_2a30_field16_decoder_promoted_pack.get('fullhd_assets', '0')}",
+                    "tex_large_shifted_2a30_field16_promoted_pack_verdict="
+                    f"{tex_large_shifted_2a30_field16_decoder_promoted_pack.get('review_verdict', '')}",
                 ],
             )
 
@@ -5567,6 +5588,15 @@ def apply_old_clean_byte_union(
                     tex_raw_same_archive_promoted_pack.get("next_action")
                     or tex_remaining_reference_profile.get("next_action")
                 )
+            elif int_value(tex_augmented_coverage, "field16_decoder_unique_pcx") > 0:
+                next_action = str(tex_remaining_reference_profile.get("next_action"))
+            elif (
+                tex_large_shifted_2a30_field16_decoder_promoted_pack
+                and int_value(tex_large_shifted_2a30_field16_decoder_promoted_pack, "coverage_eligible_rows") > 0
+                and int_value(tex_large_shifted_2a30_field16_decoder_promoted_pack, "issue_rows") == 0
+                and tex_large_shifted_2a30_field16_decoder_promoted_pack.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_field16_decoder_promoted_pack.get("next_action"))
             elif (
                 tex_large_shifted_2a30_field16_decoder_previews_review
                 and int_value(tex_large_shifted_2a30_field16_decoder_previews_review, "review_ready_rows") > 0
@@ -21659,6 +21689,11 @@ def main() -> None:
         default=DEFAULT_TEX_RAW_SAME_ARCHIVE_PENDING_REVIEW_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-field16-decoder-promoted-pack-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PROMOTED_PACK_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-unresolved-probe-analysis-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_UNRESOLVED_PROBE_ANALYSIS_SUMMARY,
@@ -24281,6 +24316,9 @@ def main() -> None:
     tex_raw_same_archive_pending_review_summary = read_optional_summary(
         args.tex_raw_same_archive_pending_review_summary
     )
+    tex_large_shifted_2a30_field16_decoder_promoted_pack_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_field16_decoder_promoted_pack_summary
+    )
     tex_large_unresolved_probe_analysis_summary = read_optional_summary(
         args.tex_large_unresolved_probe_analysis_summary
     )
@@ -25851,6 +25889,7 @@ def main() -> None:
         tex_remaining_reference_profile=tex_remaining_reference_profile_summary,
         tex_raw_same_archive_promoted_pack=tex_raw_same_archive_promoted_pack_summary,
         tex_raw_same_archive_pending_review=tex_raw_same_archive_pending_review_summary,
+        tex_large_shifted_2a30_field16_decoder_promoted_pack=tex_large_shifted_2a30_field16_decoder_promoted_pack_summary,
         tex_large_unresolved_probe_analysis=tex_large_unresolved_probe_analysis_summary,
         tex_large_unresolved_probe_review=tex_large_unresolved_probe_review_summary,
         tex_large_rejected_decoder_profile=tex_large_rejected_decoder_profile_summary,

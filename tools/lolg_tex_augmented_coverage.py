@@ -17,6 +17,9 @@ DEFAULT_REFERENCES = Path("output/tex_reference_coverage/references.csv")
 DEFAULT_ALIAS_PACK = Path("output/cdcache_tex_alias_pack/manifest.csv")
 DEFAULT_MATERIAL_DECODE_PACK = Path("output/tex_material_decode_pack/manifest.csv")
 DEFAULT_RAW_SAME_ARCHIVE_PROMOTED_PACK = Path("output/tex_raw_same_archive_promoted_pack/manifest.csv")
+DEFAULT_FIELD16_DECODER_PROMOTED_PACK = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_promoted_pack/manifest.csv"
+)
 
 SUMMARY_FIELDNAMES = [
     "scope",
@@ -33,9 +36,13 @@ SUMMARY_FIELDNAMES = [
     "raw_same_archive_reference_rows",
     "raw_same_archive_unique_pcx",
     "raw_same_archive_assets",
+    "field16_decoder_reference_rows",
+    "field16_decoder_unique_pcx",
+    "field16_decoder_assets",
     "exact_or_alias_unique_pcx",
     "exact_alias_or_decoded_unique_pcx",
     "exact_alias_decoded_or_raw_unique_pcx",
+    "exact_alias_decoded_raw_or_field16_unique_pcx",
     "unresolved_reference_rows",
     "unresolved_unique_pcx",
     "issue_rows",
@@ -58,6 +65,8 @@ ROW_FIELDNAMES = [
     "decoded_material_pack_paths",
     "raw_same_archive_assets",
     "raw_same_archive_pack_paths",
+    "field16_decoder_assets",
+    "field16_decoder_pack_paths",
     "issues",
 ]
 
@@ -80,6 +89,21 @@ RAW_SAME_ARCHIVE_FIELDNAMES = [
     "archive_tag",
     "pcx_name",
     "normalized_pcx_name",
+    "review_status",
+    "coverage_eligible",
+    "promoted_fullhd_path",
+    "issues",
+]
+
+FIELD16_DECODER_FIELDNAMES = [
+    "asset_id",
+    "archive",
+    "archive_tag",
+    "pcx_name",
+    "normalized_pcx_name",
+    "texture_path",
+    "decoder_rule",
+    "decoder_extra",
     "review_status",
     "coverage_eligible",
     "promoted_fullhd_path",
@@ -152,6 +176,17 @@ def raw_promotions_by_archive_name(rows: list[dict[str, str]]) -> dict[tuple[str
     return output
 
 
+def field16_promotions_by_archive_name(rows: list[dict[str, str]]) -> dict[tuple[str, str], list[dict[str, str]]]:
+    output: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        if row.get("coverage_eligible") != "yes":
+            continue
+        key = (row.get("archive", ""), normalize_pcx(row.get("normalized_pcx_name", "") or row.get("pcx_name", "")))
+        if key[0] and key[1]:
+            output[key].append(row)
+    return output
+
+
 def read_optional_rows(path: Path) -> list[dict[str, str]]:
     if not path.exists():
         return []
@@ -163,14 +198,23 @@ def build_rows(
     aliases: list[dict[str, str]],
     decoded_materials: list[dict[str, str]],
     raw_promotions: list[dict[str, str]],
-) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
+    field16_promotions: list[dict[str, str]],
+) -> tuple[
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+]:
     alias_lookup = aliases_by_archive_name(aliases)
     decoded_lookup = decoded_by_archive_name(decoded_materials)
     raw_lookup = raw_promotions_by_archive_name(raw_promotions)
+    field16_lookup = field16_promotions_by_archive_name(field16_promotions)
     rows: list[dict[str, str]] = []
     alias_rows: list[dict[str, str]] = []
     decoded_rows: list[dict[str, str]] = []
     raw_rows: list[dict[str, str]] = []
+    field16_rows: list[dict[str, str]] = []
     for reference in references:
         archive = reference.get("archive", "")
         name = normalize_pcx(reference.get("normalized_pcx_name", "") or reference.get("pcx_name", ""))
@@ -178,6 +222,7 @@ def build_rows(
         matching_aliases = alias_lookup.get((archive, name), [])
         matching_decoded = decoded_lookup.get((archive, name), [])
         matching_raw = raw_lookup.get((archive, name), [])
+        matching_field16 = field16_lookup.get((archive, name), [])
         issues = []
         for alias in matching_aliases:
             if alias.get("issues"):
@@ -194,12 +239,19 @@ def build_rows(
                 issues.append("raw_same_archive_has_issues")
             if raw.get("promoted_fullhd_exists") != "yes" or not Path(raw.get("promoted_fullhd_path", "")).exists():
                 issues.append("missing_raw_same_archive_path")
+        for field16 in matching_field16:
+            if field16.get("issues"):
+                issues.append("field16_decoder_has_issues")
+            if field16.get("promoted_fullhd_exists") != "yes" or not Path(field16.get("promoted_fullhd_path", "")).exists():
+                issues.append("missing_field16_decoder_path")
         if exact_covered:
             status = "exact"
         elif matching_aliases:
             status = "alias"
         elif matching_decoded:
             status = "decoded_material"
+        elif matching_field16:
+            status = "field16_decoder"
         elif matching_raw:
             status = "raw_same_archive"
         else:
@@ -227,6 +279,10 @@ def build_rows(
                 "raw_same_archive_assets": str(len(matching_raw)),
                 "raw_same_archive_pack_paths": ";".join(
                     row.get("promoted_fullhd_path", "") for row in matching_raw
+                ),
+                "field16_decoder_assets": str(len(matching_field16)),
+                "field16_decoder_pack_paths": ";".join(
+                    row.get("promoted_fullhd_path", "") for row in matching_field16
                 ),
                 "issues": ";".join(sorted(set(issues))),
             }
@@ -281,7 +337,25 @@ def build_rows(
                 "issues": raw.get("issues", ""),
             }
         )
-    return rows, alias_rows, decoded_rows, raw_rows
+
+    for field16 in field16_promotions:
+        field16_rows.append(
+            {
+                "asset_id": field16.get("asset_id", ""),
+                "archive": field16.get("archive", ""),
+                "archive_tag": field16.get("archive_tag", ""),
+                "pcx_name": field16.get("pcx_name", ""),
+                "normalized_pcx_name": field16.get("normalized_pcx_name", ""),
+                "texture_path": field16.get("texture_path", ""),
+                "decoder_rule": field16.get("decoder_rule", ""),
+                "decoder_extra": field16.get("decoder_extra", ""),
+                "review_status": field16.get("review_status", ""),
+                "coverage_eligible": field16.get("coverage_eligible", ""),
+                "promoted_fullhd_path": field16.get("promoted_fullhd_path", ""),
+                "issues": field16.get("issues", ""),
+            }
+        )
+    return rows, alias_rows, decoded_rows, raw_rows, field16_rows
 
 
 def summary_row(
@@ -289,6 +363,7 @@ def summary_row(
     aliases: list[dict[str, str]],
     decoded_materials: list[dict[str, str]],
     raw_promotions: list[dict[str, str]],
+    field16_promotions: list[dict[str, str]],
 ) -> dict[str, str]:
     unique_names = {row["normalized_pcx_name"] for row in rows}
     exact_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "exact"}
@@ -299,8 +374,10 @@ def summary_row(
         if row["coverage_status"] == "decoded_material"
     }
     raw_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "raw_same_archive"}
+    field16_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "field16_decoder"}
     unresolved_names = {row["normalized_pcx_name"] for row in rows if row["coverage_status"] == "unresolved"}
     eligible_raw = [row for row in raw_promotions if row.get("coverage_eligible") == "yes"]
+    eligible_field16 = [row for row in field16_promotions if row.get("coverage_eligible") == "yes"]
     return {
         "scope": "total",
         "reference_rows": str(len(rows)),
@@ -318,9 +395,15 @@ def summary_row(
         "raw_same_archive_reference_rows": str(sum(1 for row in rows if row["coverage_status"] == "raw_same_archive")),
         "raw_same_archive_unique_pcx": str(len(raw_names)),
         "raw_same_archive_assets": str(len(eligible_raw)),
+        "field16_decoder_reference_rows": str(sum(1 for row in rows if row["coverage_status"] == "field16_decoder")),
+        "field16_decoder_unique_pcx": str(len(field16_names)),
+        "field16_decoder_assets": str(len(eligible_field16)),
         "exact_or_alias_unique_pcx": str(len(exact_names | alias_names)),
         "exact_alias_or_decoded_unique_pcx": str(len(exact_names | alias_names | decoded_names)),
         "exact_alias_decoded_or_raw_unique_pcx": str(len(exact_names | alias_names | decoded_names | raw_names)),
+        "exact_alias_decoded_raw_or_field16_unique_pcx": str(
+            len(exact_names | alias_names | decoded_names | raw_names | field16_names)
+        ),
         "unresolved_reference_rows": str(sum(1 for row in rows if row["coverage_status"] == "unresolved")),
         "unresolved_unique_pcx": str(len(unresolved_names)),
         "issue_rows": str(
@@ -328,6 +411,7 @@ def summary_row(
             + sum(1 for row in aliases if row["issues"])
             + sum(1 for row in decoded_materials if row.get("issues"))
             + sum(1 for row in eligible_raw if row.get("issues"))
+            + sum(1 for row in eligible_field16 if row.get("issues"))
         ),
     }
 
@@ -354,6 +438,7 @@ def build_html(
     aliases: list[dict[str, str]],
     decoded_materials: list[dict[str, str]],
     raw_promotions: list[dict[str, str]],
+    field16_promotions: list[dict[str, str]],
     output_dir: Path,
     title: str,
 ) -> str:
@@ -363,6 +448,7 @@ def build_html(
         "aliases": aliases,
         "decoded_materials": decoded_materials,
         "raw_same_archive_promotions": raw_promotions,
+        "field16_decoder_promotions": field16_promotions,
     }
     data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
     links = " ".join(
@@ -373,11 +459,13 @@ def build_html(
             ("aliases.csv", output_dir / "aliases.csv"),
             ("material_decodes.csv", output_dir / "material_decodes.csv"),
             ("raw_same_archive_promotions.csv", output_dir / "raw_same_archive_promotions.csv"),
+            ("field16_decoder_promotions.csv", output_dir / "field16_decoder_promotions.csv"),
         )
     )
     alias_rows = [row for row in rows if row["coverage_status"] == "alias"]
     decoded_rows = [row for row in rows if row["coverage_status"] == "decoded_material"]
     raw_rows = [row for row in rows if row["coverage_status"] == "raw_same_archive"]
+    field16_rows = [row for row in rows if row["coverage_status"] == "field16_decoder"]
     unresolved_rows = [row for row in rows if row["coverage_status"] == "unresolved"]
     return f"""<!doctype html>
 <html lang="fr">
@@ -455,7 +543,8 @@ a {{ color: var(--accent); text-decoration: none; margin-right: 10px; }}
     <div class="stat"><div class="label">Alias unique</div><div class="value">{html.escape(summary['alias_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Decodes materiaux</div><div class="value">{html.escape(summary['decoded_material_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Raw same-archive</div><div class="value">{html.escape(summary['raw_same_archive_unique_pcx'])}</div></div>
-    <div class="stat"><div class="label">Exact/alias/decoded/raw</div><div class="value">{html.escape(summary['exact_alias_decoded_or_raw_unique_pcx'])}</div></div>
+    <div class="stat"><div class="label">Field16 decoder</div><div class="value">{html.escape(summary['field16_decoder_unique_pcx'])}</div></div>
+    <div class="stat"><div class="label">Couverts augmentes</div><div class="value">{html.escape(summary['exact_alias_decoded_raw_or_field16_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Restants</div><div class="value warn">{html.escape(summary['unresolved_unique_pcx'])}</div></div>
     <div class="stat"><div class="label">Issues</div><div class="value ok">{html.escape(summary['issue_rows'])}</div></div>
   </section>
@@ -480,6 +569,10 @@ a {{ color: var(--accent); text-decoration: none; margin-right: 10px; }}
     {render_table(raw_rows, ROW_FIELDNAMES)}
   </section>
   <section class="panel">
+    <h2>References field16 decoder promues</h2>
+    {render_table(field16_rows, ROW_FIELDNAMES)}
+  </section>
+  <section class="panel">
     <h2>References restantes</h2>
     {render_table(unresolved_rows, ROW_FIELDNAMES)}
   </section>
@@ -498,25 +591,35 @@ def write_report(
     alias_pack_path: Path,
     material_decode_pack_path: Path,
     raw_same_archive_promoted_pack_path: Path,
+    field16_decoder_promoted_pack_path: Path,
     title: str,
-) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
+) -> tuple[
+    dict[str, str],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    rows, aliases, decoded_materials, raw_promotions = build_rows(
+    rows, aliases, decoded_materials, raw_promotions, field16_promotions = build_rows(
         read_rows(references_path),
         read_rows(alias_pack_path),
         read_optional_rows(material_decode_pack_path),
         read_optional_rows(raw_same_archive_promoted_pack_path),
+        read_optional_rows(field16_decoder_promoted_pack_path),
     )
-    summary = summary_row(rows, aliases, decoded_materials, raw_promotions)
+    summary = summary_row(rows, aliases, decoded_materials, raw_promotions, field16_promotions)
     write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(output_dir / "references.csv", ROW_FIELDNAMES, rows)
     write_csv(output_dir / "aliases.csv", ALIAS_FIELDNAMES, aliases)
     write_csv(output_dir / "material_decodes.csv", DECODED_MATERIAL_FIELDNAMES, decoded_materials)
     write_csv(output_dir / "raw_same_archive_promotions.csv", RAW_SAME_ARCHIVE_FIELDNAMES, raw_promotions)
+    write_csv(output_dir / "field16_decoder_promotions.csv", FIELD16_DECODER_FIELDNAMES, field16_promotions)
     (output_dir / "index.html").write_text(
-        build_html(summary, rows, aliases, decoded_materials, raw_promotions, output_dir, title)
+        build_html(summary, rows, aliases, decoded_materials, raw_promotions, field16_promotions, output_dir, title)
     )
-    return summary, rows, aliases, decoded_materials, raw_promotions
+    return summary, rows, aliases, decoded_materials, raw_promotions, field16_promotions
 
 
 def main() -> None:
@@ -526,24 +629,27 @@ def main() -> None:
     parser.add_argument("--alias-pack", type=Path, default=DEFAULT_ALIAS_PACK)
     parser.add_argument("--material-decode-pack", type=Path, default=DEFAULT_MATERIAL_DECODE_PACK)
     parser.add_argument("--raw-same-archive-promoted-pack", type=Path, default=DEFAULT_RAW_SAME_ARCHIVE_PROMOTED_PACK)
+    parser.add_argument("--field16-decoder-promoted-pack", type=Path, default=DEFAULT_FIELD16_DECODER_PROMOTED_PACK)
     parser.add_argument("--title", default="Lands of Lore II .tex Augmented Coverage")
     args = parser.parse_args()
 
-    summary, _rows, _aliases, _decoded, _raw = write_report(
+    summary, _rows, _aliases, _decoded, _raw, _field16 = write_report(
         args.output,
         args.references,
         args.alias_pack,
         args.material_decode_pack,
         args.raw_same_archive_promoted_pack,
+        args.field16_decoder_promoted_pack,
         args.title,
     )
     print(f"Unique likely PCX: {summary['unique_likely_pcx']}")
     print(
-        "Exact/alias/decoded/raw/unresolved unique: "
+        "Exact/alias/decoded/raw/field16/unresolved unique: "
         f"{summary['exact_covered_unique_pcx']}/"
         f"{summary['alias_unique_pcx']}/"
         f"{summary['decoded_material_unique_pcx']}/"
         f"{summary['raw_same_archive_unique_pcx']}/"
+        f"{summary['field16_decoder_unique_pcx']}/"
         f"{summary['unresolved_unique_pcx']}"
     )
     print(f"Issue rows: {summary['issue_rows']}")
