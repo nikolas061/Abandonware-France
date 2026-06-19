@@ -1080,6 +1080,9 @@ DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_RESTART_LOW2_SMALL_DE
 DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_RESTART_LOW2_NON_LOW2_SOURCE_PROBE_SUMMARY = Path(
     "output/tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_RESTART_LOW2_NON_LOW2_SELECTOR_PROBE_SUMMARY = Path(
+    "output/tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_standard_probe/summary.csv"
 )
@@ -2013,6 +2016,7 @@ def apply_old_clean_byte_union(
     tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_residual_profile_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_small_delta_miss_split_probe: dict[str, str] | None,
     tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe: dict[str, str] | None,
+    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe: dict[str, str] | None,
     tex_large_shifted_2a30_standard_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_probe: dict[str, str] | None,
     tex_large_shifted_2a30_branch_decoder_path_probe: dict[str, str] | None,
@@ -5357,6 +5361,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_aligned="
+                    f"{tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe.get('aligned_pixels', '0')}",
+                    "tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_remaining="
+                    f"{tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe.get('potential_remaining_nonzero_pixels', '0')}",
+                    "tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_verdict="
+                    f"{tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe.get('non_low2_selector_verdict', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_standard_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -6949,6 +6966,57 @@ def apply_old_clean_byte_union(
                 )
                 == 0
             )
+            shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe_current = (
+                shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe_current
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe
+                is not None
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe.get(
+                    "frontier_id"
+                )
+                == tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe.get(
+                    "frontier_id"
+                )
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe.get(
+                    "pcx_name"
+                )
+                == tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe.get(
+                    "pcx_name"
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe,
+                    "non_low2_target_pixels",
+                )
+                == int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe,
+                    "non_low2_target_pixels",
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe,
+                    "low2_representable_pixels",
+                )
+                == int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe,
+                    "low2_representable_pixels",
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe,
+                    "aligned_pixels",
+                )
+                == int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe,
+                    "best_lcs_pixels",
+                )
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe,
+                    "dy",
+                )
+                == 1
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe,
+                    "shift",
+                )
+                == 0
+            )
             shifted_2a30_standard_probe_current = (
                 large_rejected_profile_current
                 and tex_large_shifted_2a30_standard_probe is not None
@@ -7399,6 +7467,23 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_standard_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
+            elif (
+                tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe
+                and shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe_current
+                and int_value(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe,
+                    "issue_rows",
+                )
+                == 0
+                and tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe.get(
+                    "next_action"
+                )
+            ):
+                next_action = str(
+                    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe.get(
+                        "next_action"
+                    )
+                )
             elif (
                 tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe
                 and shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe_current
@@ -23952,6 +24037,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_RESTART_LOW2_NON_LOW2_SOURCE_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shared-2700302b-reference-fixed-dy1-post-restart-low2-non-low2-selector-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHARED_2700302B_REFERENCE_FIXED_DY1_POST_RESTART_LOW2_NON_LOW2_SELECTOR_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-standard-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY,
@@ -26747,6 +26837,11 @@ def main() -> None:
             args.tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe_summary
         )
     )
+    tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe_summary = (
+        read_optional_summary(
+            args.tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe_summary
+        )
+    )
     tex_large_shifted_2a30_standard_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_standard_probe_summary
     )
@@ -28427,6 +28522,9 @@ def main() -> None:
         ),
         tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe=(
             tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_source_probe_summary
+        ),
+        tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe=(
+            tex_large_shared_2700302b_reference_fixed_dy1_post_restart_low2_non_low2_selector_probe_summary
         ),
         tex_large_shifted_2a30_standard_probe=tex_large_shifted_2a30_standard_probe_summary,
         tex_large_shifted_2a30_branch_probe=tex_large_shifted_2a30_branch_probe_summary,
