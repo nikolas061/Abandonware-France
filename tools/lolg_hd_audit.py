@@ -133,6 +133,18 @@ DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_ANCHORS = Path(
 DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_HTML = Path(
     "output/tex_large_rejected_decoder_profile/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_standard_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_ANCHORS = Path(
+    "output/tex_large_shifted_2a30_standard_probe/anchors.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_RULES = Path(
+    "output/tex_large_shifted_2a30_standard_probe/rules.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_standard_probe/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -822,6 +834,8 @@ SUMMARY_FIELDNAMES = [
     "tex_large_rejected_decoder_profile_groups",
     "tex_large_rejected_decoder_profile_control_paths",
     "tex_large_rejected_decoder_profile_shifted_2a30_anchors",
+    "tex_large_shifted_2a30_standard_probe_rows",
+    "tex_large_shifted_2a30_standard_probe_branch_rows",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -3042,6 +3056,122 @@ def audit_tex_large_rejected_decoder_profile(
         body_first_word_groups if ok else 0,
         control_path_groups if ok else 0,
         shifted_2a30_anchor_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_standard_probe(
+    summary: Path,
+    anchors_path: Path,
+    rules_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_standard_probe", summary), 0, 0
+    if not anchors_path.exists():
+        return missing_gate("tex_large_shifted_2a30_standard_probe", anchors_path), 0, 0
+    if not rules_path.exists():
+        return missing_gate("tex_large_shifted_2a30_standard_probe", rules_path), 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_standard_probe", html_report), 0, 0
+
+    summary_rows = read_csv(summary)
+    anchor_rows = read_csv(anchors_path)
+    rule_rows = read_csv(rules_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    anchor_count = int_value(total, "anchor_rows")
+    standard_rows = int_value(total, "standard_rows")
+    branch_rows = int_value(total, "branch_rows")
+    branch_key_groups = int_value(total, "branch_key_groups")
+    standard_branch_key = total.get("standard_branch_key", "")
+    branch_only_keys = total.get("branch_only_keys", "")
+    standard_selector_values = int_value(total, "standard_selector_values")
+    branch_selector_values = int_value(total, "branch_selector_values")
+    selector_collision_rows = int_value(total, "selector_collision_rows")
+    standard_field16_values = int_value(total, "standard_field16_values")
+    standard_field16_min = int_value(total, "standard_field16_min")
+    standard_field16_max = int_value(total, "standard_field16_max")
+    post_zero_rows = int_value(total, "post_zero_rows")
+    post_28_rows = int_value(total, "post_28_rows")
+    rule_count = int_value(total, "rule_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    standard = [row for row in anchor_rows if row.get("is_standard") == "yes"]
+    branch = [row for row in anchor_rows if row.get("is_standard") != "yes"]
+    standard_keys = {row.get("branch_key", "") for row in standard if row.get("branch_key")}
+    branch_keys = {row.get("branch_key", "") for row in branch if row.get("branch_key")}
+    all_keys = {row.get("branch_key", "") for row in anchor_rows if row.get("branch_key")}
+    standard_selectors = {row.get("selector_byte_hex", "") for row in standard if row.get("selector_byte_hex")}
+    branch_selectors = {row.get("selector_byte_hex", "") for row in branch if row.get("selector_byte_hex")}
+    selector_collisions = standard_selectors & branch_selectors
+    standard_fields = [int_value(row, "post_field16_le_dec") for row in standard if row.get("post_field16_le_dec")]
+    expected_branch_only = "|".join(sorted(branch_keys - standard_keys))
+
+    if anchor_count != len(anchor_rows):
+        issues.append("shifted_2a30_anchor_count_mismatch")
+    if standard_rows != len(standard):
+        issues.append("shifted_2a30_standard_count_mismatch")
+    if branch_rows != len(branch):
+        issues.append("shifted_2a30_branch_count_mismatch")
+    if branch_key_groups != len(all_keys):
+        issues.append("shifted_2a30_branch_key_group_mismatch")
+    if standard_branch_key != "0x00_0x28" or standard_keys != {"0x00_0x28"}:
+        issues.append("shifted_2a30_standard_branch_key_mismatch")
+    if branch_only_keys != expected_branch_only:
+        issues.append("shifted_2a30_branch_only_key_mismatch")
+    if standard_selector_values != len(standard_selectors):
+        issues.append("shifted_2a30_standard_selector_count_mismatch")
+    if branch_selector_values != len(branch_selectors):
+        issues.append("shifted_2a30_branch_selector_count_mismatch")
+    if selector_collision_rows != sum(
+        1 for row in anchor_rows if row.get("selector_byte_hex") in selector_collisions
+    ):
+        issues.append("shifted_2a30_selector_collision_count_mismatch")
+    if standard_field16_values != len(set(standard_fields)):
+        issues.append("shifted_2a30_field16_value_count_mismatch")
+    if standard_fields and standard_field16_min != min(standard_fields):
+        issues.append("shifted_2a30_field16_min_mismatch")
+    if standard_fields and standard_field16_max != max(standard_fields):
+        issues.append("shifted_2a30_field16_max_mismatch")
+    if post_zero_rows != sum(1 for row in anchor_rows if row.get("post0_hex") == "0x00"):
+        issues.append("shifted_2a30_post_zero_count_mismatch")
+    if post_28_rows != sum(1 for row in anchor_rows if row.get("post1_hex") == "0x28"):
+        issues.append("shifted_2a30_post_28_count_mismatch")
+    if rule_count != len(rule_rows):
+        issues.append("shifted_2a30_rule_count_mismatch")
+    rule_verdicts = {row.get("rule_id", ""): row.get("verdict", "") for row in rule_rows}
+    if rule_verdicts.get("branch_key") != "separates_current_branch":
+        issues.append("shifted_2a30_branch_key_rule_mismatch")
+    if rule_verdicts.get("selector_byte") != "collides_with_branch":
+        issues.append("shifted_2a30_selector_rule_mismatch")
+    if issue_rows != sum(1 for row in anchor_rows if row.get("issues")):
+        issues.append("shifted_2a30_issue_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    if "const TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_standard_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_standard_probe",
+            ok,
+            expected="shifted 0x2a30 standard branch is separated from the isolated branch row",
+            actual=(
+                f"anchors={anchor_count}, standard={standard_rows}, branch={branch_rows}, "
+                f"field16_values={standard_field16_values}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        standard_rows if ok else 0,
+        branch_rows if ok else 0,
     )
 
 
@@ -12295,6 +12425,17 @@ def main() -> None:
         DEFAULT_TEX_LARGE_REJECTED_DECODER_PROFILE_HTML,
     )
     rows.append(tex_large_rejected_decoder_profile_gate)
+    (
+        tex_large_shifted_2a30_standard_probe_gate,
+        tex_large_shifted_2a30_standard_probe_rows,
+        tex_large_shifted_2a30_standard_probe_branch_rows,
+    ) = audit_tex_large_shifted_2a30_standard_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_ANCHORS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_RULES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_standard_probe_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -17650,6 +17791,10 @@ def main() -> None:
         ),
         "tex_large_rejected_decoder_profile_shifted_2a30_anchors": str(
             tex_large_rejected_decoder_profile_shifted_2a30_anchors
+        ),
+        "tex_large_shifted_2a30_standard_probe_rows": str(tex_large_shifted_2a30_standard_probe_rows),
+        "tex_large_shifted_2a30_standard_probe_branch_rows": str(
+            tex_large_shifted_2a30_standard_probe_branch_rows
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),

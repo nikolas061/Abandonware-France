@@ -2569,6 +2569,10 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_large_rejected_decoder_profile.py"],
         ),
         Step(
+            "probe 2a30 standard gros segments .tex rejetes",
+            [sys.executable, "tools/lolg_tex_large_shifted_2a30_standard_probe.py"],
+        ),
+        Step(
             "gradient-like noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,
