@@ -73,10 +73,14 @@ DEFAULT_ALIAS_PACK_HTML = Path("output/cdcache_tex_alias_pack/index.html")
 DEFAULT_TEX_MATERIAL_DECODE_PACK_SUMMARY = Path("output/tex_material_decode_pack/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODE_PACK_MANIFEST = Path("output/tex_material_decode_pack/manifest.csv")
 DEFAULT_TEX_MATERIAL_DECODE_PACK_HTML = Path("output/tex_material_decode_pack/index.html")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_SUMMARY = Path("output/tex_raw_same_archive_promoted_pack/summary.csv")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_MANIFEST = Path("output/tex_raw_same_archive_promoted_pack/manifest.csv")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_HTML = Path("output/tex_raw_same_archive_promoted_pack/index.html")
 DEFAULT_TEX_AUGMENTED_SUMMARY = Path("output/tex_augmented_coverage/summary.csv")
 DEFAULT_TEX_AUGMENTED_REFERENCES = Path("output/tex_augmented_coverage/references.csv")
 DEFAULT_TEX_AUGMENTED_ALIASES = Path("output/tex_augmented_coverage/aliases.csv")
 DEFAULT_TEX_AUGMENTED_MATERIAL_DECODES = Path("output/tex_augmented_coverage/material_decodes.csv")
+DEFAULT_TEX_AUGMENTED_RAW_SAME_ARCHIVE = Path("output/tex_augmented_coverage/raw_same_archive_promotions.csv")
 DEFAULT_TEX_AUGMENTED_HTML = Path("output/tex_augmented_coverage/index.html")
 DEFAULT_TEX_UNRESOLVED_PROBE_SUMMARY = Path("output/tex_unresolved_material_probe_render/summary.csv")
 DEFAULT_TEX_UNRESOLVED_PROBE_MANIFEST = Path(
@@ -759,8 +763,10 @@ SUMMARY_FIELDNAMES = [
     "cdcache_alias_fullhd_outputs",
     "cdcache_tex_alias_pack_assets",
     "tex_material_decode_pack_assets",
+    "tex_raw_same_archive_promoted_pack_eligible",
     "tex_augmented_exact_or_alias_unique_pcx",
     "tex_augmented_exact_alias_or_decoded_unique_pcx",
+    "tex_augmented_exact_alias_decoded_or_raw_unique_pcx",
     "tex_augmented_unresolved_unique_pcx",
     "tex_unresolved_material_probe_fullhd_previews",
     "tex_unresolved_material_probe_unique_pcx",
@@ -2136,28 +2142,141 @@ def audit_tex_material_decode_pack(
     )
 
 
+def audit_tex_raw_same_archive_promoted_pack(
+    summary: Path,
+    manifest: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int]:
+    if not summary.exists():
+        return missing_gate("tex_raw_same_archive_promoted_pack", summary), 0
+    if not manifest.exists():
+        return missing_gate("tex_raw_same_archive_promoted_pack", manifest), 0
+    if not html_report.exists():
+        return missing_gate("tex_raw_same_archive_promoted_pack", html_report), 0
+
+    summary_rows = read_csv(summary)
+    manifest_rows = read_csv(manifest)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    candidate_rows = int_value(total, "candidate_rows")
+    unique_pcx = int_value(total, "unique_pcx")
+    accepted_rows = int_value(total, "accepted_rows")
+    pending_rows = int_value(total, "pending_rows")
+    coverage_eligible_rows = int_value(total, "coverage_eligible_rows")
+    native_assets = int_value(total, "native_assets")
+    fullhd_assets = int_value(total, "fullhd_assets")
+    accepted_fullhd_assets = int_value(total, "accepted_fullhd_assets")
+    missing_source_paths = int_value(total, "missing_source_paths")
+    missing_fullhd_paths = int_value(total, "missing_fullhd_paths")
+    issue_rows = int_value(total, "issue_rows")
+
+    unique_names = {
+        row.get("normalized_pcx_name", "")
+        for row in manifest_rows
+        if row.get("normalized_pcx_name")
+    }
+    accepted = [row for row in manifest_rows if row.get("review_status") == "accepted"]
+    pending = [row for row in manifest_rows if row.get("review_status") != "accepted"]
+    eligible = [row for row in manifest_rows if row.get("coverage_eligible") == "yes"]
+
+    if candidate_rows != len(manifest_rows):
+        issues.append("raw_same_archive_candidate_count_mismatch")
+    if unique_pcx != len(unique_names):
+        issues.append("raw_same_archive_unique_pcx_mismatch")
+    if accepted_rows != len(accepted):
+        issues.append("raw_same_archive_accepted_count_mismatch")
+    if pending_rows != len(pending):
+        issues.append("raw_same_archive_pending_count_mismatch")
+    if coverage_eligible_rows != len(eligible):
+        issues.append("raw_same_archive_eligible_count_mismatch")
+    if native_assets != sum(1 for row in manifest_rows if row.get("promoted_native_exists") == "yes"):
+        issues.append("raw_same_archive_native_count_mismatch")
+    if fullhd_assets != sum(1 for row in manifest_rows if row.get("promoted_fullhd_exists") == "yes"):
+        issues.append("raw_same_archive_fullhd_count_mismatch")
+    if accepted_fullhd_assets != sum(1 for row in accepted if row.get("promoted_fullhd_exists") == "yes"):
+        issues.append("raw_same_archive_accepted_fullhd_count_mismatch")
+    if missing_source_paths != sum(1 for row in manifest_rows if row.get("source_native_exists") != "yes"):
+        issues.append("raw_same_archive_missing_source_count_mismatch")
+    if missing_fullhd_paths != sum(1 for row in manifest_rows if row.get("promoted_fullhd_exists") != "yes"):
+        issues.append("raw_same_archive_missing_fullhd_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    missing_paths = 0
+    bad_dimensions = 0
+    accepted_with_issues = 0
+    for row in manifest_rows:
+        if row.get("coverage_eligible") == "yes" and row.get("review_status") != "accepted":
+            issues.append("raw_same_archive_eligible_not_accepted")
+        if row.get("review_status") == "accepted" and row.get("issues"):
+            accepted_with_issues += 1
+        value = row.get("promoted_fullhd_path", "")
+        if row.get("promoted_fullhd_exists") == "yes":
+            if not value or not Path(value).exists():
+                missing_paths += 1
+            if (row.get("promoted_fullhd_width"), row.get("promoted_fullhd_height")) != (
+                str(TARGET_SIZE[0]),
+                str(TARGET_SIZE[1]),
+            ):
+                bad_dimensions += 1
+    if missing_paths:
+        issues.append(f"missing_raw_same_archive_paths:{missing_paths}")
+    if bad_dimensions:
+        issues.append(f"raw_same_archive_bad_dimensions:{bad_dimensions}")
+    if accepted_with_issues:
+        issues.append(f"accepted_raw_same_archive_rows_have_issues:{accepted_with_issues}")
+    if "const TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK = " not in text:
+        issues.append("missing_tex_raw_same_archive_promoted_pack_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_raw_same_archive_promoted_pack",
+            ok,
+            expected="raw same-archive .tex promotion pack has valid reviewed Full HD outputs",
+            actual=(
+                f"candidates={candidate_rows}, accepted={accepted_rows}, "
+                f"eligible={coverage_eligible_rows}, pending={pending_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        coverage_eligible_rows if ok else 0,
+    )
+
+
 def audit_tex_augmented_coverage(
     summary: Path,
     references: Path,
     aliases: Path,
     material_decodes: Path,
+    raw_same_archive_promotions: Path,
     html_report: Path,
-) -> tuple[dict[str, str], int, int, int]:
+) -> tuple[dict[str, str], int, int, int, int]:
     if not summary.exists():
-        return missing_gate("tex_augmented_coverage", summary), 0, 0, 0
+        return missing_gate("tex_augmented_coverage", summary), 0, 0, 0, 0
     if not references.exists():
-        return missing_gate("tex_augmented_coverage", references), 0, 0, 0
+        return missing_gate("tex_augmented_coverage", references), 0, 0, 0, 0
     if not aliases.exists():
-        return missing_gate("tex_augmented_coverage", aliases), 0, 0, 0
+        return missing_gate("tex_augmented_coverage", aliases), 0, 0, 0, 0
     if not material_decodes.exists():
-        return missing_gate("tex_augmented_coverage", material_decodes), 0, 0, 0
+        return missing_gate("tex_augmented_coverage", material_decodes), 0, 0, 0, 0
+    if not raw_same_archive_promotions.exists():
+        return missing_gate("tex_augmented_coverage", raw_same_archive_promotions), 0, 0, 0, 0
     if not html_report.exists():
-        return missing_gate("tex_augmented_coverage", html_report), 0, 0, 0
+        return missing_gate("tex_augmented_coverage", html_report), 0, 0, 0, 0
 
     summary_rows = read_csv(summary)
     reference_rows = read_csv(references)
     alias_rows = read_csv(aliases)
     material_decode_rows = read_csv(material_decodes)
+    raw_same_archive_rows = read_csv(raw_same_archive_promotions)
     text = html_report.read_text(errors="replace")
     issues: list[str] = []
     if len(summary_rows) != 1:
@@ -2175,8 +2294,12 @@ def audit_tex_augmented_coverage(
     decoded_reference_rows = int_value(total, "decoded_material_reference_rows")
     decoded_unique = int_value(total, "decoded_material_unique_pcx")
     decoded_assets = int_value(total, "decoded_material_assets")
+    raw_reference_rows = int_value(total, "raw_same_archive_reference_rows")
+    raw_unique = int_value(total, "raw_same_archive_unique_pcx")
+    raw_assets = int_value(total, "raw_same_archive_assets")
     exact_or_alias = int_value(total, "exact_or_alias_unique_pcx")
     exact_alias_or_decoded = int_value(total, "exact_alias_or_decoded_unique_pcx")
+    exact_alias_decoded_or_raw = int_value(total, "exact_alias_decoded_or_raw_unique_pcx")
     unresolved_unique = int_value(total, "unresolved_unique_pcx")
     issue_rows = int_value(total, "issue_rows")
 
@@ -2196,11 +2319,17 @@ def audit_tex_augmented_coverage(
         for row in reference_rows
         if row.get("coverage_status") == "decoded_material"
     }
+    raw_names = {
+        row.get("normalized_pcx_name", "")
+        for row in reference_rows
+        if row.get("coverage_status") == "raw_same_archive"
+    }
     unresolved_names = {
         row.get("normalized_pcx_name", "")
         for row in reference_rows
         if row.get("coverage_status") == "unresolved"
     }
+    eligible_raw = [row for row in raw_same_archive_rows if row.get("coverage_eligible") == "yes"]
     if reference_count != len(reference_rows):
         issues.append("tex_augmented_reference_count_mismatch")
     if unique_likely != len(reference_names):
@@ -2219,10 +2348,18 @@ def audit_tex_augmented_coverage(
         issues.append("tex_augmented_decoded_unique_count_mismatch")
     if decoded_assets != len(material_decode_rows):
         issues.append("tex_augmented_decoded_asset_count_mismatch")
+    if raw_reference_rows != sum(1 for row in reference_rows if row.get("coverage_status") == "raw_same_archive"):
+        issues.append("tex_augmented_raw_reference_count_mismatch")
+    if raw_unique != len(raw_names):
+        issues.append("tex_augmented_raw_unique_count_mismatch")
+    if raw_assets != len(eligible_raw):
+        issues.append("tex_augmented_raw_asset_count_mismatch")
     if exact_or_alias != len(exact_names | alias_names):
         issues.append("tex_augmented_exact_or_alias_count_mismatch")
     if exact_alias_or_decoded != len(exact_names | alias_names | decoded_names):
         issues.append("tex_augmented_exact_alias_or_decoded_count_mismatch")
+    if exact_alias_decoded_or_raw != len(exact_names | alias_names | decoded_names | raw_names):
+        issues.append("tex_augmented_exact_alias_decoded_or_raw_count_mismatch")
     if unresolved_unique != len(unresolved_names):
         issues.append("tex_augmented_unresolved_unique_count_mismatch")
     if issue_rows:
@@ -2243,6 +2380,15 @@ def audit_tex_augmented_coverage(
             issues.append("material_decode_row_has_issues")
     if missing_decoded_paths:
         issues.append(f"missing_material_decode_paths:{missing_decoded_paths}")
+    missing_raw_paths = 0
+    for row in eligible_raw:
+        value = row.get("promoted_fullhd_path", "")
+        if not value or not Path(value).exists():
+            missing_raw_paths += 1
+        if row.get("issues"):
+            issues.append("raw_same_archive_row_has_issues")
+    if missing_raw_paths:
+        issues.append(f"missing_raw_same_archive_paths:{missing_raw_paths}")
     if "const TEX_AUGMENTED_COVERAGE = " not in text:
         issues.append("missing_tex_augmented_coverage_json")
 
@@ -2254,7 +2400,8 @@ def audit_tex_augmented_coverage(
             expected=".tex exact, alias and material decode coverage report is internally consistent",
             actual=(
                 f"unique={unique_likely}, exact={exact_unique}, alias={alias_unique}, "
-                f"decoded={decoded_unique}, exact_alias_decoded={exact_alias_or_decoded}, "
+                f"decoded={decoded_unique}, raw={raw_unique}, "
+                f"exact_alias_decoded_raw={exact_alias_decoded_or_raw}, "
                 f"unresolved={unresolved_unique}, issues={issue_rows}"
             ),
             evidence=f"{summary};{html_report}",
@@ -2262,6 +2409,7 @@ def audit_tex_augmented_coverage(
         ),
         exact_or_alias if ok else 0,
         exact_alias_or_decoded if ok else 0,
+        exact_alias_decoded_or_raw if ok else 0,
         unresolved_unique if ok else 0,
     )
 
@@ -11600,10 +11748,17 @@ def main() -> None:
         DEFAULT_TEX_MATERIAL_DECODE_PACK_HTML,
     )
     rows.append(tex_material_decode_gate)
+    tex_raw_same_archive_gate, tex_raw_same_archive_eligible = audit_tex_raw_same_archive_promoted_pack(
+        DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_SUMMARY,
+        DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_MANIFEST,
+        DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_HTML,
+    )
+    rows.append(tex_raw_same_archive_gate)
     (
         tex_augmented_gate,
         tex_augmented_exact_or_alias,
         tex_augmented_exact_alias_or_decoded,
+        tex_augmented_exact_alias_decoded_or_raw,
         tex_augmented_unresolved,
     ) = (
         audit_tex_augmented_coverage(
@@ -11611,6 +11766,7 @@ def main() -> None:
             DEFAULT_TEX_AUGMENTED_REFERENCES,
             DEFAULT_TEX_AUGMENTED_ALIASES,
             DEFAULT_TEX_AUGMENTED_MATERIAL_DECODES,
+            DEFAULT_TEX_AUGMENTED_RAW_SAME_ARCHIVE,
             DEFAULT_TEX_AUGMENTED_HTML,
         )
     )
@@ -16961,8 +17117,12 @@ def main() -> None:
         "cdcache_alias_fullhd_outputs": str(alias_descriptor_count + alias_tile_count),
         "cdcache_tex_alias_pack_assets": str(alias_pack_assets),
         "tex_material_decode_pack_assets": str(tex_material_decode_assets),
+        "tex_raw_same_archive_promoted_pack_eligible": str(tex_raw_same_archive_eligible),
         "tex_augmented_exact_or_alias_unique_pcx": str(tex_augmented_exact_or_alias),
         "tex_augmented_exact_alias_or_decoded_unique_pcx": str(tex_augmented_exact_alias_or_decoded),
+        "tex_augmented_exact_alias_decoded_or_raw_unique_pcx": str(
+            tex_augmented_exact_alias_decoded_or_raw
+        ),
         "tex_augmented_unresolved_unique_pcx": str(tex_augmented_unresolved),
         "tex_unresolved_material_probe_fullhd_previews": str(tex_probe_previews),
         "tex_unresolved_material_probe_unique_pcx": str(tex_probe_unique_pcx),

@@ -982,6 +982,7 @@ DEFAULT_GRADIENT_SEQUENCE_HIGH_SAFE_LOW_EXCEPTION_SOURCE_DEPENDENCY_FRONTIER80_S
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_AUGMENTED_COVERAGE_SUMMARY = Path("output/tex_augmented_coverage/summary.csv")
 DEFAULT_TEX_REMAINING_REFERENCE_PROFILE_SUMMARY = Path("output/tex_remaining_reference_profile/summary.csv")
+DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_SUMMARY = Path("output/tex_raw_same_archive_promoted_pack/summary.csv")
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1794,6 +1795,7 @@ def apply_old_clean_byte_union(
     tex_material_decoder_queue: dict[str, str] | None,
     tex_augmented_coverage: dict[str, str] | None,
     tex_remaining_reference_profile: dict[str, str] | None,
+    tex_raw_same_archive_promoted_pack: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -4678,6 +4680,19 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_raw_same_archive_promoted_pack:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_raw_same_archive_pack_accepted="
+                    f"{tex_raw_same_archive_promoted_pack.get('accepted_rows', '0')}",
+                    "tex_raw_same_archive_pack_pending="
+                    f"{tex_raw_same_archive_promoted_pack.get('pending_rows', '0')}",
+                    "tex_raw_same_archive_pack_coverage_eligible="
+                    f"{tex_raw_same_archive_promoted_pack.get('coverage_eligible_rows', '0')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5233,7 +5248,13 @@ def apply_old_clean_byte_union(
             and tex_remaining_reference_profile
             and tex_remaining_reference_profile.get("next_action")
         ):
-            next_action = str(tex_remaining_reference_profile.get("next_action"))
+            if tex_raw_same_archive_promoted_pack and int_value(tex_raw_same_archive_promoted_pack, "pending_rows") > 0:
+                next_action = str(
+                    tex_raw_same_archive_promoted_pack.get("next_action")
+                    or tex_remaining_reference_profile.get("next_action")
+                )
+            else:
+                next_action = str(tex_remaining_reference_profile.get("next_action"))
         elif (
             outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency
             and int_value(outside_source_frontier80_structural_nonzero_final_zero_gap_source_dependency, "source_unknown_slots") == 0
@@ -21198,6 +21219,11 @@ def main() -> None:
         default=DEFAULT_TEX_REMAINING_REFERENCE_PROFILE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-raw-same-archive-promoted-pack-summary",
+        type=Path,
+        default=DEFAULT_TEX_RAW_SAME_ARCHIVE_PROMOTED_PACK_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -23734,6 +23760,9 @@ def main() -> None:
     tex_material_decoder_queue_summary = read_optional_summary(args.tex_material_decoder_queue_summary)
     tex_augmented_coverage_summary = read_optional_summary(args.tex_augmented_coverage_summary)
     tex_remaining_reference_profile_summary = read_optional_summary(args.tex_remaining_reference_profile_summary)
+    tex_raw_same_archive_promoted_pack_summary = read_optional_summary(
+        args.tex_raw_same_archive_promoted_pack_summary
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -25254,6 +25283,7 @@ def main() -> None:
         tex_material_decoder_queue=tex_material_decoder_queue_summary,
         tex_augmented_coverage=tex_augmented_coverage_summary,
         tex_remaining_reference_profile=tex_remaining_reference_profile_summary,
+        tex_raw_same_archive_promoted_pack=tex_raw_same_archive_promoted_pack_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,

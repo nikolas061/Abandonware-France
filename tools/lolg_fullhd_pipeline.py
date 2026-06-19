@@ -2506,6 +2506,16 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
         Step("file decodeur materiaux .tex", [sys.executable, "tools/lolg_tex_material_decoder_queue.py"]),
         Step("profil references restantes .tex", [sys.executable, "tools/lolg_tex_remaining_reference_profile.py"]),
         Step(
+            "pack promotions raw same-archive .tex",
+            [sys.executable, "tools/lolg_tex_raw_same_archive_promoted_pack.py"],
+            requires_pillow=True,
+        ),
+        Step("couverture augmentee .tex apres promotions raw", [sys.executable, "tools/lolg_tex_augmented_coverage.py"]),
+        Step(
+            "profil references restantes .tex apres promotions raw",
+            [sys.executable, "tools/lolg_tex_remaining_reference_profile.py"],
+        ),
+        Step(
             "gradient-like noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,
