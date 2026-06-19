@@ -2195,6 +2195,23 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Structural No-Bridge Weak Gap Promoted Replay Probe",
                 ],
             ),
+            Step(
+                "probe sources residuelles no-bridge structurel nonzero frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_no_bridge_residual_source_probe.py",
+                    "--anchors",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_anchor_probe/anchors.csv",
+                    "--weak-gaps",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_anchor_probe/gaps.csv",
+                    "--weak-gap-promoted-summary",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_weak_gap_promoted_replay_probe/summary.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Structural No-Bridge Residual Source Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -7900,6 +7917,23 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_weak_gap_promoted_replay_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Structural No-Bridge Weak Gap Promoted Replay Probe",
+            ],
+        ),
+        Step(
+            "probe sources residuelles no-bridge structurel nonzero frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_no_bridge_residual_source_probe.py",
+                "--anchors",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_anchor_probe/anchors.csv",
+                "--weak-gaps",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_anchor_probe/gaps.csv",
+                "--weak-gap-promoted-summary",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_weak_gap_promoted_replay_probe/summary.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Structural No-Bridge Residual Source Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
