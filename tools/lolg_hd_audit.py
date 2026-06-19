@@ -286,6 +286,18 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_MANIFEST = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_HTML = Path(
     "output/tex_large_shifted_2a30_field16_decoder_previews/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews_review/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_ROWS = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews_review/review.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_DECISIONS = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews_review/decisions_template.tsv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_previews_review/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -1008,6 +1020,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_decoder_previews_native",
     "tex_large_shifted_2a30_field16_decoder_previews_fullhd",
     "tex_large_shifted_2a30_field16_decoder_previews_sources",
+    "tex_large_shifted_2a30_field16_decoder_previews_review_ready",
+    "tex_large_shifted_2a30_field16_decoder_previews_review_sheets",
+    "tex_large_shifted_2a30_field16_decoder_previews_review_fullhd",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -4881,6 +4896,139 @@ def audit_tex_large_shifted_2a30_field16_decoder_previews(
         native_previews if ok else 0,
         fullhd_previews if ok else 0,
         source_previews if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_decoder_previews_review(
+    summary: Path,
+    review_rows_path: Path,
+    decisions_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_previews_review", summary), 0, 0, 0
+    if not review_rows_path.exists():
+        return missing_gate(
+            "tex_large_shifted_2a30_field16_decoder_previews_review",
+            review_rows_path,
+        ), 0, 0, 0
+    if not decisions_path.exists():
+        return missing_gate(
+            "tex_large_shifted_2a30_field16_decoder_previews_review",
+            decisions_path,
+        ), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_previews_review", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    review_rows = read_csv(review_rows_path)
+    decision_rows = read_tsv(decisions_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    manifest_rows = int_value(total, "manifest_rows")
+    review_count = int_value(total, "review_rows")
+    ready_rows = int_value(total, "review_ready_rows")
+    decision_count = int_value(total, "decision_template_rows")
+    sheet_rows = int_value(total, "sheet_rows")
+    source_native_match_rows = int_value(total, "source_native_match_rows")
+    fullhd_reconstructed_rows = int_value(total, "fullhd_reconstructed_rows")
+    nonblank_fullhd_rows = int_value(total, "nonblank_fullhd_rows")
+    missing_source_rows = int_value(total, "missing_source_rows")
+    missing_native_rows = int_value(total, "missing_native_rows")
+    missing_fullhd_rows = int_value(total, "missing_fullhd_rows")
+    missing_sheet_rows = int_value(total, "missing_sheet_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    ready_review_rows = [row for row in review_rows if row.get("promotion_status") == "ready" and not row.get("issues")]
+    sheet_review_rows = [row for row in review_rows if row.get("review_sheet_exists") == "yes"]
+    source_native_rows = [row for row in review_rows if row.get("source_native_match") == "yes"]
+    fullhd_rows = [row for row in review_rows if row.get("fullhd_reconstructed_match") == "yes"]
+    nonblank_rows = [row for row in review_rows if row.get("fullhd_nonblank") == "yes"]
+    review_issue_rows = [row for row in review_rows if row.get("issues")]
+
+    if manifest_rows != 4:
+        issues.append("field16_decoder_preview_review_manifest_count_mismatch")
+    if review_count != len(review_rows) or review_count != 4:
+        issues.append("field16_decoder_preview_review_row_count_mismatch")
+    if ready_rows != len(ready_review_rows) or ready_rows != 4:
+        issues.append("field16_decoder_preview_review_ready_count_mismatch")
+    if decision_count != len(decision_rows) or decision_count != 4:
+        issues.append("field16_decoder_preview_review_decision_count_mismatch")
+    if sheet_rows != len(sheet_review_rows) or sheet_rows != 4:
+        issues.append("field16_decoder_preview_review_sheet_count_mismatch")
+    if source_native_match_rows != len(source_native_rows) or source_native_match_rows != 4:
+        issues.append("field16_decoder_preview_review_source_native_mismatch")
+    if fullhd_reconstructed_rows != len(fullhd_rows) or fullhd_reconstructed_rows != 4:
+        issues.append("field16_decoder_preview_review_fullhd_reconstruction_mismatch")
+    if nonblank_fullhd_rows != len(nonblank_rows) or nonblank_fullhd_rows != 4:
+        issues.append("field16_decoder_preview_review_nonblank_mismatch")
+    if missing_source_rows or missing_native_rows or missing_fullhd_rows or missing_sheet_rows:
+        issues.append("field16_decoder_preview_review_missing_inputs")
+    if issue_rows != len(review_issue_rows) or issue_rows != 0:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    expected_rows = {
+        "stump2.pcx": ("L12_CM", "zero_delta_extra40", "40"),
+        "barsgld.pcx": ("L14_HT", "positive_small_nextlow_minus2", "24"),
+        "dragend.pcx": ("L3_DH", "negative_small_extra36", "36"),
+        "catbas.pcx": ("L5_HC", "zero_delta_extra40", "40"),
+    }
+    rows_by_name = {row.get("pcx_name", ""): row for row in review_rows}
+    decisions_by_name = {row.get("name", ""): row for row in decision_rows}
+    if set(rows_by_name) != set(expected_rows):
+        issues.append("field16_decoder_preview_review_rows_unexpected")
+    if set(decisions_by_name) != set(expected_rows):
+        issues.append("field16_decoder_preview_review_decisions_unexpected")
+    for pcx_name, expected in expected_rows.items():
+        row = rows_by_name.get(pcx_name)
+        decision = decisions_by_name.get(pcx_name)
+        if not row:
+            continue
+        actual = (row.get("archive_tag"), row.get("decoder_rule"), row.get("decoder_extra"))
+        if actual != expected:
+            issues.append(f"field16_decoder_preview_review_{pcx_name}_row_mismatch")
+        if (row.get("native_width"), row.get("native_height")) != ("48", "128"):
+            issues.append(f"field16_decoder_preview_review_{pcx_name}_native_size_mismatch")
+        if (row.get("fullhd_width"), row.get("fullhd_height")) != (str(TARGET_SIZE[0]), str(TARGET_SIZE[1])):
+            issues.append(f"field16_decoder_preview_review_{pcx_name}_fullhd_size_mismatch")
+        for field in ("source_preview_path", "native_preview_path", "fullhd_preview_path", "review_sheet_path"):
+            if not row.get(field) or not Path(row[field]).exists():
+                issues.append(f"field16_decoder_preview_review_{pcx_name}_{field}_missing")
+        if row.get("promotion_status") != "ready" or row.get("promotion_reason") != "preview_consistent":
+            issues.append(f"field16_decoder_preview_review_{pcx_name}_status_mismatch")
+        if not row.get("fullhd_alpha_bbox"):
+            issues.append(f"field16_decoder_preview_review_{pcx_name}_alpha_bbox_missing")
+        if decision:
+            if decision.get("review_status") != "ready" or decision.get("review_note") != "preview_consistent":
+                issues.append(f"field16_decoder_preview_review_{pcx_name}_decision_mismatch")
+
+    if total.get("review_verdict") != "field16_decoder_previews_review_ready":
+        issues.append("field16_decoder_preview_review_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_decoder_previews_review_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_decoder_previews_review",
+            ok,
+            expected="reviewed 4 routed shifted 0x2a30 field16 decoder previews with exact native and Full HD checks",
+            actual=(
+                f"ready={ready_rows}/{review_count}, sheets={sheet_rows}, "
+                f"fullhd={fullhd_reconstructed_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        ready_rows if ok else 0,
+        sheet_rows if ok else 0,
+        fullhd_reconstructed_rows if ok else 0,
     )
 
 
@@ -14278,6 +14426,18 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_decoder_previews_gate)
+    (
+        tex_large_shifted_2a30_field16_decoder_previews_review_gate,
+        tex_large_shifted_2a30_field16_decoder_previews_review_ready,
+        tex_large_shifted_2a30_field16_decoder_previews_review_sheets,
+        tex_large_shifted_2a30_field16_decoder_previews_review_fullhd,
+    ) = audit_tex_large_shifted_2a30_field16_decoder_previews_review(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_ROWS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_DECISIONS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_PREVIEWS_REVIEW_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_decoder_previews_review_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -19728,6 +19888,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_decoder_previews_sources": str(
             tex_large_shifted_2a30_field16_decoder_previews_sources
+        ),
+        "tex_large_shifted_2a30_field16_decoder_previews_review_ready": str(
+            tex_large_shifted_2a30_field16_decoder_previews_review_ready
+        ),
+        "tex_large_shifted_2a30_field16_decoder_previews_review_sheets": str(
+            tex_large_shifted_2a30_field16_decoder_previews_review_sheets
+        ),
+        "tex_large_shifted_2a30_field16_decoder_previews_review_fullhd": str(
+            tex_large_shifted_2a30_field16_decoder_previews_review_fullhd
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
