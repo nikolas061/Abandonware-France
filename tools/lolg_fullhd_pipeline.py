@@ -2212,6 +2212,23 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Structural No-Bridge Residual Source Probe",
                 ],
             ),
+            Step(
+                "probe grammaire run-local residuelle no-bridge structurel nonzero frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_no_bridge_run_local_residual_grammar_probe.py",
+                    "--residual-source-summary",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe/summary.csv",
+                    "--residual-spans",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe/residual_spans.csv",
+                    "--residual-tokens",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe/tokens.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_run_local_residual_grammar_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Structural No-Bridge Run-Local Residual Grammar Probe",
+                ],
+            ),
         ]
     )
     return steps
@@ -7934,6 +7951,23 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Structural No-Bridge Residual Source Probe",
+            ],
+        ),
+        Step(
+            "probe grammaire run-local residuelle no-bridge structurel nonzero frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_structural_nonzero_no_bridge_run_local_residual_grammar_probe.py",
+                "--residual-source-summary",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe/summary.csv",
+                "--residual-spans",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe/residual_spans.csv",
+                "--residual-tokens",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_residual_source_probe/tokens.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_no_bridge_run_local_residual_grammar_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Structural No-Bridge Run-Local Residual Grammar Probe",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
