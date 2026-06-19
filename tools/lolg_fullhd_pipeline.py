@@ -1772,6 +1772,19 @@ def terminal_source_byte_guard_cascade_steps() -> list[Step]:
                     "Lands of Lore II .tex Frontier80 Nonzero Palette Walk External Source Probe After Compact Target Delta Guard Fixture Replay",
                 ],
             ),
+            Step(
+                "probe sequence generee palette-walk nonzero apres replay fixture target-delta compact high-row frontier80 .tex",
+                [
+                    sys.executable,
+                    "tools/lolg_tex_gap_decoder_frontier80_clean_nonzero_palette_walk_generated_sequence_probe.py",
+                    "--candidates",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe/candidates.csv",
+                    "-o",
+                    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_generated_sequence_probe",
+                    "--title",
+                    "Lands of Lore II .tex Frontier80 Nonzero Palette Walk Generated Sequence Probe After Compact Target Delta Guard Fixture Replay",
+                ],
+            ),
         ]
     )
     return steps
@@ -7054,6 +7067,19 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
                 "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_external_source_probe",
                 "--title",
                 "Lands of Lore II .tex Frontier80 Nonzero Palette Walk External Source Probe After Compact Target Delta Guard Fixture Replay",
+            ],
+        ),
+        Step(
+            "probe sequence generee palette-walk nonzero apres replay fixture target-delta compact high-row frontier80 .tex",
+            [
+                sys.executable,
+                "tools/lolg_tex_gap_decoder_frontier80_clean_nonzero_palette_walk_generated_sequence_probe.py",
+                "--candidates",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe/candidates.csv",
+                "-o",
+                "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_generated_sequence_probe",
+                "--title",
+                "Lands of Lore II .tex Frontier80 Nonzero Palette Walk Generated Sequence Probe After Compact Target Delta Guard Fixture Replay",
             ],
         ),
         Step("roadmap decodeur .tex", [sys.executable, "tools/lolg_tex_decoder_roadmap.py"]),
