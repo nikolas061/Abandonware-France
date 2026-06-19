@@ -62,6 +62,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_REVIEW = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY = Path(
     "output/tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_integration/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODE_PACK = Path("output/tex_material_decode_pack/index.html")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE = Path("output/tex_material_decoder_queue/index.html")
 DEFAULT_TEX_REMAINING_REFERENCE_PROFILE = Path("output/tex_remaining_reference_profile/index.html")
@@ -970,6 +973,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Replay promu garde small-delta field16 2a30 gros segments .tex",
             DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY,
+        ),
+        (
+            "Integration decodeur field16 2a30 gros segments .tex",
+            DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION,
         ),
         ("Pack decode matériaux .tex", DEFAULT_TEX_MATERIAL_DECODE_PACK),
         ("File décodeur .tex", DEFAULT_TEX_MATERIAL_DECODER_QUEUE),

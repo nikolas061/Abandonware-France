@@ -256,6 +256,18 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_GUARDS 
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_HTML = Path(
     "output/tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_integration/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_ROWS = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_integration/decoder_rows.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_RULES = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_integration/rules.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_decoder_integration/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -969,6 +981,9 @@ SUMMARY_FIELDNAMES = [
     "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_rows",
     "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_large",
     "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_blocked_context",
+    "tex_large_shifted_2a30_field16_decoder_integration_rows",
+    "tex_large_shifted_2a30_field16_decoder_integration_large_exact",
+    "tex_large_shifted_2a30_field16_decoder_integration_blocked_context",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -4441,6 +4456,192 @@ def audit_tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay(
         ),
         promoted_exact_rows if ok else 0,
         promoted_large_rows if ok else 0,
+        blocked_context_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_decoder_integration(
+    summary: Path,
+    decoder_rows_path: Path,
+    rules_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_integration", summary), 0, 0, 0
+    if not decoder_rows_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_integration", decoder_rows_path), 0, 0, 0
+    if not rules_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_integration", rules_path), 0, 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_decoder_integration", html_report), 0, 0, 0
+
+    summary_rows = read_csv(summary)
+    decoder_rows = read_csv(decoder_rows_path)
+    rule_rows = read_csv(rules_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    candidate_rows = int_value(total, "candidate_rows")
+    decoder_count = int_value(total, "decoder_rows")
+    decoder_exact_rows = int_value(total, "decoder_exact_rows")
+    large_rejected_rows = int_value(total, "large_rejected_rows")
+    large_rejected_decoder_rows = int_value(total, "large_rejected_decoder_rows")
+    large_rejected_exact_rows = int_value(total, "large_rejected_exact_rows")
+    remaining_large_rows = int_value(total, "remaining_large_rows")
+    remaining_large_decoder_rows = int_value(total, "remaining_large_decoder_rows")
+    remaining_large_exact_rows = int_value(total, "remaining_large_exact_rows")
+    target_decoder_rows = int_value(total, "target_decoder_rows")
+    support_decoder_rows = int_value(total, "support_decoder_rows")
+    positive_guard_rows = int_value(total, "positive_guard_rows")
+    negative_guard_rows = int_value(total, "negative_guard_rows")
+    zero_guard_rows = int_value(total, "zero_guard_rows")
+    blocked_context_rows = int_value(total, "blocked_context_rows")
+    replay_operation_rows = int_value(total, "replay_operation_rows")
+    replay_promoted_rows = int_value(total, "replay_promoted_rows")
+    replay_promoted_exact_rows = int_value(total, "replay_promoted_exact_rows")
+    replay_blocked_context_rows = int_value(total, "replay_blocked_context_rows")
+    rule_count = int_value(total, "rule_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    decoded = [row for row in decoder_rows if row.get("decoder_status") == "decoded_exact"]
+    exact = [row for row in decoded if row.get("exact_match") == "yes"]
+    large_rows = [row for row in decoder_rows if row.get("large_rejected") == "yes"]
+    large_decoded = [row for row in large_rows if row.get("decoder_status") == "decoded_exact"]
+    large_exact = [row for row in large_decoded if row.get("exact_match") == "yes"]
+    remaining_rows = [row for row in decoder_rows if row.get("remaining_large") == "yes"]
+    remaining_decoded = [row for row in remaining_rows if row.get("decoder_status") == "decoded_exact"]
+    remaining_exact = [row for row in remaining_decoded if row.get("exact_match") == "yes"]
+    target_rows = [row for row in decoded if row.get("target_promoted") == "yes"]
+    support_rows = [row for row in decoded if row.get("support_promoted") == "yes"]
+    blocked_rows = [row for row in decoder_rows if row.get("context_blocked") == "yes"]
+    row_issue_rows = [row for row in decoder_rows if row.get("issues")]
+    rule_issue_rows = [row for row in rule_rows if row.get("verdict") in {"context_issue", "integrated_with_issues"}]
+
+    if candidate_rows != len(decoder_rows) or candidate_rows != 10:
+        issues.append("field16_decoder_integration_candidate_count_mismatch")
+    if decoder_count != len(decoded) or decoder_count != 6:
+        issues.append("field16_decoder_integration_decoder_count_mismatch")
+    if decoder_exact_rows != len(exact) or decoder_exact_rows != 6:
+        issues.append("field16_decoder_integration_exact_count_mismatch")
+    if large_rejected_rows != len(large_rows) or large_rejected_rows != 4:
+        issues.append("field16_decoder_integration_large_count_mismatch")
+    if large_rejected_decoder_rows != len(large_decoded) or large_rejected_decoder_rows != 4:
+        issues.append("field16_decoder_integration_large_decoder_count_mismatch")
+    if large_rejected_exact_rows != len(large_exact) or large_rejected_exact_rows != 4:
+        issues.append("field16_decoder_integration_large_exact_count_mismatch")
+    if remaining_large_rows != len(remaining_rows) or remaining_large_rows != 2:
+        issues.append("field16_decoder_integration_remaining_count_mismatch")
+    if remaining_large_decoder_rows != len(remaining_decoded) or remaining_large_decoder_rows != 2:
+        issues.append("field16_decoder_integration_remaining_decoder_count_mismatch")
+    if remaining_large_exact_rows != len(remaining_exact) or remaining_large_exact_rows != 2:
+        issues.append("field16_decoder_integration_remaining_exact_count_mismatch")
+    if target_decoder_rows != len(target_rows) or target_decoder_rows != 4:
+        issues.append("field16_decoder_integration_target_count_mismatch")
+    if support_decoder_rows != len(support_rows) or support_decoder_rows != 2:
+        issues.append("field16_decoder_integration_support_count_mismatch")
+    if positive_guard_rows != sum(1 for row in decoded if row.get("decoder_rule") == "positive_small_nextlow_minus2") or positive_guard_rows != 2:
+        issues.append("field16_decoder_integration_positive_count_mismatch")
+    if negative_guard_rows != sum(1 for row in decoded if row.get("decoder_rule") == "negative_small_extra36") or negative_guard_rows != 2:
+        issues.append("field16_decoder_integration_negative_count_mismatch")
+    if zero_guard_rows != sum(1 for row in decoded if row.get("decoder_rule") == "zero_delta_extra40") or zero_guard_rows != 2:
+        issues.append("field16_decoder_integration_zero_count_mismatch")
+    if blocked_context_rows != len(blocked_rows) or blocked_context_rows != 4:
+        issues.append("field16_decoder_integration_blocked_context_count_mismatch")
+    if replay_operation_rows != 10 or replay_promoted_rows != 6 or replay_promoted_exact_rows != 6:
+        issues.append("field16_decoder_integration_replay_promoted_count_mismatch")
+    if replay_blocked_context_rows != 4:
+        issues.append("field16_decoder_integration_replay_blocked_context_count_mismatch")
+    if rule_count != len(rule_rows) or rule_count != 4:
+        issues.append("field16_decoder_integration_rule_count_mismatch")
+    if issue_rows != len(row_issue_rows) + len(rule_issue_rows) or issue_rows != 0:
+        issues.append(f"issue_rows:{issue_rows}")
+
+    expected_rows = {
+        "barsgld.pcx": ("L14_HT", "positive_small_nextlow_minus2", "24", "yes", "no", "no"),
+        "dragend.pcx": ("L3_DH", "negative_small_extra36", "36", "yes", "no", "no"),
+        "stump2.pcx": ("L12_CM", "zero_delta_extra40", "40", "yes", "no", "no"),
+        "catbas.pcx": ("L5_HC", "zero_delta_extra40", "40", "yes", "no", "no"),
+        "6.pcx": ("L16_CA", "positive_small_nextlow_minus2", "32", "no", "yes", "no"),
+        "pillar.pcx": ("L17_HC", "negative_small_extra36", "36", "no", "yes", "no"),
+        "ggbridge2.pcx": ("L16_CA", "skip_large_negative_context", "", "no", "no", "yes"),
+        "colapse.pcx": ("L1_DC", "skip_large_negative_context", "", "no", "no", "yes"),
+        "hrglass.pcx": ("L3_DH", "skip_large_negative_context", "", "no", "no", "yes"),
+        "lantern.pcx": ("L4_HJ", "skip_large_negative_context", "", "no", "no", "yes"),
+    }
+    rows_by_name = {row.get("pcx_name", ""): row for row in decoder_rows}
+    if set(rows_by_name) != set(expected_rows):
+        issues.append("field16_decoder_integration_rows_unexpected")
+    else:
+        for pcx_name, expected in expected_rows.items():
+            row = rows_by_name[pcx_name]
+            actual = (
+                row.get("archive_tag"),
+                row.get("decoder_rule"),
+                row.get("decoder_extra"),
+                row.get("target_promoted"),
+                row.get("support_promoted"),
+                row.get("context_blocked"),
+            )
+            if actual != expected:
+                issues.append(f"field16_decoder_integration_{pcx_name}_row_mismatch")
+            if row.get("context_blocked") == "yes":
+                if row.get("decoder_status") != "blocked_context" or row.get("delta_group") != "large_negative_delta":
+                    issues.append(f"field16_decoder_integration_{pcx_name}_context_mismatch")
+            elif row.get("decoder_status") != "decoded_exact" or row.get("exact_match") != "yes":
+                issues.append(f"field16_decoder_integration_{pcx_name}_not_exact")
+            if row.get("issues"):
+                issues.append(f"field16_decoder_integration_{pcx_name}_issue")
+
+    expected_rules = {
+        "positive_small_nextlow_minus2": ("2", "2", "2", "1", "1", "1", "1", "0", "integrated_exact"),
+        "negative_small_extra36": ("2", "2", "2", "1", "1", "1", "1", "0", "integrated_exact"),
+        "zero_delta_extra40": ("2", "2", "2", "2", "2", "2", "0", "0", "integrated_exact"),
+        "skip_large_negative_context": ("4", "0", "0", "0", "0", "0", "0", "4", "context_blocked"),
+    }
+    rules_by_id = {row.get("rule_id", ""): row for row in rule_rows}
+    if set(rules_by_id) != set(expected_rules):
+        issues.append("field16_decoder_integration_rules_unexpected")
+    else:
+        for rule_id, expected in expected_rules.items():
+            row = rules_by_id[rule_id]
+            actual = (
+                row.get("source_rows"),
+                row.get("decoder_rows"),
+                row.get("exact_rows"),
+                row.get("large_rows"),
+                row.get("large_exact_rows"),
+                row.get("target_rows"),
+                row.get("support_rows"),
+                row.get("context_blocked_rows"),
+                row.get("verdict"),
+            )
+            if actual != expected:
+                issues.append(f"field16_decoder_integration_{rule_id}_rule_mismatch")
+    if total.get("review_verdict") != "field16_small_delta_decoder_integrated":
+        issues.append("field16_decoder_integration_verdict_mismatch")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_decoder_integration_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_decoder_integration",
+            ok,
+            expected="integrated shifted 0x2a30 field16 decoder covers 4 large rows and blocks 4 contexts",
+            actual=(
+                f"decoded={decoder_exact_rows}/{decoder_count}, large={large_rejected_exact_rows}/"
+                f"{large_rejected_rows}, blocked_context={blocked_context_rows}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        decoder_exact_rows if ok else 0,
+        large_rejected_exact_rows if ok else 0,
         blocked_context_rows if ok else 0,
     )
 
@@ -13805,6 +14006,18 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_SMALL_DELTA_GUARD_PROMOTED_REPLAY_HTML,
     )
     rows.append(tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_gate)
+    (
+        tex_large_shifted_2a30_field16_decoder_integration_gate,
+        tex_large_shifted_2a30_field16_decoder_integration_rows,
+        tex_large_shifted_2a30_field16_decoder_integration_large_exact,
+        tex_large_shifted_2a30_field16_decoder_integration_blocked_context,
+    ) = audit_tex_large_shifted_2a30_field16_decoder_integration(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_ROWS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_RULES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_DECODER_INTEGRATION_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_decoder_integration_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -19228,6 +19441,15 @@ def main() -> None:
         ),
         "tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_blocked_context": str(
             tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay_blocked_context
+        ),
+        "tex_large_shifted_2a30_field16_decoder_integration_rows": str(
+            tex_large_shifted_2a30_field16_decoder_integration_rows
+        ),
+        "tex_large_shifted_2a30_field16_decoder_integration_large_exact": str(
+            tex_large_shifted_2a30_field16_decoder_integration_large_exact
+        ),
+        "tex_large_shifted_2a30_field16_decoder_integration_blocked_context": str(
+            tex_large_shifted_2a30_field16_decoder_integration_blocked_context
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
