@@ -188,6 +188,7 @@ EXTENDED_SPLIT_RULES: tuple[tuple[str, str], ...] = (
     ("arg1_43", "deny_skip6"),
     ("arg4_43", "deny_skip6"),
     ("arg1_30", "deny_skip2"),
+    ("arg1_32", "deny_skip1"),
 )
 
 
@@ -218,6 +219,8 @@ def extra_condition_passes(condition_id: str, context: dict[str, int]) -> bool:
         return context["arg4"] == 0x43
     if condition_id == "arg1_30":
         return context["arg1"] == 0x30
+    if condition_id == "arg1_32":
+        return context["arg1"] == 0x32
     return False
 
 
