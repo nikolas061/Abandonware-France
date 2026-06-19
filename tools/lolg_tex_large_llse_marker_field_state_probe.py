@@ -81,6 +81,11 @@ SUMMARY_FIELDNAMES = [
     "record_static_guard_rows",
     "trace_static_guard_rows",
     "record_static_guard_untraced_rows",
+    "validation_height",
+    "validation_event_rows",
+    "validation_actions_applied",
+    "validation_static_guard_rows",
+    "validation_static_guard_untraced_rows",
     "record_static_guard_sample_offsets",
     "final_x",
     "final_y",
@@ -503,6 +508,8 @@ def guard_candidate_rows(events: list[dict[str, str]], limit: int) -> list[dict[
 
 def summary_row(
     events: list[dict[str, str]],
+    validation_events: list[dict[str, str]],
+    validation_stats: dict[str, int],
     stats: dict[str, int],
     semantics_summary: dict[str, str],
     variant,
@@ -510,6 +517,7 @@ def summary_row(
     sample_limit: int,
     segment_count: int,
     record_guard: dict[str, str],
+    validation_height: int,
 ) -> dict[str, str]:
     total = len(events)
     f1_mod4_zero = sum(1 for row in events if row.get("f1_mod4") == "0")
@@ -530,6 +538,11 @@ def summary_row(
         for row in events
         if byte_value(row, "field0") >= 0x40 and row_num(row, "f1_mod4") == 0
     )
+    validation_static_guard_rows = sum(
+        1
+        for row in validation_events
+        if byte_value(row, "field0") >= 0x40 and row_num(row, "f1_mod4") == 0
+    )
     record_static_guard_rows = int_value(record_guard, "record_static_guard_rows")
     best_delta = semantics_summary.get("best_delta_vs_pair", "")
     if issue_rows:
@@ -538,9 +551,13 @@ def summary_row(
     elif total and f1_mod4_zero / max(1, total) >= 0.5 and float_text(best_delta) < 0:
         verdict = "llse_marker_field_state_guard_signal"
         if "f0ge40" in variant.action:
+            validation_untraced = max(0, record_static_guard_rows - validation_static_guard_rows)
+            if validation_untraced:
+                validation_text = f"validate {validation_untraced} off-trace records"
+            else:
+                validation_text = "compare validated static guard replay impact"
             next_action = (
-                "validate LLSE 2730 static guard field1 mod4 and field0>=0x40 on "
-                f"{max(0, record_static_guard_rows - trace_static_guard_rows)} off-trace records "
+                f"{validation_text} for LLSE 2730 field1 mod4 and field0>=0x40 "
                 "before decoder promotion; "
                 f"candidate {variant.action}"
             )
@@ -602,6 +619,11 @@ def summary_row(
         "record_static_guard_rows": str(record_static_guard_rows),
         "trace_static_guard_rows": str(trace_static_guard_rows),
         "record_static_guard_untraced_rows": str(max(0, record_static_guard_rows - trace_static_guard_rows)),
+        "validation_height": str(validation_height),
+        "validation_event_rows": str(len(validation_events)),
+        "validation_actions_applied": str(validation_stats.get("actions_applied", 0)),
+        "validation_static_guard_rows": str(validation_static_guard_rows),
+        "validation_static_guard_untraced_rows": str(max(0, record_static_guard_rows - validation_static_guard_rows)),
         "record_static_guard_sample_offsets": record_guard.get("record_static_guard_sample_offsets", ""),
         "final_x": str(stats.get("final_x", "")),
         "final_y": str(stats.get("final_y", "")),
@@ -708,7 +730,9 @@ def write_report(
     segment_rows = [row for row in read_csv(args.segments) if row.get("control_path") == TARGET_CONTROL_PATH]
     payload_cache: dict[Path, bytes] = {}
     all_events: list[dict[str, str]] = []
+    validation_events: list[dict[str, str]] = []
     merged_stats: Counter[str] = Counter()
+    validation_stats: Counter[str] = Counter()
     merged_counters: dict[str, Counter[str]] = {}
     issue_rows = 0
     for source in segment_rows:
@@ -727,6 +751,24 @@ def write_report(
             issue_rows += 1
         all_events.extend(events)
         merged_stats.update(stats)
+        if args.validation_height > args.height:
+            extra_events, extra_stats, _extra_counters, extra_issues = trace_body(
+                source,
+                body,
+                issues,
+                variant,
+                args.width,
+                args.validation_height,
+                args.low,
+                args.high,
+            )
+            if extra_issues:
+                issue_rows += 1
+            validation_events.extend(extra_events)
+            validation_stats.update(extra_stats)
+        else:
+            validation_events.extend(events)
+            validation_stats.update(stats)
         for bucket, counter in counters.items():
             merged_counters.setdefault(bucket, Counter()).update(counter)
     for rank, row in enumerate(all_events, 1):
@@ -734,6 +776,8 @@ def write_report(
     buckets = bucket_rows(merged_counters, len(all_events))
     summary = summary_row(
         all_events,
+        validation_events,
+        dict(validation_stats),
         dict(merged_stats),
         semantics_summary,
         variant,
@@ -741,6 +785,7 @@ def write_report(
         args.sample_limit,
         len(segment_rows),
         record_guard,
+        args.validation_height,
     )
     sampled_events = all_events[: args.sample_limit]
     guards = guard_candidate_rows(all_events, args.guard_limit)
@@ -767,6 +812,7 @@ def main() -> None:
     parser.add_argument("--mix-entry-index", type=int, default=DEFAULT_MIX_ENTRY_INDEX)
     parser.add_argument("--width", type=int, default=64)
     parser.add_argument("--height", type=int, default=512)
+    parser.add_argument("--validation-height", type=int, default=2048)
     parser.add_argument("--low", type=lambda value: int(value, 0), default=0x30)
     parser.add_argument("--high", type=lambda value: int(value, 0), default=0xBF)
     parser.add_argument("--action", default="best")
@@ -787,6 +833,11 @@ def main() -> None:
         "Record static guard: "
         f"{summary['record_static_guard_rows']}/{summary['record_target_rows']} "
         f"(trace {summary['trace_static_guard_rows']})"
+    )
+    print(
+        "Validation static guard: "
+        f"{summary['validation_static_guard_rows']}/{summary['record_static_guard_rows']} "
+        f"at height {summary['validation_height']}"
     )
     print(f"Issue rows: {summary['issue_rows']}")
     print(f"State verdict: {summary['state_verdict']}")
