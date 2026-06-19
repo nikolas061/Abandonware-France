@@ -841,6 +841,9 @@ DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_LARGEST_RUN_STRUCTURAL_PROFILE_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile/summary.csv"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_PRODUCER_PROBE_SUMMARY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe/summary.csv"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/summary.csv"
 )
@@ -1604,6 +1607,7 @@ def apply_old_clean_byte_union(
     outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_run_probe: dict[str, str] | None,
     outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile: dict[str, str] | None,
+    outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_selector_review: dict[str, str] | None,
     outside_source_frontier80_clean_largest_run_structural_profile: dict[str, str] | None,
     outside_source_frontier80_clean_width32_delta_neighborhood_probe: dict[str, str] | None,
@@ -1723,6 +1727,7 @@ def apply_old_clean_byte_union(
             outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_run_probe,
             outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_selector_review,
             outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile,
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe,
             outside_source_frontier80_clean_largest_run_selector_review,
             outside_source_frontier80_clean_largest_run_structural_profile,
             outside_source_frontier80_clean_width32_delta_neighborhood_probe,
@@ -3558,6 +3563,25 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_palette_walk_verdict="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get('review_verdict', '')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_palette_walk_candidates="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get('candidate_runs', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get('candidate_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_palette_walk_coverage="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get('candidate_palette_bytes', '0')}/"
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get('candidate_bytes', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_palette_walk_known_support="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get('best_known_normalized_exact_max', '0')}",
+                    "gradient_sequence_old_clean_byte_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_palette_walk_next="
+                    f"{outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get('next_probe', '')}",
+                ],
+            )
+
         if outside_source_frontier80_clean_largest_run_selector_review:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -4084,6 +4108,16 @@ def apply_old_clean_byte_union(
             and int_value(outside_source_frontier80_tail_compact_token_transfer_guard_dependency, "source_unknown_slots") > 0
         ):
             next_action = "derive remaining source dependencies after guarded high2 frontier80 replay"
+        elif (
+            outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe
+            and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get(
+                "review_verdict"
+            )
+        ):
+            next_action = outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe.get(
+                "next_probe",
+                "derive non-oracle source and terminal split for normalized palette-walk candidates",
+            )
         elif (
             outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile
             and outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile.get(
@@ -19315,6 +19349,11 @@ def main() -> None:
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_LARGEST_RUN_STRUCTURAL_PROFILE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-gap-decoder-frontier80-stride320-outlier-target-value-guarded-prior-high-row-exact-residual-compact-target-delta-guard-nonzero-palette-walk-producer-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_PRODUCER_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-gap-decoder-frontier80-clean-largest-run-selector-review-summary",
         type=Path,
         default=DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW_SUMMARY,
@@ -21618,6 +21657,11 @@ def main() -> None:
             args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile_summary
         )
     )
+    tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe_summary = (
+        read_optional_summary(
+            args.tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe_summary
+        )
+    )
     tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary = read_optional_summary(
         args.tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary
     )
@@ -23089,6 +23133,7 @@ def main() -> None:
         outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_run_probe=tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_fixture_replay_summary,
         outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_selector_review=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_selector_review_summary,
         outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_largest_run_structural_profile_summary,
+        outside_source_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe=tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_producer_probe_summary,
         outside_source_frontier80_clean_largest_run_selector_review=tex_gap_decoder_frontier80_clean_largest_run_selector_review_summary,
         outside_source_frontier80_clean_largest_run_structural_profile=tex_gap_decoder_frontier80_clean_largest_run_structural_profile_summary,
         outside_source_frontier80_clean_width32_delta_neighborhood_probe=tex_gap_decoder_frontier80_clean_width32_delta_neighborhood_probe_summary,
