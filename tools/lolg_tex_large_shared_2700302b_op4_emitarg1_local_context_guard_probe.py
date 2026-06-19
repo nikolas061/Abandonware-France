@@ -179,6 +179,7 @@ def atom_specs() -> list[dict[str, object]]:
         {"atom_id": "arg1_arg2_32_00", "kind": "pair", "field_a": "arg1", "field_b": "arg2", "value_a": 0x32, "value_b": 0x00},
         {"atom_id": "arg1_arg2_40_20", "kind": "pair", "field_a": "arg1", "field_b": "arg2", "value_a": 0x40, "value_b": 0x20},
         {"atom_id": "arg1_arg2_53_00", "kind": "pair", "field_a": "arg1", "field_b": "arg2", "value_a": 0x53, "value_b": 0x00},
+        {"atom_id": "arg1_op4", "kind": "class", "field": "arg1", "class": "op4"},
         {"atom_id": "arg2_arg3_22_e0", "kind": "pair", "field_a": "arg2", "field_b": "arg3", "value_a": 0x22, "value_b": 0xE0},
         {"atom_id": "prev1_arg1_e0_5c", "kind": "pair", "field_a": "prev1", "field_b": "arg1", "value_a": 0xE0, "value_b": 0x5C},
         {"atom_id": "prev1_arg1_01_81", "kind": "pair", "field_a": "prev1", "field_b": "arg1", "value_a": 0x01, "value_b": 0x81},
@@ -203,6 +204,14 @@ def atom_specs() -> list[dict[str, object]]:
     return unique
 
 
+def class_matches(class_name: str, value: int) -> bool:
+    if value < 0:
+        return False
+    if class_name == "op4":
+        return is_op4_candidate(value)
+    return False
+
+
 def atom_matches(atom: dict[str, object], context: dict[str, int]) -> bool:
     kind = str(atom["kind"])
     if kind == "eq":
@@ -214,6 +223,8 @@ def atom_matches(atom: dict[str, object], context: dict[str, int]) -> bool:
         ) == (int(atom["value_a"]), int(atom["value_b"]))
     if kind == "known_pair":
         return (context[str(atom["field_a"])], context[str(atom["field_b"])]) in KNOWN_MARKER_PAIRS
+    if kind == "class":
+        return class_matches(str(atom["class"]), context[str(atom["field"])])
     return False
 
 
@@ -233,6 +244,7 @@ def guard_specs(atoms: list[dict[str, object]]) -> list[dict[str, object]]:
             "broad",
             ["arg2_03", "prev1_22", "arg3_0a", "arg4_7e", "prev2_prev1_26_e1", "arg1_arg2_53_00"],
         ),
+        ("general", ["arg1_op4", "arg3_0a"]),
     ]
     for sequence_name, greedy_atoms in greedy_sequences:
         for index in range(1, len(greedy_atoms) + 1):
@@ -493,12 +505,20 @@ def build_summary(
             f"{best.get('guard_id', '')} previews before decoder promotion"
         )
     elif improved:
-        verdict = "shared_2700302b_op4_emitarg1_local_context_guard_improves"
-        next_action = (
-            "generalize shared 0x2700302b op4 emit-arg1 local-context denylist beyond exact atom matches; "
-            f"best guard {best.get('guard_id', '')} avg score "
-            f"{float_text(best.get('avg_score')):.4f} remains noisy"
-        )
+        if "arg1_op4" in best.get("denied_atoms", ""):
+            verdict = "shared_2700302b_op4_emitarg1_generalized_local_context_guard_improves"
+            next_action = (
+                "inspect shared 0x2700302b op4 emit-arg1 generalized local-context guard "
+                f"{best.get('guard_id', '')}; avg score "
+                f"{float_text(best.get('avg_score')):.4f} remains noisy"
+            )
+        else:
+            verdict = "shared_2700302b_op4_emitarg1_local_context_guard_improves"
+            next_action = (
+                "generalize shared 0x2700302b op4 emit-arg1 local-context denylist beyond exact atom matches; "
+                f"best guard {best.get('guard_id', '')} avg score "
+                f"{float_text(best.get('avg_score')):.4f} remains noisy"
+            )
     else:
         verdict = "shared_2700302b_op4_emitarg1_local_context_guard_no_improvement"
         next_action = "broaden shared 0x2700302b emitarg1 guard beyond local byte context"
