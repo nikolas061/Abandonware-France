@@ -145,6 +145,18 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_RULES = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_HTML = Path(
     "output/tex_large_shifted_2a30_standard_probe/index.html"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_field16_probe/summary.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_ROWS = Path(
+    "output/tex_large_shifted_2a30_field16_probe/field16.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_RULES = Path(
+    "output/tex_large_shifted_2a30_field16_probe/rules.csv"
+)
+DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_HTML = Path(
+    "output/tex_large_shifted_2a30_field16_probe/index.html"
+)
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY = Path("output/tex_material_decoder_queue/summary.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_ROWS = Path("output/tex_material_decoder_queue/queue.csv")
 DEFAULT_TEX_MATERIAL_DECODER_QUEUE_PREFIXES = Path("output/tex_material_decoder_queue/by_prefix.csv")
@@ -836,6 +848,8 @@ SUMMARY_FIELDNAMES = [
     "tex_large_rejected_decoder_profile_shifted_2a30_anchors",
     "tex_large_shifted_2a30_standard_probe_rows",
     "tex_large_shifted_2a30_standard_probe_branch_rows",
+    "tex_large_shifted_2a30_field16_probe_rows",
+    "tex_large_shifted_2a30_field16_probe_low_mod4_rows",
     "tex_material_decoder_queue_rows",
     "tex_material_decoder_queue_segments",
     "tex_remaining_reference_profile_unique",
@@ -3172,6 +3186,120 @@ def audit_tex_large_shifted_2a30_standard_probe(
         ),
         standard_rows if ok else 0,
         branch_rows if ok else 0,
+    )
+
+
+def audit_tex_large_shifted_2a30_field16_probe(
+    summary: Path,
+    rows_path: Path,
+    rules_path: Path,
+    html_report: Path,
+) -> tuple[dict[str, str], int, int]:
+    if not summary.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_probe", summary), 0, 0
+    if not rows_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_probe", rows_path), 0, 0
+    if not rules_path.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_probe", rules_path), 0, 0
+    if not html_report.exists():
+        return missing_gate("tex_large_shifted_2a30_field16_probe", html_report), 0, 0
+
+    summary_rows = read_csv(summary)
+    field_rows = read_csv(rows_path)
+    rule_rows = read_csv(rules_path)
+    text = html_report.read_text(errors="replace")
+    issues: list[str] = []
+    if len(summary_rows) != 1:
+        issues.append("summary_row_count_invalid")
+        total = {}
+    else:
+        total = summary_rows[0]
+
+    standard_rows = int_value(total, "standard_rows")
+    branch_rows = int_value(total, "branch_rows")
+    field16_values = int_value(total, "field16_values")
+    field16_low_values = int_value(total, "field16_low_values")
+    field16_high_values = int_value(total, "field16_high_values")
+    low_mod4_zero_rows = int_value(total, "low_mod4_zero_rows")
+    low_mod8_zero_rows = int_value(total, "low_mod8_zero_rows")
+    selector_mod8_zero_rows = int_value(total, "selector_mod8_zero_rows")
+    selector_low_delta_values = int_value(total, "selector_low_delta_values")
+    next_word_values = int_value(total, "next_word_values")
+    next_word_low_values = int_value(total, "next_word_low_values")
+    next_word_high_values = int_value(total, "next_word_high_values")
+    high_nonzero_rows = int_value(total, "high_nonzero_rows")
+    rule_count = int_value(total, "rule_rows")
+    issue_rows = int_value(total, "issue_rows")
+
+    if standard_rows != len(field_rows):
+        issues.append("shifted_2a30_field16_standard_count_mismatch")
+    if branch_rows < 1:
+        issues.append("shifted_2a30_field16_missing_branch_context")
+    if field16_values != len({row.get("field16_hex", "") for row in field_rows if row.get("field16_hex")}):
+        issues.append("shifted_2a30_field16_value_count_mismatch")
+    if field16_low_values != len(
+        {row.get("field16_low_hex", "") for row in field_rows if row.get("field16_low_hex")}
+    ):
+        issues.append("shifted_2a30_field16_low_count_mismatch")
+    if field16_high_values != len(
+        {row.get("field16_high_hex", "") for row in field_rows if row.get("field16_high_hex")}
+    ):
+        issues.append("shifted_2a30_field16_high_count_mismatch")
+    if low_mod4_zero_rows != sum(1 for row in field_rows if row.get("field16_low_mod4") == "0"):
+        issues.append("shifted_2a30_field16_low_mod4_count_mismatch")
+    if low_mod8_zero_rows != sum(1 for row in field_rows if row.get("field16_low_mod8") == "0"):
+        issues.append("shifted_2a30_field16_low_mod8_count_mismatch")
+    if selector_mod8_zero_rows != sum(1 for row in field_rows if int_value(row, "selector_byte_dec") % 8 == 0):
+        issues.append("shifted_2a30_field16_selector_mod8_count_mismatch")
+    if selector_low_delta_values != len(
+        {row.get("selector_to_low_delta", "") for row in field_rows if row.get("selector_to_low_delta")}
+    ):
+        issues.append("shifted_2a30_field16_delta_count_mismatch")
+    if next_word_values != len({row.get("next_word16_hex", "") for row in field_rows if row.get("next_word16_hex")}):
+        issues.append("shifted_2a30_field16_next_word_count_mismatch")
+    if next_word_low_values != len(
+        {row.get("next_word_low_hex", "") for row in field_rows if row.get("next_word_low_hex")}
+    ):
+        issues.append("shifted_2a30_field16_next_low_count_mismatch")
+    if next_word_high_values != len(
+        {row.get("next_word_high_hex", "") for row in field_rows if row.get("next_word_high_hex")}
+    ):
+        issues.append("shifted_2a30_field16_next_high_count_mismatch")
+    if high_nonzero_rows != sum(1 for row in field_rows if int_value(row, "field16_high_dec") > 0):
+        issues.append("shifted_2a30_field16_high_nonzero_count_mismatch")
+    if low_mod4_zero_rows != standard_rows:
+        issues.append("shifted_2a30_field16_low_mod4_not_all_standard")
+    if selector_low_delta_values == 1:
+        issues.append("shifted_2a30_field16_selector_delta_not_rejected")
+    if rule_count != len(rule_rows):
+        issues.append("shifted_2a30_field16_rule_count_mismatch")
+    rule_verdicts = {row.get("rule_id", ""): row.get("verdict", "") for row in rule_rows}
+    if rule_verdicts.get("field16_low_mod4_zero") != "all_standard_rows":
+        issues.append("shifted_2a30_field16_low_mod4_rule_mismatch")
+    if rule_verdicts.get("selector_to_low_delta") != "no_standard_rows":
+        issues.append("shifted_2a30_field16_selector_delta_rule_mismatch")
+    if issue_rows != sum(1 for row in field_rows if row.get("issues")):
+        issues.append("shifted_2a30_field16_issue_count_mismatch")
+    if issue_rows:
+        issues.append(f"issue_rows:{issue_rows}")
+    if "const TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE = " not in text:
+        issues.append("missing_tex_large_shifted_2a30_field16_probe_json")
+
+    ok = not issues
+    return (
+        gate(
+            "tex_large_shifted_2a30_field16_probe",
+            ok,
+            expected="shifted 0x2a30 field16 low-byte alignment is profiled before replay",
+            actual=(
+                f"standard={standard_rows}, low_mod4={low_mod4_zero_rows}, "
+                f"field16_values={field16_values}, issues={issue_rows}"
+            ),
+            evidence=f"{summary};{html_report}",
+            issues=issues,
+        ),
+        standard_rows if ok else 0,
+        low_mod4_zero_rows if ok else 0,
     )
 
 
@@ -12436,6 +12564,17 @@ def main() -> None:
         DEFAULT_TEX_LARGE_SHIFTED_2A30_STANDARD_PROBE_HTML,
     )
     rows.append(tex_large_shifted_2a30_standard_probe_gate)
+    (
+        tex_large_shifted_2a30_field16_probe_gate,
+        tex_large_shifted_2a30_field16_probe_rows,
+        tex_large_shifted_2a30_field16_probe_low_mod4_rows,
+    ) = audit_tex_large_shifted_2a30_field16_probe(
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_ROWS,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_RULES,
+        DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_HTML,
+    )
+    rows.append(tex_large_shifted_2a30_field16_probe_gate)
     tex_decoder_queue_gate, tex_decoder_queue_rows, tex_decoder_queue_segments = (
         audit_tex_material_decoder_queue(
             DEFAULT_TEX_MATERIAL_DECODER_QUEUE_SUMMARY,
@@ -17795,6 +17934,10 @@ def main() -> None:
         "tex_large_shifted_2a30_standard_probe_rows": str(tex_large_shifted_2a30_standard_probe_rows),
         "tex_large_shifted_2a30_standard_probe_branch_rows": str(
             tex_large_shifted_2a30_standard_probe_branch_rows
+        ),
+        "tex_large_shifted_2a30_field16_probe_rows": str(tex_large_shifted_2a30_field16_probe_rows),
+        "tex_large_shifted_2a30_field16_probe_low_mod4_rows": str(
+            tex_large_shifted_2a30_field16_probe_low_mod4_rows
         ),
         "tex_material_decoder_queue_rows": str(tex_decoder_queue_rows),
         "tex_material_decoder_queue_segments": str(tex_decoder_queue_segments),
