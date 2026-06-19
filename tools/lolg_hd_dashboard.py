@@ -491,6 +491,15 @@ DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALU
 DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_FIXTURE_REPLAY = Path(
     "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_final_fixture_replay/index.html"
 )
+DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY = Path(
+    "output/tex_gap_decoder_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_final_zero_gap_fixture_replay/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY = Path(
+    "output/tex_gap_decoder_clean_gap_queue_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_final_zero_gap_fixture_replay/index.html"
+)
+DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY = Path(
+    "output/tex_gap_decoder_unresolved_run_probe_frontier80_stride320_outlier_target_value_guarded_prior_high_row_exact_residual_compact_target_delta_guard_nonzero_palette_walk_low_tail_anchor_guard_structural_nonzero_final_zero_gap_fixture_replay/index.html"
+)
 DEFAULT_TEX_GAP_DECODER_FRONTIER80_CLEAN_LARGEST_RUN_SELECTOR_REVIEW = Path(
     "output/tex_gap_decoder_frontier80_clean_largest_run_selector_review/index.html"
 )
@@ -1486,6 +1495,18 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Runs gaps clean apres replay fixture final structurel nonzero frontier80 .tex",
             DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_FIXTURE_REPLAY,
+        ),
+        (
+            "Replay fixture final gaps zero apres structurel nonzero frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY,
+        ),
+        (
+            "File gaps clean apres replay fixture final gaps zero frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_CLEAN_GAP_QUEUE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY,
+        ),
+        (
+            "Runs gaps clean apres replay fixture final gaps zero frontier80 .tex",
+            DEFAULT_TEX_GAP_DECODER_UNRESOLVED_RUN_PROBE_FRONTIER80_STRIDE320_OUTLIER_TARGET_VALUE_GUARDED_PRIOR_HIGH_ROW_EXACT_RESIDUAL_COMPACT_TARGET_DELTA_GUARD_NONZERO_PALETTE_WALK_LOW_TAIL_ANCHOR_GUARD_STRUCTURAL_NONZERO_FINAL_ZERO_GAP_FIXTURE_REPLAY,
         ),
         (
             "Revue selector run 96 apres clean frontier80 .tex",
