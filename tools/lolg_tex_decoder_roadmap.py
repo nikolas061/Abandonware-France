@@ -1032,6 +1032,9 @@ DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_START_GUARD_ROUTE_SUMMARY = Path(
 DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_GUARDED_RENDERER_GRAMMAR_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe/summary.csv"
 )
+DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HIGH_ARG2_SKIP_VALIDATION_PROBE_SUMMARY = Path(
+    "output/tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe/summary.csv"
+)
 DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY = Path(
     "output/tex_large_shifted_2a30_field16_probe/summary.csv"
 )
@@ -1898,6 +1901,7 @@ def apply_old_clean_byte_union(
     tex_large_shifted_2a30_branch_start_guard_promoted_replay: dict[str, str] | None,
     tex_large_shifted_2a30_branch_start_guard_route: dict[str, str] | None,
     tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe: dict[str, str] | None,
+    tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_replay_probe: dict[str, str] | None,
     tex_large_shifted_2a30_field16_transform_probe: dict[str, str] | None,
@@ -5058,6 +5062,23 @@ def apply_old_clean_byte_union(
                 ],
             )
 
+        if tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe:
+            blocking_evidence = append_evidence(
+                blocking_evidence,
+                [
+                    "tex_large_shifted_2a30_branch_high_arg2_validation_target_equal="
+                    f"{tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get('target_pixels_equal', '')}",
+                    "tex_large_shifted_2a30_branch_high_arg2_validation_target_high_arg2="
+                    f"{tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get('target_high_arg2_skips', '0')}",
+                    "tex_large_shifted_2a30_branch_high_arg2_validation_support_applicable_high_arg2="
+                    f"{tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get('support_applicable_high_arg2_skip_max', '0')}",
+                    "tex_large_shifted_2a30_branch_high_arg2_validation_forced_nonapplicable_high_arg2="
+                    f"{tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get('support_forced_nonapplicable_high_arg2_skip_max', '0')}",
+                    "tex_large_shifted_2a30_branch_high_arg2_validation_verdict="
+                    f"{tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get('validation_verdict', '')}",
+                ],
+            )
+
         if tex_large_shifted_2a30_field16_probe:
             blocking_evidence = append_evidence(
                 blocking_evidence,
@@ -5891,6 +5912,20 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get("target_archive_tag")
                 == tex_large_shifted_2a30_branch_start_guard_route.get("target_archive_tag")
             )
+            shifted_2a30_branch_high_arg2_skip_validation_probe_current = (
+                shifted_2a30_branch_guarded_renderer_grammar_probe_current
+                and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe is not None
+                and int_value(
+                    tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe,
+                    "grammar_target_high_arg2_rows",
+                )
+                == int_value(
+                    tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe,
+                    "target_sig_high_arg2_skip_rows",
+                )
+                and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("target_archive_tag")
+                == tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe.get("target_archive_tag")
+            )
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -6019,6 +6054,19 @@ def apply_old_clean_byte_union(
                 and tex_large_shifted_2a30_field16_probe.get("next_action")
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
+            elif (
+                tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe
+                and shifted_2a30_branch_high_arg2_skip_validation_probe_current
+                and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("target_pixels_equal") == "yes"
+                and int_value(
+                    tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe,
+                    "target_high_arg2_skips",
+                )
+                > 0
+                and int_value(tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe, "issue_rows") == 0
+                and tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("next_action")
+            ):
+                next_action = str(tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe.get("next_action"))
             elif (
                 tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe
                 and shifted_2a30_branch_guarded_renderer_grammar_probe_current
@@ -22202,6 +22250,11 @@ def main() -> None:
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_GUARDED_RENDERER_GRAMMAR_PROBE_SUMMARY,
     )
     parser.add_argument(
+        "--tex-large-shifted-2a30-branch-high-arg2-skip-validation-probe-summary",
+        type=Path,
+        default=DEFAULT_TEX_LARGE_SHIFTED_2A30_BRANCH_HIGH_ARG2_SKIP_VALIDATION_PROBE_SUMMARY,
+    )
+    parser.add_argument(
         "--tex-large-shifted-2a30-field16-probe-summary",
         type=Path,
         default=DEFAULT_TEX_LARGE_SHIFTED_2A30_FIELD16_PROBE_SUMMARY,
@@ -24852,6 +24905,9 @@ def main() -> None:
     tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe_summary
     )
+    tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe_summary = read_optional_summary(
+        args.tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe_summary
+    )
     tex_large_shifted_2a30_field16_probe_summary = read_optional_summary(
         args.tex_large_shifted_2a30_field16_probe_summary
     )
@@ -26426,6 +26482,7 @@ def main() -> None:
         tex_large_shifted_2a30_branch_start_guard_promoted_replay=tex_large_shifted_2a30_branch_start_guard_promoted_replay_summary,
         tex_large_shifted_2a30_branch_start_guard_route=tex_large_shifted_2a30_branch_start_guard_route_summary,
         tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe=tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe_summary,
+        tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe=tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe_summary,
         tex_large_shifted_2a30_field16_probe=tex_large_shifted_2a30_field16_probe_summary,
         tex_large_shifted_2a30_field16_replay_probe=tex_large_shifted_2a30_field16_replay_probe_summary,
         tex_large_shifted_2a30_field16_transform_probe=tex_large_shifted_2a30_field16_transform_probe_summary,
