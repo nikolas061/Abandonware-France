@@ -2633,6 +2633,46 @@ def report_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_tex_remaining_reference_profile.py"],
         ),
         Step(
+            "previews gros segments .tex restants apres promotions field16 2a30",
+            [
+                sys.executable,
+                "tools/lolg_tex_probe_render.py",
+                "--names-from-profile",
+                "output/tex_remaining_reference_profile/profile.csv",
+                "--profile-priority",
+                "probe_large_tex_segment",
+                "--palette",
+                "C/LOLG/LOCAL.MIX:94",
+                "--fullhd",
+                "-o",
+                "output/tex_large_unresolved_probe_render",
+            ],
+        ),
+        Step(
+            "galerie gros segments .tex restants apres promotions field16 2a30",
+            [
+                sys.executable,
+                "tools/lolg_tex_probe_gallery.py",
+                "output/tex_large_unresolved_probe_render",
+                "--title",
+                "Lands of Lore II .tex Large Unresolved Probe Gallery",
+            ],
+        ),
+        Step(
+            "analyse gros segments .tex restants apres promotions field16 2a30",
+            [
+                sys.executable,
+                "tools/lolg_tex_probe_analyze.py",
+                "output/tex_large_unresolved_probe_render",
+                "--title",
+                "Lands of Lore II .tex Large Unresolved Probe Analysis",
+            ],
+        ),
+        Step(
+            "revue gros segments .tex restants apres promotions field16 2a30",
+            [sys.executable, "tools/lolg_tex_large_unresolved_probe_review.py"],
+        ),
+        Step(
             "gradient-like noisy .tex",
             [sys.executable, "tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_probe.py"],
             requires_pillow=True,

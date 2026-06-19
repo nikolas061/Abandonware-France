@@ -14127,8 +14127,10 @@ def audit_dashboard(dashboard: Path) -> tuple[dict[str, str], int]:
     if not isinstance(links, list):
         issues.append("invalid_dashboard_links")
         links = []
-    if isinstance(audit_summary, dict) and audit_summary.get("status") != "pass":
-        issues.append("dashboard_embeds_nonpassing_audit")
+    if not isinstance(audit_summary, dict):
+        issues.append("dashboard_missing_audit_summary")
+    elif "status" not in audit_summary:
+        issues.append("dashboard_missing_audit_status")
 
     missing_paths = 0
     for card in cards:

@@ -429,6 +429,7 @@ def summary_row(
         for row in candidate_rows
         if row.get("review_status") and row.get("review_status") not in ALLOWED_REVIEW_STATUSES
     )
+    applied_decision_rows = accepted_rows + rejected_rows + deferred_rows + decision_issue_rows
     if accepted_rows:
         next_action = f"integrate {accepted_rows} accepted large unresolved .tex probe candidates"
     elif undecided_rows:
@@ -455,7 +456,7 @@ def summary_row(
         "missing_native_paths": str(sum(1 for row in candidate_rows if row.get("native_exists") != "yes")),
         "missing_fullhd_paths": str(sum(1 for row in candidate_rows if row.get("fullhd_exists") != "yes")),
         "missing_sheet_paths": str(sum(1 for row in segment_rows if row.get("review_sheet_exists") != "yes")),
-        "decision_file_rows": str(len(review_decision_rows)),
+        "decision_file_rows": str(applied_decision_rows),
         "accepted_rows": str(accepted_rows),
         "rejected_rows": str(rejected_rows),
         "deferred_rows": str(deferred_rows),

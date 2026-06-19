@@ -5577,6 +5577,7 @@ def apply_old_clean_byte_union(
             and tex_remaining_reference_profile
             and tex_remaining_reference_profile.get("next_action")
         ):
+            field16_decoder_covered = int_value(tex_augmented_coverage, "field16_decoder_unique_pcx") > 0
             if (
                 tex_raw_same_archive_pending_review
                 and int_value(tex_raw_same_archive_pending_review, "pending_rows") > 0
@@ -5588,9 +5589,9 @@ def apply_old_clean_byte_union(
                     tex_raw_same_archive_promoted_pack.get("next_action")
                     or tex_remaining_reference_profile.get("next_action")
                 )
-            elif int_value(tex_augmented_coverage, "field16_decoder_unique_pcx") > 0:
-                next_action = str(tex_remaining_reference_profile.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_decoder_promoted_pack
                 and int_value(tex_large_shifted_2a30_field16_decoder_promoted_pack, "coverage_eligible_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_decoder_promoted_pack, "issue_rows") == 0
@@ -5598,6 +5599,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_decoder_promoted_pack.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_decoder_previews_review
                 and int_value(tex_large_shifted_2a30_field16_decoder_previews_review, "review_ready_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_decoder_previews_review, "issue_rows") == 0
@@ -5605,6 +5608,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_decoder_previews_review.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_decoder_previews
                 and int_value(tex_large_shifted_2a30_field16_decoder_previews, "fullhd_previews") > 0
                 and int_value(tex_large_shifted_2a30_field16_decoder_previews, "issue_rows") == 0
@@ -5612,6 +5617,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_decoder_previews.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_decoder_route
                 and int_value(tex_large_shifted_2a30_field16_decoder_route, "routed_exact_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_decoder_route, "issue_rows") == 0
@@ -5619,6 +5626,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_decoder_route.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_decoder_integration
                 and int_value(tex_large_shifted_2a30_field16_decoder_integration, "large_rejected_exact_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_decoder_integration, "issue_rows") == 0
@@ -5626,6 +5635,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_decoder_integration.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay
                 and int_value(tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay, "promoted_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay, "issue_rows") == 0
@@ -5633,6 +5644,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_small_delta_guard_promoted_replay.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_small_delta_guard_review
                 and int_value(tex_large_shifted_2a30_field16_small_delta_guard_review, "large_target_exact_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_small_delta_guard_review, "issue_rows") == 0
@@ -5640,6 +5653,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_small_delta_guard_review.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_small_delta_guard_probe
                 and int_value(tex_large_shifted_2a30_field16_small_delta_guard_probe, "applicable_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_small_delta_guard_probe, "issue_rows") == 0
@@ -5647,6 +5662,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_small_delta_guard_probe.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_delta_split_probe
                 and int_value(tex_large_shifted_2a30_field16_delta_split_probe, "remaining_large_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_delta_split_probe, "issue_rows") == 0
@@ -5654,6 +5671,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_delta_split_probe.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_selector_probe
                 and int_value(tex_large_shifted_2a30_field16_selector_probe, "corpus_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_selector_probe, "issue_rows") == 0
@@ -5661,6 +5680,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_selector_probe.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_transform_probe
                 and int_value(tex_large_shifted_2a30_field16_transform_probe, "oracle_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_transform_probe, "issue_rows") == 0
@@ -5668,6 +5689,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_transform_probe.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_replay_probe
                 and int_value(tex_large_shifted_2a30_field16_replay_probe, "standard_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_replay_probe, "issue_rows") == 0
@@ -5675,6 +5698,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_replay_probe.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_field16_probe
                 and int_value(tex_large_shifted_2a30_field16_probe, "standard_rows") > 0
                 and int_value(tex_large_shifted_2a30_field16_probe, "issue_rows") == 0
@@ -5682,6 +5707,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_field16_probe.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_shifted_2a30_standard_probe
                 and int_value(tex_large_shifted_2a30_standard_probe, "standard_rows") > 0
                 and int_value(tex_large_shifted_2a30_standard_probe, "issue_rows") == 0
@@ -5689,6 +5716,8 @@ def apply_old_clean_byte_union(
             ):
                 next_action = str(tex_large_shifted_2a30_standard_probe.get("next_action"))
             elif (
+                not field16_decoder_covered
+                and
                 tex_large_rejected_decoder_profile
                 and int_value(tex_large_rejected_decoder_profile, "rejected_segment_rows") > 0
                 and int_value(tex_large_rejected_decoder_profile, "issue_rows") == 0
@@ -5698,6 +5727,8 @@ def apply_old_clean_byte_union(
             elif (
                 tex_large_unresolved_probe_review
                 and int_value(tex_large_unresolved_probe_review, "candidate_rows") > 0
+                and int_value(tex_large_unresolved_probe_review, "segment_rows")
+                == int_value(tex_remaining_reference_profile, "large_segment_unique")
                 and tex_large_unresolved_probe_review.get("next_action")
             ):
                 next_action = str(tex_large_unresolved_probe_review.get("next_action"))
@@ -5705,7 +5736,7 @@ def apply_old_clean_byte_union(
                 tex_large_unresolved_probe_analysis
                 and int_value(tex_remaining_reference_profile, "large_segment_unique") > 0
                 and int_value(tex_large_unresolved_probe_analysis, "segments")
-                >= int_value(tex_remaining_reference_profile, "large_segment_unique")
+                == int_value(tex_remaining_reference_profile, "large_segment_unique")
                 and int_value(tex_large_unresolved_probe_analysis, "best_candidate_rows") > 0
             ):
                 next_action = (
