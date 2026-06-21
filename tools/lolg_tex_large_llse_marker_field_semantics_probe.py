@@ -242,9 +242,21 @@ def skip_total(policy: str, default: int = 2) -> int:
         return default
 
 
+def resolve_archive_path(archive: Path) -> Path:
+    if not archive.as_posix():
+        return archive
+    candidates = [
+        archive,
+        Path(archive.name),
+        Path("C") / archive.name,
+        Path("C") / "LOLG" / archive.name,
+    ]
+    return next((candidate for candidate in candidates if candidate.is_file()), archive)
+
+
 def load_body(row: dict[str, str], payload_cache: dict[Path, bytes], mix_entry_index: int) -> tuple[bytes, list[str]]:
     issues: list[str] = []
-    archive = Path(row.get("archive", ""))
+    archive = resolve_archive_path(Path(row.get("archive", "")))
     offset = int_value(row, "body_offset")
     size = int_value(row, "body_size")
     try:
