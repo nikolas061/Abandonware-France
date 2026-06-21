@@ -154,6 +154,12 @@ def replacement_path_for_entry(replacements: Path, row: dict[str, str]) -> Path:
     return replacements / Path(archive).stem / f"{file_id}.vqa"
 
 
+def excluded_archive(row: dict[str, str], excluded_stems: set[str]) -> bool:
+    if not excluded_stems:
+        return False
+    return Path(row.get("archive", "")).stem.upper() in excluded_stems
+
+
 def read_mix_entry(path: Path, index: int) -> bytes:
     data = path.read_bytes()
     count, body_size = struct.unpack_from("<HI", data, 0)
@@ -229,9 +235,12 @@ def select_entry(args: argparse.Namespace) -> dict[str, str]:
 
 
 def select_entries(args: argparse.Namespace) -> list[dict[str, str]]:
+    excluded_stems = {stem.upper() for stem in args.exclude_archive_stem}
     if args.archive or args.index or args.file_id:
         entry = select_entry(args)
         if entry and args.missing_only and replacement_path_for_entry(args.replacements, entry).is_file():
+            return []
+        if entry and excluded_archive(entry, excluded_stems):
             return []
         return [entry] if entry else []
 
@@ -241,7 +250,11 @@ def select_entries(args: argparse.Namespace) -> list[dict[str, str]]:
     selected_keys: set[tuple[str, str, str]] = set()
 
     fixture_entry = select_entry(args)
-    if fixture_entry and (not args.missing_only or not replacement_path_for_entry(args.replacements, fixture_entry).is_file()):
+    if (
+        fixture_entry
+        and not excluded_archive(fixture_entry, excluded_stems)
+        and (not args.missing_only or not replacement_path_for_entry(args.replacements, fixture_entry).is_file())
+    ):
         key = (fixture_entry.get("archive", ""), fixture_entry.get("index", ""), fixture_entry.get("file_id", ""))
         selected.append(fixture_entry)
         selected_keys.add(key)
@@ -253,6 +266,8 @@ def select_entries(args: argparse.Namespace) -> list[dict[str, str]]:
     ]
     if args.missing_only:
         candidates = [row for row in candidates if not replacement_path_for_entry(args.replacements, row).is_file()]
+    if excluded_stems:
+        candidates = [row for row in candidates if not excluded_archive(row, excluded_stems)]
     candidates.sort(
         key=lambda row: (
             int_value(row, "fullhd_frames"),
@@ -1030,6 +1045,12 @@ def main() -> None:
         "--missing-only",
         action="store_true",
         help="Select only VQA entries whose canonical replacement payload is not present yet.",
+    )
+    parser.add_argument(
+        "--exclude-archive-stem",
+        action="append",
+        default=[],
+        help="Skip selected source archive stems when choosing batch entries, for example L20_BBI.",
     )
     parser.add_argument(
         "--validate-reused-frames",
