@@ -1,6 +1,6 @@
 # Mise au point du projet
 
-Date: 2026-06-16
+Date: 2026-06-20
 
 ## Etat general
 
@@ -20,23 +20,72 @@ Pipeline de validation:
 python3 tools/lolg_fullhd_pipeline.py --mode quick --fail-on-issues
 ```
 
+Audit runtime:
+
+```sh
+python3 tools/lolg_runtime_fullhd_audit.py
+```
+
 Validation actuelle:
 
 ```text
 Full HD audit: pass
-Gates: 229/229
-Full HD PNGs: 177452
-Dashboard cards: 4
-Quick links: 229
+Gates: 252/252
+Full HD PNGs: 177463
+Dashboard cards: 6
+Dashboard links: 809
+Runtime audit: gap
+Runtime components: 8
+Runtime ready components: 1
+Runtime info components: 2
+Runtime gaps: 2
 ```
 
 ## Ce qui est stable
 
 - `RUN_HD.sh` est le lanceur HD principal.
+- `RUN_HD_PCX_FULLHD.sh` est le lanceur runtime PCX Full HD non destructif:
+  il regenere `output/fullhd_pcx_runtime_launch/` avec les MIX du pack
+  `mod_mix_pcx_fullhd/` et laisse les MIX actifs inchanges.
 - Les reglages de qualite du jeu sont reappliques au lancement.
 - Les images fixes PCX sont exportees et verifiees en 1920x1080.
+- Un pack MIX PCX 1920x1080 experimental existe pour les 37 PCX de
+  `GLOBAL.MIX`/`LOCAL.MIX`; il n'est pas installe dans les MIX actifs.
+- Un staging de smoke test non destructif peut etre regenere dans
+  `output/fullhd_pcx_runtime_smoke/`.
+- Le smoke DOSBox offscreen du staging PCX Full HD tient jusqu'au timeout de
+  45s avec stage/ISO/VESA/swap confirmes, lectures tracees des deux MIX Full
+  HD, lecture de l'entree PCX cible `LOCAL:0fe8e7df`, et frame SDL 640x480 non
+  vide capturee apres sa lecture complete (`after_pcx_frame_temporal_proof=1`);
+  une variante sentinelle isolee prouve que cette payload PCX affecte le
+  framebuffer capture (`sentinel_proof=pass`).
 - Les VQA ont un vrai rendu frame par frame exporte en Full HD.
+- La faisabilite runtime VQA est auditee separement: elle confirme les 1955
+  entrees et 171167 frames Full HD exportees. La readiness repack confirme
+  aussi 1955/1955 entrees mappees et 66/66 archives en roundtrip exact.
+  Un premier writer WVQA Full HD produit maintenant un batch de 1568 payloads de
+  remplacement et valide 70758/70758 frames 1920x1080 au redecode. Un seed
+  writer d'archives ajoute 8 payloads cibles, valide 1675/1675 frames, et la
+  racine runtime atteint 1573/1955 payloads; le builder ecrit maintenant 66/66
+  MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 382 payloads restent
+  manquants, et 35 remplacements de `L20_BBI.MIX` sont differes pour rester sous
+  la limite body 32 bits du format MIX.
+  La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
+  entrees natives exact-block comme cibles de fixture.
+  Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
+  LCW literal et valide 20/20 frames au redecode.
+- La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
+  sont detectes. L'essai Xvfb/Wine standard atteint le bootstrap (`MMX`), puis
+  sort en `exited_1` sur le rendu D3D/pixel-format; une variante
+  `renderer=no3d` reste vivante jusqu'au timeout controle. Les entrees reelles
+  `real_upload_capture`, `real_surface` et `real_provenance` manquent encore.
+  Les traces `winedbg` standard et `no3d` confirment que les 7 breakpoints
+  payload-offset sont acceptes, mais qu'aucun n'est touche en 90s sans pilotage
+  de gameplay ni hook natif.
 - Les assets CDCACHE ont un pack HD verifie, avec 3104 assets references.
+- L'inventaire Full HD contient 177463 PNGs verifies en 1920x1080, sans issue.
+- L'audit runtime separe les exports valides des assets effectivement charges
+  par le jeu.
 - Le tableau de bord centralise les galeries, manifests, rapports et preuves.
 - L'inventaire historique des anciens fichiers projet est integre.
 
@@ -50,6 +99,7 @@ Visual MIX entries covered: 1992
 CDCACHE HD assets: 3104
 .tex-linked assets: 194
 .tex material rows in decoder queue: 36
+.tex augmented unresolved unique PCX references: 49
 ```
 
 Inventaire historique:
@@ -86,7 +136,45 @@ Sorties principales:
 ```text
 output/vqa_batch_window_lcw_transparent0_allframes/index.html
 output/vqa_batch_window_lcw_transparent0_allframes/status.html
+output/vqa_runtime_feasibility/index.html
+output/vqa_runtime_feasibility/summary.csv
+output/vqa_runtime_feasibility/requirements.csv
+output/vqa_runtime_repack_readiness/index.html
+output/vqa_runtime_repack_readiness/summary.csv
+output/vqa_runtime_repack_readiness/requirements.csv
+output/vqa_runtime_repack_readiness/archives.csv
+output/vqa_runtime_repack_readiness/entries.csv
+output/vqa_runtime_pack_build/index.html
+output/vqa_runtime_pack_build/summary.csv
+output/vqa_runtime_pack_build/requirements.csv
+output/vqa_runtime_pack_build/archives.csv
+output/vqa_runtime_pack_build/entries.csv
+output/vqa_lcw_literal_probe/index.html
+output/vqa_lcw_literal_probe/summary.csv
+output/vqa_lcw_literal_probe/requirements.csv
+output/vqa_lcw_literal_probe/candidates.csv
+output/vqa_native_exact_fixture_writer/index.html
+output/vqa_native_exact_fixture_writer/summary.csv
+output/vqa_native_exact_fixture_writer/requirements.csv
+output/vqa_native_exact_fixture_writer/frames.csv
+output/vqa_fullhd_replacement_writer/index.html
+output/vqa_fullhd_replacement_writer/summary.csv
+output/vqa_fullhd_replacement_writer/requirements.csv
+output/vqa_fullhd_replacement_writer/frames.csv
 ```
+
+Etat runtime VQA: `gap`. Le rapport de faisabilite liste 9 requirements: les
+requirements `wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
+`wvqa_native_fixture_writer` et `palette_codebook_pointer_encoder` passent
+(`mapped_entries=1955/1955`, `roundtrip_archives=66/66`,
+`roundtrip_cases=11`, `roundtrip_failures=0`, `matched_frames=20/20`,
+`fullhd_writer_validated_frames=70758/70758`, `exact_block_ratio=0.917472`),
+tandis que 4 restent ouverts:
+`mix_repack`, `lcw_format80_encoder`, `audio_handling` et
+`cbp_update_encoder`. Le build de pack VQA reste `gap` avec
+`replacement_entries=1573/1955`, `applied_replacements=1538/1955`,
+`deferred_replacements=35`, `missing_replacements=382` et
+`output_archives=66/66`.
 
 ## Textures .tex
 
@@ -95,6 +183,43 @@ instrumente: les rapports isolent les gaps, les frontieres, les runs, les
 tokens, les controles et les cas non resolus. Les promotions automatiques sont
 conservatrices: quand une hypothese ne produit pas une regle robuste, elle reste
 en revue.
+
+Readiness runtime reelle:
+
+```text
+output/tex_runtime_real_capture_readiness/index.html
+output/tex_runtime_real_capture_readiness/summary.csv
+output/tex_runtime_real_capture_readiness/requirements.csv
+output/tex_runtime_real_capture_readiness/run_xvfb_capture_session.sh
+output/tex_runtime_real_capture_attempt/index.html
+output/tex_runtime_real_capture_attempt/summary.csv
+output/tex_runtime_real_capture_attempt/targets.csv
+output/tex_runtime_real_capture_attempt_no3d/index.html
+output/tex_runtime_real_capture_attempt_no3d/summary.csv
+output/lolg95_winedbg_payload_trace_attempt/index.html
+output/lolg95_winedbg_payload_trace_attempt/summary.csv
+output/lolg95_winedbg_payload_trace_attempt/trace.tsv
+output/lolg95_winedbg_payload_trace_attempt/raw.log
+output/lolg95_winedbg_payload_trace_attempt_no3d/index.html
+output/lolg95_winedbg_payload_trace_attempt_no3d/summary.csv
+output/lolg95_winedbg_payload_trace_attempt_no3d/trace.tsv
+output/lolg95_winedbg_payload_trace_attempt_no3d/raw.log
+```
+
+Etat actuel: `gap`. Xvfb et Wine sont disponibles, mais la preflight reste
+`missing_real_provenance`; les trois entrees attendues sont encore absentes:
+`real_upload_capture`, `real_surface` et `real_provenance`. L'essai Xvfb/Wine
+standard consigne `session_status=exited_1` et `timed_out=0`: LOLG95 atteint le
+bootstrap MMX, puis echoue sur le rendu D3D/pixel-format et le changement de
+mode display. La variante `renderer=no3d` consigne
+`session_status=started_timeout` et `timed_out=1`, avec le prefixe Wine isole
+`output/tex_runtime_real_capture_attempt_no3d/wineprefix`; elle evite la sortie
+rapide, mais ne cree toujours aucun artefact dans `captures/`. Le prochain
+verrou est donc le hook/logger TE qui doit ecrire ces fichiers pendant la
+session Wine. Les essais `winedbg` standard et `no3d` consignent
+`contract_breakpoints=7`, `breakpoint_hits=0` et `extracted_rows=0`; les
+breakpoints sont poses, mais le flux actuel n'atteint pas les probes
+payload-offset.
 
 Roadmap de travail:
 
@@ -4849,5 +4974,5 @@ Etat de reference apres cette mise au point:
 
 ```text
 Audit final: pass
-Gates: 229/229
+Gates: 252/252
 ```
