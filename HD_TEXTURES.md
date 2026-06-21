@@ -1767,7 +1767,9 @@ HD replacement payload. The Full HD replacement writer now encodes a 1568-entry
 1920x1080 `FORM/WVQA` main batch plus 3-entry and 6-entry `--missing-only`
 incremental batches. The main writer report validates 73647/73647 decoded
 frames with `exact_block_ratio=0.917133`; the latest incremental batch validates
-546/546 additional decoded frames and installs them under
+546/546 additional decoded frames. The runtime feasibility report aggregates
+those writer outputs as 74466/74466 validated frames with
+`exact_block_ratio=0.917776` and installs them under
 `replacements_vqa_fullhd/`.
 
 The `.tex` real-capture readiness report confirms that Xvfb and Wine are
@@ -3965,7 +3967,9 @@ at 1920x1080, 22603620816 payload bytes, 4000/4000 max vectors used,
 `exact_block_ratio=0.917133`, and `changed_pixel_ratio=0.036322`. The latest
 incremental batch result is also `pass`, with 546/546 decoded frames validated,
 161546006 payload bytes, `exact_block_ratio=0.972864`, and
-`changed_pixel_ratio=0.012063`. The writer
+`changed_pixel_ratio=0.012063`. The feasibility report now aggregates accepted
+writer outputs as 74466/74466 validated frames, 22845996338 payload bytes,
+`exact_block_ratio=0.917776`, and `changed_pixel_ratio=0.036040`. The writer
 installs the payloads under `replacements_vqa_fullhd/`, which the pack builder
 then combines with the archive seed writer outputs into 66 partial MIX archives
 under `mod_mix_vqa_fullhd/`.

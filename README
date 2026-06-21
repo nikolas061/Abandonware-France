@@ -151,8 +151,8 @@ encore la generalisation a toutes les entrees. Le writer de fixture
 redecode. Le writer `output/vqa_fullhd_replacement_writer/` produit maintenant
 un batch principal de 1568 payloads `FORM/WVQA` 1920x1080, complete par des
 batches incrementaux `--missing-only` de 3 puis 6 payloads. Le rapport writer
-principal valide 73647/73647 frames au redecode; le dernier batch incremental
-valide 546/546 frames supplementaires et installe les payloads dans
+agrege par la faisabilite valide 74466/74466 frames au redecode; le dernier
+batch incremental valide 546/546 frames supplementaires et installe les payloads dans
 `replacements_vqa_fullhd/`. Le
 gap `.tex` est
 mesure dans `output/tex_runtime_real_capture_readiness/`: Xvfb et Wine sont

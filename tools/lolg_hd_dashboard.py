@@ -962,6 +962,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             Path("output/cdcache_hd_asset_pack/contact_sheet_all_descriptors.png"),
         ]
     )
+    vqa_writer_validated = (
+        vqa_runtime_summary.get("fullhd_replacement_writer_validated_frames")
+        or vqa_fullhd_writer_summary.get("validated_frames", "")
+    )
+    vqa_writer_frames = (
+        vqa_runtime_summary.get("fullhd_replacement_writer_frames")
+        or vqa_fullhd_writer_summary.get("frames", "")
+    )
 
     cards = [
         {
@@ -985,8 +993,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{vqa_archive_seed_summary.get('target_archives', '')}, "
                 f"LCW {vqa_lcw_summary.get('roundtrip_cases', '')} tests, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
-                f"writer {vqa_fullhd_writer_summary.get('validated_frames', '')}/"
-                f"{vqa_fullhd_writer_summary.get('frames', '')}"
+                f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
             "href": relative_href(DEFAULT_VQA_RUNTIME_FEASIBILITY, base_dir),
             "image": "",
