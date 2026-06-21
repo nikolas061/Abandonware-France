@@ -14,6 +14,12 @@ from pathlib import Path
 DEFAULT_OUTPUT = Path("output/fullhd_dashboard/index.html")
 DEFAULT_AUDIT = Path("output/fullhd_audit/audit.csv")
 DEFAULT_AUDIT_SUMMARY = Path("output/fullhd_audit/summary.csv")
+DEFAULT_RUNTIME_AUDIT = Path("output/fullhd_runtime_audit/index.html")
+DEFAULT_RUNTIME_AUDIT_SUMMARY = Path("output/fullhd_runtime_audit/summary.csv")
+DEFAULT_RUNTIME_AUDIT_DETAILS = Path("output/fullhd_runtime_audit/details.csv")
+DEFAULT_PCX_SENTINEL_PROOF = Path("output/fullhd_pcx_runtime_sentinel/proof.tsv")
+DEFAULT_PCX_SENTINEL_REPORT = Path("output/fullhd_pcx_runtime_sentinel/report.csv")
+DEFAULT_PCX_SENTINEL_SMOKE = Path("output/fullhd_pcx_runtime_sentinel_smoke/runtime_smoke.tsv")
 DEFAULT_INVENTORY_SUMMARY = Path("output/fullhd_inventory/summary.csv")
 DEFAULT_PROJECT_LEGACY_INVENTORY = Path("output/project_legacy_inventory/index.html")
 DEFAULT_PROJECT_LEGACY_MANIFEST = Path("output/project_legacy_inventory/manifest.csv")
@@ -23,6 +29,57 @@ DEFAULT_VQA_GALLERY_MANIFEST = Path(
     "output/vqa_batch_window_lcw_transparent0_allframes/gallery_manifest.csv"
 )
 DEFAULT_VQA_STATUS = Path("output/vqa_batch_window_lcw_transparent0_allframes/status.html")
+DEFAULT_VQA_RUNTIME_FEASIBILITY = Path("output/vqa_runtime_feasibility/index.html")
+DEFAULT_VQA_RUNTIME_FEASIBILITY_SUMMARY = Path("output/vqa_runtime_feasibility/summary.csv")
+DEFAULT_VQA_RUNTIME_FEASIBILITY_REQUIREMENTS = Path("output/vqa_runtime_feasibility/requirements.csv")
+DEFAULT_VQA_RUNTIME_REPACK_READINESS = Path("output/vqa_runtime_repack_readiness/index.html")
+DEFAULT_VQA_RUNTIME_REPACK_READINESS_SUMMARY = Path("output/vqa_runtime_repack_readiness/summary.csv")
+DEFAULT_VQA_RUNTIME_REPACK_READINESS_REQUIREMENTS = Path("output/vqa_runtime_repack_readiness/requirements.csv")
+DEFAULT_VQA_RUNTIME_REPACK_READINESS_ARCHIVES = Path("output/vqa_runtime_repack_readiness/archives.csv")
+DEFAULT_VQA_RUNTIME_REPACK_READINESS_ENTRIES = Path("output/vqa_runtime_repack_readiness/entries.csv")
+DEFAULT_VQA_RUNTIME_PACK_BUILD = Path("output/vqa_runtime_pack_build/index.html")
+DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY = Path("output/vqa_runtime_pack_build/summary.csv")
+DEFAULT_VQA_RUNTIME_PACK_BUILD_REQUIREMENTS = Path("output/vqa_runtime_pack_build/requirements.csv")
+DEFAULT_VQA_RUNTIME_PACK_BUILD_ARCHIVES = Path("output/vqa_runtime_pack_build/archives.csv")
+DEFAULT_VQA_RUNTIME_PACK_BUILD_ENTRIES = Path("output/vqa_runtime_pack_build/entries.csv")
+DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
+DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
+DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
+    "output/vqa_runtime_archive_seed_writer/requirements.csv"
+)
+DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_TARGETS = Path("output/vqa_runtime_archive_seed_writer/targets.csv")
+DEFAULT_VQA_LCW_LITERAL_PROBE = Path("output/vqa_lcw_literal_probe/index.html")
+DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY = Path("output/vqa_lcw_literal_probe/summary.csv")
+DEFAULT_VQA_LCW_LITERAL_PROBE_REQUIREMENTS = Path("output/vqa_lcw_literal_probe/requirements.csv")
+DEFAULT_VQA_LCW_LITERAL_PROBE_CANDIDATES = Path("output/vqa_lcw_literal_probe/candidates.csv")
+DEFAULT_VQA_NATIVE_EXACT_FIXTURE = Path("output/vqa_native_exact_fixture_writer/index.html")
+DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY = Path("output/vqa_native_exact_fixture_writer/summary.csv")
+DEFAULT_VQA_NATIVE_EXACT_FIXTURE_REQUIREMENTS = Path("output/vqa_native_exact_fixture_writer/requirements.csv")
+DEFAULT_VQA_NATIVE_EXACT_FIXTURE_FRAMES = Path("output/vqa_native_exact_fixture_writer/frames.csv")
+DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER = Path("output/vqa_fullhd_replacement_writer/index.html")
+DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_SUMMARY = Path("output/vqa_fullhd_replacement_writer/summary.csv")
+DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_REQUIREMENTS = Path(
+    "output/vqa_fullhd_replacement_writer/requirements.csv"
+)
+DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_FRAMES = Path("output/vqa_fullhd_replacement_writer/frames.csv")
+DEFAULT_TEX_REAL_CAPTURE_READINESS = Path("output/tex_runtime_real_capture_readiness/index.html")
+DEFAULT_TEX_REAL_CAPTURE_READINESS_SUMMARY = Path("output/tex_runtime_real_capture_readiness/summary.csv")
+DEFAULT_TEX_REAL_CAPTURE_READINESS_REQUIREMENTS = Path("output/tex_runtime_real_capture_readiness/requirements.csv")
+DEFAULT_TEX_REAL_CAPTURE_ATTEMPT = Path("output/tex_runtime_real_capture_attempt/index.html")
+DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_SUMMARY = Path("output/tex_runtime_real_capture_attempt/summary.csv")
+DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_TARGETS = Path("output/tex_runtime_real_capture_attempt/targets.csv")
+DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_NO3D = Path("output/tex_runtime_real_capture_attempt_no3d/index.html")
+DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_NO3D_SUMMARY = Path("output/tex_runtime_real_capture_attempt_no3d/summary.csv")
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE = Path("output/lolg95_winedbg_payload_trace_attempt/index.html")
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_SUMMARY = Path("output/lolg95_winedbg_payload_trace_attempt/summary.csv")
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_RAW = Path("output/lolg95_winedbg_payload_trace_attempt/raw.log")
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_TSV = Path("output/lolg95_winedbg_payload_trace_attempt/trace.tsv")
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D = Path("output/lolg95_winedbg_payload_trace_attempt_no3d/index.html")
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D_SUMMARY = Path(
+    "output/lolg95_winedbg_payload_trace_attempt_no3d/summary.csv"
+)
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D_RAW = Path("output/lolg95_winedbg_payload_trace_attempt_no3d/raw.log")
+DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D_TSV = Path("output/lolg95_winedbg_payload_trace_attempt_no3d/trace.tsv")
 DEFAULT_ARCHIVE_COVERAGE = Path("output/fullhd_archive_coverage/index.html")
 DEFAULT_CDCACHE_GALLERY = Path("output/cdcache_hd_asset_pack/index.html")
 DEFAULT_CDCACHE_PACK_SUMMARY = Path("output/cdcache_hd_asset_pack/summary.csv")
@@ -879,6 +936,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     base_dir = output.parent
     audit_summary = first_row(DEFAULT_AUDIT_SUMMARY)
     audit_rows = read_csv(DEFAULT_AUDIT) if DEFAULT_AUDIT.exists() else []
+    runtime_summary = first_row(DEFAULT_RUNTIME_AUDIT_SUMMARY)
+    vqa_runtime_summary = first_row(DEFAULT_VQA_RUNTIME_FEASIBILITY_SUMMARY)
+    vqa_repack_summary = first_row(DEFAULT_VQA_RUNTIME_REPACK_READINESS_SUMMARY)
+    vqa_pack_build_summary = first_row(DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY)
+    vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
+    vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
+    vqa_fixture_summary = first_row(DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY)
+    vqa_fullhd_writer_summary = first_row(DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_SUMMARY)
     inventory_rows = read_csv(DEFAULT_INVENTORY_SUMMARY) if DEFAULT_INVENTORY_SUMMARY.exists() else []
     vqa_rows = read_csv(DEFAULT_VQA_GALLERY_MANIFEST) if DEFAULT_VQA_GALLERY_MANIFEST.exists() else []
     still_manifest = (
@@ -908,6 +973,25 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             "image": relative_href(first_vqa.get("representative_fullhd_path", ""), base_dir),
         },
         {
+            "title": "VQA Runtime",
+            "stat": vqa_runtime_summary.get("status", ""),
+            "label": "runtime",
+            "description": (
+                f"{vqa_runtime_summary.get('encoder_tools', '')} encodeurs, "
+                f"{vqa_runtime_summary.get('runtime_pack_entries', '')} entrees pack, "
+                f"repack {vqa_repack_summary.get('mapped_entries', '')}/{vqa_repack_summary.get('vqa_entries', '')}, "
+                f"build {vqa_pack_build_summary.get('output_archives', '')} MIX, "
+                f"seed {vqa_archive_seed_summary.get('encoded_archives', '')}/"
+                f"{vqa_archive_seed_summary.get('target_archives', '')}, "
+                f"LCW {vqa_lcw_summary.get('roundtrip_cases', '')} tests, "
+                f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
+                f"writer {vqa_fullhd_writer_summary.get('validated_frames', '')}/"
+                f"{vqa_fullhd_writer_summary.get('frames', '')}"
+            ),
+            "href": relative_href(DEFAULT_VQA_RUNTIME_FEASIBILITY, base_dir),
+            "image": "",
+        },
+        {
             "title": "Textures CDCACHE",
             "stat": audit_summary.get("cdcache_pack_assets", ""),
             "label": "assets",
@@ -931,11 +1015,25 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             "href": relative_href(DEFAULT_AUDIT, base_dir),
             "image": "",
         },
+        {
+            "title": "Audit runtime",
+            "stat": runtime_summary.get("status", ""),
+            "label": "runtime",
+            "description": f"{runtime_summary.get('runtime_gap_components', '')} gaps runtime",
+            "href": relative_href(DEFAULT_RUNTIME_AUDIT, base_dir),
+            "image": "",
+        },
     ]
 
     links = [
         ("Audit CSV", DEFAULT_AUDIT),
         ("Audit summary", DEFAULT_AUDIT_SUMMARY),
+        ("Audit runtime", DEFAULT_RUNTIME_AUDIT),
+        ("Audit runtime summary", DEFAULT_RUNTIME_AUDIT_SUMMARY),
+        ("Audit runtime details", DEFAULT_RUNTIME_AUDIT_DETAILS),
+        ("Preuve PCX runtime sentinelle", DEFAULT_PCX_SENTINEL_PROOF),
+        ("Rapport PCX sentinelle", DEFAULT_PCX_SENTINEL_REPORT),
+        ("Smoke PCX sentinelle", DEFAULT_PCX_SENTINEL_SMOKE),
         ("Inventaire Full HD", DEFAULT_INVENTORY_SUMMARY),
         ("Inventaire fichiers projet", DEFAULT_PROJECT_LEGACY_INVENTORY),
         ("Manifest fichiers projet", DEFAULT_PROJECT_LEGACY_MANIFEST),
@@ -944,6 +1042,51 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Manifest images fixes", DEFAULT_STILL_MANIFEST),
         ("Galerie VQA", DEFAULT_VQA_GALLERY),
         ("Rapport VQA", DEFAULT_VQA_STATUS),
+        ("Faisabilite runtime VQA", DEFAULT_VQA_RUNTIME_FEASIBILITY),
+        ("Synthese faisabilite runtime VQA", DEFAULT_VQA_RUNTIME_FEASIBILITY_SUMMARY),
+        ("Requirements runtime VQA", DEFAULT_VQA_RUNTIME_FEASIBILITY_REQUIREMENTS),
+        ("Readiness repack runtime VQA", DEFAULT_VQA_RUNTIME_REPACK_READINESS),
+        ("Synthese readiness repack VQA", DEFAULT_VQA_RUNTIME_REPACK_READINESS_SUMMARY),
+        ("Requirements readiness repack VQA", DEFAULT_VQA_RUNTIME_REPACK_READINESS_REQUIREMENTS),
+        ("Archives readiness repack VQA", DEFAULT_VQA_RUNTIME_REPACK_READINESS_ARCHIVES),
+        ("Entrees readiness repack VQA", DEFAULT_VQA_RUNTIME_REPACK_READINESS_ENTRIES),
+        ("Build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD),
+        ("Synthese build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY),
+        ("Requirements build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_REQUIREMENTS),
+        ("Archives build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_ARCHIVES),
+        ("Entrees build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_ENTRIES),
+        ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
+        ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
+        ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),
+        ("Cibles seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_TARGETS),
+        ("Probe LCW literal VQA", DEFAULT_VQA_LCW_LITERAL_PROBE),
+        ("Synthese probe LCW literal VQA", DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY),
+        ("Requirements probe LCW literal VQA", DEFAULT_VQA_LCW_LITERAL_PROBE_REQUIREMENTS),
+        ("Candidats probe LCW literal VQA", DEFAULT_VQA_LCW_LITERAL_PROBE_CANDIDATES),
+        ("Fixture WVQA native exact-block", DEFAULT_VQA_NATIVE_EXACT_FIXTURE),
+        ("Synthese fixture WVQA native", DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY),
+        ("Requirements fixture WVQA native", DEFAULT_VQA_NATIVE_EXACT_FIXTURE_REQUIREMENTS),
+        ("Frames fixture WVQA native", DEFAULT_VQA_NATIVE_EXACT_FIXTURE_FRAMES),
+        ("Writer remplacement WVQA Full HD", DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER),
+        ("Synthese writer WVQA Full HD", DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_SUMMARY),
+        ("Requirements writer WVQA Full HD", DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_REQUIREMENTS),
+        ("Frames writer WVQA Full HD", DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_FRAMES),
+        ("Readiness capture runtime .tex", DEFAULT_TEX_REAL_CAPTURE_READINESS),
+        ("Synthese readiness capture .tex", DEFAULT_TEX_REAL_CAPTURE_READINESS_SUMMARY),
+        ("Requirements capture .tex", DEFAULT_TEX_REAL_CAPTURE_READINESS_REQUIREMENTS),
+        ("Essai Xvfb capture .tex", DEFAULT_TEX_REAL_CAPTURE_ATTEMPT),
+        ("Synthese essai Xvfb capture .tex", DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_SUMMARY),
+        ("Cibles essai Xvfb capture .tex", DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_TARGETS),
+        ("Essai Xvfb capture .tex no3d", DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_NO3D),
+        ("Synthese essai Xvfb capture .tex no3d", DEFAULT_TEX_REAL_CAPTURE_ATTEMPT_NO3D_SUMMARY),
+        ("Trace winedbg payload .tex", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE),
+        ("Synthese trace winedbg payload .tex", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_SUMMARY),
+        ("Log brut trace winedbg payload .tex", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_RAW),
+        ("TSV trace winedbg payload .tex", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_TSV),
+        ("Trace winedbg payload .tex no3d", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D),
+        ("Synthese trace winedbg payload .tex no3d", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D_SUMMARY),
+        ("Log brut trace winedbg payload .tex no3d", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D_RAW),
+        ("TSV trace winedbg payload .tex no3d", DEFAULT_LOLG95_WINEDBG_PAYLOAD_TRACE_NO3D_TSV),
         ("Couverture archives", DEFAULT_ARCHIVE_COVERAGE),
         ("Galerie CDCACHE", DEFAULT_CDCACHE_GALLERY),
         ("Couverture .tex", DEFAULT_TEX_COVERAGE),

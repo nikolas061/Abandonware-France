@@ -2449,6 +2449,20 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
         audit.append("--fail-on-issues")
         final_audit.append("--fail-on-issues")
     return [
+        Step("probe LCW literal VQA Full HD", [sys.executable, "tools/lolg_vqa_lcw_literal_probe.py"]),
+        Step("fixture WVQA native exact-block", [sys.executable, "tools/lolg_vqa_native_exact_fixture_writer.py"]),
+        Step(
+            "writer remplacements WVQA Full HD",
+            [sys.executable, "tools/lolg_vqa_fullhd_replacement_writer.py", "--batch-limit", "1568"],
+        ),
+        Step("readiness repack runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_repack_readiness.py"]),
+        Step("build pack runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_pack_build.py"]),
+        Step("seed archives runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_archive_seed_writer.py"]),
+        Step("build pack runtime VQA Full HD final", [sys.executable, "tools/lolg_vqa_runtime_pack_build.py"]),
+        Step("readiness repack runtime VQA Full HD final", [sys.executable, "tools/lolg_vqa_runtime_repack_readiness.py"]),
+        Step("faisabilite runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_feasibility.py"]),
+        Step("readiness capture runtime .tex", [sys.executable, "tools/lolg_tex_runtime_real_capture_readiness.py"]),
+        Step("audit runtime Full HD", [sys.executable, "tools/lolg_runtime_fullhd_audit.py"]),
         Step("audit Full HD", audit),
         Step("dashboard Full HD", [sys.executable, "tools/lolg_hd_dashboard.py"]),
         Step("audit final Full HD", final_audit),

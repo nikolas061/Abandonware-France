@@ -7,9 +7,17 @@ Point d'entree principal du projet Full HD:
 ./RUN_HD.sh
 ```
 
+Chemin runtime PCX Full HD non destructif:
+
+```sh
+./RUN_HD_PCX_FULLHD.sh
+```
+
 Ce lanceur remet les profils du jeu en qualite haute, force DOSBox-Staging en
 1920x1080 avec sortie OpenGL, et utilise le shader `interpolation/catmull-rom`.
-La version classique reste disponible avec `./RUN.sh`.
+La variante PCX Full HD lance un staging dans `output/fullhd_pcx_runtime_launch/`
+avec `GLOBAL.MIX` et `LOCAL.MIX` remplaces par `mod_mix_pcx_fullhd/`, sans
+ecraser les MIX actifs. La version classique reste disponible avec `./RUN.sh`.
 
 Tableau de bord local du travail HD:
 
@@ -23,15 +31,144 @@ Validation rapide du socle Full HD:
 python3 tools/lolg_fullhd_pipeline.py --mode quick --fail-on-issues
 ```
 
+Audit de ce qui est réellement prêt côté runtime:
+
+```sh
+python3 tools/lolg_runtime_fullhd_audit.py
+```
+
+Audit du contrat restant pour les VQA jouees en runtime:
+
+```sh
+python3 tools/lolg_vqa_runtime_feasibility.py
+```
+
+Audit de readiness repack pour les VQA runtime:
+
+```sh
+python3 tools/lolg_vqa_runtime_repack_readiness.py
+```
+
+Build/audit du pack MIX runtime VQA:
+
+```sh
+python3 tools/lolg_vqa_runtime_pack_build.py
+```
+
+Probe de la primitive LCW literal pour le futur encodeur VQA:
+
+```sh
+python3 tools/lolg_vqa_lcw_literal_probe.py
+```
+
+Writer de fixture WVQA native exact-block:
+
+```sh
+python3 tools/lolg_vqa_native_exact_fixture_writer.py
+```
+
+Writer de remplacement WVQA Full HD quantize:
+
+```sh
+python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
+```
+
+Seed des archives runtime VQA encore sans pack partiel:
+
+```sh
+python3 tools/lolg_vqa_runtime_archive_seed_writer.py
+```
+
+Audit de readiness pour la capture runtime reelle des textures `.tex`:
+
+```sh
+python3 tools/lolg_tex_runtime_real_capture_readiness.py
+```
+
+Essai borne de capture `.tex` sous Xvfb/Wine:
+
+```sh
+python3 tools/run_lolg95_xvfb_capture_attempt.py --timeout 30
+```
+
+Variante Wine sans 3D pour isoler le blocage renderer:
+
+```sh
+env WINEPREFIX=$PWD/output/tex_runtime_real_capture_attempt_no3d/wineprefix \
+  xvfb-run -a wine reg add 'HKCU\Software\Wine\Direct3D' /v renderer /d no3d /f
+python3 tools/run_lolg95_xvfb_capture_attempt.py \
+  --output output/tex_runtime_real_capture_attempt_no3d \
+  --wineprefix output/tex_runtime_real_capture_attempt_no3d/wineprefix \
+  --timeout 45
+```
+
+Essai borne de trace payload-offset `.tex` sous `winedbg`:
+
+```sh
+python3 tools/run_lolg95_winedbg_payload_trace_attempt.py --timeout 90
+```
+
 Pour afficher la regeneration complete des rapports legers sans les lancer:
 
 ```sh
 python3 tools/lolg_fullhd_pipeline.py --mode reports --dry-run
 ```
 
-Etat actuel: le socle Full HD est valide par l'audit local. Le chantier restant
-est le decodage complet des textures proprietaires `.tex`; les notes detaillees
-sont dans `MISE_AU_POINT_PROJET.md` et `HD_TEXTURES.md`.
+Etat actuel: le socle Full HD est valide par l'audit local: 252/252 gates,
+177463 PNGs Full HD recenses, 171167 frames VQA Full HD, 78 images fixes et
+3104 assets CDCACHE. L'audit runtime separe ces exports des assets reellement
+charges par le jeu; il reste en `gap` avec 2 gaps runtime. Un pack PCX
+experimental 1920x1080 existe pour les 37 PCX de `GLOBAL.MIX`/`LOCAL.MIX`,
+avec un smoke DOSBox offscreen qui demarre le staging, monte l'ISO, passe en
+VESA 640x480, cree `LOLGSWAP.SWP` et trace des lectures reelles des deux MIX
+Full HD du staging (`file_load_proof=1`). Le smoke prouve aussi la lecture de
+l'entree PCX Full HD cible `LOCAL:0fe8e7df` (`target_pcx_read_proof=1`) et
+capture une frame SDL 640x480 non vide apres sa lecture complete
+(`after_pcx_frame_temporal_proof=1`). Une variante sentinelle non destructive
+prouve aussi que changer uniquement cette payload PCX modifie le framebuffer
+capture (`sentinel_proof=pass`); le pack PCX Full HD n'est toutefois pas encore
+installe dans les MIX actifs. L'audit runtime compte maintenant ce pack comme
+runtime-ready via `RUN_HD_PCX_FULLHD.sh`; les MIX actifs originaux et le pack
+PCX 4x historique sont informationnels. Les deux gaps runtime restants sont les
+VQA jouees et les textures `.tex`. Le gap VQA est maintenant mesure dans
+`output/vqa_runtime_feasibility/`: 1955 entrees, 171167 frames Full HD
+exportees, 1 writer WVQA Full HD valide et 66 entrees de pack runtime partiel.
+La readiness repack
+VQA dans `output/vqa_runtime_repack_readiness/` confirme 1955/1955 entrees
+mappees et 66/66 archives en roundtrip exact; la couverture runtime reste
+partielle avec 1573/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
+materialises. Le builder `output/vqa_runtime_pack_build/` formalise cette
+frontiere: 1573/1955 payloads de remplacement, 1538 appliques, 35 differes
+pour rester sous la limite body 32 bits de `L20_BBI.MIX`, et 66 MIX ecrits dans
+`mod_mix_vqa_fullhd/`. Le seed writer
+`output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
+archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
+literal est maintenant prouvee dans `output/vqa_lcw_literal_probe/` avec 11
+roundtrips sans echec et 374 entrees natives exact-block candidates; il manque
+encore la generalisation a toutes les entrees. Le writer de fixture
+`output/vqa_native_exact_fixture_writer/` assemble deja un vrai payload
+`FORM/WVQA` natif avec CBFZ/VPTZ LCW literal et valide 20/20 frames au
+redecode. Le writer `output/vqa_fullhd_replacement_writer/` produit maintenant
+un batch de 1568 payloads `FORM/WVQA` 1920x1080, valide 70758/70758 frames au redecode, et les
+installe dans `replacements_vqa_fullhd/`. Le
+gap `.tex` est
+mesure dans `output/tex_runtime_real_capture_readiness/`: Xvfb et Wine sont
+detectes, mais la preflight reste `missing_real_provenance` avec les trois
+entrees reelles absentes (`real_upload_capture`, `real_surface`,
+`real_provenance`). Un essai reel Xvfb/Wine est aussi consigne dans
+`output/tex_runtime_real_capture_attempt/`: en 640x480x16 la session sort en
+`exited_1`, imprime `MMX.......Detected`, puis echoue cote pixel-format
+D3D/display mode sans produire les trois artefacts de capture. Une variante
+isolee `renderer=no3d` dans
+`output/tex_runtime_real_capture_attempt_no3d/` garde le processus vivant
+jusqu'au timeout controle (`started_timeout`, `timed_out=1`), mais ne produit
+toujours aucun fichier dans `captures/`; le verrou restant est donc l'injection
+ou l'activation du hook/logger TE. Une trace `winedbg` bornee est aussi
+consignee dans `output/lolg95_winedbg_payload_trace_attempt/`, avec une variante
+`no3d` dans `output/lolg95_winedbg_payload_trace_attempt_no3d/`: les 7
+breakpoints payload-offset sont acceptes par `winedbg`, mais aucun n'est touche
+en 90s sans pilotage de gameplay ni hook natif. Les notes detaillees sont dans
+`MISE_AU_POINT_PROJET.md` et `HD_TEXTURES.md`.
 
 DOSBox Staging
 ==============

@@ -1,11 +1,16 @@
 # Full HD / Texture Notes
 
-This package now has two DOSBox rendering paths:
+This package now has three DOSBox rendering paths:
 
 - `RUN.sh`: original DOSBox launcher, forced to 1920x1080 fullscreen and 16:9 stretch.
 - `RUN_HD.sh`: DOSBox HD launcher. It reapplies the game quality settings,
   forces the DOSBox config back to 1920x1080 OpenGL stretch output, fixes the
   local CD image mount path, and starts the bundled `dosbox` binary.
+- `RUN_HD_PCX_FULLHD.sh`: non-destructive PCX Full HD runtime launcher. It
+  stages `output/fullhd_pcx_runtime_launch/`, copies
+  `mod_mix_pcx_fullhd/GLOBAL.MIX` and `mod_mix_pcx_fullhd/LOCAL.MIX` into that
+  staged C drive, symlinks the remaining game files, and starts DOSBox against
+  the staged config.
 
 Game-side texture quality is already set to the engine maximum in:
 
@@ -419,6 +424,34 @@ output/vqa_batch_window_lcw_transparent0_allframes/status_summary.csv
 output/vqa_batch_window_lcw_transparent0_allframes/status_by_archive.csv
 output/vqa_batch_window_lcw_transparent0_allframes/status_by_resolution.csv
 output/vqa_batch_window_lcw_transparent0_allframes/status_by_pointer.csv
+output/vqa_runtime_feasibility/index.html
+output/vqa_runtime_feasibility/summary.csv
+output/vqa_runtime_feasibility/requirements.csv
+output/vqa_runtime_feasibility/by_archive.csv
+output/vqa_runtime_feasibility/by_resolution.csv
+output/vqa_runtime_feasibility/by_pointer.csv
+output/vqa_runtime_repack_readiness/index.html
+output/vqa_runtime_repack_readiness/summary.csv
+output/vqa_runtime_repack_readiness/requirements.csv
+output/vqa_runtime_repack_readiness/archives.csv
+output/vqa_runtime_repack_readiness/entries.csv
+output/vqa_runtime_pack_build/index.html
+output/vqa_runtime_pack_build/summary.csv
+output/vqa_runtime_pack_build/requirements.csv
+output/vqa_runtime_pack_build/archives.csv
+output/vqa_runtime_pack_build/entries.csv
+output/vqa_lcw_literal_probe/index.html
+output/vqa_lcw_literal_probe/summary.csv
+output/vqa_lcw_literal_probe/requirements.csv
+output/vqa_lcw_literal_probe/candidates.csv
+output/vqa_native_exact_fixture_writer/index.html
+output/vqa_native_exact_fixture_writer/summary.csv
+output/vqa_native_exact_fixture_writer/requirements.csv
+output/vqa_native_exact_fixture_writer/frames.csv
+output/vqa_fullhd_replacement_writer/index.html
+output/vqa_fullhd_replacement_writer/summary.csv
+output/vqa_fullhd_replacement_writer/requirements.csv
+output/vqa_fullhd_replacement_writer/frames.csv
 ```
 
 Regenerate it with:
@@ -428,6 +461,15 @@ python3 tools/lolg_hd_inventory.py -o output/fullhd_inventory
 python3 tools/lolg_project_legacy_inventory.py -o output/project_legacy_inventory
 python3 tools/lolg_still_hd_gallery.py output/fullhd_images
 python3 tools/lolg_vqa_status_report.py output/vqa_batch_window_lcw_transparent0_allframes
+python3 tools/lolg_vqa_runtime_repack_readiness.py
+python3 tools/lolg_vqa_runtime_pack_build.py
+python3 tools/lolg_vqa_lcw_literal_probe.py
+python3 tools/lolg_vqa_native_exact_fixture_writer.py
+python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
+python3 tools/lolg_vqa_runtime_archive_seed_writer.py
+python3 tools/lolg_vqa_runtime_pack_build.py
+python3 tools/lolg_vqa_runtime_repack_readiness.py
+python3 tools/lolg_vqa_runtime_feasibility.py
 python3 tools/lolg_hd_archive_coverage.py C/LOLG/*.MIX -o output/fullhd_archive_coverage
 python3 tools/lolg_tex_hd_coverage.py -o output/tex_hd_coverage
 python3 tools/lolg_tex_reference_coverage.py -o output/tex_reference_coverage
@@ -567,17 +609,19 @@ output/project_legacy_inventory/summary.csv
 output/project_legacy_inventory/manifest.csv
 ```
 
-The current verified inventory result is 177452 Full HD PNG rows, 177452
-existing files, 177452 files at 1920x1080, and 0 issue rows. The summary
+The current verified inventory result is 177463 Full HD PNG rows, 177463
+existing files, 177463 files at 1920x1080, and 0 issue rows. The summary
 breaks down as:
 
 - 171167 VQA frame exports.
 - 78 static still-image exports.
 - 531 CDCACHE descriptor Full HD exports, including descriptor crops.
 - 5676 CDCACHE tile Full HD exports, including tile crops.
-- 6238 transparent RGBA Full HD exports.
+- 8 `.tex` material decode Full HD exports.
+- 3 `.tex` raw same-archive promoted Full HD exports.
+- 6241 transparent RGBA Full HD exports.
 
-The current master Full HD audit result is 229/229 gates passed:
+The current master Full HD audit result is 252/252 gates passed:
 
 - 78 static still-image PNGs verified at 1920x1080.
 - `output/fullhd_images/index.html` verified with 78 gallery entries and 0
@@ -591,7 +635,7 @@ The current master Full HD audit result is 229/229 gates passed:
 - `output/fullhd_archive_coverage/index.html` verified against 86 `.MIX`
   archives with 1992 detected visual entries: 1955/1955 VQA and 37/37 PCX
   entries covered by Full HD outputs.
-- 177452 inventoried Full HD PNG outputs exist and are 1920x1080.
+- 177463 inventoried Full HD PNG outputs exist and are 1920x1080.
 - 266 CDCACHE RGBA descriptor rows and 2838 CDCACHE RGBA tile rows verified.
 - 3104 CDCACHE HD asset-pack symlinks verified, including 194 `.tex`-linked
   pack entries.
@@ -1395,14 +1439,17 @@ The current master Full HD audit result is 229/229 gates passed:
   best prefix 64 bytes, best exact-byte count 4050, and 0 issue rows.
 - `output/cdcache_hd_asset_pack/index.html` verified with 3104 gallery assets,
   including 194 `.tex`-linked assets and 0 missing image/source paths.
-- `output/fullhd_dashboard/index.html` verified with 4 dashboard cards, 228 quick
+- `output/fullhd_dashboard/index.html` verified with 6 dashboard cards, 809 quick
   links, and 0 missing paths.
 - `RUN_HD.sh` and `lol2dos.conf` verify as the direct 1920x1080 DOSBox HD
   launch path.
 
 `output/fullhd_dashboard/index.html` is the current top-level local entry point
-for the Full HD outputs. It links to the VQA gallery and status report,
-archive coverage report, CDCACHE gallery, `.tex` coverage report, still image
+for the Full HD outputs. It links to the runtime audit, VQA gallery/status, VQA
+runtime feasibility, repack-readiness, pack-build, LCW literal, and native WVQA
+fixture reports, `.tex` real-capture readiness, Xvfb attempt, and
+`winedbg` payload-trace reports, archive coverage report, CDCACHE gallery,
+`.tex` coverage report, still image
 gallery and manifest, `.tex` reference coverage and missing-reference evidence
 reports, CDCACHE raw probe and alias-pack reports, audit reports, inventory
 summary, augmented `.tex` coverage, unresolved material `.tex` probe previews,
@@ -1542,8 +1589,203 @@ with issues.
 These files are asset exports, not drop-in replacements for the running game.
 The original `.MIX` archives do not store filenames, most animated visuals are
 Westwood VQA files, and the level textures are proprietary `.tex` payloads.
-Injecting 1920x1080 assets back into the game archives would require format-
-specific encoders and engine compatibility checks that are not present here.
+Injecting all 1920x1080 assets back into the game archives would require
+format-specific encoders and engine compatibility checks that are not present
+here.
+
+The static PCX subset now has an isolated Full HD replacement pack for audit
+and smoke-test work:
+
+```text
+tools/prepare_fullhd_pcx_replacements.py
+output/fullhd_pcx_replacements/report.csv
+replacements_pcx_fullhd/
+mod_mix_pcx_fullhd/
+```
+
+`tools/prepare_fullhd_pcx_replacements.py --fail-on-issues` converts the 37
+`mix_pcx` still-image exports back to paletted 1920x1080 PCX files using the
+original PCX palettes. `tools/rebuild_mix.py` then rebuilds
+`mod_mix_pcx_fullhd/GLOBAL.MIX` and `mod_mix_pcx_fullhd/LOCAL.MIX`; the current
+pack validates as 37/37 PCX entries at 1920x1080. It remains experimental and
+is not installed over active `GLOBAL.MIX`/`LOCAL.MIX`, because 1920x1080 exceeds
+the known DOS PCX 640x480 path and still needs a controlled runtime smoke test.
+
+The non-destructive smoke staging and runner commands are:
+
+```sh
+python3 tools/stage_pcx_fullhd_runtime_smoke.py --fail-on-issues
+python3 tools/run_pcx_fullhd_runtime_smoke.py --timeout 45
+```
+
+The current staging/smoke result is:
+
+```text
+output/fullhd_pcx_runtime_smoke/manifest.csv
+output/fullhd_pcx_runtime_smoke/lol2dos_pcx_fullhd.conf
+output/fullhd_pcx_runtime_smoke/run_pcx_fullhd_smoke.sh
+output/fullhd_pcx_runtime_smoke/runtime_smoke.tsv
+output/fullhd_pcx_runtime_smoke/runtime_stdout.txt
+output/fullhd_pcx_runtime_smoke/runtime_stderr.txt
+output/fullhd_pcx_runtime_smoke/pcx_fullhd_runtime_trace.tsv
+output/fullhd_pcx_runtime_smoke/runtime_frame.png
+output/fullhd_pcx_runtime_smoke/runtime_frame.tsv
+output/fullhd_pcx_runtime_smoke/runtime_frame_after_pcx.png
+output/fullhd_pcx_runtime_smoke/runtime_frame_after_pcx.tsv
+output/fullhd_pcx_runtime_smoke/stage/
+output/fullhd_pcx_runtime_launch/manifest.csv
+output/fullhd_pcx_runtime_launch/lol2dos_pcx_fullhd.conf
+output/fullhd_pcx_runtime_launch/run_pcx_fullhd_smoke.sh
+output/fullhd_pcx_runtime_launch/stage/
+output/fullhd_pcx_runtime_sentinel/report.csv
+output/fullhd_pcx_runtime_sentinel/proof.tsv
+output/fullhd_pcx_runtime_sentinel/sentinel_preview.png
+output/fullhd_pcx_runtime_sentinel_smoke/runtime_smoke.tsv
+```
+
+It stages 287 items with 2 replacement MIX files and 0 issue rows. The staged
+`GLOBAL.MIX` and `LOCAL.MIX` match `mod_mix_pcx_fullhd/` and differ from the
+active game-root MIX files. The automated smoke prefers Xvfb when the local X
+socket is usable and otherwise falls back to SDL offscreen video with
+texture/software rendering and dummy audio. The current result is
+`started_timeout` after 45 seconds with 0 issues, stage mount seen, ISO mount
+seen, VESA 640x480 mode seen, and `LOLGSWAP.SWP` created inside the staged C
+drive. `tools/pcx_fullhd_runtime_trace.c` is injected with `LD_PRELOAD` and
+currently records `file_load_proof=1`: `GLOBAL.MIX` opened 73 times with 37262
+bytes read, and `LOCAL.MIX` opened 18 times with 566463 bytes read, all from
+the staged Full HD MIX path. The same trace records `pcx_entry_read_proof=1`:
+the game reads the Full HD PCX entry `LOCAL:0fe8e7df` (original 64x64, rebuilt
+as 1920x1080) with 269 overlapping reads and 548973 overlapped bytes. The
+targeted trace records `TARGET_PCX_READ_COMPLETE` and `target_pcx_read_proof=1`
+for byte range 27480230-28029203 with 548973/548973 bytes covered, then
+captures a nonblank 640x480 SDL framebuffer at
+`output/fullhd_pcx_runtime_smoke/runtime_frame_after_pcx.png` with
+`after_target_pcx_read_complete=1`, `after_pcx_frame_temporal_proof=1`, and
+hash `5a01ec686657fce9`. This proves startup, staged-MIX file-load, one staged
+Full HD PCX-entry read through `target_end`, and a nonblank VESA framebuffer
+captured after that complete read.
+
+The render-effect proof uses `tools/prepare_pcx_runtime_sentinel.py` to build a
+non-destructive sentinel variant of only `LOCAL:0fe8e7df`. The sentinel PCX is
+1920x1080, uses the original PCX palette, keeps the MIX entry size matched at
+548973 bytes, and records `decode_bytes=95797` for the meaningful PCX stream
+before padding. `mod_mix_pcx_fullhd_sentinel/` differs from
+`mod_mix_pcx_fullhd/` by exactly one payload: `LOCAL:0fe8e7df`. The sentinel
+smoke also reaches `target_pcx_read_proof=1` and
+`after_pcx_frame_temporal_proof=1`. The differential proof report
+`output/fullhd_pcx_runtime_sentinel/proof.tsv` currently passes:
+`changed_pixel_fraction=0.807272` for the last post-PCX frame and
+`first_changed_pixel_fraction=0.638880` for the first post-PCX frame, with
+0 issues. This proves that the staged 1920x1080 PCX payload affects the
+captured framebuffer; it does not install the pack into the active game-root
+MIX files.
+
+`tools/lolg_runtime_fullhd_audit.py` records that runtime boundary explicitly.
+The current report is:
+
+```text
+output/fullhd_runtime_audit/index.html
+output/fullhd_runtime_audit/summary.csv
+output/fullhd_runtime_audit/details.csv
+output/vqa_runtime_feasibility/index.html
+output/vqa_runtime_feasibility/summary.csv
+output/vqa_runtime_feasibility/requirements.csv
+output/vqa_runtime_repack_readiness/index.html
+output/vqa_runtime_repack_readiness/summary.csv
+output/vqa_runtime_repack_readiness/requirements.csv
+output/vqa_runtime_repack_readiness/archives.csv
+output/vqa_runtime_repack_readiness/entries.csv
+output/vqa_runtime_pack_build/index.html
+output/vqa_runtime_pack_build/summary.csv
+output/vqa_runtime_pack_build/requirements.csv
+output/vqa_runtime_pack_build/archives.csv
+output/vqa_runtime_pack_build/entries.csv
+output/vqa_lcw_literal_probe/index.html
+output/vqa_lcw_literal_probe/summary.csv
+output/vqa_lcw_literal_probe/requirements.csv
+output/vqa_lcw_literal_probe/candidates.csv
+output/vqa_native_exact_fixture_writer/index.html
+output/vqa_native_exact_fixture_writer/summary.csv
+output/vqa_native_exact_fixture_writer/requirements.csv
+output/vqa_native_exact_fixture_writer/frames.csv
+output/vqa_fullhd_replacement_writer/index.html
+output/vqa_fullhd_replacement_writer/summary.csv
+output/vqa_fullhd_replacement_writer/requirements.csv
+output/vqa_fullhd_replacement_writer/frames.csv
+output/tex_runtime_real_capture_readiness/index.html
+output/tex_runtime_real_capture_readiness/summary.csv
+output/tex_runtime_real_capture_readiness/requirements.csv
+output/tex_runtime_real_capture_readiness/targets.csv
+output/tex_runtime_real_capture_attempt/index.html
+output/tex_runtime_real_capture_attempt/summary.csv
+output/tex_runtime_real_capture_attempt/targets.csv
+output/tex_runtime_real_capture_attempt_no3d/index.html
+output/tex_runtime_real_capture_attempt_no3d/summary.csv
+output/lolg95_winedbg_payload_trace_attempt/index.html
+output/lolg95_winedbg_payload_trace_attempt/summary.csv
+output/lolg95_winedbg_payload_trace_attempt/trace.tsv
+output/lolg95_winedbg_payload_trace_attempt/raw.log
+output/lolg95_winedbg_payload_trace_attempt_no3d/index.html
+output/lolg95_winedbg_payload_trace_attempt_no3d/summary.csv
+output/lolg95_winedbg_payload_trace_attempt_no3d/trace.tsv
+output/lolg95_winedbg_payload_trace_attempt_no3d/raw.log
+```
+
+The current runtime audit status is `gap`: 8 components are audited, with 2
+runtime gaps, 2 informational PCX components, and 1 runtime-ready component.
+Active PCX entries in `GLOBAL.MIX`/`LOCAL.MIX` still use original dimensions
+but are covered by the non-destructive PCX Full HD launcher; the 4x PCX pack is
+superseded and remains informational. The separate 1920x1080 PCX pack validates
+as 37/37 Full HD PCX entries and starts under DOSBox
+offscreen smoke with staged-MIX file-load proof (`file_load_proof=1`,
+`pcx_entry_read_proof=1`, `target_pcx_read_proof=1`,
+`after_pcx_frame_temporal_proof=1`, `sentinel_proof=pass`, `runtime_proof=0`)
+and has a non-destructive runtime launcher in `RUN_HD_PCX_FULLHD.sh`, VQA files
+have Full HD PNG frame exports plus one decoded WVQA Full HD replacement, and
+the `.tex` render proof is synthetic-only until a real apply/upload/surface
+capture validates it with `--require-real`. The VQA runtime feasibility report
+quantifies that gap as 1955 entries, 171167 Full HD frames, 1 WVQA Full HD
+writer, 66 runtime-pack entries, 5 passed requirements, and 4 open requirements.
+The separate VQA repack readiness report confirms `mapped_entries=1955`,
+`entry_issues=0`, `roundtrip_archives=66`, and `roundtrip_failures=0`; encoded
+WVQA payloads are still partial at 1573/1955 payloads, while materialized runtime
+packs now cover 66/66 archives. The VQA runtime pack build report makes the
+staging boundary explicit: `replacement_entries=1573/1955`,
+`applied_replacements=1538/1955`, `deferred_replacements=35`,
+`missing_replacements=382`, and `output_archives=66/66`, so it writes 66
+partial runtime MIX files and keeps the global requirement in `gap`. `L20_BBI.MIX`
+uses 306/341 currently available replacements and defers 35 more to stay below
+the MIX 32-bit body-size field.
+The archive seed writer adds 8 targeted payloads for the previously uncovered MIX
+archives and validates 1675/1675 decoded frames. The LCW
+literal probe adds one concrete encoder primitive: 11 literal-LCW roundtrips
+pass, 374 native exact-block entries are identified, and 0 Full HD naive
+exact-block entries fit without vector quantization. The native exact fixture
+writer now assembles a real `FORM/WVQA` payload with CBFZ/VPTZ literal-LCW
+chunks and validates 20/20 decoded frames; it is still native-size, not a Full
+HD replacement payload. The Full HD replacement writer now encodes a 1568-entry
+1920x1080 `FORM/WVQA` batch, validates 70758/70758 decoded frames, records
+`exact_block_ratio=0.917472`, and installs them under
+`replacements_vqa_fullhd/`.
+
+The `.tex` real-capture readiness report confirms that Xvfb and Wine are
+available for the Win95 capture path, but the current preflight is still
+`missing_real_provenance`. The real upload TSV, real surface PNG, and real
+provenance TSV are all still absent, so the proof remains synthetic-only until
+those capture artifacts are produced and accepted by the `--require-real`
+intake pipeline. The current standard Xvfb/Wine run is recorded as
+`session_status=exited_1` after reaching the MMX bootstrap and failing around
+D3D pixel-format/display-mode setup. A dedicated `renderer=no3d` Wine prefix in
+`output/tex_runtime_real_capture_attempt_no3d/wineprefix` keeps LOLG95 alive
+until the controlled timeout (`session_status=started_timeout`, `timed_out=1`),
+but still produces no real upload/surface/provenance artifact. Bounded internal
+`winedbg` payload-offset traces are recorded for both the standard and `no3d`
+paths: all 7 contract breakpoints are accepted at the expected `lolg95+...`
+addresses, but both runs record `breakpoint_hits=0` and `extracted_rows=0`.
+The next required implementation step is therefore the TE hook/logger injection
+or activation that writes those files during the Win95 session, followed by
+driving gameplay far enough to load the target TE payload or adding a native
+hook at the asset/decode boundary.
 
 ## Texture cache report
 
@@ -3579,6 +3821,31 @@ output/vqa_batch_window_lcw_transparent0_allframes/status_summary.csv
 output/vqa_batch_window_lcw_transparent0_allframes/status_by_archive.csv
 output/vqa_batch_window_lcw_transparent0_allframes/status_by_resolution.csv
 output/vqa_batch_window_lcw_transparent0_allframes/status_by_pointer.csv
+output/vqa_runtime_feasibility/index.html
+output/vqa_runtime_feasibility/summary.csv
+output/vqa_runtime_feasibility/requirements.csv
+output/vqa_runtime_repack_readiness/index.html
+output/vqa_runtime_repack_readiness/summary.csv
+output/vqa_runtime_repack_readiness/requirements.csv
+output/vqa_runtime_repack_readiness/archives.csv
+output/vqa_runtime_repack_readiness/entries.csv
+output/vqa_runtime_pack_build/index.html
+output/vqa_runtime_pack_build/summary.csv
+output/vqa_runtime_pack_build/requirements.csv
+output/vqa_runtime_pack_build/archives.csv
+output/vqa_runtime_pack_build/entries.csv
+output/vqa_lcw_literal_probe/index.html
+output/vqa_lcw_literal_probe/summary.csv
+output/vqa_lcw_literal_probe/requirements.csv
+output/vqa_lcw_literal_probe/candidates.csv
+output/vqa_native_exact_fixture_writer/index.html
+output/vqa_native_exact_fixture_writer/summary.csv
+output/vqa_native_exact_fixture_writer/requirements.csv
+output/vqa_native_exact_fixture_writer/frames.csv
+output/vqa_fullhd_replacement_writer/index.html
+output/vqa_fullhd_replacement_writer/summary.csv
+output/vqa_fullhd_replacement_writer/requirements.csv
+output/vqa_fullhd_replacement_writer/frames.csv
 ```
 
 It was generated with `--all-frames --experimental-window-lcw
@@ -3618,6 +3885,97 @@ python3 tools/lolg_vqa_status_report.py \
 The current VQA status report covers 1955 entries, 66 source archives, 384
 native resolutions, 11 pointer/decode groups, 171167 Full HD frames, 13 held
 frame rows, and 0 issue rows.
+
+`tools/lolg_vqa_runtime_repack_readiness.py` writes the VQA MIX mapping and
+no-op repack readiness report for those exports:
+
+```sh
+python3 tools/lolg_vqa_runtime_repack_readiness.py
+```
+
+Current result: `gap`, with 1955/1955 VQA entries mapped, 0 entry issues,
+66/66 exact layout-preserving MIX roundtrips, 1573/1955 encoded WVQA replacement
+payloads, and 66/66 runtime-pack entries.
+
+`tools/lolg_vqa_runtime_pack_build.py` materializes the VQA runtime MIX pack
+only when WVQA replacement payloads exist:
+
+```sh
+python3 tools/lolg_vqa_runtime_pack_build.py
+```
+
+Current result: `gap`, with `replacement_entries=1573/1955`,
+`applied_replacements=1538/1955`, `deferred_replacements=35`,
+`missing_replacements=382`, and `output_archives=66/66`. Sixty-six partial runtime
+VQA MIX files are written. `L20_BBI.MIX` applies 306/341 available replacements
+and defers 35 entries so the rebuilt body stays under the 4294967295-byte MIX
+field limit. Partial or deferred files still cannot satisfy the full
+`mix_repack` requirement.
+
+`tools/lolg_vqa_runtime_archive_seed_writer.py` keeps every VQA source archive
+represented in the runtime pack without forcing the main batch writer to jump to
+the farthest archive rank:
+
+```sh
+python3 tools/lolg_vqa_runtime_archive_seed_writer.py
+```
+
+Current result: `pass`, with 8/8 target archives seeded, 1675/1675 decoded
+frames validated at 1920x1080, and 509460886 payload bytes installed under
+`replacements_vqa_fullhd/`.
+
+`tools/lolg_vqa_lcw_literal_probe.py` proves the first LCW/Format80 encoder
+primitive and selects native exact-block targets:
+
+```sh
+python3 tools/lolg_vqa_lcw_literal_probe.py
+```
+
+Current result: `gap`, with `lcw_literal_encoder=pass`, 11 roundtrip cases, 0
+roundtrip failures, 374 native exact-block targets, 12 stored-pointer native
+exact targets, and 0 naive exact-block Full HD targets. This is an encoder
+primitive, not a complete WVQA writer.
+
+`tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
+native-size WVQA payload using exact per-frame block codebooks and literal LCW
+CBFZ/VPTZ chunks:
+
+```sh
+python3 tools/lolg_vqa_native_exact_fixture_writer.py
+```
+
+Current result: `pass`, target `C/LOLG/TINT.MIX:0029:44f79fdd`, 20/20 frames
+matched after redecode, 217404 payload bytes, 40 literal-LCW chunks, and max
+520 vectors used against a 4000-vector codebook limit. This proves the fixture
+writer path; it is not yet a Full HD replacement payload.
+
+`tools/lolg_vqa_fullhd_replacement_writer.py` writes the first quantized Full
+HD WVQA replacement payload from the exported 1920x1080 frames:
+
+```sh
+python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
+```
+
+Current result: `pass`, batch of 1568 entries, 70758/70758 decoded frames validated
+at 1920x1080, 21702657572 payload bytes, 4000/4000 max vectors used,
+`exact_block_ratio=0.917472`, and `changed_pixel_ratio=0.036238`. The writer
+installs the payloads under `replacements_vqa_fullhd/`, which the pack builder
+then combines with the archive seed writer outputs into 66 partial MIX archives
+under `mod_mix_vqa_fullhd/`.
+
+`tools/lolg_vqa_runtime_feasibility.py` writes the runtime replacement contract
+for those VQA exports:
+
+```sh
+python3 tools/lolg_vqa_runtime_feasibility.py
+```
+
+Current result: `gap`, with 1955 entries, 171167 Full HD frames, 66 source
+archives, 1 WVQA Full HD writer, 66 runtime-pack entries, 5 passed requirements
+(`wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
+`wvqa_native_fixture_writer`, `palette_codebook_pointer_encoder`), and 4 open
+requirements: MIX repack/runtime override, LCW/Format80 encode, audio
+preservation, and CBP update encode.
 
 The current renderer handles `VPTZ`/`VPT0` frames against full codebooks,
 including delta pointer tables that copy from the previous frame. It also
