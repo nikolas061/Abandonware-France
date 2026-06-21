@@ -64,13 +64,13 @@ Runtime gaps: 2
   entrees et 171167 frames Full HD exportees. La readiness repack confirme
   aussi 1955/1955 entrees mappees et 66/66 archives en roundtrip exact.
   Un premier writer WVQA Full HD produit maintenant un batch principal de 1568
-  payloads de remplacement et trois batches incrementaux `--missing-only` de 3,
-  6, puis 6 payloads hors `L20_BBI`; le rapport de faisabilite agrege
-  maintenant 75016/75016 frames 1920x1080 validees au redecode, et le dernier
-  batch incremental valide 550/550 frames supplementaires. Un seed
+  payloads de remplacement et quatre batches incrementaux `--missing-only` de
+  3, 6, 6 puis 8 payloads hors `L20_BBI`; le rapport de faisabilite agrege
+  maintenant 75774/75774 frames 1920x1080 validees au redecode, et le dernier
+  batch incremental valide 758/758 frames supplementaires. Un seed
   writer d'archives ajoute 8 payloads cibles, valide 1675/1675 frames, et la
-  racine runtime atteint 1620/1955 payloads; le builder ecrit maintenant 66/66
-  MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 335 payloads restent
+  racine runtime atteint 1628/1955 payloads; le builder ecrit maintenant 66/66
+  MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 327 payloads restent
   manquants, et 51 remplacements de `L20_BBI.MIX` sont differes pour rester sous
   la limite body 32 bits du format MIX.
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
@@ -171,12 +171,12 @@ requirements `wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
 `wvqa_native_fixture_writer` et `palette_codebook_pointer_encoder` passent
 (`mapped_entries=1955/1955`, `roundtrip_archives=66/66`,
 `roundtrip_cases=11`, `roundtrip_failures=0`, `matched_frames=20/20`,
-`fullhd_writer_validated_frames=75016/75016`, `exact_block_ratio=0.917109`),
+`fullhd_writer_validated_frames=75774/75774`, `exact_block_ratio=0.916616`),
 tandis que 4 restent ouverts:
 `mix_repack`, `lcw_format80_encoder`, `audio_handling` et
 `cbp_update_encoder`. Le build de pack VQA reste `gap` avec
-`replacement_entries=1620/1955`, `applied_replacements=1569/1955`,
-`deferred_replacements=51`, `missing_replacements=335` et
+`replacement_entries=1628/1955`, `applied_replacements=1577/1955`,
+`deferred_replacements=51`, `missing_replacements=327` et
 `output_archives=66/66`.
 
 ## Textures .tex
