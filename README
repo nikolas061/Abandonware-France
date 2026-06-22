@@ -136,9 +136,9 @@ exportees, 1 writer WVQA Full HD valide et 66 entrees de pack runtime partiel.
 La readiness repack
 VQA dans `output/vqa_runtime_repack_readiness/` confirme 1955/1955 entrees
 mappees et 66/66 archives en roundtrip exact; la couverture runtime reste
-partielle avec 1790/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
+partielle avec 1818/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
 materialises. Le builder `output/vqa_runtime_pack_build/` formalise cette
-frontiere: 1790/1955 payloads de remplacement, 1739 appliques, 51 differes
+frontiere: 1818/1955 payloads de remplacement, 1767 appliques, 51 differes
 pour rester sous la limite body 32 bits de `L20_BBI.MIX`, et 66 MIX ecrits dans
 `mod_mix_vqa_fullhd/`. Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
@@ -151,9 +151,9 @@ encore la generalisation a toutes les entrees. Le writer de fixture
 redecode. Le writer `output/vqa_fullhd_replacement_writer/` produit maintenant
 un batch principal de 1568 payloads `FORM/WVQA` 1920x1080, complete par des
 batches incrementaux `--missing-only` de 3, 6, 6, 8, 10, 12, 14, 16, 18, 20,
-22, 24 puis 26 payloads, les onze derniers hors `L20_BBI`. Le rapport writer
-agrege par la faisabilite valide 95966/95966 frames au redecode; le dernier
-batch incremental valide 4083/4083 frames supplementaires et installe les payloads
+22, 24, 26 puis 28 payloads, les douze derniers hors `L20_BBI`. Le rapport writer
+agrege par la faisabilite valide 101536/101536 frames au redecode; le dernier
+batch incremental valide 5570/5570 frames supplementaires et installe les payloads
 dans `replacements_vqa_fullhd/`. Le gap `.tex` est
 mesure dans `output/tex_runtime_real_capture_readiness/`: Xvfb et Wine sont
 detectes, mais la preflight reste `missing_real_provenance` avec les trois
