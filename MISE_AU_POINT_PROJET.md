@@ -64,14 +64,14 @@ Runtime gaps: 2
   entrees et 171167 frames Full HD exportees. La readiness repack confirme
   aussi 1955/1955 entrees mappees et 66/66 archives en roundtrip exact.
   Un premier writer WVQA Full HD produit maintenant un batch principal de 1568
-  payloads de remplacement et six batches incrementaux `--missing-only` de
-  3, 6, 6, 8, 10 puis 12 payloads, les quatre derniers hors `L20_BBI`; le
-  rapport de faisabilite agrege maintenant 77945/77945 frames 1920x1080
-  validees au redecode, et le dernier batch incremental valide 1196/1196 frames
+  payloads de remplacement et sept batches incrementaux `--missing-only` de
+  3, 6, 6, 8, 10, 12 puis 14 payloads, les cinq derniers hors `L20_BBI`; le
+  rapport de faisabilite agrege maintenant 79353/79353 frames 1920x1080
+  validees au redecode, et le dernier batch incremental valide 1408/1408 frames
   supplementaires. Un seed
   writer d'archives ajoute 8 payloads cibles, valide 1675/1675 frames, et la
-  racine runtime atteint 1650/1955 payloads; le builder ecrit maintenant 66/66
-  MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 305 payloads restent
+  racine runtime atteint 1664/1955 payloads; le builder ecrit maintenant 66/66
+  MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 291 payloads restent
   manquants, et 51 remplacements de `L20_BBI.MIX` sont differes pour rester sous
   la limite body 32 bits du format MIX.
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
@@ -172,12 +172,12 @@ requirements `wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
 `wvqa_native_fixture_writer` et `palette_codebook_pointer_encoder` passent
 (`mapped_entries=1955/1955`, `roundtrip_archives=66/66`,
 `roundtrip_cases=11`, `roundtrip_failures=0`, `matched_frames=20/20`,
-`fullhd_writer_validated_frames=77945/77945`, `exact_block_ratio=0.914904`),
+`fullhd_writer_validated_frames=79353/79353`, `exact_block_ratio=0.914104`),
 tandis que 4 restent ouverts:
 `mix_repack`, `lcw_format80_encoder`, `audio_handling` et
 `cbp_update_encoder`. Le build de pack VQA reste `gap` avec
-`replacement_entries=1650/1955`, `applied_replacements=1599/1955`,
-`deferred_replacements=51`, `missing_replacements=305` et
+`replacement_entries=1664/1955`, `applied_replacements=1613/1955`,
+`deferred_replacements=51`, `missing_replacements=291` et
 `output_archives=66/66`.
 
 ## Textures .tex
