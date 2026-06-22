@@ -1748,14 +1748,14 @@ quantifies that gap as 1955 entries, 171167 Full HD frames, 1 WVQA Full HD
 writer, 66 runtime-pack entries, 5 passed requirements, and 4 open requirements.
 The separate VQA repack readiness report confirms `mapped_entries=1955`,
 `entry_issues=0`, `roundtrip_archives=66`, and `roundtrip_failures=0`; encoded
-WVQA payloads are still partial at 1890/1955 payloads, while materialized runtime
+WVQA payloads are still partial at 1892/1955 payloads, while materialized runtime
 packs now cover 66/66 archives. The VQA runtime pack build report makes the
-staging boundary explicit: `replacement_entries=1890/1955`,
-`applied_replacements=1837/1955`, `deferred_replacements=53`,
-`missing_replacements=65`, and `output_archives=66/66`, so it writes 66
+staging boundary explicit: `replacement_entries=1892/1955`,
+`applied_replacements=1838/1955`, `deferred_replacements=54`,
+`missing_replacements=63`, and `output_archives=66/66`, so it writes 66
 partial runtime MIX files and keeps the global requirement in `gap`. `L20_BBI.MIX`
 uses 306/357 currently available replacements and defers 51 more, while
-`L4_HJI.MIX` applies 125/127 and defers 2, so both rebuilt bodies stay below
+`L4_HJI.MIX` applies 125/128 and defers 3, so both rebuilt bodies stay below
 the MIX 32-bit body-size field.
 The archive seed writer adds 8 targeted payloads for the previously uncovered MIX
 archives and validates 1675/1675 decoded frames. The LCW
@@ -1775,6 +1775,12 @@ the latest incremental batch validates 8752/8752 additional decoded frames. The
 runtime feasibility report aggregates those writer outputs as 136389/136389
 validated frames with `exact_block_ratio=0.876270` and
 `changed_pixel_ratio=0.057993`, and installs them under `replacements_vqa_fullhd/`.
+A following interrupted tail15 run adds two more canonical payloads,
+`L12_CMI:0030:46eee787` and `L4_HJI:0019:ccf930d3`; because it stopped before
+writing a writer `summary.csv`, those two are tracked by repack readiness and
+pack-build counts rather than the writer aggregate. `L4_HJI:0019` is separately
+redecoded as 1100/1100 frames in
+`output/vqa_payload_decode_l4_hji_0019_tail15_check/`.
 
 The `.tex` real-capture readiness report confirms that Xvfb and Wine are
 available for the Win95 capture path, but the current preflight is still
@@ -3902,7 +3908,7 @@ python3 tools/lolg_vqa_runtime_repack_readiness.py
 ```
 
 Current result: `gap`, with 1955/1955 VQA entries mapped, 0 entry issues,
-66/66 exact layout-preserving MIX roundtrips, 1890/1955 encoded WVQA replacement
+66/66 exact layout-preserving MIX roundtrips, 1892/1955 encoded WVQA replacement
 payloads, and 66/66 runtime-pack entries.
 
 `tools/lolg_vqa_runtime_pack_build.py` materializes the VQA runtime MIX pack
@@ -3912,11 +3918,11 @@ only when WVQA replacement payloads exist:
 python3 tools/lolg_vqa_runtime_pack_build.py
 ```
 
-Current result: `gap`, with `replacement_entries=1890/1955`,
-`applied_replacements=1837/1955`, `deferred_replacements=53`,
-`missing_replacements=65`, and `output_archives=66/66`. Sixty-six partial runtime
+Current result: `gap`, with `replacement_entries=1892/1955`,
+`applied_replacements=1838/1955`, `deferred_replacements=54`,
+`missing_replacements=63`, and `output_archives=66/66`. Sixty-six partial runtime
 VQA MIX files are written. `L20_BBI.MIX` applies 306/357 available replacements
-and defers 51 entries; `L4_HJI.MIX` applies 125/127 and defers 2 entries. These
+and defers 51 entries; `L4_HJI.MIX` applies 125/128 and defers 3 entries. These
 deferrals keep the rebuilt bodies under the 4294967295-byte MIX field limit.
 Partial or deferred files still cannot satisfy the full
 `mix_repack` requirement.
@@ -3980,6 +3986,7 @@ python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --exclude-arc
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --exclude-archive-stem L20_BBI --batch-limit 30 -o output/vqa_fullhd_replacement_writer_missing_non_l20_next30
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --exclude-archive-stem L20_BBI --batch-limit 32 -o output/vqa_fullhd_replacement_writer_missing_non_l20_next32
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --exclude-archive-stem L20_BBI --batch-limit 10 -o output/vqa_fullhd_replacement_writer_missing_non_l20_tail10_after_next32
+python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --exclude-archive-stem L20_BBI --batch-limit 15 -o output/vqa_fullhd_replacement_writer_missing_non_l20_tail15_after_tail10
 ```
 
 Current main-writer result: `pass`, with 73647/73647 decoded frames validated
@@ -3992,7 +3999,12 @@ writer outputs as 136389/136389 validated frames, 42329658726 payload bytes,
 `exact_block_ratio=0.876270`, and `changed_pixel_ratio=0.057993`. The writer
 installs the payloads under `replacements_vqa_fullhd/`, which the pack builder
 then combines with the archive seed writer outputs into 66 partial MIX archives
-under `mod_mix_vqa_fullhd/`.
+under `mod_mix_vqa_fullhd/`. The tail15 command above was interrupted after
+materializing two additional canonical payloads; `L4_HJI:0019:ccf930d3` has a
+separate decode-control proof of 1100/1100 frames in
+`output/vqa_payload_decode_l4_hji_0019_tail15_check/`, so the current readiness
+and pack-build counts include those two payloads even though the writer aggregate
+does not.
 
 `tools/lolg_vqa_runtime_feasibility.py` writes the runtime replacement contract
 for those VQA exports:

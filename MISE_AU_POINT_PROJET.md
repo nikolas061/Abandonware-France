@@ -66,13 +66,16 @@ Runtime gaps: 2
   Un premier writer WVQA Full HD produit maintenant un batch principal de 1568
   payloads de remplacement et dix-sept batches incrementaux `--missing-only` de
   3, 6, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32 puis tail10,
-  les quinze derniers hors `L20_BBI`; le rapport de faisabilite agrege maintenant
-  136389/136389 frames 1920x1080 validees au redecode, et le dernier batch
-  incremental valide 8752/8752 frames supplementaires. Un seed
+  les quinze derniers hors `L20_BBI`; un run tail15 suivant, interrompu avant
+  `summary.csv`, ajoute aussi `L12_CMI:0030:46eee787` et
+  `L4_HJI:0019:ccf930d3`, avec ce dernier controle par redecode separe
+  1100/1100 frames. Le rapport de faisabilite agrege maintenant 136389/136389
+  frames 1920x1080 validees au redecode, et le dernier batch incremental complet
+  valide 8752/8752 frames supplementaires. Un seed
   writer d'archives ajoute 8 payloads cibles, valide 1675/1675 frames, et la
-  racine runtime atteint 1890/1955 payloads; le builder ecrit maintenant 66/66
-  MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 65 payloads restent
-  manquants, et 53 remplacements sont differes (51 dans `L20_BBI.MIX`, 2 dans
+  racine runtime atteint 1892/1955 payloads; le builder ecrit maintenant 66/66
+  MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 63 payloads restent
+  manquants, et 54 remplacements sont differes (51 dans `L20_BBI.MIX`, 3 dans
   `L4_HJI.MIX`) pour rester sous la limite body 32 bits du format MIX.
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
   entrees natives exact-block comme cibles de fixture.
@@ -176,8 +179,8 @@ requirements `wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
 tandis que 4 restent ouverts:
 `mix_repack`, `lcw_format80_encoder`, `audio_handling` et
 `cbp_update_encoder`. Le build de pack VQA reste `gap` avec
-`replacement_entries=1890/1955`, `applied_replacements=1837/1955`,
-`deferred_replacements=53`, `missing_replacements=65` et
+`replacement_entries=1892/1955`, `applied_replacements=1838/1955`,
+`deferred_replacements=54`, `missing_replacements=63` et
 `output_archives=66/66`.
 
 ## Textures .tex
