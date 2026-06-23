@@ -136,11 +136,11 @@ exportees, 1 writer WVQA Full HD valide et 66 entrees de pack runtime partiel.
 La readiness repack
 VQA dans `output/vqa_runtime_repack_readiness/` confirme 1955/1955 entrees
 mappees et 66/66 archives en roundtrip exact; la couverture runtime reste
-partielle avec 1895/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
+partielle avec 1896/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
 materialises. Le builder `output/vqa_runtime_pack_build/` formalise cette
-frontiere: 1895/1955 payloads de remplacement, 1841 appliques, 54 differes
+frontiere: 1896/1955 payloads de remplacement, 1842 appliques, 54 differes
 (51 dans `L20_BBI.MIX`, 3 dans `L4_HJI.MIX`) pour rester sous la limite body
-32 bits des MIX, 60 encore manquants, et 66 MIX ecrits dans
+32 bits des MIX, 59 encore manquants, et 66 MIX ecrits dans
 `mod_mix_vqa_fullhd/`. Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
@@ -162,7 +162,9 @@ ensuite `MOVIES:0000:90fd8446` et valide 1125/1125 frames. Le run unitaire
 `output/vqa_fullhd_replacement_writer_movies_0003_single_after_movies0000/`
 ajoute aussi `MOVIES:0003:d0b3011f` et valide 1130/1130 frames. Le run unitaire
 `output/vqa_fullhd_replacement_writer_l19_bci_0005_single_after_movies0003/`
-ajoute `L19_BCI:0005:4732b185` et valide 1256/1256 frames. Le rapport writer
+ajoute `L19_BCI:0005:4732b185` et valide 1256/1256 frames. Le run unitaire
+`output/vqa_fullhd_replacement_writer_spkston2_0008_single_after_l19bci0005/`
+ajoute `SPKSTON2:0008:4119c82e` et valide 1294/1294 frames. Le rapport writer
 agrege par la faisabilite valide 136389/136389 frames au redecode; le dernier
 batch incremental complet valide 8752/8752 frames supplementaires et installe les payloads
 dans `replacements_vqa_fullhd/`. Le gap `.tex` est
