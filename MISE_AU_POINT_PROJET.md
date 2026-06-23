@@ -93,13 +93,15 @@ Runtime gaps: 2
   `L20_BBI:0262:2bf27862` et valide 105/105 frames; ce payload reste lui aussi
   differe dans `L20_BBI.MIX`. Le run suivant ajoute
   `L20_BBI:0060:03f27862` et valide 105/105 frames; ce payload reste lui aussi
+  differe dans `L20_BBI.MIX`. Le run suivant ajoute
+  `L20_BBI:0168:1bf27862` et valide 105/105 frames; ce payload reste lui aussi
   differe dans `L20_BBI.MIX`. Le rapport
   de faisabilite agrege maintenant 136389/136389 frames 1920x1080 validees au
   redecode, et le dernier batch incremental complet valide 8752/8752 frames
   supplementaires. Un seed writer d'archives ajoute 8 payloads cibles et valide
-  1675/1675 frames. La racine runtime atteint 1909/1955 payloads; le builder
-  ecrit maintenant 66/66 MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 46
-  payloads restent manquants, et 59 remplacements sont differes (55 dans
+  1675/1675 frames. La racine runtime atteint 1910/1955 payloads; le builder
+  ecrit maintenant 66/66 MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 45
+  payloads restent manquants, et 60 remplacements sont differes (56 dans
   `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body 32 bits
   du format MIX.
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
@@ -204,8 +206,8 @@ requirements `wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
 tandis que 4 restent ouverts:
 `mix_repack`, `lcw_format80_encoder`, `audio_handling` et
 `cbp_update_encoder`. Le build de pack VQA reste `gap` avec
-`replacement_entries=1909/1955`, `applied_replacements=1850/1955`,
-`deferred_replacements=59`, `missing_replacements=46`,
+`replacement_entries=1910/1955`, `applied_replacements=1850/1955`,
+`deferred_replacements=60`, `missing_replacements=45`,
 `output_archives=66/66` et `output_bytes=47792090931`.
 
 ## Textures .tex
