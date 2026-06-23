@@ -545,6 +545,7 @@ def build_payload(
     source_dir: Path,
     selected_frames: list[Path],
     frame_rows: list[dict[str, str]],
+    progress_every: int = 0,
 ) -> tuple[bytes, dict[str, int]]:
     source_header, _chunks = vqa.parse_vqa(source_payload)
     if source_header.block_width <= 0 or source_header.block_height <= 0:
@@ -559,6 +560,10 @@ def build_payload(
     max_vptz_size = 0
 
     for frame_index, path in enumerate(selected_frames):
+        if progress_every and (
+            frame_index == 0 or (frame_index + 1) % progress_every == 0 or frame_index + 1 == len(selected_frames)
+        ):
+            print(f"Encoding {source_dir.name}: frame {frame_index + 1}/{len(selected_frames)}", flush=True)
         codebook, pointer, stats = encode_quantized_frame(path, palette, source_header)
         codebook_lcw = lcw_compress_literal(codebook)
         pointer_lcw = lcw_compress_literal(pointer)
@@ -888,7 +893,7 @@ def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[s
             validated = len(frame_rows)
         else:
             source_payload = read_mix_entry(resolve_archive_path(archive), index)
-            payload, totals = build_payload(source_payload, source_dir, frames, frame_rows)
+            payload, totals = build_payload(source_payload, source_dir, frames, frame_rows, args.progress_every)
             report_payload.parent.mkdir(parents=True, exist_ok=True)
             report_payload.write_bytes(payload)
             replacement_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1057,6 +1062,7 @@ def main() -> None:
         action="store_true",
         help="Reopen decoded PNGs for cached payload rows instead of trusting prior validated frames.csv rows.",
     )
+    parser.add_argument("--progress-every", type=int, default=0, help="Print encode progress every N frames.")
     parser.add_argument("--fail-on-gaps", action="store_true")
     args = parser.parse_args()
 
