@@ -1748,14 +1748,14 @@ quantifies that gap as 1955 entries, 171167 Full HD frames, 1 WVQA Full HD
 writer, 66 runtime-pack entries, 5 passed requirements, and 4 open requirements.
 The separate VQA repack readiness report confirms `mapped_entries=1955`,
 `entry_issues=0`, `roundtrip_archives=66`, and `roundtrip_failures=0`; encoded
-WVQA payloads are still partial at 1908/1955 payloads, while materialized runtime
+WVQA payloads are still partial at 1909/1955 payloads, while materialized runtime
 packs now cover 66/66 archives. The VQA runtime pack build report makes the
-staging boundary explicit: `replacement_entries=1908/1955`,
-`applied_replacements=1850/1955`, `deferred_replacements=58`,
-`missing_replacements=47`, `output_archives=66/66`, and
+staging boundary explicit: `replacement_entries=1909/1955`,
+`applied_replacements=1850/1955`, `deferred_replacements=59`,
+`missing_replacements=46`, `output_archives=66/66`, and
 `output_bytes=47792090931`, so it writes 66
 partial runtime MIX files and keeps the global requirement in `gap`. `L20_BBI.MIX`
-uses 306/360 currently available replacements and defers 54 more, while
+uses 306/361 currently available replacements and defers 55 more, while
 `L4_HJI.MIX` applies 125/129 and defers 4. `CHV.MIX` now applies 5/5,
 `MOVIES.MIX` applies 28/28 available replacements, `L19_BCI.MIX` applies 7/7,
 and `SPKSTON2.MIX` applies 10/10. `L12_CMI.MIX` applies 56/56, `L1_DCI.MIX`
@@ -1839,6 +1839,10 @@ that payload also remains deferred in `L20_BBI.MIX`.
 The next clean single writer run adds `L20_BBI:0262:2bf27862` and validates
 105/105 frames in
 `output/vqa_fullhd_replacement_writer_l20_bbi_0262_single_after_l20bbi0004/`;
+that payload also remains deferred in `L20_BBI.MIX`.
+The next clean single writer run adds `L20_BBI:0060:03f27862` and validates
+105/105 frames in
+`output/vqa_fullhd_replacement_writer_l20_bbi_0060_single_after_l20bbi0262/`;
 that payload also remains deferred in `L20_BBI.MIX`.
 
 The `.tex` real-capture readiness report confirms that Xvfb and Wine are
@@ -3967,7 +3971,7 @@ python3 tools/lolg_vqa_runtime_repack_readiness.py
 ```
 
 Current result: `gap`, with 1955/1955 VQA entries mapped, 0 entry issues,
-66/66 exact layout-preserving MIX roundtrips, 1908/1955 encoded WVQA replacement
+66/66 exact layout-preserving MIX roundtrips, 1909/1955 encoded WVQA replacement
 payloads, and 66/66 runtime-pack entries.
 
 `tools/lolg_vqa_runtime_pack_build.py` materializes the VQA runtime MIX pack
@@ -3977,12 +3981,12 @@ only when WVQA replacement payloads exist:
 python3 tools/lolg_vqa_runtime_pack_build.py
 ```
 
-Current result: `gap`, with `replacement_entries=1908/1955`,
-`applied_replacements=1850/1955`, `deferred_replacements=58`,
-`missing_replacements=47`, `output_archives=66/66`, and
+Current result: `gap`, with `replacement_entries=1909/1955`,
+`applied_replacements=1850/1955`, `deferred_replacements=59`,
+`missing_replacements=46`, `output_archives=66/66`, and
 `output_bytes=47792090931`. Sixty-six partial runtime
-VQA MIX files are written. `L20_BBI.MIX` applies 306/360 available replacements
-and defers 54 entries; `L4_HJI.MIX` applies 125/129 and defers 4 entries;
+VQA MIX files are written. `L20_BBI.MIX` applies 306/361 available replacements
+and defers 55 entries; `L4_HJI.MIX` applies 125/129 and defers 4 entries;
 `CHV.MIX` applies 5/5; `MOVIES.MIX` applies 28/28 available replacements;
 `L19_BCI.MIX` applies 7/7. `SPKSTON2.MIX` applies 10/10; `L12_CMI.MIX` applies
 56/56; `L1_DCI.MIX` applies 36/36; `L5_HCI.MIX` applies 13/13; `TMPLDOR.MIX`
@@ -4067,6 +4071,7 @@ python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/MOVIES.MIX 
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/L20_BBI.MIX --index 0029 --file-id e80802f3 -o output/vqa_fullhd_replacement_writer_l20_bbi_0029_single_after_movies0002 --progress-every 25
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/L20_BBI.MIX --index 0004 --file-id 83f2786b -o output/vqa_fullhd_replacement_writer_l20_bbi_0004_single_after_l20bbi0029 --progress-every 25
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/L20_BBI.MIX --index 0262 --file-id 2bf27862 -o output/vqa_fullhd_replacement_writer_l20_bbi_0262_single_after_l20bbi0004 --progress-every 25
+python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/L20_BBI.MIX --index 0060 --file-id 03f27862 -o output/vqa_fullhd_replacement_writer_l20_bbi_0060_single_after_l20bbi0262 --progress-every 25
 ```
 
 For long single runs, `--progress-every N` prints encode progress every N frames
@@ -4134,6 +4139,10 @@ builder also marks it `replacement_deferred_oversize`. The next
 `L20_BBI:0262:2bf27862` single-run result is `pass`, with 105/105 decoded frames
 validated, 31084996 payload bytes, `exact_block_ratio=0.978138`, and
 `changed_pixel_ratio=0.009490`; the pack builder also marks it
+`replacement_deferred_oversize`. The next `L20_BBI:0060:03f27862` single-run
+result is `pass`, with 105/105 decoded frames validated, 31056244 payload bytes,
+`exact_block_ratio=0.978350`, and `changed_pixel_ratio=0.009315`; the pack
+builder also marks it
 `replacement_deferred_oversize`.
 
 `tools/lolg_vqa_runtime_feasibility.py` writes the runtime replacement contract
