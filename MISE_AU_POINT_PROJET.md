@@ -117,13 +117,18 @@ Runtime gaps: 2
   `L20_BBI:0259:2bf27462`, `L20_BBI:0057:03f27462`,
   `L20_BBI:0165:1bf27462` et `L20_BBI:0212:23f27462`; `0355` et `0083`
   valident 119/119 frames, les quatre autres valident 116/116 frames, et tous
+  restent differes dans `L20_BBI.MIX`. Les six runs suivants ajoutent
+  `L20_BBI:0353:3bf27462`, `L20_BBI:0081:0bf27462`,
+  `L20_BBI:0306:33f27462`, `L20_BBI:0118:13f27462`,
+  `L20_BBI:0258:2bee7e6c` et `L20_BBI:0117:13ee7e6c`; les quatre premiers
+  valident 116/116 frames, les deux derniers valident 176/176 frames, et tous
   restent differes dans `L20_BBI.MIX`. Le rapport
   de faisabilite agrege maintenant 136389/136389 frames 1920x1080 validees au
   redecode, et le dernier batch incremental complet valide 8752/8752 frames
   supplementaires. Un seed writer d'archives ajoute 8 payloads cibles et valide
-  1675/1675 frames. La racine runtime atteint 1935/1955 payloads; le builder
-  ecrit maintenant 66/66 MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 20
-  payloads restent manquants, et 85 remplacements sont differes (81 dans
+  1675/1675 frames. La racine runtime atteint 1941/1955 payloads; le builder
+  ecrit maintenant 66/66 MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 14
+  payloads restent manquants, et 91 remplacements sont differes (87 dans
   `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body 32 bits
   du format MIX.
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
@@ -228,8 +233,8 @@ requirements `wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
 tandis que 4 restent ouverts:
 `mix_repack`, `lcw_format80_encoder`, `audio_handling` et
 `cbp_update_encoder`. Le build de pack VQA reste `gap` avec
-`replacement_entries=1935/1955`, `applied_replacements=1850/1955`,
-`deferred_replacements=85`, `missing_replacements=20`,
+`replacement_entries=1941/1955`, `applied_replacements=1850/1955`,
+`deferred_replacements=91`, `missing_replacements=14`,
 `output_archives=66/66` et `output_bytes=47792090931`.
 
 ## Textures .tex
