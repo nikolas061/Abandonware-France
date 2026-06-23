@@ -136,11 +136,11 @@ exportees, 1 writer WVQA Full HD valide et 66 entrees de pack runtime partiel.
 La readiness repack
 VQA dans `output/vqa_runtime_repack_readiness/` confirme 1955/1955 entrees
 mappees et 66/66 archives en roundtrip exact; la couverture runtime reste
-partielle avec 1907/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
+partielle avec 1908/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
 materialises. Le builder `output/vqa_runtime_pack_build/` formalise cette
-frontiere: 1907/1955 payloads de remplacement, 1850 appliques, 57 differes
-(53 dans `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body
-32 bits des MIX, 48 encore manquants, et 66 MIX ecrits dans
+frontiere: 1908/1955 payloads de remplacement, 1850 appliques, 58 differes
+(54 dans `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body
+32 bits des MIX, 47 encore manquants, et 66 MIX ecrits dans
 `mod_mix_vqa_fullhd/`. Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
@@ -191,6 +191,9 @@ ajoute `L20_BBI:0029:e80802f3` et valide 92/92 frames; le pack runtime le
 differe pour rester sous la limite body 32 bits de `L20_BBI.MIX`. Le run unitaire
 `output/vqa_fullhd_replacement_writer_l20_bbi_0004_single_after_l20bbi0029/`
 ajoute `L20_BBI:0004:83f2786b` et valide 95/95 frames; le pack runtime le
+differe aussi. Le run unitaire
+`output/vqa_fullhd_replacement_writer_l20_bbi_0262_single_after_l20bbi0004/`
+ajoute `L20_BBI:0262:2bf27862` et valide 105/105 frames; le pack runtime le
 differe aussi. Le rapport writer
 agrege par la faisabilite valide 136389/136389 frames au redecode; le dernier
 batch incremental complet valide 8752/8752 frames supplementaires et installe les payloads
