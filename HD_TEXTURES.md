@@ -1748,17 +1748,17 @@ quantifies that gap as 1955 entries, 171167 Full HD frames, 1 WVQA Full HD
 writer, 66 runtime-pack entries, 5 passed requirements, and 4 open requirements.
 The separate VQA repack readiness report confirms `mapped_entries=1955`,
 `entry_issues=0`, `roundtrip_archives=66`, and `roundtrip_failures=0`; encoded
-WVQA payloads are still partial at 1894/1955 payloads, while materialized runtime
+WVQA payloads are still partial at 1895/1955 payloads, while materialized runtime
 packs now cover 66/66 archives. The VQA runtime pack build report makes the
-staging boundary explicit: `replacement_entries=1894/1955`,
-`applied_replacements=1840/1955`, `deferred_replacements=54`,
-`missing_replacements=61`, `output_archives=66/66`, and
-`output_bytes=42652495315`, so it writes 66
+staging boundary explicit: `replacement_entries=1895/1955`,
+`applied_replacements=1841/1955`, `deferred_replacements=54`,
+`missing_replacements=60`, `output_archives=66/66`, and
+`output_bytes=43050922081`, so it writes 66
 partial runtime MIX files and keeps the global requirement in `gap`. `L20_BBI.MIX`
 uses 306/357 currently available replacements and defers 51 more, while
 `L4_HJI.MIX` applies 125/128 and defers 3. `MOVIES.MIX` now applies 27/27
-available replacements, so all rebuilt bodies stay below the MIX 32-bit
-body-size field.
+available replacements and `L19_BCI.MIX` applies 7/7, so all rebuilt bodies
+stay below the MIX 32-bit body-size field.
 The archive seed writer adds 8 targeted payloads for the previously uncovered MIX
 archives and validates 1675/1675 decoded frames. The LCW
 literal probe adds one concrete encoder primitive: 11 literal-LCW roundtrips
@@ -1788,6 +1788,9 @@ writer run adds `MOVIES:0000:90fd8446` and validates 1125/1125 frames in
 following clean single writer run adds `MOVIES:0003:d0b3011f` and validates
 1130/1130 frames in
 `output/vqa_fullhd_replacement_writer_movies_0003_single_after_movies0000/`.
+The next clean single writer run adds `L19_BCI:0005:4732b185` and validates
+1256/1256 frames in
+`output/vqa_fullhd_replacement_writer_l19_bci_0005_single_after_movies0003/`.
 
 The `.tex` real-capture readiness report confirms that Xvfb and Wine are
 available for the Win95 capture path, but the current preflight is still
@@ -3915,7 +3918,7 @@ python3 tools/lolg_vqa_runtime_repack_readiness.py
 ```
 
 Current result: `gap`, with 1955/1955 VQA entries mapped, 0 entry issues,
-66/66 exact layout-preserving MIX roundtrips, 1894/1955 encoded WVQA replacement
+66/66 exact layout-preserving MIX roundtrips, 1895/1955 encoded WVQA replacement
 payloads, and 66/66 runtime-pack entries.
 
 `tools/lolg_vqa_runtime_pack_build.py` materializes the VQA runtime MIX pack
@@ -3925,14 +3928,15 @@ only when WVQA replacement payloads exist:
 python3 tools/lolg_vqa_runtime_pack_build.py
 ```
 
-Current result: `gap`, with `replacement_entries=1894/1955`,
-`applied_replacements=1840/1955`, `deferred_replacements=54`,
-`missing_replacements=61`, `output_archives=66/66`, and
-`output_bytes=42652495315`. Sixty-six partial runtime
+Current result: `gap`, with `replacement_entries=1895/1955`,
+`applied_replacements=1841/1955`, `deferred_replacements=54`,
+`missing_replacements=60`, `output_archives=66/66`, and
+`output_bytes=43050922081`. Sixty-six partial runtime
 VQA MIX files are written. `L20_BBI.MIX` applies 306/357 available replacements
 and defers 51 entries; `L4_HJI.MIX` applies 125/128 and defers 3 entries;
-`MOVIES.MIX` applies 27/27 available replacements. These deferrals keep the
-rebuilt bodies under the 4294967295-byte MIX field limit.
+`MOVIES.MIX` applies 27/27 available replacements; `L19_BCI.MIX` applies 7/7.
+These deferrals keep the rebuilt bodies under the 4294967295-byte MIX field
+limit.
 Partial or deferred files still cannot satisfy the full
 `mix_repack` requirement.
 
@@ -3998,6 +4002,7 @@ python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --exclude-arc
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --exclude-archive-stem L20_BBI --batch-limit 15 -o output/vqa_fullhd_replacement_writer_missing_non_l20_tail15_after_tail10
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/MOVIES.MIX --index 0000 --file-id 90fd8446 -o output/vqa_fullhd_replacement_writer_movies_0000_single_after_tail15
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/MOVIES.MIX --index 0003 --file-id d0b3011f -o output/vqa_fullhd_replacement_writer_movies_0003_single_after_movies0000
+python3 tools/lolg_vqa_fullhd_replacement_writer.py --archive C/LOLG/L19_BCI.MIX --index 0005 --file-id 4732b185 -o output/vqa_fullhd_replacement_writer_l19_bci_0005_single_after_movies0003
 ```
 
 Current main-writer result: `pass`, with 73647/73647 decoded frames validated
@@ -4020,7 +4025,9 @@ with 1125/1125 decoded frames validated, 351392254 payload bytes,
 `exact_block_ratio=0.592350`, and `changed_pixel_ratio=0.195645`. The next
 `MOVIES:0003:d0b3011f` single-run result is also `pass`, with 1130/1130 decoded
 frames validated, 363076648 payload bytes, `exact_block_ratio=0.609902`, and
-`changed_pixel_ratio=0.190110`.
+`changed_pixel_ratio=0.190110`. The next `L19_BCI:0005:4732b185` single-run
+result is `pass`, with 1256/1256 decoded frames validated, 409112772 payload
+bytes, `exact_block_ratio=0.993564`, and `changed_pixel_ratio=0.002813`.
 
 `tools/lolg_vqa_runtime_feasibility.py` writes the runtime replacement contract
 for those VQA exports:
