@@ -19,12 +19,18 @@ DEFAULT_LOOKUP_SUMMARY = Path("output/lolg95_winedbg_mix_lookup_l20_additive_att
 DEFAULT_STAGE_SUMMARY = Path("output/lolg95_sidecar_runtime_stage/summary.csv")
 DEFAULT_FILE_IO_CONTRACT_SUMMARY = Path("output/lolg95_sidecar_file_io_trace_contract/summary.csv")
 DEFAULT_FILE_IO_TRACE_ATTEMPT_SUMMARY = Path("output/lolg95_sidecar_file_io_trace_attempt/summary.csv")
+DEFAULT_FILE_IO_TRACE_ATTEMPT_ARCHIVES = Path("output/lolg95_sidecar_file_io_trace_attempt/archives.tsv")
+DEFAULT_FILE_IO_TRACE_ATTEMPT_TARGETS = Path("output/lolg95_sidecar_file_io_trace_attempt/archive_targets.tsv")
 
 SUMMARY_FIELDS = [
     "status",
     "targets",
+    "runtime_evidence_source",
     "load_order_pass",
     "runtime_sidecar_first",
+    "runtime_base_first",
+    "runtime_missing",
+    "runtime_unknown_first",
     "played_lookup_hits",
     "played_sidecar_hits",
     "played_missing",
@@ -37,7 +43,12 @@ SUMMARY_FIELDS = [
     "file_io_offset_max",
     "file_io_trace_attempt_status",
     "file_io_trace_attempt_session",
+    "file_io_archive_scan_phase",
+    "file_io_archive_nodes",
+    "file_io_archive_names",
     "file_io_sidecar_path_hits",
+    "file_io_archive_pointer_mapped_hits",
+    "file_io_sidecar_archive_pointer_hits",
     "file_io_target_offset_seek_hits",
     "file_io_unmapped_target_offset_seek_hits",
     "file_io_target_seek_hits",
@@ -122,16 +133,38 @@ def relative_existing(path: Path) -> str:
     return str(path) if path.exists() else ""
 
 
+def choose_runtime_evidence(
+    archive_rows: list[dict[str, str]],
+    target_rows: list[dict[str, str]],
+    file_io_summary: dict[str, str],
+    file_io_archive_rows: list[dict[str, str]],
+    file_io_target_rows: list[dict[str, str]],
+) -> tuple[str, list[dict[str, str]], list[dict[str, str]]]:
+    if file_io_summary.get("archive_scan_phase") and file_io_target_rows:
+        return "file_io_trace_attempt", file_io_archive_rows, file_io_target_rows
+    return "runtime_archive_list_probe", archive_rows, target_rows
+
+
 def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[str, str]]:
     load_rows = read_delimited(args.load_plan_entries)
     readiness_by_id = by_file_id(read_delimited(args.repack_readiness_entries))
     pack_by_id = by_file_id(read_delimited(args.sidecar_pack_entries))
-    runtime_by_id = by_file_id(read_delimited(args.runtime_targets, delimiter="\t"))
     archive_rows = read_delimited(args.runtime_archives, delimiter="\t")
+    runtime_target_rows = read_delimited(args.runtime_targets, delimiter="\t")
     lookup_summary = first_row(args.lookup_summary)
     stage_summary = first_row(args.stage_summary)
     file_io_summary = first_row(args.file_io_contract_summary)
     file_io_attempt_summary = first_row(args.file_io_trace_attempt_summary)
+    file_io_archive_rows = read_delimited(args.file_io_trace_attempt_archives, delimiter="\t")
+    file_io_target_rows = read_delimited(args.file_io_trace_attempt_targets, delimiter="\t")
+    runtime_evidence_source, archive_rows, runtime_target_rows = choose_runtime_evidence(
+        archive_rows,
+        runtime_target_rows,
+        file_io_attempt_summary,
+        file_io_archive_rows,
+        file_io_target_rows,
+    )
+    runtime_by_id = by_file_id(runtime_target_rows)
 
     sidecar_archive = next((row for row in archive_rows if row.get("name", "").lower().endswith("_hd.mix")), {})
     sidecar_body_pointer = sidecar_archive.get("body_pointer", "")
@@ -152,11 +185,15 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
         pack = pack_by_id.get(file_id, {})
         runtime = runtime_by_id.get(file_id, {})
         issues = []
+        runtime_first_archive = runtime.get("first_archive", load_row.get("runtime_first_archive", ""))
+        runtime_first_order = runtime.get("first_order", load_row.get("runtime_first_order", ""))
+        runtime_first_size = runtime.get("first_entry_size", "")
+        runtime_first_status = runtime.get("first_status", "")
 
         if load_row.get("load_order_status") != "pass":
             issues.append("load_order_not_pass")
-        if runtime.get("first_status") != "sidecar":
-            issues.append("runtime_first_not_sidecar")
+        if runtime_first_status != "sidecar":
+            issues.append(f"runtime_first_not_sidecar:{runtime_first_status or 'missing'}")
         if file_id in sidecar_hit_ids:
             played_lookup_status = "sidecar_hit"
         elif file_id in all_lookup_hit_ids:
@@ -177,6 +214,8 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
             payload_residency_status = "file_backed_not_observed"
             issues.append("payload_read_not_observed")
 
+        load_order_status = "pass" if runtime_first_status == "sidecar" else "gap"
+
         firstframe_dir = Path(
             f"output/vqa_batch_firstframes/L20_BBI_{load_row.get('index', '')}_{file_id}"
         )
@@ -193,11 +232,11 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
                 "replacement_path": pack.get("replacement_path", readiness.get("replacement_path", "")),
                 "replacement_size": load_row.get("replacement_size", pack.get("replacement_size", "")),
                 "sidecar_archive": load_row.get("sidecar_archive", pack.get("sidecar_archive", "")),
-                "sidecar_offset": load_row.get("sidecar_offset", runtime.get("first_entry_offset", "")),
-                "sidecar_size": load_row.get("sidecar_size", runtime.get("first_entry_size", "")),
-                "runtime_first_archive": load_row.get("runtime_first_archive", runtime.get("first_archive", "")),
-                "runtime_first_order": load_row.get("runtime_first_order", runtime.get("first_order", "")),
-                "load_order_status": load_row.get("load_order_status", ""),
+                "sidecar_offset": runtime.get("first_entry_offset", load_row.get("sidecar_offset", "")),
+                "sidecar_size": load_row.get("sidecar_size", runtime_first_size),
+                "runtime_first_archive": runtime_first_archive,
+                "runtime_first_order": runtime_first_order,
+                "load_order_status": load_order_status,
                 "played_lookup_status": played_lookup_status,
                 "payload_residency_status": payload_residency_status,
                 "file_io_seek_status": file_io_seek_status,
@@ -214,6 +253,16 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
 
     load_order_pass = sum(1 for row in target_rows if row["load_order_status"] == "pass")
     runtime_sidecar_first = sum(1 for row in target_rows if row["runtime_first_archive"].lower().endswith("_hd.mix"))
+    runtime_base_first = sum(
+        1 for row in target_rows if row["runtime_first_archive"] and not row["runtime_first_archive"].lower().endswith("_hd.mix")
+    )
+    runtime_missing = sum(1 for row in target_rows if not row["runtime_first_archive"])
+    runtime_unknown_first = sum(
+        1
+        for row in runtime_target_rows
+        if row.get("file_id", "").lower() in {target.get("file_id", "") for target in target_rows}
+        and row.get("first_status") == "unknown_size"
+    )
     file_backed_targets = sum(
         1 for row in target_rows if row["payload_residency_status"].startswith("file_")
     )
@@ -234,8 +283,12 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
         and payload_read_evidence_targets == len(target_rows)
         else "gap",
         "targets": str(len(target_rows)),
+        "runtime_evidence_source": runtime_evidence_source,
         "load_order_pass": str(load_order_pass),
         "runtime_sidecar_first": str(runtime_sidecar_first),
+        "runtime_base_first": str(runtime_base_first),
+        "runtime_missing": str(runtime_missing),
+        "runtime_unknown_first": str(runtime_unknown_first),
         "played_lookup_hits": str(target_hit_count),
         "played_sidecar_hits": str(sidecar_hit_count),
         "played_missing": str(played_missing),
@@ -248,7 +301,14 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
         "file_io_offset_max": file_io_summary.get("expected_offset_max", ""),
         "file_io_trace_attempt_status": file_io_attempt_summary.get("status", ""),
         "file_io_trace_attempt_session": file_io_attempt_summary.get("session_status", ""),
+        "file_io_archive_scan_phase": file_io_attempt_summary.get("archive_scan_phase", ""),
+        "file_io_archive_nodes": file_io_attempt_summary.get("archive_nodes", ""),
+        "file_io_archive_names": file_io_attempt_summary.get("archive_names", ""),
         "file_io_sidecar_path_hits": file_io_attempt_summary.get("sidecar_path_hits", ""),
+        "file_io_archive_pointer_mapped_hits": file_io_attempt_summary.get("archive_pointer_mapped_hits", ""),
+        "file_io_sidecar_archive_pointer_hits": file_io_attempt_summary.get(
+            "sidecar_archive_pointer_hits", ""
+        ),
         "file_io_target_offset_seek_hits": file_io_attempt_summary.get("target_offset_seek_hits", ""),
         "file_io_unmapped_target_offset_seek_hits": file_io_attempt_summary.get(
             "unmapped_target_offset_seek_hits", ""
@@ -263,13 +323,16 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
             issue
             for issue, present in [
                 ("played_lookup_missing", played_missing > 0),
+                ("runtime_first_not_sidecar", runtime_sidecar_first < len(target_rows)),
                 ("payload_read_not_observed", payload_read_evidence_targets < len(target_rows)),
                 ("file_io_trace_attempt_missing", not file_io_attempt_summary),
             ]
             if present
         ),
         "next_step": (
-            "run tools/run_lolg95_sidecar_file_io_trace_attempt.py under xvfb-run and drive/request one target VQA"
+            "change sidecar insertion order so duplicate VQA IDs are found before l20_bbI.MIX"
+            if runtime_sidecar_first < len(target_rows)
+            else "run tools/run_lolg95_sidecar_file_io_trace_attempt.py under xvfb-run and drive/request one target VQA"
         ),
     }
     return target_rows, summary
@@ -292,10 +355,13 @@ def build_requirements(summary: dict[str, str], target_rows: list[dict[str, str]
                 and count_int(summary.get("runtime_sidecar_first", "")) == target_count
             ),
             "evidence": (
+                f"source={summary.get('runtime_evidence_source', '')};"
                 f"load_order_pass={summary.get('load_order_pass', '')}/{target_count};"
-                f"runtime_sidecar_first={summary.get('runtime_sidecar_first', '')}/{target_count}"
+                f"runtime_sidecar_first={summary.get('runtime_sidecar_first', '')}/{target_count};"
+                f"runtime_base_first={summary.get('runtime_base_first', '')}/{target_count};"
+                f"runtime_missing={summary.get('runtime_missing', '')}/{target_count}"
             ),
-            "next_step": "rerun tools/lolg_vqa_runtime_sidecar_load_plan.py",
+            "next_step": "change the additive patch so L20_BBI_HD.MIX is inserted before l20_bbI.MIX",
         },
         {
             "requirement": "file_io_trace_contract",
@@ -319,7 +385,11 @@ def build_requirements(summary: dict[str, str], target_rows: list[dict[str, str]
             "evidence": (
                 f"attempt_status={summary.get('file_io_trace_attempt_status', '')};"
                 f"session={summary.get('file_io_trace_attempt_session', '')};"
+                f"archive_scan={summary.get('file_io_archive_scan_phase', '')}/"
+                f"{summary.get('file_io_archive_nodes', '')};"
                 f"sidecar_path_hits={summary.get('file_io_sidecar_path_hits', '')};"
+                f"archive_pointer_mapped_hits={summary.get('file_io_archive_pointer_mapped_hits', '')};"
+                f"sidecar_archive_pointer_hits={summary.get('file_io_sidecar_archive_pointer_hits', '')};"
                 f"target_offset_seek_hits={summary.get('file_io_target_offset_seek_hits', '')};"
                 f"unmapped_target_offset_seek_hits={summary.get('file_io_unmapped_target_offset_seek_hits', '')};"
                 f"target_seek_hits={summary.get('file_io_target_seek_hits', '')};"
@@ -424,8 +494,11 @@ def render_html(path: Path, summary: dict[str, str], requirements: list[dict[str
   <section class="summary">
     <div class="metric"><strong>Status</strong>{esc(summary['status'])}</div>
     <div class="metric"><strong>Targets</strong>{esc(summary['targets'])}</div>
+    <div class="metric"><strong>Runtime evidence</strong>{esc(summary['runtime_evidence_source'])}</div>
     <div class="metric"><strong>Runtime sidecar first</strong>{esc(summary['runtime_sidecar_first'])}</div>
+    <div class="metric"><strong>Runtime base first</strong>{esc(summary['runtime_base_first'])}</div>
     <div class="metric"><strong>Played sidecar hits</strong>{esc(summary['played_sidecar_hits'])}</div>
+    <div class="metric"><strong>I/O archive scan</strong>{esc(summary['file_io_archive_scan_phase'])}/{esc(summary['file_io_archive_nodes'])}</div>
     <div class="metric"><strong>File-I/O target reads</strong>{esc(summary['file_io_target_read_hits'])}</div>
     <div class="metric"><strong>File-backed targets</strong>{esc(summary['file_backed_targets'])}</div>
     <div class="metric"><strong>Sidecar body pointer</strong><code>{esc(summary['sidecar_body_pointer'])}</code></div>
@@ -479,6 +552,8 @@ def main() -> None:
     parser.add_argument("--stage-summary", type=Path, default=DEFAULT_STAGE_SUMMARY)
     parser.add_argument("--file-io-contract-summary", type=Path, default=DEFAULT_FILE_IO_CONTRACT_SUMMARY)
     parser.add_argument("--file-io-trace-attempt-summary", type=Path, default=DEFAULT_FILE_IO_TRACE_ATTEMPT_SUMMARY)
+    parser.add_argument("--file-io-trace-attempt-archives", type=Path, default=DEFAULT_FILE_IO_TRACE_ATTEMPT_ARCHIVES)
+    parser.add_argument("--file-io-trace-attempt-targets", type=Path, default=DEFAULT_FILE_IO_TRACE_ATTEMPT_TARGETS)
     args = parser.parse_args()
 
     summary = build_report(args)

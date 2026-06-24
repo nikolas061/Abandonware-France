@@ -428,18 +428,19 @@ sidecar buildable: `sidecar_entries=8`, `sidecar_archives=1`,
 SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
 `output/vqa_runtime_sidecar_load_plan/` valide maintenant le mapping de
 chargement complet: 8/8 entrees retrouvent leur ID et leur taille dans
-`L20_BBI.MIX`, 8/8 dans `L20_BBI_HD.MIX`, puis 8/8 sont verifies
-`sidecar-first` par la preuve runtime archive-list. Son `summary.csv` passe avec
-`runtime_archive_list_status=pass`, `runtime_sidecar_first=8`, et 0 ID
-runtime base/missing/unknown. Le rapport note aussi que `CDCACHE.LST` et
-`CDCACHE.LS_` ne contiennent ni `L20_BBI.MIX` ni `L20_BBI_HD.MIX`; le chemin
-accepte est donc le hook du loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui
-contiennent `CDCACHE` et `.MIX`) prouve par le patch additif.
+`L20_BBI.MIX`, et 8/8 dans `L20_BBI_HD.MIX`. La preuve runtime stricte vient
+du run I/O recent, pas de l'ancien scan archive-list tardif: son `summary.csv`
+est maintenant `gap` avec `runtime_evidence_source=file_io_trace_attempt`,
+`runtime_sidecar_first=0`, et `runtime_base_first=8`. Le rapport note aussi que
+`CDCACHE.LST` et `CDCACHE.LS_` ne contiennent ni `L20_BBI.MIX` ni
+`L20_BBI_HD.MIX`; le prochain verrou est donc le hook du loader compile ou
+l'ordre de lookup (`LOLG95.EXE`/`LOLG.DAT`, qui contiennent `CDCACHE` et
+`.MIX`) pour que le sidecar HD soit consulte avant la base.
 `output/lolg95_sidecar_runtime_stage/` fige ce chemin en stage de test non
-destructif: `summary.csv` passe, `requirements.csv` valide le patch additif,
-le repertoire de stage, l'executable stage, les liens sidecar, le plan
-sidecar et la preuve archive-list, puis
-`run_lolg95_sidecar_fullhd_wine.sh` lance uniquement ce stage Wine.
+destructif, mais son `summary.csv` est maintenant `gap` avec
+`issues=sidecar_load_plan`: le patch additif, le repertoire de stage,
+l'executable stage et les liens sidecar existent, mais le stage reste bloque
+tant que le sidecar HD n'est pas insere avant `l20_bbI.MIX`.
 `output/vqa_runtime_loader_probe/` cartographie ce loader cote `LOLG95.EXE`:
 4 candidats hook, 7 references `CreateFileA`, constructeur generique `.MIX`,
 montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage `CDCACHE.MIX`, et 0
@@ -517,27 +518,28 @@ une scene ou un appel cible qui sollicite ces VQA pour prouver la resolution
 effective depuis le sidecar.
 `tools/run_lolg95_runtime_archive_list_probe.py` ajoute la preuve d'ordre
 runtime sans perturber les requetes du jeu: apres le meme pilotage L20, il lit
-la liste globale `0x6a5b34` dans `/proc/<pid>/mem`. Le run
-`output/lolg95_runtime_archive_list_l20_sidecar_probe/` passe avec
-`archive_nodes=7`, `force_level_write_status=pass` et les 8 IDs en
-`target_sidecar_first`. `targets.tsv` pointe `first_archive=l20_bbI_HD.MIX`,
-`first_order=4`, et les tailles sidecar attendues pour les 8 hashes. La
-selection par ordre runtime est donc prouvee des que ces IDs sont demandes; le
-reste du travail est de stabiliser ce comportement en fallback final ou de le
-rattacher a un appel VQA joue.
+la liste globale `0x6a5b34` dans `/proc/<pid>/mem`. L'ancien run tardif
+`output/lolg95_runtime_archive_list_l20_sidecar_probe/` voyait les 8 IDs en
+`target_sidecar_first`, mais sans l'archive base chargee au meme moment. Le
+run I/O recent rescane pendant que `l20_bbI.MIX` et `l20_bbI_HD.MIX` sont
+tous deux presents: les 8 hashes sont `base` en premier et le sidecar en
+second dans `all_matches`. Le patch additif monte donc bien le sidecar, mais
+ne gagne pas encore le lookup des doublons.
 Le plan `output/vqa_runtime_sidecar_load_plan/` consomme maintenant cette
-preuve et passe: 8/8 base, 8/8 sidecar, `runtime_archive_list_status=pass`,
-`runtime_sidecar_first=8`, et aucun ID runtime base/missing/unknown.
-Le stage `output/lolg95_sidecar_runtime_stage/` passe a son tour et fournit un
-script Wine de test pointe vers
-`output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE`;
-il ne modifie pas le lanceur DOSBox.
+preuve plus stricte et reste `gap`: 8/8 base, 8/8 sidecar,
+`runtime_evidence_source=file_io_trace_attempt`, `runtime_sidecar_first=0`,
+et `runtime_base_first=8`.
+Le stage `output/lolg95_sidecar_runtime_stage/` est donc `gap` a son tour
+(`issues=sidecar_load_plan`): il garde le script Wine de test pointe vers
+`output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE`,
+mais ne doit pas etre utilise comme chemin visuel valide avant correction de
+l'ordre sidecar. Il ne modifie pas le lanceur DOSBox.
 Le rapport `output/lolg95_sidecar_played_read_plan/` fige le diagnostic du
-banc Wine/Xvfb: statut `gap`, ordre sidecar 8/8 conserve, mais
-`played_sidecar_hits=0/8`, `played_missing=8` et `file_backed_targets=8/8`
-avec `sidecar_body_pointer=0x00000000`. Autrement dit, le test a atteint le
-son et le montage runtime, mais il n'a pas encore demande les 8 VQA HD qui
-permettraient de prouver l'image sidecar.
+banc Wine/Xvfb: statut `gap`, `runtime_sidecar_first=0/8`,
+`runtime_base_first=8/8`, `played_sidecar_hits=0/8`, `played_missing=8` et
+`file_backed_targets=8/8` avec `sidecar_body_pointer=0x00000000`. Autrement
+dit, le test a atteint le son et le montage runtime, mais le sidecar HD est
+encore apres la base et ne prouve pas l'image sidecar.
 Le contrat `output/lolg95_sidecar_file_io_trace_contract/` prepare cette preuve
 avec des offsets fichier exacts: `contract_status=pass`, 8 cibles, plage
 `102..593523280` dans `l20_bbI_HD.MIX`, breakpoint `SetFilePointer=0x004eb7eb`
@@ -5318,22 +5320,24 @@ core_project_file: 18 files
 
 ## Prochaine passe technique
 
-Priorite 1: promouvoir la preuve sidecar runtime en chemin final propre. Les 8
-payloads restants tiennent dans un sidecar MIX valide, le plan de chargement
-verifie maintenant les IDs dans la base, dans le sidecar, puis en ordre runtime:
-`output/vqa_runtime_sidecar_load_plan/summary.csv` passe avec 8/8 base, 8/8
-sidecar et `runtime_sidecar_first=8`. Le patch additif ouvre
-`L20_BBI.MIX` puis `L20_BBI_HD.MIX` dans le meme run, et
-`output/lolg95_runtime_archive_list_l20_sidecar_probe/` ferme le point d'ordre:
-les 8 hashes `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`, `46e8b785`,
-`46e8b985`, `46eab985` et `46eeb585` sont tous `target_sidecar_first` dans la
-liste runtime, via `l20_bbI_HD.MIX`. La trace lookup directe
+Priorite 1: corriger l'ordre runtime du sidecar avant de promouvoir un chemin
+final. Les 8 payloads restants tiennent dans un sidecar MIX valide, et le plan
+de chargement verifie maintenant les IDs dans la base et dans le sidecar. La
+preuve runtime stricte est cependant `gap`:
+`output/vqa_runtime_sidecar_load_plan/summary.csv` indique
+`runtime_evidence_source=file_io_trace_attempt`, `runtime_sidecar_first=0` et
+`runtime_base_first=8`. Le patch additif ouvre `L20_BBI.MIX` puis
+`L20_BBI_HD.MIX` dans le meme run, mais le scan I/O recent prouve que les 8
+hashes `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`, `46e8b785`,
+`46e8b985`, `46eab985` et `46eeb585` restent resolus depuis `l20_bbI.MIX`
+quand les deux archives sont presentes. La trace lookup directe
 `output/lolg95_winedbg_mix_lookup_l20_additive_attempt/` observe toujours
 `0x004e3d18` avec 97 hits et 52 IDs uniques mais aucun de ces 8 hashes, parce
 que le parcours automatise ne sollicite pas encore ces VQA. La prochaine passe
 dispose maintenant du stage propre `output/lolg95_sidecar_runtime_stage/`; elle
-doit donc soit capturer un appel VQA joue qui consomme un de ces IDs, soit
-promouvoir ce chemin Wine stage apres revue visuelle manuelle. Les points de
+doit donc modifier l'insertion/l'ordre de lookup pour placer `L20_BBI_HD.MIX`
+avant `L20_BBI.MIX`, puis capturer un appel VQA joue qui consomme un de ces
+IDs. Les points de
 depart actuels sont le constructeur generique `0x004e41e0`, la liste globale
 d'archives `0x6a5b40`, le lookup hash `0x004e3c90`, le hit archive
 `0x004e3d18`, le saut additif `0x00453723 -> 0x005ab2d3`, et les refs
@@ -5355,11 +5359,12 @@ consomme maintenant le contrat `SetFilePointer`/`ReadFile` L20 et produit
 Wine/Xvfb s'attache maintenant au vrai process (`session_status=exited_0`,
 `attach_pid_source=runtime_executable`) et capture 64 hits: 37
 `SetFilePointer`, 27 `ReadFile`, 30 seeks dont l'offset tombe dans les plages
-des VQA cibles. Ces 30 signaux restent `unmapped_target_offset_seek_hits`,
-donc aucune lecture n'est encore comptee comme `l20_bbI_HD.MIX`. Le prochain
-verrou est le mapping handle/chemin pendant ces seeks ou un pilotage qui force
-une VQA cible avec chemin sidecar decode. Ce point concerne seulement le banc
-de test automatise, pas le lanceur DOSBox.
+des VQA cibles, et 47 hits avec pointeur d'archive mappe. Ces signaux pointent
+toutefois vers l'ordre `base-first` (`runtime_base_first=8/8`) et
+`sidecar_archive_pointer_hits=0`, donc aucune lecture n'est encore comptee
+comme `l20_bbI_HD.MIX`. Le prochain verrou est l'ordre d'insertion du sidecar
+ou un hook de lookup qui prefere le HD avant la base. Ce point concerne
+seulement le banc de test automatise, pas le lanceur DOSBox.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.

@@ -17,6 +17,8 @@ DEFAULT_OUTPUT = Path("output/vqa_runtime_sidecar_load_plan")
 DEFAULT_GAME_ROOT = Path(".")
 DEFAULT_RUNTIME_ARCHIVE_LIST_SUMMARY = Path("output/lolg95_runtime_archive_list_l20_sidecar_probe/summary.csv")
 DEFAULT_RUNTIME_ARCHIVE_LIST_TARGETS = Path("output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv")
+DEFAULT_FILE_IO_TRACE_ATTEMPT_SUMMARY = Path("output/lolg95_sidecar_file_io_trace_attempt/summary.csv")
+DEFAULT_FILE_IO_TRACE_ATTEMPT_TARGETS = Path("output/lolg95_sidecar_file_io_trace_attempt/archive_targets.tsv")
 DEFAULT_PROBES = [
     Path("CDCACHE.LST"),
     Path("CDCACHE.LS_"),
@@ -37,6 +39,7 @@ SUMMARY_FIELDS = [
     "cdcache_sidecar_name_hits",
     "cdcache_base_name_hits",
     "loader_candidate_files",
+    "runtime_evidence_source",
     "runtime_archive_list_status",
     "runtime_archive_list_targets",
     "runtime_sidecar_first",
@@ -256,11 +259,23 @@ def archive_names_match(runtime_name: str, planned_name: str) -> bool:
 def load_runtime_archive_list_evidence(
     summary_path: Path,
     targets_path: Path,
+    file_io_summary_path: Path,
+    file_io_targets_path: Path,
     plan_rows: list[dict[str, str]],
-) -> tuple[dict[str, str], dict[str, dict[str, str]], list[str]]:
+) -> tuple[dict[str, str], dict[str, dict[str, str]], list[str], str]:
     summary_rows = read_csv(summary_path)
     summary = summary_rows[0] if summary_rows else {}
     target_rows = {row.get("file_id", "").lower(): row for row in read_tsv(targets_path) if row.get("file_id")}
+    evidence_source = "runtime_archive_list_probe"
+    file_io_summary_rows = read_csv(file_io_summary_path)
+    file_io_summary = file_io_summary_rows[0] if file_io_summary_rows else {}
+    file_io_targets = {
+        row.get("file_id", "").lower(): row for row in read_tsv(file_io_targets_path) if row.get("file_id")
+    }
+    if file_io_summary.get("archive_scan_phase") and file_io_targets:
+        summary = file_io_summary
+        target_rows = file_io_targets
+        evidence_source = "file_io_trace_attempt"
     issues: list[str] = []
 
     if not summary:
@@ -275,6 +290,11 @@ def load_runtime_archive_list_evidence(
     base_first = split_csv_set(summary.get("target_base_first", ""))
     missing = split_csv_set(summary.get("target_missing", ""))
     unknown = split_csv_set(summary.get("target_unknown_first", ""))
+    if not sidecar_first and target_rows:
+        sidecar_first = {file_id for file_id, row in target_rows.items() if row.get("first_status") == "sidecar"}
+        base_first = {file_id for file_id, row in target_rows.items() if row.get("first_status") == "base"}
+        missing = {file_id for file_id, row in target_rows.items() if row.get("first_status") == "missing"}
+        unknown = {file_id for file_id, row in target_rows.items() if row.get("first_status") == "unknown_size"}
     plan_ids = {row.get("file_id", "").lower() for row in plan_rows if row.get("file_id")}
     if summary.get("expected_ids") and summary.get("expected_ids") != str(len(plan_rows)):
         issues.append(f"runtime_archive_list_expected_ids:{summary.get('expected_ids')}:{len(plan_rows)}")
@@ -293,6 +313,10 @@ def load_runtime_archive_list_evidence(
         if runtime_row is None:
             issues.append(f"runtime_target_missing:{file_id}")
             continue
+        all_matches = runtime_row.get("all_matches", "")
+        if expected_source := row.get("source_size", ""):
+            if all_matches and f":{expected_source}" not in all_matches:
+                issues.append(f"runtime_target_base_match_missing:{file_id}")
         if runtime_row.get("first_status") != "sidecar":
             issues.append(f"runtime_target_not_sidecar_first:{file_id}:{runtime_row.get('first_status', '')}")
         if runtime_row.get("first_entry_size") != row.get("replacement_size", ""):
@@ -306,7 +330,7 @@ def load_runtime_archive_list_evidence(
                 f"{file_id}:{runtime_row.get('first_archive', '')}:{row.get('sidecar_archive', '')}"
             )
 
-    return summary, target_rows, list(dict.fromkeys(issues))
+    return summary, target_rows, list(dict.fromkeys(issues)), evidence_source
 
 
 def build_reports(args: argparse.Namespace) -> tuple[
@@ -317,9 +341,11 @@ def build_reports(args: argparse.Namespace) -> tuple[
     list[dict[str, str]],
 ]:
     plan_rows = [row for row in read_csv(args.sidecar_entries) if row.get("status") == "sidecar_ready"]
-    runtime_summary, runtime_targets, runtime_issues = load_runtime_archive_list_evidence(
+    runtime_summary, runtime_targets, runtime_issues, runtime_evidence_source = load_runtime_archive_list_evidence(
         args.runtime_archive_list_summary,
         args.runtime_archive_list_targets,
+        args.file_io_trace_attempt_summary,
+        args.file_io_trace_attempt_targets,
         plan_rows,
     )
     rows_by_archive: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
@@ -459,6 +485,18 @@ def build_reports(args: argparse.Namespace) -> tuple[
         for row in source_rows
         if row.get("interpretation") == "compiled_loader_candidate"
     ]
+    runtime_sidecar_first_ids = {
+        file_id for file_id, row in runtime_targets.items() if row.get("first_status") == "sidecar"
+    }
+    runtime_base_first_ids = {
+        file_id for file_id, row in runtime_targets.items() if row.get("first_status") == "base"
+    }
+    runtime_missing_ids = {
+        file_id for file_id, row in runtime_targets.items() if row.get("first_status") == "missing"
+    }
+    runtime_unknown_first_ids = {
+        file_id for file_id, row in runtime_targets.items() if row.get("first_status") == "unknown_size"
+    }
 
     runtime_order_ok = bool(plan_rows) and not runtime_issues and all(
         row.get("load_order_status") == "pass" for row in entry_rows
@@ -497,9 +535,9 @@ def build_reports(args: argparse.Namespace) -> tuple[
             "status": "pass" if cdcache_sidecar_hits or runtime_order_ok else "gap",
             "evidence": (
                 f"cdcache_sidecar_hits={cdcache_sidecar_hits};"
+                f"runtime_evidence_source={runtime_evidence_source};"
                 f"runtime_archive_list_status={runtime_summary.get('status', '')};"
-                f"runtime_sidecar_first={len(split_csv_set(runtime_summary.get('target_sidecar_first', '')))}/"
-                f"{len(plan_rows)}"
+                f"runtime_sidecar_first={len(runtime_sidecar_first_ids)}/{len(plan_rows)}"
             ),
             "next_step": "keep the runtime hook proof if CDCACHE.LST does not declare the sidecar name",
         },
@@ -514,10 +552,11 @@ def build_reports(args: argparse.Namespace) -> tuple[
             "status": "pass" if runtime_order_ok else "gap",
             "evidence": (
                 f"summary={args.runtime_archive_list_summary};"
+                f"evidence_source={runtime_evidence_source};"
                 f"targets={args.runtime_archive_list_targets};"
                 f"archive_nodes={runtime_summary.get('archive_nodes', '')};"
-                f"sidecar_first={len(split_csv_set(runtime_summary.get('target_sidecar_first', '')))}/"
-                f"{len(plan_rows)}"
+                f"sidecar_first={len(runtime_sidecar_first_ids)}/{len(plan_rows)};"
+                f"base_first={len(runtime_base_first_ids)}/{len(plan_rows)}"
             ),
             "next_step": (
                 "promote the additive runtime patch into a final staged runtime path"
@@ -537,17 +576,18 @@ def build_reports(args: argparse.Namespace) -> tuple[
         "cdcache_sidecar_name_hits": str(cdcache_sidecar_hits),
         "cdcache_base_name_hits": str(cdcache_base_hits),
         "loader_candidate_files": str(len(loader_candidates)),
+        "runtime_evidence_source": runtime_evidence_source,
         "runtime_archive_list_status": runtime_summary.get("status", ""),
         "runtime_archive_list_targets": str(len(runtime_targets)),
-        "runtime_sidecar_first": str(len(split_csv_set(runtime_summary.get("target_sidecar_first", "")))),
-        "runtime_base_first": str(len(split_csv_set(runtime_summary.get("target_base_first", "")))),
-        "runtime_missing": str(len(split_csv_set(runtime_summary.get("target_missing", "")))),
-        "runtime_unknown_first": str(len(split_csv_set(runtime_summary.get("target_unknown_first", "")))),
+        "runtime_sidecar_first": str(len(runtime_sidecar_first_ids)),
+        "runtime_base_first": str(len(runtime_base_first_ids)),
+        "runtime_missing": str(len(runtime_missing_ids)),
+        "runtime_unknown_first": str(len(runtime_unknown_first_ids)),
         "issues": ";".join(dict.fromkeys(all_issues)),
         "next_step": (
             "promote the proven additive sidecar stage into a clean user-facing runtime path"
             if critical_ok and not all_issues
-            else "patch or wrap the MIX loader so L20_BBI_HD.MIX is queried after L20_BBI.MIX"
+            else "patch or wrap the MIX loader so L20_BBI_HD.MIX is queried before L20_BBI.MIX"
         ),
     }
     return summary, requirements, archive_rows, entry_rows, source_rows
@@ -601,6 +641,9 @@ def write_html(
     <div class="stat"><div class="label">Entrees sidecar</div><div class="value">{html.escape(summary['sidecar_entries'])}</div></div>
     <div class="stat"><div class="label">Base verifiee</div><div class="value">{html.escape(summary['base_entries_verified'])}</div></div>
     <div class="stat"><div class="label">Sidecar verifie</div><div class="value">{html.escape(summary['sidecar_entries_verified'])}</div></div>
+    <div class="stat"><div class="label">Preuve runtime</div><div class="value">{html.escape(summary['runtime_evidence_source'])}</div></div>
+    <div class="stat"><div class="label">Sidecar first</div><div class="value">{html.escape(summary['runtime_sidecar_first'])}</div></div>
+    <div class="stat"><div class="label">Base first</div><div class="value">{html.escape(summary['runtime_base_first'])}</div></div>
   </div>
   <h2>Requirements</h2>
   {render_table(requirements, REQUIREMENT_FIELDS)}
@@ -623,6 +666,8 @@ def main() -> None:
     parser.add_argument("--sidecar-entries", type=Path, default=DEFAULT_SIDECAR_ENTRIES)
     parser.add_argument("--runtime-archive-list-summary", type=Path, default=DEFAULT_RUNTIME_ARCHIVE_LIST_SUMMARY)
     parser.add_argument("--runtime-archive-list-targets", type=Path, default=DEFAULT_RUNTIME_ARCHIVE_LIST_TARGETS)
+    parser.add_argument("--file-io-trace-attempt-summary", type=Path, default=DEFAULT_FILE_IO_TRACE_ATTEMPT_SUMMARY)
+    parser.add_argument("--file-io-trace-attempt-targets", type=Path, default=DEFAULT_FILE_IO_TRACE_ATTEMPT_TARGETS)
     parser.add_argument("--game-root", type=Path, default=DEFAULT_GAME_ROOT)
     parser.add_argument("--probe", type=Path, action="append", default=list(DEFAULT_PROBES))
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)

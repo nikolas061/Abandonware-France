@@ -24,6 +24,13 @@ from run_lolg95_winedbg_attach_pilot_attempt import (  # noqa: E402
     stop_process,
     write_process_dwords,
 )
+from run_lolg95_runtime_archive_list_probe import (  # noqa: E402
+    ARCHIVE_FIELDS,
+    DEFAULT_EXPECTED_IDS,
+    TARGET_FIELDS as ARCHIVE_TARGET_FIELDS,
+    load_expected,
+    scan_archive_list,
+)
 
 
 DEFAULT_OUTPUT = Path("output/lolg95_sidecar_file_io_trace_attempt")
@@ -36,7 +43,10 @@ TRACE_FIELDS = [
     "kind",
     "path",
     "path_pointer",
+    "archive_pointer_role",
+    "archive_name",
     "file_object",
+    "file_object_word",
     "file_handle",
     "edi",
     "esi",
@@ -85,11 +95,22 @@ SUMMARY_FIELDS = [
     "info_proc_log",
     "raw_log",
     "trace",
+    "archives",
+    "archive_targets",
+    "archive_scan_phase",
     "capture_stops",
+    "archive_nodes",
+    "archive_names",
+    "runtime_sidecar_first",
+    "runtime_base_first",
+    "runtime_missing",
+    "runtime_unknown_first",
     "breakpoint_hits",
     "setfilepointer_hits",
     "readfile_hits",
     "sidecar_path_hits",
+    "archive_pointer_mapped_hits",
+    "sidecar_archive_pointer_hits",
     "target_offset_seek_hits",
     "unmapped_target_offset_seek_hits",
     "target_seek_hits",
@@ -237,17 +258,38 @@ def parse_attach_pid(info_proc_text: str, executable_name: str) -> tuple[str, st
 
 
 def runtime_command_path(runtime_executable: Path, cwd: Path) -> str:
-    runtime_resolved = runtime_executable.resolve()
-    cwd_resolved = cwd.resolve()
-    if runtime_resolved.parent == cwd_resolved:
-        return runtime_resolved.name
-    return str(runtime_resolved)
+    return str(runtime_executable.resolve())
+
+
+def normalize_pointer(value: str) -> str:
+    try:
+        return hex32(value_to_int(value))
+    except ValueError:
+        return ""
+
+
+def build_archive_pointer_map(archive_rows: list[dict[str, str]]) -> dict[str, dict[str, str]]:
+    pointer_map: dict[str, dict[str, str]] = {}
+    for row in archive_rows:
+        name = row.get("name", "")
+        if not name:
+            continue
+        for field, role in [
+            ("node", "node"),
+            ("name_pointer", "name_pointer"),
+            ("table_pointer", "table_pointer"),
+            ("body_pointer", "body_pointer"),
+        ]:
+            pointer = normalize_pointer(row.get(field, ""))
+            if pointer and pointer != "0x00000000":
+                pointer_map[pointer] = {"archive_name": name, "archive_pointer_role": role}
+    return pointer_map
 
 
 def classify_rows(rows: list[dict[str, str]], targets: list[dict[str, str]]) -> None:
     last_sidecar_target: dict[str, str] = {}
     for row in rows:
-        path_is_sidecar = sidecar_path(row["path"])
+        path_is_sidecar = sidecar_path(row["path"]) or sidecar_path(row.get("archive_name", ""))
         if row["kind"] == "SetFilePointer":
             offset = value_to_int(row["seek_offset"])
             target = target_for_offset(targets, offset)
@@ -293,6 +335,7 @@ def extract_trace_rows(
     raw_text: str,
     tracepoints: list[dict[str, str]],
     targets: list[dict[str, str]],
+    archive_pointer_map: dict[str, dict[str, str]],
 ) -> tuple[list[dict[str, str]], int]:
     tracepoint_by_va = {hex32(value_to_int(row["breakpoint_va"])): row for row in tracepoints}
     stop_re = re.compile(r"Stopped on breakpoint\s+\d+\s+at\s+(0x[0-9a-fA-F]+)", re.IGNORECASE)
@@ -309,9 +352,11 @@ def extract_trace_rows(
         breakpoint_hits += 1
         registers = parse_registers(block)
         values = isolated_values(block)
-        displayed_ebx = values[0] if len(values) > 0 else registers.get("ebx", "")
+        file_object = registers.get("ebx", "")
+        file_object_word = values[0] if len(values) > 0 else ""
         file_handle = values[1] if len(values) > 1 else ""
         path_pointer = values[2] if len(values) > 2 else ""
+        archive_pointer = archive_pointer_map.get(normalize_pointer(path_pointer), {})
         edi = values[3] if len(values) > 3 else registers.get("edi", "")
         esi = values[4] if len(values) > 4 else registers.get("esi", "")
         esp0 = values[5] if len(values) > 5 else ""
@@ -325,9 +370,12 @@ def extract_trace_rows(
                 "row_index": str(len(rows)),
                 "breakpoint_va": breakpoint_va,
                 "kind": kind,
-                "path": parse_path_hint(block),
+                "path": parse_path_hint(block) or archive_pointer.get("archive_name", ""),
                 "path_pointer": path_pointer,
-                "file_object": displayed_ebx,
+                "archive_pointer_role": archive_pointer.get("archive_pointer_role", ""),
+                "archive_name": archive_pointer.get("archive_name", ""),
+                "file_object": file_object,
+                "file_object_word": file_object_word,
                 "file_handle": file_handle,
                 "edi": edi,
                 "esi": esi,
@@ -405,6 +453,8 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     info_proc_log = output / "info_proc.log"
     raw_log = output / "raw.log"
     trace_path = output / "trace.tsv"
+    archives_path = output / "archives.tsv"
+    archive_targets_path = output / "archive_targets.tsv"
     command_file = output / "winedbg_file_io_commands.txt"
     xdotool_log = output / "xdotool.log"
     pilot_key_log = output / "pilot_keys.log"
@@ -415,11 +465,14 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
 
     tracepoints = read_csv(args.tracepoints, delimiter="\t")
     targets = load_targets(args.targets)
+    expected = load_expected(args.expected_ids)
     issues: list[str] = []
     if not tracepoints:
         issues.append("missing_tracepoints")
     if not targets:
         issues.append("missing_targets")
+    if not expected:
+        issues.append("missing_expected_ids")
 
     wine = args.wine or shutil.which("wine") or ""
     winedbg = args.winedbg or shutil.which("winedbg") or ""
@@ -461,11 +514,30 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     winedbg_returncode = ""
     winedbg_timed_out = "0"
     game_process: subprocess.Popen[str] | None = None
+    archive_rows: list[dict[str, str]] = []
+    archive_target_rows: list[dict[str, str]] = []
+    archive_scan_phase = ""
+
+    def refresh_archive_scan(phase: str) -> None:
+        nonlocal archive_rows, archive_target_rows, archive_scan_phase
+        if not linux_pid:
+            issues.append(f"missing_runtime_memory_probe_pid:{phase}")
+            return
+        rows, target_rows, scan_issues = scan_archive_list(linux_pid, expected, args.max_archives)
+        if rows:
+            archive_rows = rows
+            archive_target_rows = target_rows
+            archive_scan_phase = phase
+        issues.extend(f"archive_scan:{phase}:{issue}" for issue in scan_issues)
+        write_csv(archives_path, ARCHIVE_FIELDS, archive_rows, delimiter="\t")
+        write_csv(archive_targets_path, ARCHIVE_TARGET_FIELDS, archive_target_rows, delimiter="\t")
 
     if args.dry_run:
         build_command_file(command_file, "00000000", tracepoints, args.capture_stops)
         raw_log.write_text("", encoding="utf-8")
         info_proc_log.write_text("", encoding="utf-8")
+        write_csv(archives_path, ARCHIVE_FIELDS, archive_rows, delimiter="\t")
+        write_csv(archive_targets_path, ARCHIVE_TARGET_FIELDS, archive_target_rows, delimiter="\t")
         if args.force_level_index is not None or args.force_level_slot is not None:
             planned_writes = []
             if args.force_level_index is not None:
@@ -480,6 +552,8 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
         raw_log.write_text("", encoding="utf-8")
         info_proc_log.write_text("", encoding="utf-8")
         force_level_log.write_text("", encoding="utf-8")
+        write_csv(archives_path, ARCHIVE_FIELDS, archive_rows, delimiter="\t")
+        write_csv(archive_targets_path, ARCHIVE_TARGET_FIELDS, archive_target_rows, delimiter="\t")
     else:
         try:
             with game_stdout.open("w", encoding="utf-8", errors="replace") as stdout_handle, game_stderr.open(
@@ -531,6 +605,8 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
                         issues.extend(force_issues)
                     else:
                         force_level_write_status = "pass"
+
+            refresh_archive_scan("pre_debug")
 
             if not attach_pid:
                 issues.append("missing_lolg95_process")
@@ -613,11 +689,15 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
                         session_status = "started_timeout"
                         debugger.kill()
                         debugger.wait(timeout=8)
+                if args.post_debug_archive_wait:
+                    time.sleep(args.post_debug_archive_wait)
+                refresh_archive_scan("post_debug")
         finally:
             stop_process(game_process)
 
     raw_text = raw_log.read_text(encoding="utf-8", errors="replace") if raw_log.exists() else ""
-    trace_rows, breakpoint_hits = extract_trace_rows(raw_text, tracepoints, targets)
+    archive_pointer_map = build_archive_pointer_map(archive_rows)
+    trace_rows, breakpoint_hits = extract_trace_rows(raw_text, tracepoints, targets, archive_pointer_map)
     write_csv(trace_path, TRACE_FIELDS, trace_rows, delimiter="\t")
     if breakpoint_hits == 0 and not args.dry_run:
         issues.append("no_file_io_breakpoints")
@@ -627,6 +707,8 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     setfilepointer_rows = [row for row in trace_rows if row["kind"] == "SetFilePointer"]
     readfile_rows = [row for row in trace_rows if row["kind"] == "ReadFile"]
     sidecar_path_rows = [row for row in trace_rows if sidecar_path(row["path"])]
+    archive_pointer_mapped_rows = [row for row in trace_rows if row["archive_name"]]
+    sidecar_archive_pointer_rows = [row for row in archive_pointer_mapped_rows if sidecar_path(row["archive_name"])]
     target_offset_seek_rows = [
         row
         for row in trace_rows
@@ -640,6 +722,14 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     target_read_rows = [row for row in trace_rows if row["target_status"] == "sidecar_target_read_after_seek"]
     target_ids_seen = sorted({row["target_file_id"] for row in target_seek_rows if row["target_file_id"]})
     target_read_ids_seen = sorted({row["target_file_id"] for row in target_read_rows if row["target_file_id"]})
+    runtime_sidecar_first = [
+        row["file_id"] for row in archive_target_rows if row.get("first_status") == "sidecar"
+    ]
+    runtime_base_first = [row["file_id"] for row in archive_target_rows if row.get("first_status") == "base"]
+    runtime_missing = [row["file_id"] for row in archive_target_rows if row.get("first_status") == "missing"]
+    runtime_unknown_first = [
+        row["file_id"] for row in archive_target_rows if row.get("first_status") == "unknown_size"
+    ]
 
     if target_read_rows:
         status = "pass"
@@ -647,6 +737,9 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     elif target_seek_rows:
         status = "gap"
         next_step = "extend capture until ReadFile follows the observed target sidecar seek"
+    elif runtime_base_first:
+        status = "gap"
+        next_step = "change sidecar insertion order so duplicate VQA IDs are found before l20_bbI.MIX"
     elif sidecar_path_rows:
         status = "gap"
         next_step = "drive gameplay until a sidecar file seek falls inside one VQA target range"
@@ -702,11 +795,22 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
         "info_proc_log": str(info_proc_log),
         "raw_log": str(raw_log),
         "trace": str(trace_path),
+        "archives": str(archives_path),
+        "archive_targets": str(archive_targets_path),
+        "archive_scan_phase": archive_scan_phase,
         "capture_stops": str(args.capture_stops),
+        "archive_nodes": str(len(archive_rows)),
+        "archive_names": ",".join(row["name"] for row in archive_rows if row.get("name")),
+        "runtime_sidecar_first": ",".join(runtime_sidecar_first),
+        "runtime_base_first": ",".join(runtime_base_first),
+        "runtime_missing": ",".join(runtime_missing),
+        "runtime_unknown_first": ",".join(runtime_unknown_first),
         "breakpoint_hits": str(breakpoint_hits),
         "setfilepointer_hits": str(len(setfilepointer_rows)),
         "readfile_hits": str(len(readfile_rows)),
         "sidecar_path_hits": str(len(sidecar_path_rows)),
+        "archive_pointer_mapped_hits": str(len(archive_pointer_mapped_rows)),
+        "sidecar_archive_pointer_hits": str(len(sidecar_archive_pointer_rows)),
         "target_offset_seek_hits": str(len(target_offset_seek_rows)),
         "unmapped_target_offset_seek_hits": str(len(unmapped_target_offset_seek_rows)),
         "target_seek_hits": str(len(target_seek_rows)),
@@ -726,6 +830,7 @@ def main() -> None:
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--tracepoints", type=Path, default=DEFAULT_TRACEPOINTS)
     parser.add_argument("--targets", type=Path, default=DEFAULT_TARGETS)
+    parser.add_argument("--expected-ids", type=Path, default=DEFAULT_EXPECTED_IDS)
     parser.add_argument("--runtime-executable", type=Path, default=Path("LOLG95.EXE"))
     parser.add_argument("--runtime-arg", action="append", default=[])
     parser.add_argument("--cwd", type=Path, default=Path.cwd())
@@ -737,6 +842,7 @@ def main() -> None:
     parser.add_argument("--startup-wait", type=int, default=35)
     parser.add_argument("--info-timeout", type=int, default=12)
     parser.add_argument("--attach-timeout", type=int, default=120)
+    parser.add_argument("--post-debug-archive-wait", type=int, default=8)
     parser.add_argument("--capture-stops", type=int, default=512)
     parser.add_argument("--xdotool", default="/tmp/xdotool-local/usr/bin/xdotool")
     parser.add_argument("--xdotool-library-path", default="/tmp/xdotool-local/usr/lib/x86_64-linux-gnu")
@@ -752,6 +858,7 @@ def main() -> None:
     parser.add_argument("--pilot-key-delay", type=float, default=8.0)
     parser.add_argument("--force-level-index", type=lambda value: int(value, 0))
     parser.add_argument("--force-level-slot", type=lambda value: int(value, 0))
+    parser.add_argument("--max-archives", type=int, default=128)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 

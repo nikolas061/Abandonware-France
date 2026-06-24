@@ -4588,7 +4588,7 @@ python3 tools/lolg95_sidecar_file_io_trace_contract.py
 python3 tools/lolg95_sidecar_played_read_plan.py
 ```
 
-Current sidecar load-plan result: `pass`. The pack side is valid: 8 deferred
+Current sidecar load-plan result: `gap`. The pack side is valid: 8 deferred
 entries, 1 source archive, 1 sidecar archive, `sidecar_entries=8`,
 `replacement_bytes=593523178`, `largest_sidecar_body_bytes=593523178`, and
 `output_bytes=593523280`. Rerunning without `--report-only` writes
@@ -4596,19 +4596,17 @@ entries, 1 source archive, 1 sidecar archive, `sidecar_entries=8`,
 entries and SHA-256
 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
 `output/vqa_runtime_sidecar_load_plan/` verifies the 8 deferred IDs against the
-base `L20_BBI.MIX` index, the local `L20_BBI_HD.MIX` sidecar index, and the
-runtime archive-list proof. It records 8/8 base entries, 8/8 sidecar entries,
-`runtime_archive_list_status=pass`, `runtime_sidecar_first=8`, and zero
-runtime base/missing/unknown first IDs. `CDCACHE.LST`/`CDCACHE.LS_` still do
-not declare `L20_BBI_HD`, so the accepted path is the compiled-loader hook
-proof from the additive runtime patch; `LOLG95.EXE`/`LOLG.DAT` remain the
-compiled-loader candidates because they contain both `CDCACHE` and `.MIX`
-markers.
-`output/lolg95_sidecar_runtime_stage/` wraps that accepted path into a clean
-non-destructive test stage: all requirements pass, the staged executable is
-`output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE`,
-both sidecar links exist, and the generated Wine script points only at this
-staged path.
+base `L20_BBI.MIX` index and the local `L20_BBI_HD.MIX` sidecar index. The
+runtime evidence is now the fresher file-I/O scan, not the older late
+archive-list scan: it records 8/8 base entries, 8/8 sidecar entries,
+`runtime_evidence_source=file_io_trace_attempt`, `runtime_sidecar_first=0`,
+and `runtime_base_first=8`. `CDCACHE.LST`/`CDCACHE.LS_` still do not declare
+`L20_BBI_HD`, so the next accepted path must change the compiled-loader hook or
+lookup order so the HD sidecar is queried before the base archive.
+`output/lolg95_sidecar_runtime_stage/` wraps the staged executable and sidecar
+links, but it is now intentionally `gap` with `issues=sidecar_load_plan`: the
+generated Wine script must not be treated as a validated visual path until the
+HD sidecar is queried before the base archive.
 `output/vqa_runtime_loader_probe/` resolves the Windows PE side of that next
 step: 4 hook candidates, 7 `CreateFileA` xrefs, the generic `.MIX`
 constructor, startup archive mounts, `CDCACHE.MIX` mount evidence, and no
@@ -4680,30 +4678,29 @@ This validates the lookup tracepoint and shows that the current automated L20
 path has not requested the deferred VQA entries yet; the next runtime proof
 needs deeper gameplay or a targeted entry-request probe.
 `tools/run_lolg95_runtime_archive_list_probe.py` then probes the live archive
-list without rewriting lookup keys. After the same forced L20 additive run, it
-reads `0x6a5b34` through `/proc/<pid>/mem`, records 7 archive-list nodes, and
-passes with all 8 expected IDs in `target_sidecar_first`. `targets.tsv` records
-`first_archive=l20_bbI_HD.MIX`, `first_order=4`, and the expected sidecar sizes
-for `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`, `46e8b785`, `46e8b985`,
-`46eab985`, and `46eeb585`. This proves the runtime list/order required for
-sidecar selection once those IDs are requested.
-`tools/lolg_vqa_runtime_sidecar_load_plan.py` now consumes that archive-list
-proof, so `output/vqa_runtime_sidecar_load_plan/summary.csv` is `pass` with
-8/8 base entries, 8/8 sidecar entries, `runtime_archive_list_status=pass`,
-`runtime_sidecar_first=8`, and zero runtime base/missing/unknown first IDs.
-`tools/lolg95_sidecar_runtime_stage.py` promotes the proven output-only path
-into `output/lolg95_sidecar_runtime_stage/`: `summary.csv` is `pass`,
-`requirements.csv` checks the additive patch, staged EXE, sidecar links,
-sidecar load plan, and archive-list probe, and
-`run_lolg95_sidecar_fullhd_wine.sh` launches the staged Wine test path without
-modifying the DOSBox launcher.
+list without rewriting lookup keys. The older late scan saw
+`first_archive=l20_bbI_HD.MIX`, but it was incomplete because the base archive
+was no longer present for the duplicate IDs. The newer file-I/O run scans while
+`l20_bbI.MIX` and `l20_bbI_HD.MIX` are both present: all 8 expected IDs are
+`base` first, with sidecar matches second in `all_matches`. This proves the
+current additive patch mounts the HD archive, but does not yet make it win the
+duplicate-ID lookup.
+`tools/lolg_vqa_runtime_sidecar_load_plan.py` now consumes that stricter
+evidence, so `output/vqa_runtime_sidecar_load_plan/summary.csv` is `gap` with
+8/8 base entries, 8/8 sidecar entries, `runtime_evidence_source=file_io_trace_attempt`,
+`runtime_sidecar_first=0`, and `runtime_base_first=8`.
+`tools/lolg95_sidecar_runtime_stage.py` records the output-only path under
+`output/lolg95_sidecar_runtime_stage/`, but `summary.csv` is now `gap` with
+`issues=sidecar_load_plan`. The staged EXE and sidecar links exist, but the
+Wine test path stays blocked until the sidecar load order is fixed. It still
+does not modify the DOSBox launcher.
 `tools/lolg95_sidecar_played_read_plan.py` now summarizes the remaining
 played-read evidence gap under `output/lolg95_sidecar_played_read_plan/`.
-Its current `summary.csv` is `gap`: the sidecar order proof is still 8/8, but
-`played_sidecar_hits=0/8`, `played_missing=8`, and the sidecar archive body is
-file-backed in the live archive list (`sidecar_body_pointer=0x00000000`). That
-keeps the Wine/Xvfb "sound but no image proof" issue isolated from the DOSBox
-launcher path.
+Its current `summary.csv` is `gap`: `runtime_sidecar_first=0/8`,
+`runtime_base_first=8/8`, `played_sidecar_hits=0/8`, `played_missing=8`, and
+the sidecar archive body is file-backed in the live archive list
+(`sidecar_body_pointer=0x00000000`). That keeps the Wine/Xvfb "sound but no
+image proof" issue isolated from the DOSBox launcher path.
 `tools/lolg95_sidecar_file_io_trace_contract.py` adds the exact file-I/O
 contract needed for the next runtime proof. It exports 8 target ranges in
 `l20_bbI_HD.MIX`, with expected file offsets from `102` through `593523280`,
@@ -4715,10 +4712,12 @@ sidecar seek/read to one of those ranges.
 runner for that staged Wine/Xvfb proof. It writes
 `output/lolg95_sidecar_file_io_trace_attempt/summary.csv`, `trace.tsv`,
 `raw.log`, `winedbg_file_io_commands.txt`, and `index.html`; the current real
-run is `gap/exited_0` with 64 breakpoint hits, 37 seeks, 27 reads, and 30
-target-range offset seeks that remain unmapped to an archive handle. There are
-still zero proven `l20_bbI_HD.MIX` reads. This isolates the automated "sound
-but no image" test issue from the DOSBox launcher path.
+run is `gap/exited_0` with 64 breakpoint hits, 37 seeks, 27 reads, 30
+target-range offset seeks, and 47 archive-pointer mapped hits. The mapped
+runtime order is still `runtime_base_first=8/8` and
+`sidecar_archive_pointer_hits=0`, so there are still zero proven
+`l20_bbI_HD.MIX` reads. This isolates the automated "sound but no image" test
+issue from the DOSBox launcher path.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

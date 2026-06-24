@@ -27,7 +27,11 @@ SUMMARY_FIELDS = [
     "archive_list_summary",
     "sidecar_links",
     "expected_ids",
+    "runtime_evidence_source",
     "runtime_sidecar_first",
+    "runtime_base_first",
+    "runtime_missing",
+    "runtime_unknown_first",
     "issues",
     "next_step",
 ]
@@ -144,7 +148,11 @@ def build_stage(args: argparse.Namespace) -> dict[str, str]:
     readme = output / "README.txt"
 
     expected_ids = load_plan_summary.get("sidecar_entries", "")
+    runtime_evidence_source = load_plan_summary.get("runtime_evidence_source", "")
     runtime_sidecar_first = load_plan_summary.get("runtime_sidecar_first", "")
+    runtime_base_first = load_plan_summary.get("runtime_base_first", "")
+    runtime_missing = load_plan_summary.get("runtime_missing", "")
+    runtime_unknown_first = load_plan_summary.get("runtime_unknown_first", "")
     requirements = [
         {
             "requirement": "additive_patch_summary",
@@ -182,11 +190,13 @@ def build_stage(args: argparse.Namespace) -> dict[str, str]:
             ),
             "evidence": (
                 f"status={load_plan_summary.get('status', '')};"
+                f"source={runtime_evidence_source};"
                 f"base={load_plan_summary.get('base_entries_verified', '')}/{expected_ids};"
                 f"sidecar={load_plan_summary.get('sidecar_entries_verified', '')}/{expected_ids};"
-                f"runtime_sidecar_first={runtime_sidecar_first}/{expected_ids}"
+                f"runtime_sidecar_first={runtime_sidecar_first}/{expected_ids};"
+                f"runtime_base_first={runtime_base_first}/{expected_ids}"
             ),
-            "next_step": "rerun tools/lolg_vqa_runtime_sidecar_load_plan.py",
+            "next_step": "change sidecar insertion order so L20_BBI_HD.MIX is queried before L20_BBI.MIX",
         },
         {
             "requirement": "runtime_archive_list_probe",
@@ -214,8 +224,10 @@ def build_stage(args: argparse.Namespace) -> dict[str, str]:
         run_script.write_text("# stage requirements are not passing; rerun the report first\n", encoding="utf-8")
 
     lookup_gap_note = (
-        "Direct lookup trace note: output/lolg95_winedbg_mix_lookup_l20_additive_attempt/ "
-        "still has target_hits=0 because the automated route did not request these VQA IDs."
+        "Runtime order note: the stricter file-I/O scan currently has "
+        f"runtime_sidecar_first={runtime_sidecar_first}/{expected_ids} and "
+        f"runtime_base_first={runtime_base_first}/{expected_ids}. "
+        "The direct lookup trace still has target_hits=0 because the automated route did not request these VQA IDs."
     )
     summary = {
         "status": status,
@@ -229,12 +241,16 @@ def build_stage(args: argparse.Namespace) -> dict[str, str]:
         "archive_list_summary": str(args.archive_list_summary),
         "sidecar_links": ";".join(str(path) for path in sidecar_paths),
         "expected_ids": expected_ids,
+        "runtime_evidence_source": runtime_evidence_source,
         "runtime_sidecar_first": runtime_sidecar_first,
+        "runtime_base_first": runtime_base_first,
+        "runtime_missing": runtime_missing,
+        "runtime_unknown_first": runtime_unknown_first,
         "issues": ";".join(issues),
         "next_step": (
             "capture a played VQA read or promote this staged Wine path after manual visual review"
             if status == "pass"
-            else "fix failed stage requirements before using the runtime stage"
+            else "fix the sidecar insertion order before using this stage as a visual validation path"
         ),
     }
     build_readme(readme, summary, requirements, lookup_gap_note)

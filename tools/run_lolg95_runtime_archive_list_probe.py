@@ -224,6 +224,11 @@ def scan_archive_list(pid: str, expected: dict[str, dict[str, str]], max_archive
             first_status = "base"
         else:
             first_status = "unknown_size"
+        row_issues: list[str] = []
+        if matches and not any(match.get("entry_size") == expected_row["source_size"] for match in matches):
+            row_issues.append("base_match_missing")
+        if matches and not any(match.get("entry_size") == expected_row["sidecar_size"] for match in matches):
+            row_issues.append("sidecar_match_missing")
         target_rows.append(
             {
                 "file_id": file_id,
@@ -238,7 +243,7 @@ def scan_archive_list(pid: str, expected: dict[str, dict[str, str]], max_archive
                 "all_matches": "|".join(
                     f"{match['order']}:{match['archive']}:{match['entry_size']}" for match in matches
                 ),
-                "issues": "",
+                "issues": ";".join(row_issues),
             }
         )
     return archive_rows, target_rows, issues
@@ -431,8 +436,15 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     base_first = [row["file_id"] for row in target_rows if row["first_status"] == "base"]
     missing = [row["file_id"] for row in target_rows if row["first_status"] == "missing"]
     unknown = [row["file_id"] for row in target_rows if row["first_status"] == "unknown_size"]
+    incomplete_duplicate = [row["file_id"] for row in target_rows if row.get("issues")]
 
-    if len(sidecar_first) == len(expected_ids):
+    if incomplete_duplicate:
+        issues.append("incomplete_duplicate_order:" + ",".join(incomplete_duplicate))
+
+    if incomplete_duplicate:
+        status = "gap"
+        next_step = "scan while both base and HD archives are loaded so duplicate-ID order is proven"
+    elif len(sidecar_first) == len(expected_ids):
         status = "pass"
         next_step = "wire the proven sidecar-first archive order into the final runtime fallback path"
     elif base_first:

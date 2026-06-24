@@ -2622,6 +2622,8 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
                 sys.executable,
                 "tools/run_lolg95_sidecar_file_io_trace_attempt.py",
                 "--dry-run",
+                "-o",
+                "output/lolg95_sidecar_file_io_trace_attempt_dry_run",
                 "--wineprefix",
                 "output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix",
                 "--cwd",

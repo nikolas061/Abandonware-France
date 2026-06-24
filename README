@@ -166,6 +166,7 @@ python3 tools/lolg95_sidecar_runtime_stage.py
 python3 tools/lolg95_sidecar_file_io_trace_contract.py
 python3 tools/run_lolg95_sidecar_file_io_trace_attempt.py \
   --dry-run \
+  -o output/lolg95_sidecar_file_io_trace_attempt_dry_run \
   --wineprefix output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix \
   --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
@@ -384,27 +385,26 @@ une scene ou un appel cible qui demande ces VQA, puis de confirmer qu'elles
 sortent de `L20_BBI_HD.MIX`.
 `tools/run_lolg95_runtime_archive_list_probe.py` ajoute une preuve runtime sans
 modifier les lookups actifs: apres le meme montage L20, il traverse la liste
-globale d'archives `0x6a5b34` depuis `/proc/<pid>/mem`. Le run
-`output/lolg95_runtime_archive_list_l20_sidecar_probe/` passe avec
-`archive_nodes=7`, `force_level_write_status=pass` et les 8 IDs en
-`target_sidecar_first`; `targets.tsv` montre `first_archive=l20_bbI_HD.MIX`
-et les tailles sidecar attendues pour les 8 hashes. Le sidecar est donc bien
-premier dans la liste runtime pour ces IDs; il reste a raccorder cette preuve
-au fallback final ou a un appel VQA joue.
-`tools/lolg_vqa_runtime_sidecar_load_plan.py` consomme maintenant cette preuve:
-`output/vqa_runtime_sidecar_load_plan/summary.csv` passe avec 8/8 entrees base,
-8/8 entrees sidecar, `runtime_archive_list_status=pass`, `runtime_sidecar_first=8`
-et aucun ID `runtime_base_first`/`runtime_missing`/`runtime_unknown_first`.
+globale d'archives `0x6a5b34` depuis `/proc/<pid>/mem`. L'ancien scan tardif
+voyait `l20_bbI_HD.MIX` seul pour les 8 IDs, mais il ne prouvait pas l'arbitrage
+quand `l20_bbI.MIX` est encore charge. La trace I/O recente corrige ce point:
+`output/lolg95_sidecar_file_io_trace_attempt/archive_targets.tsv` voit
+`l20_bbI.MIX` et `l20_bbI_HD.MIX` ensemble, et les 8 IDs sont `base` en premier.
+`tools/lolg_vqa_runtime_sidecar_load_plan.py` consomme maintenant cette preuve
+plus stricte: `output/vqa_runtime_sidecar_load_plan/summary.csv` est `gap` avec
+8/8 entrees base, 8/8 entrees sidecar, `runtime_evidence_source=file_io_trace_attempt`,
+`runtime_sidecar_first=0` et `runtime_base_first=8`.
 `tools/lolg95_sidecar_runtime_stage.py` fige ce chemin dans un stage non
-destructif: `output/lolg95_sidecar_runtime_stage/summary.csv` passe, ecrit
-`requirements.csv`, `README.txt`, et le script de test Wine
-`run_lolg95_sidecar_fullhd_wine.sh` pointant vers le stage additif prouve.
+destructif, mais son `summary.csv` est maintenant `gap` avec
+`issues=sidecar_load_plan`: le script Wine est volontairement bloque tant que
+le sidecar HD n'est pas insere avant `l20_bbI.MIX`.
 `tools/lolg95_sidecar_played_read_plan.py` formalise le trou restant dans le
 banc Wine/Xvfb: `output/lolg95_sidecar_played_read_plan/summary.csv` reste
-`gap` avec `played_sidecar_hits=0/8`, `played_missing=8`, et
-`file_backed_targets=8/8` parce que l'archive sidecar a `body_pointer=0x00000000`.
+`gap` avec `runtime_sidecar_first=0/8`, `runtime_base_first=8/8`,
+`played_sidecar_hits=0/8`, `played_missing=8`, et `file_backed_targets=8/8`
+parce que l'archive sidecar a `body_pointer=0x00000000`.
 Ce n'est pas un changement du lanceur; c'est le constat que le test sonore
-actuel n'a pas encore force la lecture image des 8 VQA HD.
+actuel monte le sidecar apres la base et ne lit pas encore l'image HD.
 `tools/lolg95_sidecar_file_io_trace_contract.py` prepare le prochain verrou
 technique: `output/lolg95_sidecar_file_io_trace_contract/summary.csv` garde le
 statut runtime `gap`, mais son `contract_status=pass` avec 8 plages d'offset
@@ -415,9 +415,10 @@ produit `output/lolg95_sidecar_file_io_trace_attempt/summary.csv`,
 `trace.tsv`, `raw.log`, `winedbg_file_io_commands.txt` et `index.html`. Le
 run Wine/Xvfb actuel s'attache correctement (`session_status=exited_0`) et
 capture 64 hits (`37` seek, `27` read). Il observe `30` seeks dont l'offset
-tombe dans les plages des VQA cibles, mais les `30` restent
-`unmapped_target_offset_seek_hits`: le chemin/handle d'archive n'est pas encore
-decode comme `l20_bbI_HD.MIX`, donc la preuve image runtime reste `gap`. Cela
+tombe dans les plages des VQA cibles. Le mapping handle est maintenant decode:
+`archive_pointer_mapped_hits=47`, mais `sidecar_archive_pointer_hits=0` et
+`runtime_base_first=8/8`; le chemin observe reste non-HD, donc la preuve image
+runtime reste `gap`. Cela
 reste separe du lanceur DOSBox.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
