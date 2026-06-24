@@ -97,6 +97,10 @@ def replacement_size_value(row: dict[str, str]) -> int:
     return int_value(row, "replacement_size") or int_value(row, "original_payload_bytes")
 
 
+def row_key(row: dict[str, str]) -> tuple[str, str, str]:
+    return (row.get("archive", ""), row.get("index", ""), row.get("file_id", "").lower())
+
+
 def ratio_text(numerator: int, denominator: int) -> str:
     if denominator <= 0:
         return "0.000000"
@@ -155,8 +159,7 @@ def select_rows(args: argparse.Namespace) -> tuple[int, list[dict[str, str]]]:
         for row in read_csv(entries_path):
             if not row.get("replacement_path") or not Path(row.get("replacement_path", "")).is_file():
                 continue
-            key = (row.get("archive", ""), row.get("index", ""), row.get("file_id", "").lower())
-            rows_by_key.setdefault(key, row)
+            rows_by_key.setdefault(row_key(row), row)
     rows = list(rows_by_key.values())
     if args.min_replacement_size:
         rows = [row for row in rows if replacement_size_value(row) >= args.min_replacement_size]
@@ -173,6 +176,20 @@ def select_rows(args: argparse.Namespace) -> tuple[int, list[dict[str, str]]]:
     if args.entry_limit:
         rows = rows[: args.entry_limit]
     return total, rows
+
+
+def reusable_report_rows(
+    output: Path,
+) -> tuple[dict[tuple[str, str, str], dict[str, str]], dict[tuple[str, str, str], list[dict[str, str]]]]:
+    entry_rows: dict[tuple[str, str, str], dict[str, str]] = {}
+    chunk_rows: dict[tuple[str, str, str], list[dict[str, str]]] = {}
+    for row in read_csv(output / "entries.csv"):
+        compact_path = row.get("compact_path", "")
+        if compact_path and Path(compact_path).is_file() and not row.get("issues"):
+            entry_rows[row_key(row)] = row
+    for row in read_csv(output / "chunks.csv"):
+        chunk_rows.setdefault(row_key(row), []).append(row)
+    return entry_rows, chunk_rows
 
 
 def audit_existing_compact_payload(
@@ -434,9 +451,19 @@ def compact_payload(
 
 def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]]]:
     available, selected = select_rows(args)
+    previous_entries: dict[tuple[str, str, str], dict[str, str]] = {}
+    previous_chunks: dict[tuple[str, str, str], list[dict[str, str]]] = {}
+    if args.reuse_existing and args.reuse_report_metrics:
+        previous_entries, previous_chunks = reusable_report_rows(args.output)
     entry_rows: list[dict[str, str]] = []
     chunk_rows: list[dict[str, str]] = []
     for row in selected:
+        key = row_key(row)
+        previous_entry = previous_entries.get(key)
+        if previous_entry and int_value(previous_entry, "original_payload_bytes") == replacement_size_value(row):
+            entry_rows.append(previous_entry)
+            chunk_rows.extend(previous_chunks.get(key, []))
+            continue
         entry_row, rows = compact_payload(row, args.compact_root, args.search_depth, args.reuse_existing)
         entry_rows.append(entry_row)
         chunk_rows.extend(rows)
@@ -551,6 +578,11 @@ def main() -> None:
         "--reuse-existing",
         action="store_true",
         help="Validate and report existing compact payloads instead of recompressing them.",
+    )
+    parser.add_argument(
+        "--reuse-report-metrics",
+        action="store_true",
+        help="Reuse clean rows already present in the output report when their compact payload still exists.",
     )
     parser.add_argument("--fail-on-gaps", action="store_true")
     args = parser.parse_args()
