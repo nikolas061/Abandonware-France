@@ -4711,6 +4711,14 @@ and debugger breakpoints for `SetFilePointer` at `0x004eb7eb` plus `ReadFile`
 at `0x004eb390`. The contract is ready (`contract_status=pass`) while the
 runtime evidence intentionally stays `gap` until a staged Wine run matches a
 sidecar seek/read to one of those ranges.
+`tools/run_lolg95_sidecar_file_io_trace_attempt.py` is the corresponding
+runner for that staged Wine/Xvfb proof. It writes
+`output/lolg95_sidecar_file_io_trace_attempt/summary.csv`, `trace.tsv`,
+`raw.log`, `winedbg_file_io_commands.txt`, and `index.html`; the current real
+run is `gap/exited_0` with 64 breakpoint hits, 37 seeks, 27 reads, and 30
+target-range offset seeks that remain unmapped to an archive handle. There are
+still zero proven `l20_bbI_HD.MIX` reads. This isolates the automated "sound
+but no image" test issue from the DOSBox launcher path.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

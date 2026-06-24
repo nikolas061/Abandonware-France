@@ -18,6 +18,7 @@ DEFAULT_RUNTIME_TARGETS = Path("output/lolg95_runtime_archive_list_l20_sidecar_p
 DEFAULT_LOOKUP_SUMMARY = Path("output/lolg95_winedbg_mix_lookup_l20_additive_attempt/summary.csv")
 DEFAULT_STAGE_SUMMARY = Path("output/lolg95_sidecar_runtime_stage/summary.csv")
 DEFAULT_FILE_IO_CONTRACT_SUMMARY = Path("output/lolg95_sidecar_file_io_trace_contract/summary.csv")
+DEFAULT_FILE_IO_TRACE_ATTEMPT_SUMMARY = Path("output/lolg95_sidecar_file_io_trace_attempt/summary.csv")
 
 SUMMARY_FIELDS = [
     "status",
@@ -34,6 +35,15 @@ SUMMARY_FIELDS = [
     "file_io_tracepoints",
     "file_io_offset_min",
     "file_io_offset_max",
+    "file_io_trace_attempt_status",
+    "file_io_trace_attempt_session",
+    "file_io_sidecar_path_hits",
+    "file_io_target_offset_seek_hits",
+    "file_io_unmapped_target_offset_seek_hits",
+    "file_io_target_seek_hits",
+    "file_io_target_read_hits",
+    "file_io_target_read_ids_seen",
+    "payload_read_evidence_targets",
     "sidecar_archive",
     "sidecar_body_pointer",
     "issues",
@@ -61,6 +71,8 @@ TARGET_FIELDS = [
     "load_order_status",
     "played_lookup_status",
     "payload_residency_status",
+    "file_io_seek_status",
+    "file_io_read_status",
     "firstframe_dir",
     "issues",
     "next_step",
@@ -119,6 +131,7 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
     lookup_summary = first_row(args.lookup_summary)
     stage_summary = first_row(args.stage_summary)
     file_io_summary = first_row(args.file_io_contract_summary)
+    file_io_attempt_summary = first_row(args.file_io_trace_attempt_summary)
 
     sidecar_archive = next((row for row in archive_rows if row.get("name", "").lower().endswith("_hd.mix")), {})
     sidecar_body_pointer = sidecar_archive.get("body_pointer", "")
@@ -128,6 +141,9 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
     all_lookup_hit_ids = csv_ids(lookup_summary.get("target_ids_seen", ""))
     target_hit_count = count_int(lookup_summary.get("target_hits", ""))
     sidecar_hit_count = count_int(lookup_summary.get("target_sidecar_hits", ""))
+    file_io_seek_ids = csv_ids(file_io_attempt_summary.get("target_ids_seen", ""))
+    file_io_read_ids = csv_ids(file_io_attempt_summary.get("target_read_ids_seen", ""))
+    file_io_target_read_hits = count_int(file_io_attempt_summary.get("target_read_hits", ""))
 
     target_rows = []
     for load_row in load_rows:
@@ -150,10 +166,15 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
             played_lookup_status = "missing"
             issues.append("played_lookup_missing")
 
+        file_io_seek_status = "target_seek" if file_id in file_io_seek_ids else "missing"
+        file_io_read_status = "target_read" if file_id in file_io_read_ids else "missing"
+
         if payloads_resident:
             payload_residency_status = "resident"
+        elif file_io_read_status == "target_read":
+            payload_residency_status = "file_read_observed"
         else:
-            payload_residency_status = "file_backed_not_resident"
+            payload_residency_status = "file_backed_not_observed"
             issues.append("payload_read_not_observed")
 
         firstframe_dir = Path(
@@ -179,11 +200,13 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
                 "load_order_status": load_row.get("load_order_status", ""),
                 "played_lookup_status": played_lookup_status,
                 "payload_residency_status": payload_residency_status,
+                "file_io_seek_status": file_io_seek_status,
+                "file_io_read_status": file_io_read_status,
                 "firstframe_dir": relative_existing(firstframe_dir),
                 "issues": ";".join(issues),
                 "next_step": (
-                    "capture a gameplay/requested VQA read for this hash"
-                    if played_lookup_status == "missing"
+                    "capture a gameplay/requested VQA read for this hash with the file-I/O trace runner"
+                    if played_lookup_status == "missing" or file_io_read_status == "missing"
                     else "verify the selected archive and payload bytes"
                 ),
             }
@@ -192,18 +215,23 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
     load_order_pass = sum(1 for row in target_rows if row["load_order_status"] == "pass")
     runtime_sidecar_first = sum(1 for row in target_rows if row["runtime_first_archive"].lower().endswith("_hd.mix"))
     file_backed_targets = sum(
-        1 for row in target_rows if row["payload_residency_status"] == "file_backed_not_resident"
+        1 for row in target_rows if row["payload_residency_status"].startswith("file_")
     )
     resident_payload_targets = sum(1 for row in target_rows if row["payload_residency_status"] == "resident")
+    file_read_observed_targets = sum(
+        1 for row in target_rows if row["payload_residency_status"] == "file_read_observed"
+    )
+    payload_read_evidence_targets = resident_payload_targets + file_read_observed_targets
     played_missing = sum(1 for row in target_rows if row["played_lookup_status"] == "missing")
+    played_or_read_hits = max(sidecar_hit_count, file_io_target_read_hits)
 
     summary = {
         "status": "pass"
         if target_rows
         and load_order_pass == len(target_rows)
         and runtime_sidecar_first == len(target_rows)
-        and sidecar_hit_count == len(target_rows)
-        and resident_payload_targets == len(target_rows)
+        and played_or_read_hits == len(target_rows)
+        and payload_read_evidence_targets == len(target_rows)
         else "gap",
         "targets": str(len(target_rows)),
         "load_order_pass": str(load_order_pass),
@@ -218,17 +246,31 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
         "file_io_tracepoints": file_io_summary.get("tracepoints", ""),
         "file_io_offset_min": file_io_summary.get("expected_offset_min", ""),
         "file_io_offset_max": file_io_summary.get("expected_offset_max", ""),
+        "file_io_trace_attempt_status": file_io_attempt_summary.get("status", ""),
+        "file_io_trace_attempt_session": file_io_attempt_summary.get("session_status", ""),
+        "file_io_sidecar_path_hits": file_io_attempt_summary.get("sidecar_path_hits", ""),
+        "file_io_target_offset_seek_hits": file_io_attempt_summary.get("target_offset_seek_hits", ""),
+        "file_io_unmapped_target_offset_seek_hits": file_io_attempt_summary.get(
+            "unmapped_target_offset_seek_hits", ""
+        ),
+        "file_io_target_seek_hits": file_io_attempt_summary.get("target_seek_hits", ""),
+        "file_io_target_read_hits": file_io_attempt_summary.get("target_read_hits", ""),
+        "file_io_target_read_ids_seen": file_io_attempt_summary.get("target_read_ids_seen", ""),
+        "payload_read_evidence_targets": str(payload_read_evidence_targets),
         "sidecar_archive": sidecar_archive.get("name", ""),
         "sidecar_body_pointer": sidecar_body_pointer,
         "issues": ";".join(
             issue
             for issue, present in [
                 ("played_lookup_missing", played_missing > 0),
-                ("payload_read_not_observed", file_backed_targets > 0),
+                ("payload_read_not_observed", payload_read_evidence_targets < len(target_rows)),
+                ("file_io_trace_attempt_missing", not file_io_attempt_summary),
             ]
             if present
         ),
-        "next_step": "drive a gameplay route or add a targeted runtime call probe that requests one target VQA ID",
+        "next_step": (
+            "run tools/run_lolg95_sidecar_file_io_trace_attempt.py under xvfb-run and drive/request one target VQA"
+        ),
     }
     return target_rows, summary
 
@@ -269,6 +311,23 @@ def build_requirements(summary: dict[str, str], target_rows: list[dict[str, str]
             "next_step": "rerun tools/lolg95_sidecar_file_io_trace_contract.py",
         },
         {
+            "requirement": "file_io_trace_attempt",
+            "status": pass_if(
+                summary.get("file_io_trace_attempt_status") == "pass"
+                and count_int(summary.get("file_io_target_read_hits", "")) > 0
+            ),
+            "evidence": (
+                f"attempt_status={summary.get('file_io_trace_attempt_status', '')};"
+                f"session={summary.get('file_io_trace_attempt_session', '')};"
+                f"sidecar_path_hits={summary.get('file_io_sidecar_path_hits', '')};"
+                f"target_offset_seek_hits={summary.get('file_io_target_offset_seek_hits', '')};"
+                f"unmapped_target_offset_seek_hits={summary.get('file_io_unmapped_target_offset_seek_hits', '')};"
+                f"target_seek_hits={summary.get('file_io_target_seek_hits', '')};"
+                f"target_read_hits={summary.get('file_io_target_read_hits', '')}"
+            ),
+            "next_step": "run tools/run_lolg95_sidecar_file_io_trace_attempt.py under xvfb-run",
+        },
+        {
             "requirement": "target_metadata",
             "status": pass_if(
                 target_count > 0
@@ -280,25 +339,32 @@ def build_requirements(summary: dict[str, str], target_rows: list[dict[str, str]
         {
             "requirement": "played_lookup",
             "status": pass_if(
-                target_count > 0 and count_int(summary.get("played_sidecar_hits", "")) == target_count
+                target_count > 0
+                and (
+                    count_int(summary.get("played_sidecar_hits", "")) == target_count
+                    or count_int(summary.get("file_io_target_read_hits", "")) == target_count
+                )
             ),
             "evidence": (
                 f"played_lookup_hits={summary.get('played_lookup_hits', '')};"
                 f"played_sidecar_hits={summary.get('played_sidecar_hits', '')}/{target_count};"
-                f"played_missing={summary.get('played_missing', '')}"
+                f"played_missing={summary.get('played_missing', '')};"
+                f"file_io_target_read_hits={summary.get('file_io_target_read_hits', '')}/{target_count}"
             ),
-            "next_step": "capture gameplay or targeted call evidence for the 8 deferred VQA hashes",
+            "next_step": "capture gameplay or targeted file-I/O evidence for the 8 deferred VQA hashes",
         },
         {
             "requirement": "payload_read_evidence",
             "status": pass_if(
-                target_count > 0 and count_int(summary.get("resident_payload_targets", "")) == target_count
+                target_count > 0 and count_int(summary.get("payload_read_evidence_targets", "")) == target_count
             ),
             "evidence": (
                 f"sidecar_body_pointer={summary.get('sidecar_body_pointer', '')};"
-                f"file_backed_targets={summary.get('file_backed_targets', '')}/{target_count}"
+                f"file_backed_targets={summary.get('file_backed_targets', '')}/{target_count};"
+                f"payload_read_evidence_targets={summary.get('payload_read_evidence_targets', '')}/{target_count};"
+                f"file_io_target_read_ids_seen={summary.get('file_io_target_read_ids_seen', '')}"
             ),
-            "next_step": "trace file reads or decoded VQA playback after a target hash is requested",
+            "next_step": "trace file reads after a target hash is requested",
         },
     ]
 
@@ -327,6 +393,8 @@ def render_html(path: Path, summary: dict[str, str], requirements: list[dict[str
         f"<td>{esc(row['sidecar_size'])}</td>"
         f"<td class=\"status-{esc(row['played_lookup_status'])}\">{esc(row['played_lookup_status'])}</td>"
         f"<td>{esc(row['payload_residency_status'])}</td>"
+        f"<td>{esc(row['file_io_seek_status'])}</td>"
+        f"<td>{esc(row['file_io_read_status'])}</td>"
         f"<td>{esc(row['issues'])}</td>"
         "</tr>"
         for row in targets
@@ -347,7 +415,7 @@ def render_html(path: Path, summary: dict[str, str], requirements: list[dict[str
     .metric {{ background: white; border: 1px solid #d9d9d2; padding: 10px; }}
     .metric strong {{ display: block; font-size: 0.86rem; color: #4b5258; }}
     .status-pass {{ color: #176c37; font-weight: 700; }}
-    .status-gap, .status-missing, .status-file_backed_not_resident {{ color: #9a4d00; font-weight: 700; }}
+    .status-gap, .status-missing, .status-file_backed_not_observed {{ color: #9a4d00; font-weight: 700; }}
     code {{ overflow-wrap: anywhere; }}
   </style>
 </head>
@@ -358,6 +426,7 @@ def render_html(path: Path, summary: dict[str, str], requirements: list[dict[str
     <div class="metric"><strong>Targets</strong>{esc(summary['targets'])}</div>
     <div class="metric"><strong>Runtime sidecar first</strong>{esc(summary['runtime_sidecar_first'])}</div>
     <div class="metric"><strong>Played sidecar hits</strong>{esc(summary['played_sidecar_hits'])}</div>
+    <div class="metric"><strong>File-I/O target reads</strong>{esc(summary['file_io_target_read_hits'])}</div>
     <div class="metric"><strong>File-backed targets</strong>{esc(summary['file_backed_targets'])}</div>
     <div class="metric"><strong>Sidecar body pointer</strong><code>{esc(summary['sidecar_body_pointer'])}</code></div>
   </section>
@@ -372,7 +441,7 @@ def render_html(path: Path, summary: dict[str, str], requirements: list[dict[str
     <h2>Targets</h2>
     <table>
       <thead>
-        <tr><th>Index</th><th>Hash</th><th>Source geom</th><th>Frames</th><th>Runtime archive</th><th>Offset</th><th>Sidecar size</th><th>Lookup</th><th>Payload</th><th>Issues</th></tr>
+        <tr><th>Index</th><th>Hash</th><th>Source geom</th><th>Frames</th><th>Runtime archive</th><th>Offset</th><th>Sidecar size</th><th>Lookup</th><th>Payload</th><th>I/O seek</th><th>I/O read</th><th>Issues</th></tr>
       </thead>
       <tbody>{target_rows}</tbody>
     </table>
@@ -409,6 +478,7 @@ def main() -> None:
     parser.add_argument("--lookup-summary", type=Path, default=DEFAULT_LOOKUP_SUMMARY)
     parser.add_argument("--stage-summary", type=Path, default=DEFAULT_STAGE_SUMMARY)
     parser.add_argument("--file-io-contract-summary", type=Path, default=DEFAULT_FILE_IO_CONTRACT_SUMMARY)
+    parser.add_argument("--file-io-trace-attempt-summary", type=Path, default=DEFAULT_FILE_IO_TRACE_ATTEMPT_SUMMARY)
     args = parser.parse_args()
 
     summary = build_report(args)

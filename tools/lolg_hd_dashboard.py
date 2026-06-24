@@ -295,6 +295,22 @@ DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINEDBG = Path(
 DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINDBG = Path(
     "output/lolg95_sidecar_file_io_trace_contract/windbg_breakpoints.cmd"
 )
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT = Path("output/lolg95_sidecar_file_io_trace_attempt/index.html")
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_SUMMARY = Path(
+    "output/lolg95_sidecar_file_io_trace_attempt/summary.csv"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_TRACE = Path(
+    "output/lolg95_sidecar_file_io_trace_attempt/trace.tsv"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_RAW = Path(
+    "output/lolg95_sidecar_file_io_trace_attempt/raw.log"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_COMMANDS = Path(
+    "output/lolg95_sidecar_file_io_trace_attempt/winedbg_file_io_commands.txt"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_FORCE_LOG = Path(
+    "output/lolg95_sidecar_file_io_trace_attempt/force_level_write.log"
+)
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1241,6 +1257,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     lolg95_sidecar_runtime_stage_summary = first_row(DEFAULT_LOLG95_SIDECAR_RUNTIME_STAGE_SUMMARY)
     lolg95_sidecar_played_read_summary = first_row(DEFAULT_LOLG95_SIDECAR_PLAYED_READ_PLAN_SUMMARY)
     lolg95_sidecar_file_io_summary = first_row(DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_SUMMARY)
+    lolg95_sidecar_file_io_attempt_summary = first_row(DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1350,6 +1367,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"payload file-backed {lolg95_sidecar_played_read_summary.get('file_backed_targets', '')}, "
                 f"io contract {lolg95_sidecar_file_io_summary.get('contract_status', '')}/"
                 f"{lolg95_sidecar_file_io_summary.get('targets', '')} targets, "
+                f"io attempt {lolg95_sidecar_file_io_attempt_summary.get('status', '')}/"
+                f"{lolg95_sidecar_file_io_attempt_summary.get('target_read_hits', '')} reads/"
+                f"{lolg95_sidecar_file_io_attempt_summary.get('target_seek_hits', '')} seeks/"
+                f"{lolg95_sidecar_file_io_attempt_summary.get('target_offset_seek_hits', '')} offsets, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1596,6 +1617,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Commandes contrat I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_COMMANDS),
         ("Commandes winedbg I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINEDBG),
         ("Breakpoints WinDbg I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINDBG),
+        ("Tentative I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT),
+        ("Synthese tentative I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_SUMMARY),
+        ("Trace tentative I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_TRACE),
+        ("Log brut tentative I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_RAW),
+        ("Commandes winedbg tentative I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_COMMANDS),
+        ("Ecriture memoire tentative I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_ATTEMPT_FORCE_LOG),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),

@@ -164,6 +164,21 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --force-level-index 20 --force-level-slot 4
 python3 tools/lolg95_sidecar_runtime_stage.py
 python3 tools/lolg95_sidecar_file_io_trace_contract.py
+python3 tools/run_lolg95_sidecar_file_io_trace_attempt.py \
+  --dry-run \
+  --wineprefix output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix \
+  --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
+  --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
+  --force-level-index 20 --force-level-slot 4 \
+  --capture-stops 256
+xvfb-run -a -s '-screen 0 1280x1024x24' \
+  python3 tools/run_lolg95_sidecar_file_io_trace_attempt.py \
+  --wineprefix output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix \
+  --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
+  --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
+  --force-level-index 20 --force-level-slot 4 \
+  --pilot-key Escape --pilot-key Return --pilot-key Return \
+  --capture-stops 64 --attach-timeout 90
 python3 tools/lolg95_sidecar_played_read_plan.py
 ```
 
@@ -395,6 +410,15 @@ technique: `output/lolg95_sidecar_file_io_trace_contract/summary.csv` garde le
 statut runtime `gap`, mais son `contract_status=pass` avec 8 plages d'offset
 exactes dans `l20_bbI_HD.MIX` (`102..593523280`) et les breakpoints
 `SetFilePointer=0x004eb7eb` / `ReadFile=0x004eb390`.
+`tools/run_lolg95_sidecar_file_io_trace_attempt.py` consomme ce contrat et
+produit `output/lolg95_sidecar_file_io_trace_attempt/summary.csv`,
+`trace.tsv`, `raw.log`, `winedbg_file_io_commands.txt` et `index.html`. Le
+run Wine/Xvfb actuel s'attache correctement (`session_status=exited_0`) et
+capture 64 hits (`37` seek, `27` read). Il observe `30` seeks dont l'offset
+tombe dans les plages des VQA cibles, mais les `30` restent
+`unmapped_target_offset_seek_hits`: le chemin/handle d'archive n'est pas encore
+decode comme `l20_bbI_HD.MIX`, donc la preuve image runtime reste `gap`. Cela
+reste separe du lanceur DOSBox.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

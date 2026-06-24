@@ -335,6 +335,11 @@ output/lolg95_sidecar_file_io_trace_contract/tracepoints.tsv
 output/lolg95_sidecar_file_io_trace_contract/commands.csv
 output/lolg95_sidecar_file_io_trace_contract/winedbg_commands.txt
 output/lolg95_sidecar_file_io_trace_contract/windbg_breakpoints.cmd
+output/lolg95_sidecar_file_io_trace_attempt/index.html
+output/lolg95_sidecar_file_io_trace_attempt/summary.csv
+output/lolg95_sidecar_file_io_trace_attempt/trace.tsv
+output/lolg95_sidecar_file_io_trace_attempt/winedbg_file_io_commands.txt
+output/lolg95_sidecar_file_io_trace_attempt/raw.log
 output/lolg95_winedbg_loader_trace_attempt/trace.tsv
 output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
 output/lolg95_winedbg_loader_trace_attempt/raw.log
@@ -5343,6 +5348,18 @@ contient ces 8 breakpoints. Le runner correspondant est
 assets) sans atteindre `L20_BBI.MIX`, la prochaine passe doit piloter ou
 automatiser le runtime plus loin que l'ecran/menu courant, puis verifier que
 `L20_BBI.MIX` est ouvert avant de patcher le fallback `L20_BBI_HD.MIX`.
+Le runner plus cible `tools/run_lolg95_sidecar_file_io_trace_attempt.py`
+consomme maintenant le contrat `SetFilePointer`/`ReadFile` L20 et produit
+`output/lolg95_sidecar_file_io_trace_attempt/summary.csv`, `trace.tsv`,
+`raw.log`, `winedbg_file_io_commands.txt` et `index.html`. Le run reel court
+Wine/Xvfb s'attache maintenant au vrai process (`session_status=exited_0`,
+`attach_pid_source=runtime_executable`) et capture 64 hits: 37
+`SetFilePointer`, 27 `ReadFile`, 30 seeks dont l'offset tombe dans les plages
+des VQA cibles. Ces 30 signaux restent `unmapped_target_offset_seek_hits`,
+donc aucune lecture n'est encore comptee comme `l20_bbI_HD.MIX`. Le prochain
+verrou est le mapping handle/chemin pendant ces seeks ou un pilotage qui force
+une VQA cible avec chemin sidecar decode. Ce point concerne seulement le banc
+de test automatise, pas le lanceur DOSBox.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.
