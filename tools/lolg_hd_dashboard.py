@@ -123,6 +123,12 @@ DEFAULT_VQA_RUNTIME_SIDECAR_PACK_SUMMARY = Path("output/vqa_runtime_sidecar_pack
 DEFAULT_VQA_RUNTIME_SIDECAR_PACK_REQUIREMENTS = Path("output/vqa_runtime_sidecar_pack/requirements.csv")
 DEFAULT_VQA_RUNTIME_SIDECAR_PACK_ARCHIVES = Path("output/vqa_runtime_sidecar_pack/archives.csv")
 DEFAULT_VQA_RUNTIME_SIDECAR_PACK_ENTRIES = Path("output/vqa_runtime_sidecar_pack/entries.csv")
+DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN = Path("output/vqa_runtime_sidecar_load_plan/index.html")
+DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SUMMARY = Path("output/vqa_runtime_sidecar_load_plan/summary.csv")
+DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_REQUIREMENTS = Path("output/vqa_runtime_sidecar_load_plan/requirements.csv")
+DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ARCHIVES = Path("output/vqa_runtime_sidecar_load_plan/archives.csv")
+DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ENTRIES = Path("output/vqa_runtime_sidecar_load_plan/entries.csv")
+DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SOURCES = Path("output/vqa_runtime_sidecar_load_plan/sources.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1049,6 +1055,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     )
     vqa_oversize_lcw_report_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_SUMMARY)
     vqa_sidecar_summary = first_row(DEFAULT_VQA_RUNTIME_SIDECAR_PACK_SUMMARY)
+    vqa_sidecar_load_summary = first_row(DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1125,6 +1132,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{vqa_oversize_lcw_report_summary.get('required_reduction_bytes', '')} bytes, "
                 f"sidecar {vqa_sidecar_summary.get('sidecar_entries', '')}/"
                 f"{vqa_sidecar_summary.get('replacement_bytes', '')} bytes, "
+                f"load {vqa_sidecar_load_summary.get('base_entries_verified', '')}/"
+                f"{vqa_sidecar_load_summary.get('sidecar_entries_verified', '')} verif, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1288,6 +1297,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Requirements sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_PACK_REQUIREMENTS),
         ("Archives sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_PACK_ARCHIVES),
         ("Entrees sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_PACK_ENTRIES),
+        ("Plan chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN),
+        ("Synthese chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SUMMARY),
+        ("Requirements chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_REQUIREMENTS),
+        ("Archives chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ARCHIVES),
+        ("Entrees chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ENTRIES),
+        ("Sources chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SOURCES),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),

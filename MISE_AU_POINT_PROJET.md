@@ -173,7 +173,10 @@ Runtime gaps: 2
   Un plan sidecar buildable existe maintenant pour ces 8 entrees:
   `L20_BBI_HD.MIX`, 593523178 octets de body, 593523280 octets de fichier,
   SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
-  Le verrou restant devient le hook ou l'ordre de chargement runtime du sidecar.
+  `output/vqa_runtime_sidecar_load_plan/` verifie les 8 IDs dans `L20_BBI.MIX`
+  et dans le sidecar local. `CDCACHE.LST`/`CDCACHE.LS_` ne declarent pas
+  `L20_BBI_HD.MIX`; le verrou restant devient le hook ou l'ordre de chargement
+  runtime du sidecar.
   Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
   LCW literal et valide 20/20 frames au redecode.
 - La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
@@ -284,6 +287,12 @@ output/vqa_runtime_sidecar_pack/summary.csv
 output/vqa_runtime_sidecar_pack/requirements.csv
 output/vqa_runtime_sidecar_pack/archives.csv
 output/vqa_runtime_sidecar_pack/entries.csv
+output/vqa_runtime_sidecar_load_plan/index.html
+output/vqa_runtime_sidecar_load_plan/summary.csv
+output/vqa_runtime_sidecar_load_plan/requirements.csv
+output/vqa_runtime_sidecar_load_plan/archives.csv
+output/vqa_runtime_sidecar_load_plan/entries.csv
+output/vqa_runtime_sidecar_load_plan/sources.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -362,7 +371,12 @@ sidecar buildable: `sidecar_entries=8`, `sidecar_archives=1`,
 `output_bytes=593523280`. Le fichier local
 `mod_mix_vqa_fullhd_sidecar/L20_BBI_HD.MIX` a ete ecrit avec 8 entrees et le
 SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
-Le requirement `runtime_loader_strategy` reste `gap`: il faut encore charger ce
+`output/vqa_runtime_sidecar_load_plan/` valide le mapping de chargement statique:
+8/8 entrees retrouvent leur ID et leur taille dans `L20_BBI.MIX`, et 8/8 dans
+`L20_BBI_HD.MIX`. Le rapport note aussi que `CDCACHE.LST` et `CDCACHE.LS_` ne
+contiennent ni `L20_BBI.MIX` ni `L20_BBI_HD.MIX`; le point utile est donc plutot
+le loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui contiennent `CDCACHE` et `.MIX`).
+Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
 ## Textures .tex
@@ -5139,10 +5153,13 @@ core_project_file: 18 files
 ## Prochaine passe technique
 
 Priorite 1: prouver le chargement runtime de `L20_BBI_HD.MIX`. Les 8 payloads
-restants tiennent maintenant dans un sidecar MIX valide; il faut encore un hook
-ou un ordre de chargement qui fasse consulter ce sidecar apres `L20_BBI.MIX`,
-puis tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`,
-`46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le sidecar.
+restants tiennent maintenant dans un sidecar MIX valide et le plan de chargement
+statique verifie les IDs dans la base et dans le sidecar. `CDCACHE.LST` n'est
+pas le bon levier: il ne declare pas de MIX sidecar. Il faut donc patcher ou
+wrapper le loader MIX compile pour consulter `L20_BBI_HD.MIX` apres
+`L20_BBI.MIX`, puis tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`,
+`46e6b985`, `46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le
+sidecar.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.

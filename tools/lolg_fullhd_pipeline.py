@@ -2596,6 +2596,10 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
             "plan sidecar runtime VQA LCW compact",
             [sys.executable, "tools/lolg_vqa_runtime_sidecar_pack.py", "--report-only"],
         ),
+        Step(
+            "plan chargement sidecar runtime VQA",
+            [sys.executable, "tools/lolg_vqa_runtime_sidecar_load_plan.py"],
+        ),
         Step("readiness repack runtime VQA Full HD final", [sys.executable, "tools/lolg_vqa_runtime_repack_readiness.py"]),
         Step("faisabilite runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_feasibility.py"]),
         Step("readiness capture runtime .tex", [sys.executable, "tools/lolg_tex_runtime_real_capture_readiness.py"]),
