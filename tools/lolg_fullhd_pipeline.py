@@ -2459,7 +2459,17 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
         Step("build pack runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_pack_build.py"]),
         Step("seed archives runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_archive_seed_writer.py"]),
         Step("build pack runtime VQA Full HD final", [sys.executable, "tools/lolg_vqa_runtime_pack_build.py"]),
-        Step("payloads compacts LCW VQA", [sys.executable, "tools/lolg_vqa_lcw_compact_payloads.py"]),
+        Step(
+            "payloads compacts LCW VQA",
+            [
+                sys.executable,
+                "tools/lolg_vqa_lcw_compact_payloads.py",
+                "--max-replacement-size",
+                "20000000",
+                "--entry-limit",
+                "0",
+            ],
+        ),
         Step(
             "build sample pack runtime VQA LCW compact",
             [

@@ -151,6 +151,10 @@ def select_rows(args: argparse.Namespace) -> tuple[int, list[dict[str, str]]]:
         for row in read_csv(args.entries)
         if row.get("replacement_path") and Path(row.get("replacement_path", "")).is_file()
     ]
+    if args.min_replacement_size:
+        rows = [row for row in rows if int_value(row, "replacement_size") >= args.min_replacement_size]
+    if args.max_replacement_size:
+        rows = [row for row in rows if int_value(row, "replacement_size") <= args.max_replacement_size]
     rows.sort(key=lambda row: int_value(row, "replacement_size"), reverse=True)
     if args.archive:
         rows = [row for row in rows if row.get("archive") == args.archive]
@@ -385,7 +389,9 @@ def main() -> None:
     parser.add_argument("--entries", type=Path, default=DEFAULT_ENTRIES)
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--compact-root", type=Path, default=DEFAULT_COMPACT_ROOT)
-    parser.add_argument("--entry-limit", type=int, default=1)
+    parser.add_argument("--entry-limit", type=int, default=1, help="Maximum selected rows; use 0 for no limit.")
+    parser.add_argument("--min-replacement-size", type=int, default=0)
+    parser.add_argument("--max-replacement-size", type=int, default=0)
     parser.add_argument("--archive", default="")
     parser.add_argument("--index", default="")
     parser.add_argument("--file-id", default="")
