@@ -133,6 +133,20 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py \
   -o output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample
 ```
 
+Rapport global du pack VQA compact sans ecriture des gros MIX:
+
+```sh
+python3 tools/lolg_vqa_runtime_pack_build.py \
+  --replacement-overlay-root replacements_vqa_fullhd_lcw_compact \
+  -o output/vqa_runtime_pack_build_lcw_compact_report \
+  --runtime-pack mod_mix_vqa_fullhd_lcw_compact \
+  --report-only
+python3 tools/lolg_vqa_runtime_oversize_budget.py \
+  --archives output/vqa_runtime_pack_build_lcw_compact_report/archives.csv \
+  --entries output/vqa_runtime_pack_build_lcw_compact_report/entries.csv \
+  -o output/vqa_runtime_oversize_budget_lcw_compact_report
+```
+
 Writer de fixture WVQA native exact-block:
 
 ```sh
@@ -244,6 +258,12 @@ overlays, applique 129/129 remplacements dans `L4_HJI.MIX`, ne differe plus
 aucun payload et ecrit `output_bytes=4241561640`. Le budget cible
 `output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/` passe avec
 `deferred_replacements=0` et `required_reduction_bytes=0`.
+Le rapport global compact `output/vqa_runtime_pack_build_lcw_compact_report/`
+utilise `--report-only` pour eviter d'ecrire un deuxieme pack de 45 Go; il
+projette 66/66 MIX avec 1955/1955 remplacements trouves, 146 overlays compacts,
+1947/1955 remplacements appliques et 8 differes, tous dans `L20_BBI.MIX`.
+Le budget global `output/vqa_runtime_oversize_budget_lcw_compact_report/`
+confirme 1 archive oversized et `required_reduction_bytes=517191089`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

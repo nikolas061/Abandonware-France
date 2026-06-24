@@ -66,6 +66,18 @@ DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
 DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES = Path(
     "output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/entries.csv"
 )
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_report/index.html"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT_SUMMARY = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_report/summary.csv"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT_ARCHIVES = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_report/archives.csv"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT_ENTRIES = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_report/entries.csv"
+)
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET = Path("output/vqa_runtime_oversize_budget/index.html")
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY = Path("output/vqa_runtime_oversize_budget/summary.csv")
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES = Path("output/vqa_runtime_oversize_budget/archives.csv")
@@ -93,6 +105,18 @@ DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
 )
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES = Path(
     "output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/entries.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_report/index.html"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_SUMMARY = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_report/summary.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_ARCHIVES = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_report/archives.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_ENTRIES = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_report/entries.csv"
 )
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
@@ -1012,11 +1036,13 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_pack_build_l4_hji_lcw_sample_summary = first_row(
         DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY
     )
+    vqa_pack_build_lcw_report_summary = first_row(DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT_SUMMARY)
     vqa_oversize_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY)
     vqa_oversize_lcw_sample_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_SUMMARY)
     vqa_oversize_l4_hji_lcw_sample_summary = first_row(
         DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY
     )
+    vqa_oversize_lcw_report_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1087,6 +1113,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{vqa_pack_build_l4_hji_lcw_sample_summary.get('applied_replacements', '')} appl, "
                 f"L4 diff {vqa_pack_build_l4_hji_lcw_sample_summary.get('deferred_replacements', '')}/"
                 f"{vqa_oversize_l4_hji_lcw_sample_summary.get('required_reduction_bytes', '')} bytes, "
+                f"global compact {vqa_pack_build_lcw_report_summary.get('applied_replacements', '')}/"
+                f"{vqa_pack_build_lcw_report_summary.get('entries', '')}, "
+                f"global diff {vqa_pack_build_lcw_report_summary.get('deferred_replacements', '')}/"
+                f"{vqa_oversize_lcw_report_summary.get('required_reduction_bytes', '')} bytes, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1186,6 +1216,19 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             "Entrees sample build VQA LCW compact L4_HJI",
             DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES,
         ),
+        ("Rapport global build VQA LCW compact", DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT),
+        (
+            "Synthese rapport global build VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT_SUMMARY,
+        ),
+        (
+            "Archives rapport global build VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT_ARCHIVES,
+        ),
+        (
+            "Entrees rapport global build VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_REPORT_ENTRIES,
+        ),
         ("Budget oversized runtime VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET),
         ("Synthese budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY),
         ("Archives budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES),
@@ -1218,6 +1261,19 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         (
             "Entrees sample budget VQA LCW compact L4_HJI",
             DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES,
+        ),
+        ("Budget global oversized VQA LCW compact", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT),
+        (
+            "Synthese budget global VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_SUMMARY,
+        ),
+        (
+            "Archives budget global VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_ARCHIVES,
+        ),
+        (
+            "Entrees budget global VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_ENTRIES,
         ),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),

@@ -384,12 +384,16 @@ def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[s
                     archive_deferred = len(deferred)
                     applied_replacements += archive_applied
                     deferred_replacements += archive_deferred
-                    data = build_mix_bytes(mix_entries)
-                    args.runtime_pack.mkdir(parents=True, exist_ok=True)
-                    output_archive.write_bytes(data)
-                    output_written = "1"
-                    output_sha = sha256_bytes(data)
-                    archive_output_bytes = len(data)
+                    if args.report_only:
+                        output_written = "report_only"
+                        archive_output_bytes = 6 + len(mix_entries) * 12 + projected_body_size
+                    else:
+                        data = build_mix_bytes(mix_entries)
+                        args.runtime_pack.mkdir(parents=True, exist_ok=True)
+                        output_archive.write_bytes(data)
+                        output_written = "1"
+                        output_sha = sha256_bytes(data)
+                        archive_output_bytes = len(data)
                     output_archives += 1
                     output_bytes += archive_output_bytes
             except Exception as exc:  # noqa: BLE001 - keep building other archives and report the failing one
@@ -436,6 +440,8 @@ def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[s
         issues.append(f"stale_runtime_pack_files:{len(existing_pack_files)}")
     if replacement_entries and output_archives != changed_archives:
         issues.append(f"missing_output_archives:{changed_archives - output_archives}")
+    if args.report_only:
+        issues.append("runtime_pack_report_only")
     stale_failed_outputs = sum(
         1
         for row in archive_rows
@@ -454,6 +460,7 @@ def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[s
         and output_archives == len(rows_by_archive)
         and not archive_issue_rows
         and not entry_issue_rows
+        and not args.report_only
     )
     requirements.extend(
         [
@@ -512,6 +519,8 @@ def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[s
         "next_step": (
             "runtime pack complete"
             if complete_runtime_pack and not issues
+            else "rerun without --report-only to materialize the projected runtime MIX pack"
+            if args.report_only
             else "compact or split deferred WVQA payloads, optionally via --replacement-overlay-root, then rerun this builder"
             if deferred_replacements
             else "rerun without --archive to materialize the complete runtime MIX pack"
@@ -609,6 +618,11 @@ def main() -> None:
         dest="archives_filter",
         help="Limit the build/report to one archive name, stem, or path; repeatable.",
     )
+    parser.add_argument(
+        "--report-only",
+        action="store_true",
+        help="Compute projected archive reports without writing runtime MIX files.",
+    )
     parser.add_argument("--fail-on-gaps", action="store_true")
     args = parser.parse_args()
 
@@ -623,7 +637,7 @@ def main() -> None:
     print(
         "VQA runtime pack build: "
         f"{summary['status']} ({summary['replacement_entries']}/{summary['entries']} replacements, "
-        f"{summary['output_archives']} MIX written)"
+        f"{summary['output_archives']} MIX {'projected' if args.report_only else 'written'})"
     )
     print(f"Summary: {args.output / 'summary.csv'}")
     print(f"HTML: {args.output / 'index.html'}")

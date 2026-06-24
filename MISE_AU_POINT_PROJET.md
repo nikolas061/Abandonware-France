@@ -33,7 +33,7 @@ Full HD audit: pass
 Gates: 252/252
 Full HD PNGs: 177463
 Dashboard cards: 6
-Dashboard links: 863
+Dashboard links: 871
 Runtime audit: gap
 Runtime components: 8
 Runtime ready components: 1
@@ -165,6 +165,11 @@ Runtime gaps: 2
   (`saved_ratio=0.696064`). Le sample compact `L4_HJI` consomme ces overlays,
   applique 129/129 remplacements, ne differe plus aucun payload et le budget
   cible passe avec `required_reduction_bytes=0`.
+  Le rapport global compact `output/vqa_runtime_pack_build_lcw_compact_report/`
+  projette maintenant les 66 MIX runtime sans ecrire un second pack de 45 Go:
+  146 overlays compacts consommes, 1947/1955 remplacements appliques, 8
+  differes restants, tous dans `L20_BBI.MIX`. Le budget global compact garde
+  `required_reduction_bytes=517191089` comme verrou restant.
   Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
   LCW literal et valide 20/20 frames au redecode.
 - La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
@@ -250,6 +255,10 @@ output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/index.html
 output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/summary.csv
 output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/archives.csv
 output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/entries.csv
+output/vqa_runtime_pack_build_lcw_compact_report/index.html
+output/vqa_runtime_pack_build_lcw_compact_report/summary.csv
+output/vqa_runtime_pack_build_lcw_compact_report/archives.csv
+output/vqa_runtime_pack_build_lcw_compact_report/entries.csv
 output/vqa_runtime_oversize_budget/index.html
 output/vqa_runtime_oversize_budget/summary.csv
 output/vqa_runtime_oversize_budget/archives.csv
@@ -262,6 +271,10 @@ output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/index.html
 output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/summary.csv
 output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/archives.csv
 output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/entries.csv
+output/vqa_runtime_oversize_budget_lcw_compact_report/index.html
+output/vqa_runtime_oversize_budget_lcw_compact_report/summary.csv
+output/vqa_runtime_oversize_budget_lcw_compact_report/archives.csv
+output/vqa_runtime_oversize_budget_lcw_compact_report/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -327,6 +340,13 @@ overlays avec `overlay_replacements=6`, `applied_replacements=129/129`,
 `deferred_replacements=0` et `output_bytes=4241561640`. Le budget cible
 `output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/` passe avec
 `required_reduction_bytes=0`.
+`output/vqa_runtime_pack_build_lcw_compact_report/` ajoute un rapport global
+compact en `--report-only`: `replacement_entries=1955/1955`,
+`overlay_replacements=146`, `applied_replacements=1947/1955`,
+`deferred_replacements=8`, `missing_replacements=0`, `output_archives=66/66`
+et `output_bytes=47893513877` projetes sans ecriture des MIX. Le budget
+correspondant `output/vqa_runtime_oversize_budget_lcw_compact_report/` confirme
+1 archive oversized, `L20_BBI.MIX`, et `required_reduction_bytes=517191089`.
 
 ## Textures .tex
 
