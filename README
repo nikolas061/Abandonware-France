@@ -99,7 +99,7 @@ python3 tools/lolg_vqa_lcw_compact_payloads.py \
   --entries output/vqa_lcw_compact_payloads/entries.csv \
   --entries output/vqa_runtime_oversize_budget/entries.csv \
   --entries output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv \
-  --max-replacement-size 32000000 \
+  --max-replacement-size 35000000 \
   --entry-limit 0 \
   --reuse-existing
 ```
@@ -193,18 +193,18 @@ depasser la limite MIX. Le probe `output/vqa_lcw_compression_probe/` teste une
 compression LCW compatible sur les 4 plus gros payloads differes: 128 frames
 echantillonnees, 28260692 octets economises sur les chunks testes et
 `sample_saved_ratio=0.704964`. `output/vqa_lcw_compact_payloads/` materialise
-maintenant 86 payloads compacts complets sous 32 Mo dans `L20_BBI.MIX` depuis
+maintenant 100 payloads compacts complets sous 35 Mo dans `L20_BBI.MIX` depuis
 le rapport compact precedent et les budgets oversized de base et compact
-courant: 7089 frames, 14178 chunks recompresses, 0 echec roundtrip,
-2097781272 -> 463397428 octets (`saved_bytes=1634383844`,
-`saved_ratio=0.779101`). Le builder runtime
+courant: 8383 frames, 16766 chunks recompresses, 0 echec roundtrip,
+2480923912 -> 547193394 octets (`saved_bytes=1933730518`,
+`saved_ratio=0.779440`). Le builder runtime
 accepte maintenant `--replacement-overlay-root` et un filtre `--archive`; le
 sample `output/vqa_runtime_pack_build_lcw_compact_sample/` prend ces payloads
-depuis `replacements_vqa_fullhd_lcw_compact/`, applique 369/407 remplacements
-dans `L20_BBI.MIX` au lieu de 306, abaisse les differes de 101 a 38 et ecrit
+depuis `replacements_vqa_fullhd_lcw_compact/`, applique 379/407 remplacements
+dans `L20_BBI.MIX` au lieu de 306, abaisse les differes de 101 a 28 et ecrit
 `mod_mix_vqa_fullhd_lcw_compact_sample/L20_BBI.MIX` avec
-`output_bytes=4288135130`. Le budget sample correspondant chiffre encore
-`required_reduction_bytes=2307283761` pour les 38 differes de `L20_BBI.MIX`.
+`output_bytes=4293033224`. Le budget sample correspondant chiffre encore
+`required_reduction_bytes=2007937087` pour les 28 differes de `L20_BBI.MIX`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
