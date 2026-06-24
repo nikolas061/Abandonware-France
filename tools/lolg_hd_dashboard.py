@@ -56,6 +56,10 @@ DEFAULT_VQA_LCW_LITERAL_PROBE = Path("output/vqa_lcw_literal_probe/index.html")
 DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY = Path("output/vqa_lcw_literal_probe/summary.csv")
 DEFAULT_VQA_LCW_LITERAL_PROBE_REQUIREMENTS = Path("output/vqa_lcw_literal_probe/requirements.csv")
 DEFAULT_VQA_LCW_LITERAL_PROBE_CANDIDATES = Path("output/vqa_lcw_literal_probe/candidates.csv")
+DEFAULT_VQA_LCW_COMPRESSION_PROBE = Path("output/vqa_lcw_compression_probe/index.html")
+DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY = Path("output/vqa_lcw_compression_probe/summary.csv")
+DEFAULT_VQA_LCW_COMPRESSION_PROBE_ENTRIES = Path("output/vqa_lcw_compression_probe/entries.csv")
+DEFAULT_VQA_LCW_COMPRESSION_PROBE_CHUNKS = Path("output/vqa_lcw_compression_probe/chunks.csv")
 DEFAULT_VQA_NATIVE_EXACT_FIXTURE = Path("output/vqa_native_exact_fixture_writer/index.html")
 DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY = Path("output/vqa_native_exact_fixture_writer/summary.csv")
 DEFAULT_VQA_NATIVE_EXACT_FIXTURE_REQUIREMENTS = Path("output/vqa_native_exact_fixture_writer/requirements.csv")
@@ -947,6 +951,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_oversize_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
+    vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
     vqa_fixture_summary = first_row(DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY)
     vqa_fullhd_writer_summary = first_row(DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_SUMMARY)
     inventory_rows = read_csv(DEFAULT_INVENTORY_SUMMARY) if DEFAULT_INVENTORY_SUMMARY.exists() else []
@@ -999,6 +1004,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"seed {vqa_archive_seed_summary.get('encoded_archives', '')}/"
                 f"{vqa_archive_seed_summary.get('target_archives', '')}, "
                 f"LCW {vqa_lcw_summary.get('roundtrip_cases', '')} tests, "
+                f"LCW comp {vqa_lcw_compression_summary.get('sample_saved_ratio', '')}, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1081,6 +1087,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Synthese probe LCW literal VQA", DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY),
         ("Requirements probe LCW literal VQA", DEFAULT_VQA_LCW_LITERAL_PROBE_REQUIREMENTS),
         ("Candidats probe LCW literal VQA", DEFAULT_VQA_LCW_LITERAL_PROBE_CANDIDATES),
+        ("Probe compression LCW VQA", DEFAULT_VQA_LCW_COMPRESSION_PROBE),
+        ("Synthese compression LCW VQA", DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY),
+        ("Entrees compression LCW VQA", DEFAULT_VQA_LCW_COMPRESSION_PROBE_ENTRIES),
+        ("Chunks compression LCW VQA", DEFAULT_VQA_LCW_COMPRESSION_PROBE_CHUNKS),
         ("Fixture WVQA native exact-block", DEFAULT_VQA_NATIVE_EXACT_FIXTURE),
         ("Synthese fixture WVQA native", DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY),
         ("Requirements fixture WVQA native", DEFAULT_VQA_NATIVE_EXACT_FIXTURE_REQUIREMENTS),

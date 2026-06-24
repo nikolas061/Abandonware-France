@@ -67,6 +67,12 @@ Probe de la primitive LCW literal pour le futur encodeur VQA:
 python3 tools/lolg_vqa_lcw_literal_probe.py
 ```
 
+Probe de compression LCW compatible sur les payloads VQA oversized:
+
+```sh
+python3 tools/lolg_vqa_lcw_compression_probe.py
+```
+
 Writer de fixture WVQA native exact-block:
 
 ```sh
@@ -152,7 +158,10 @@ frontiere: 1955/1955 payloads de remplacement, 1850 appliques, 105 differes
 `output/vqa_runtime_oversize_budget/` chiffre le verrou restant: 2 archives,
 105 remplacements differes, 155682538 octets de marge body encore disponible et
 5256429632 octets a regagner pour appliquer tous les payloads WVQA Full HD sans
-depasser la limite MIX. Le seed writer
+depasser la limite MIX. Le probe `output/vqa_lcw_compression_probe/` teste une
+compression LCW compatible sur les 4 plus gros payloads differes: 128 frames
+echantillonnees, 28260692 octets economises sur les chunks testes et
+`sample_saved_ratio=0.704964`. Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
 literal est maintenant prouvee dans `output/vqa_lcw_literal_probe/` avec 11
