@@ -315,6 +315,10 @@ output/lolg95_winedbg_mix_lookup_l20_additive_attempt/summary.csv
 output/lolg95_winedbg_mix_lookup_l20_additive_attempt/trace.tsv
 output/lolg95_winedbg_mix_lookup_l20_additive_attempt/raw.log
 output/lolg95_winedbg_mix_lookup_l20_additive_attempt/force_level_write.log
+output/lolg95_runtime_archive_list_l20_sidecar_probe/summary.csv
+output/lolg95_runtime_archive_list_l20_sidecar_probe/archives.tsv
+output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv
+output/lolg95_runtime_archive_list_l20_sidecar_probe/force_level_write.log
 output/lolg95_winedbg_loader_trace_attempt/trace.tsv
 output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
 output/lolg95_winedbg_loader_trace_attempt/raw.log
@@ -481,6 +485,16 @@ ecrit correctement `0x5b0948=20` et `0x5b094c=4`, puis capture
 n'ont pas ete demandes dans ce parcours automatise. Il faut maintenant piloter
 une scene ou un appel cible qui sollicite ces VQA pour prouver la resolution
 effective depuis le sidecar.
+`tools/run_lolg95_runtime_archive_list_probe.py` ajoute la preuve d'ordre
+runtime sans perturber les requetes du jeu: apres le meme pilotage L20, il lit
+la liste globale `0x6a5b34` dans `/proc/<pid>/mem`. Le run
+`output/lolg95_runtime_archive_list_l20_sidecar_probe/` passe avec
+`archive_nodes=7`, `force_level_write_status=pass` et les 8 IDs en
+`target_sidecar_first`. `targets.tsv` pointe `first_archive=l20_bbI_HD.MIX`,
+`first_order=4`, et les tailles sidecar attendues pour les 8 hashes. La
+selection par ordre runtime est donc prouvee des que ces IDs sont demandes; le
+reste du travail est de stabiliser ce comportement en fallback final ou de le
+rattacher a un appel VQA joue.
 
 ## Textures .tex
 
@@ -5261,16 +5275,18 @@ verifie les IDs dans la base et dans le sidecar, et le patch additif ouvre
 maintenant `L20_BBI.MIX` puis `L20_BBI_HD.MIX` dans le meme run. La trace
 lookup `output/lolg95_winedbg_mix_lookup_l20_additive_attempt/` observe bien
 `0x004e3d18` avec 97 hits et 52 IDs uniques, mais aucun des 8 hashes differes
-n'est encore demande par ce parcours automatise. Il faut donc piloter plus loin
-ou ajouter un appel cible qui sollicite `9fee8483`, `d3c844e7`, `46e6b785`,
-`46e6b985`, `46e8b785`, `46e8b985`, `46eab985` et `46eeb585`, puis confirmer
-qu'ils sont lus depuis le sidecar avant de transformer le probe en fallback
-propre. Les points de depart actuels sont le constructeur generique
-`0x004e41e0`, la liste globale d'archives `0x6a5b40`, le lookup hash
-`0x004e3c90`, le hit archive `0x004e3d18`, le saut additif
-`0x00453723 -> 0x005ab2d3`, et les refs `ReadFile` / `SetFilePointer` autour
-de `0x004eb390` / `0x004eb7eb` pour rattacher chaque lecture au handle
-d'archive.
+n'est encore demande par ce parcours automatise. La nouvelle preuve
+`output/lolg95_runtime_archive_list_l20_sidecar_probe/` ferme toutefois le
+point d'ordre: les 8 hashes `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`,
+`46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont tous
+`target_sidecar_first` dans la liste runtime, via `l20_bbI_HD.MIX`. La prochaine
+passe doit donc convertir ce probe additif en fallback propre et, si possible,
+capturer un appel VQA joue qui consomme un de ces IDs. Les points de depart
+actuels sont le constructeur generique `0x004e41e0`, la liste globale
+d'archives `0x6a5b40`, le lookup hash `0x004e3c90`, le hit archive
+`0x004e3d18`, le saut additif `0x00453723 -> 0x005ab2d3`, et les refs
+`ReadFile` / `SetFilePointer` autour de `0x004eb390` / `0x004eb7eb` pour
+rattacher chaque lecture au handle d'archive.
 Le fichier `output/vqa_runtime_loader_trace_contract/winedbg_commands.txt`
 contient ces 8 breakpoints. Le runner correspondant est
 `python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`; il ecrit

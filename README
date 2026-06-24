@@ -156,6 +156,12 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
   --force-level-index 20 --force-level-slot 4
+xvfb-run -a -s '-screen 0 1280x1024x24' \
+  python3 tools/run_lolg95_runtime_archive_list_probe.py \
+  --wineprefix output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix \
+  --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
+  --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
+  --force-level-index 20 --force-level-slot 4
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -358,6 +364,15 @@ L20 dans le banc Wine/Xvfb, garde `force_level_write_status=pass`, capture
 sollicites dans ce parcours automatise. Le prochain verrou est donc de piloter
 une scene ou un appel cible qui demande ces VQA, puis de confirmer qu'elles
 sortent de `L20_BBI_HD.MIX`.
+`tools/run_lolg95_runtime_archive_list_probe.py` ajoute une preuve runtime sans
+modifier les lookups actifs: apres le meme montage L20, il traverse la liste
+globale d'archives `0x6a5b34` depuis `/proc/<pid>/mem`. Le run
+`output/lolg95_runtime_archive_list_l20_sidecar_probe/` passe avec
+`archive_nodes=7`, `force_level_write_status=pass` et les 8 IDs en
+`target_sidecar_first`; `targets.tsv` montre `first_archive=l20_bbI_HD.MIX`
+et les tailles sidecar attendues pour les 8 hashes. Le sidecar est donc bien
+premier dans la liste runtime pour ces IDs; il reste a raccorder cette preuve
+au fallback final ou a un appel VQA joue.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

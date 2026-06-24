@@ -531,6 +531,10 @@ output/lolg95_winedbg_mix_lookup_l20_additive_attempt/summary.csv
 output/lolg95_winedbg_mix_lookup_l20_additive_attempt/trace.tsv
 output/lolg95_winedbg_mix_lookup_l20_additive_attempt/raw.log
 output/lolg95_winedbg_mix_lookup_l20_additive_attempt/force_level_write.log
+output/lolg95_runtime_archive_list_l20_sidecar_probe/summary.csv
+output/lolg95_runtime_archive_list_l20_sidecar_probe/archives.tsv
+output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv
+output/lolg95_runtime_archive_list_l20_sidecar_probe/force_level_write.log
 output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
 output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
@@ -4517,6 +4521,12 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
   --force-level-index 20 --force-level-slot 4
+xvfb-run -a -s '-screen 0 1280x1024x24' \
+  python3 tools/run_lolg95_runtime_archive_list_probe.py \
+  --wineprefix output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix \
+  --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
+  --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
+  --force-level-index 20 --force-level-slot 4
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4640,6 +4650,14 @@ matched 12-byte MIX table entry. The additive L20 run in
 This validates the lookup tracepoint and shows that the current automated L20
 path has not requested the deferred VQA entries yet; the next runtime proof
 needs deeper gameplay or a targeted entry-request probe.
+`tools/run_lolg95_runtime_archive_list_probe.py` then probes the live archive
+list without rewriting lookup keys. After the same forced L20 additive run, it
+reads `0x6a5b34` through `/proc/<pid>/mem`, records 7 archive-list nodes, and
+passes with all 8 expected IDs in `target_sidecar_first`. `targets.tsv` records
+`first_archive=l20_bbI_HD.MIX`, `first_order=4`, and the expected sidecar sizes
+for `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`, `46e8b785`, `46e8b985`,
+`46eab985`, and `46eeb585`. This proves the runtime list/order required for
+sidecar selection once those IDs are requested.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

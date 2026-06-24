@@ -249,6 +249,18 @@ DEFAULT_LOLG95_WINEDBG_MIX_LOOKUP_L20_ADDITIVE_RAW = Path(
 DEFAULT_LOLG95_WINEDBG_MIX_LOOKUP_L20_ADDITIVE_FORCE_LOG = Path(
     "output/lolg95_winedbg_mix_lookup_l20_additive_attempt/force_level_write.log"
 )
+DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_SUMMARY = Path(
+    "output/lolg95_runtime_archive_list_l20_sidecar_probe/summary.csv"
+)
+DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_ARCHIVES = Path(
+    "output/lolg95_runtime_archive_list_l20_sidecar_probe/archives.tsv"
+)
+DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_TARGETS = Path(
+    "output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv"
+)
+DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_FORCE_LOG = Path(
+    "output/lolg95_runtime_archive_list_l20_sidecar_probe/force_level_write.log"
+)
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1086,6 +1098,10 @@ def first_row(path: Path) -> dict[str, str]:
     return rows[0] if rows else {}
 
 
+def comma_count(text: str) -> str:
+    return str(len([part for part in text.split(",") if part]))
+
+
 def relative_href(path_text: str | Path, base_dir: Path) -> str:
     if not path_text:
         return ""
@@ -1187,6 +1203,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_ADDITIVE_PATCH_SUMMARY
     )
     lolg95_mix_lookup_trace_summary = first_row(DEFAULT_LOLG95_WINEDBG_MIX_LOOKUP_L20_ADDITIVE_SUMMARY)
+    lolg95_archive_list_probe_summary = first_row(DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1286,6 +1303,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{lolg95_additive_patch_trace_summary.get('l20_bbi_hd_mentions', '')}, "
                 f"lookup {lolg95_mix_lookup_trace_summary.get('target_sidecar_hits', '')}/"
                 f"{lolg95_mix_lookup_trace_summary.get('expected_ids', '')} ids, "
+                f"order {comma_count(lolg95_archive_list_probe_summary.get('target_sidecar_first', ''))}/"
+                f"{lolg95_archive_list_probe_summary.get('expected_ids', '')} ids, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1512,6 +1531,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Trace lookup MIX sidecar L20", DEFAULT_LOLG95_WINEDBG_MIX_LOOKUP_L20_ADDITIVE_TRACE),
         ("Log brut lookup MIX sidecar L20", DEFAULT_LOLG95_WINEDBG_MIX_LOOKUP_L20_ADDITIVE_RAW),
         ("Ecriture memoire lookup MIX sidecar L20", DEFAULT_LOLG95_WINEDBG_MIX_LOOKUP_L20_ADDITIVE_FORCE_LOG),
+        ("Synthese liste runtime sidecar L20", DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_SUMMARY),
+        ("Archives liste runtime sidecar L20", DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_ARCHIVES),
+        ("IDs liste runtime sidecar L20", DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_TARGETS),
+        ("Ecriture memoire liste runtime sidecar L20", DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_FORCE_LOG),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),
