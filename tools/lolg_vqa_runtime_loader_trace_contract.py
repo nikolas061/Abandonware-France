@@ -1,0 +1,392 @@
+#!/usr/bin/env python3
+"""Build a winedbg trace contract for the VQA sidecar MIX loader path."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import html
+import json
+import re
+from pathlib import Path
+
+
+DEFAULT_PROBE = Path("output/vqa_runtime_loader_probe")
+DEFAULT_SIDECAR_ENTRIES = Path("output/vqa_runtime_sidecar_load_plan/entries.csv")
+DEFAULT_OUTPUT = Path("output/vqa_runtime_loader_trace_contract")
+
+SUMMARY_FIELDS = [
+    "status",
+    "loader_probe",
+    "sidecar_entries",
+    "expected_sidecar_ids",
+    "tracepoints",
+    "createfile_tracepoints",
+    "mix_constructor_tracepoints",
+    "winedbg_commands",
+    "windbg_breakpoints",
+    "issues",
+    "next_step",
+]
+
+REQUIREMENT_FIELDS = ["requirement", "status", "evidence", "next_step"]
+
+TRACEPOINT_FIELDS = [
+    "tracepoint_id",
+    "breakpoint_va",
+    "source",
+    "kind",
+    "target",
+    "capture_registers",
+    "capture_stack",
+    "expected_signal",
+    "notes",
+]
+
+EXPECTED_ID_FIELDS = [
+    "source_archive",
+    "index",
+    "file_id",
+    "source_size",
+    "sidecar_archive",
+    "sidecar_size",
+    "evidence",
+]
+
+COMMAND_FIELDS = ["format", "path", "tracepoints", "purpose", "command_hint"]
+
+
+def read_csv(path: Path, delimiter: str = ",") -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle, delimiter=delimiter))
+
+
+def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]], delimiter: str = ",") -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, delimiter=delimiter)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def split_refs(text: str) -> list[str]:
+    payload = re.sub(r"0x[0-9a-fA-F]+->", "", text)
+    if "=" in payload:
+        payload = payload.split("=", 1)[1]
+    refs = [f"0x{int(match, 16):08x}" for match in re.findall(r"0x[0-9a-fA-F]+", payload)]
+    return list(dict.fromkeys(refs))
+
+
+def candidate_by_name(rows: list[dict[str, str]], name: str) -> dict[str, str]:
+    return next((row for row in rows if row.get("candidate") == name), {})
+
+
+def sidecar_rows(path: Path) -> list[dict[str, str]]:
+    rows = []
+    for row in read_csv(path):
+        if row.get("source_status") == "pass" and row.get("sidecar_status") == "pass":
+            rows.append(
+                {
+                    "source_archive": row.get("source_archive", ""),
+                    "index": row.get("index", ""),
+                    "file_id": row.get("file_id", ""),
+                    "source_size": row.get("source_size", ""),
+                    "sidecar_archive": row.get("sidecar_archive", ""),
+                    "sidecar_size": row.get("sidecar_size", ""),
+                    "evidence": f"base={row.get('source_mix_size', '')};sidecar={row.get('sidecar_size', '')}",
+                }
+            )
+    return rows
+
+
+def make_tracepoints(candidates: list[dict[str, str]]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    mix_constructor = candidate_by_name(candidates, "pe_archive_name_constructor")
+    for ref in split_refs(mix_constructor.get("evidence", "")):
+        rows.append(
+            {
+                "tracepoint_id": f"mix_constructor_{len(rows) + 1:02d}",
+                "breakpoint_va": ref,
+                "source": "LOLG95.EXE",
+                "kind": "mix_constructor",
+                "target": ".MIX",
+                "capture_registers": "eip,eax,ecx,edx,esi,edi",
+                "capture_stack": "esp,esp+4,esp+8,esp+12",
+                "expected_signal": "runtime builds or opens an archive path ending in .MIX",
+                "notes": "Use this to confirm the L20_BBI.MIX archive-name construction path before adding sidecar fallback.",
+            }
+        )
+
+    createfile = candidate_by_name(candidates, "pe_createfile_wrapper")
+    for ref in split_refs(createfile.get("evidence", "")):
+        rows.append(
+            {
+                "tracepoint_id": f"createfile_{len([row for row in rows if row['kind'] == 'createfile']) + 1:02d}",
+                "breakpoint_va": ref,
+                "source": "LOLG95.EXE",
+                "kind": "createfile",
+                "target": "CreateFileA",
+                "capture_registers": "eip,eax,ecx,edx,esi,edi",
+                "capture_stack": "esp,esp+4,esp+8,esp+12,esp+16,esp+20,esp+24",
+                "expected_signal": "runtime attempts to open L20_BBI.MIX; hook then retries L20_BBI_HD.MIX",
+                "notes": "At a direct CreateFileA call site, the file-name pointer is the first pushed argument just before the call.",
+            }
+        )
+    rows.sort(key=lambda row: (row["kind"], int(row["breakpoint_va"], 16)))
+    return rows
+
+
+def write_winedbg_commands(path: Path, tracepoints: list[dict[str, str]], cont_count: int) -> None:
+    lines = [
+        "# Generated by tools/lolg_vqa_runtime_loader_trace_contract.py",
+        "# Internal winedbg syntax. Run under xvfb-run/winedbg against LOLG95.EXE.",
+    ]
+    for row in tracepoints:
+        lines.append(f"break *{row['breakpoint_va']}")
+    lines.extend(
+        [
+            "display /x $eip",
+            "display /x $eax",
+            "display /x $ecx",
+            "display /x $edx",
+            "display /x $esi",
+            "display /x $edi",
+            "display /x *$esp",
+            "display /x *($esp + 4)",
+            "display /x *($esp + 8)",
+            "display /x *($esp + 12)",
+            "display /x *($esp + 16)",
+            "display /x *($esp + 20)",
+            "display /x *($esp + 24)",
+            f"cont {cont_count}",
+            "quit",
+        ]
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def windbg_line(row: dict[str, str]) -> str:
+    values = [
+        row["tracepoint_id"],
+        row["breakpoint_va"],
+        row["kind"],
+        "0x%08x",
+        "0x%08x",
+        "0x%08x",
+        "0x%08x",
+        "0x%08x",
+        "0x%08x",
+        "0x%08x",
+        "0x%08x",
+    ]
+    payload = "\\t".join(values) + "\\n"
+    return (
+        f"bp {row['breakpoint_va']} "
+        f"\".printf \\\"{payload}\\\", @eip, @eax, @ecx, @edx, poi(@esp), poi(@esp+4), "
+        f"poi(@esp+8), poi(@esp+12); gc\""
+    )
+
+
+def write_windbg_commands(path: Path, tracepoints: list[dict[str, str]]) -> None:
+    lines = [
+        "$$ Generated by tools/lolg_vqa_runtime_loader_trace_contract.py",
+        "$$ Microsoft WinDbg syntax. Use only if running the Windows target under WinDbg.",
+        ".echo tracepoint_id\tbreakpoint_va\tkind\teip\teax\tecx\tedx\tesp0\tesp4\tesp8\tesp12",
+    ]
+    lines.extend(windbg_line(row) for row in tracepoints)
+    lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines), encoding="ascii")
+
+
+def render_table(rows: list[dict[str, str]], fields: list[str]) -> str:
+    head = "".join(f"<th>{html.escape(field)}</th>" for field in fields)
+    body = []
+    for row in rows:
+        body.append("<tr>" + "".join(f"<td>{html.escape(row.get(field, ''))}</td>" for field in fields) + "</tr>")
+    return f"<table><thead><tr>{head}</tr></thead><tbody>{''.join(body)}</tbody></table>"
+
+
+def build_reports(args: argparse.Namespace) -> tuple[
+    dict[str, str],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+]:
+    candidates = read_csv(args.loader_probe / "candidates.csv")
+    expected_ids = sidecar_rows(args.sidecar_entries)
+    tracepoints = make_tracepoints(candidates)
+    winedbg_commands = args.output / "winedbg_commands.txt"
+    windbg_breakpoints = args.output / "windbg_breakpoints.cmd"
+    write_winedbg_commands(winedbg_commands, tracepoints, args.cont_count)
+    write_windbg_commands(windbg_breakpoints, tracepoints)
+
+    createfile_count = sum(1 for row in tracepoints if row["kind"] == "createfile")
+    mix_constructor_count = sum(1 for row in tracepoints if row["kind"] == "mix_constructor")
+    issues: list[str] = []
+    if not candidates:
+        issues.append("missing_loader_probe_candidates")
+    if not expected_ids:
+        issues.append("missing_expected_sidecar_ids")
+    if not tracepoints:
+        issues.append("missing_tracepoints")
+    issues.append("runtime_trace_not_executed")
+    issues.append("sidecar_runtime_load_unproven")
+
+    requirements = [
+        {
+            "requirement": "loader_probe_candidates",
+            "status": "pass" if candidates else "gap",
+            "evidence": f"candidates={len(candidates)};input={args.loader_probe / 'candidates.csv'}",
+            "next_step": "run tools/lolg_vqa_runtime_loader_probe.py before exporting the trace contract",
+        },
+        {
+            "requirement": "expected_sidecar_ids",
+            "status": "pass" if expected_ids else "gap",
+            "evidence": f"ids={len(expected_ids)};input={args.sidecar_entries}",
+            "next_step": "keep the trace target tied to the verified L20_BBI_HD.MIX sidecar rows",
+        },
+        {
+            "requirement": "loader_tracepoints",
+            "status": "pass" if tracepoints else "gap",
+            "evidence": (
+                f"tracepoints={len(tracepoints)};createfile={createfile_count};"
+                f"mix_constructor={mix_constructor_count}"
+            ),
+            "next_step": "run winedbg with the generated command file and inspect path arguments at these breakpoints",
+        },
+        {
+            "requirement": "runtime_trace_execution",
+            "status": "gap",
+            "evidence": "contract exported, but no Wine/winedbg session has proved L20_BBI.MIX or L20_BBI_HD.MIX yet",
+            "next_step": "execute the generated winedbg command file under Xvfb/Wine and parse hits for L20_BBI.MIX",
+        },
+        {
+            "requirement": "sidecar_runtime_load",
+            "status": "gap",
+            "evidence": "the game still has not been observed opening L20_BBI_HD.MIX after L20_BBI.MIX",
+            "next_step": "after the trace finds the L20_BBI.MIX open, add the fallback hook or patch and rerun",
+        },
+    ]
+
+    command_rows = [
+        {
+            "format": "winedbg",
+            "path": str(winedbg_commands),
+            "tracepoints": str(len(tracepoints)),
+            "purpose": "internal Wine debugger trace under xvfb-run",
+            "command_hint": f"xvfb-run -a winedbg --file {winedbg_commands} LOLG95.EXE",
+        },
+        {
+            "format": "windbg",
+            "path": str(windbg_breakpoints),
+            "tracepoints": str(len(tracepoints)),
+            "purpose": "Microsoft WinDbg breakpoint script for an external Windows run",
+            "command_hint": "load the target, paste/run this script, then save emitted TSV rows",
+        },
+    ]
+
+    summary = {
+        "status": "gap",
+        "loader_probe": str(args.loader_probe),
+        "sidecar_entries": str(args.sidecar_entries),
+        "expected_sidecar_ids": str(len(expected_ids)),
+        "tracepoints": str(len(tracepoints)),
+        "createfile_tracepoints": str(createfile_count),
+        "mix_constructor_tracepoints": str(mix_constructor_count),
+        "winedbg_commands": str(winedbg_commands),
+        "windbg_breakpoints": str(windbg_breakpoints),
+        "issues": ";".join(issues),
+        "next_step": "run the generated winedbg command file, then hook the L20_BBI.MIX open path to try L20_BBI_HD.MIX",
+    }
+    return summary, requirements, tracepoints, expected_ids, command_rows
+
+
+def write_html(
+    path: Path,
+    summary: dict[str, str],
+    requirements: list[dict[str, str]],
+    tracepoints: list[dict[str, str]],
+    expected_ids: list[dict[str, str]],
+    commands: list[dict[str, str]],
+) -> None:
+    payload = {
+        "summary": summary,
+        "requirements": requirements,
+        "tracepoints": tracepoints,
+        "expected_ids": expected_ids,
+        "commands": commands,
+    }
+    data_json = json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
+    page = f"""<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>VQA Runtime Loader Trace Contract</title>
+  <style>
+    body {{ font-family: system-ui, sans-serif; margin: 24px; background: #f7f7f3; color: #1f2933; }}
+    h1, h2 {{ margin-bottom: 0.4rem; }}
+    .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }}
+    .stat {{ background: white; border: 1px solid #d7d7ce; border-radius: 6px; padding: 12px; }}
+    .label {{ color: #5f6b76; font-size: 0.85rem; }}
+    .value {{ font-size: 1.35rem; font-weight: 700; }}
+    table {{ border-collapse: collapse; width: 100%; background: white; margin: 12px 0 24px; }}
+    th, td {{ border: 1px solid #d7d7ce; padding: 6px 8px; text-align: left; font-size: 0.86rem; }}
+    th {{ background: #ecece4; }}
+  </style>
+</head>
+<body>
+  <h1>VQA Runtime Loader Trace Contract</h1>
+  <div class="grid">
+    <div class="stat"><div class="label">Statut</div><div class="value">{html.escape(summary['status'])}</div></div>
+    <div class="stat"><div class="label">Tracepoints</div><div class="value">{html.escape(summary['tracepoints'])}</div></div>
+    <div class="stat"><div class="label">CreateFileA</div><div class="value">{html.escape(summary['createfile_tracepoints'])}</div></div>
+    <div class="stat"><div class="label">IDs sidecar</div><div class="value">{html.escape(summary['expected_sidecar_ids'])}</div></div>
+  </div>
+  <h2>Requirements</h2>
+  {render_table(requirements, REQUIREMENT_FIELDS)}
+  <h2>Commandes</h2>
+  {render_table(commands, COMMAND_FIELDS)}
+  <h2>Tracepoints</h2>
+  {render_table(tracepoints, TRACEPOINT_FIELDS)}
+  <h2>IDs sidecar attendus</h2>
+  {render_table(expected_ids, EXPECTED_ID_FIELDS)}
+  <script type="application/json" id="vqa-runtime-loader-trace-contract">{html.escape(data_json)}</script>
+</body>
+</html>
+"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(page, encoding="utf-8")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Build a trace contract for the VQA sidecar loader hook.")
+    parser.add_argument("--loader-probe", type=Path, default=DEFAULT_PROBE)
+    parser.add_argument("--sidecar-entries", type=Path, default=DEFAULT_SIDECAR_ENTRIES)
+    parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--cont-count", type=int, default=2000)
+    args = parser.parse_args()
+
+    summary, requirements, tracepoints, expected_ids, commands = build_reports(args)
+    args.output.mkdir(parents=True, exist_ok=True)
+    write_csv(args.output / "summary.csv", SUMMARY_FIELDS, [summary])
+    write_csv(args.output / "requirements.csv", REQUIREMENT_FIELDS, requirements)
+    write_csv(args.output / "tracepoints.tsv", TRACEPOINT_FIELDS, tracepoints, delimiter="\t")
+    write_csv(args.output / "expected_sidecar_ids.csv", EXPECTED_ID_FIELDS, expected_ids)
+    write_csv(args.output / "commands.csv", COMMAND_FIELDS, commands)
+    write_html(args.output / "index.html", summary, requirements, tracepoints, expected_ids, commands)
+    print(
+        "VQA runtime loader trace contract: "
+        f"{summary['status']} ({summary['tracepoints']} tracepoints, "
+        f"{summary['expected_sidecar_ids']} expected sidecar IDs)"
+    )
+    print(f"Summary: {args.output / 'summary.csv'}")
+    print(f"Commands: {summary['winedbg_commands']}")
+
+
+if __name__ == "__main__":
+    main()

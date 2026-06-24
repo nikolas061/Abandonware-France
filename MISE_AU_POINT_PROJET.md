@@ -301,6 +301,14 @@ output/vqa_runtime_loader_probe/anchors.csv
 output/vqa_runtime_loader_probe/xrefs.csv
 output/vqa_runtime_loader_probe/imports.csv
 output/vqa_runtime_loader_probe/candidates.csv
+output/vqa_runtime_loader_trace_contract/index.html
+output/vqa_runtime_loader_trace_contract/summary.csv
+output/vqa_runtime_loader_trace_contract/requirements.csv
+output/vqa_runtime_loader_trace_contract/tracepoints.tsv
+output/vqa_runtime_loader_trace_contract/expected_sidecar_ids.csv
+output/vqa_runtime_loader_trace_contract/commands.csv
+output/vqa_runtime_loader_trace_contract/winedbg_commands.txt
+output/vqa_runtime_loader_trace_contract/windbg_breakpoints.cmd
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -389,6 +397,9 @@ le loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui contiennent `CDCACHE` et `.MIX`)
 vers `0x004534ed`, montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage
 `CDCACHE.MIX` a partir de `0x004e1354`, et 0 occurrence compilee de
 `L20_BBI_HD.MIX`.
+`output/vqa_runtime_loader_trace_contract/` transforme ces ancres en contrat de
+trace: 8 tracepoints, 7 call sites `CreateFileA`, 1 breakpoint constructeur
+`.MIX`, commandes `winedbg`/WinDbg exportees et les 8 IDs sidecar attendus.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
@@ -5176,6 +5187,9 @@ sidecar. Les points de depart actuels sont `0x004534ed` pour le constructeur
 generique `.MIX`, les refs `CreateFileA` `0x004e2a0a`, `0x004eb15d`,
 `0x004eb17d`, `0x004eb19d`, `0x004eb25c`, `0x00529c7c`, `0x00529ee0`, et le
 montage `CDCACHE.MIX` a `0x004e1354` seulement comme indice d'architecture.
+Le fichier `output/vqa_runtime_loader_trace_contract/winedbg_commands.txt`
+contient maintenant ces 8 breakpoints et doit etre le prochain run runtime
+avant tout patch binaire.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.
