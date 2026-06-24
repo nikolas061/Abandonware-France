@@ -33,7 +33,7 @@ Full HD audit: pass
 Gates: 252/252
 Full HD PNGs: 177463
 Dashboard cards: 6
-Dashboard links: 871
+Dashboard links: 876
 Runtime audit: gap
 Runtime components: 8
 Runtime ready components: 1
@@ -170,6 +170,10 @@ Runtime gaps: 2
   146 overlays compacts consommes, 1947/1955 remplacements appliques, 8
   differes restants, tous dans `L20_BBI.MIX`. Le budget global compact garde
   `required_reduction_bytes=517191089` comme verrou restant.
+  Un plan sidecar buildable existe maintenant pour ces 8 entrees:
+  `L20_BBI_HD.MIX`, 593523178 octets de body, 593523280 octets de fichier,
+  SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
+  Le verrou restant devient le hook ou l'ordre de chargement runtime du sidecar.
   Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
   LCW literal et valide 20/20 frames au redecode.
 - La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
@@ -275,6 +279,11 @@ output/vqa_runtime_oversize_budget_lcw_compact_report/index.html
 output/vqa_runtime_oversize_budget_lcw_compact_report/summary.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/archives.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/entries.csv
+output/vqa_runtime_sidecar_pack/index.html
+output/vqa_runtime_sidecar_pack/summary.csv
+output/vqa_runtime_sidecar_pack/requirements.csv
+output/vqa_runtime_sidecar_pack/archives.csv
+output/vqa_runtime_sidecar_pack/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -347,6 +356,14 @@ compact en `--report-only`: `replacement_entries=1955/1955`,
 et `output_bytes=47893513877` projetes sans ecriture des MIX. Le budget
 correspondant `output/vqa_runtime_oversize_budget_lcw_compact_report/` confirme
 1 archive oversized, `L20_BBI.MIX`, et `required_reduction_bytes=517191089`.
+`output/vqa_runtime_sidecar_pack/` convertit ces 8 payloads differes en un
+sidecar buildable: `sidecar_entries=8`, `sidecar_archives=1`,
+`replacement_bytes=593523178`, `largest_sidecar_body_bytes=593523178` et
+`output_bytes=593523280`. Le fichier local
+`mod_mix_vqa_fullhd_sidecar/L20_BBI_HD.MIX` a ete ecrit avec 8 entrees et le
+SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
+Le requirement `runtime_loader_strategy` reste `gap`: il faut encore charger ce
+sidecar apres l'archive de base en runtime.
 
 ## Textures .tex
 
@@ -5121,11 +5138,11 @@ core_project_file: 18 files
 
 ## Prochaine passe technique
 
-Priorite 1: resoudre les 8 payloads encore differes dans `L20_BBI.MIX`.
-Le palier compact LCW a deja abaisse cette archive a 399/407 remplacements
-appliques, mais il manque encore `required_reduction_bytes=517191089`. Les
-pistes propres sont un encodage WVQA plus agressif pour ces 8 entrees ou une
-strategie runtime qui ne depend pas d'un seul body MIX 32 bits.
+Priorite 1: prouver le chargement runtime de `L20_BBI_HD.MIX`. Les 8 payloads
+restants tiennent maintenant dans un sidecar MIX valide; il faut encore un hook
+ou un ordre de chargement qui fasse consulter ce sidecar apres `L20_BBI.MIX`,
+puis tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`,
+`46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le sidecar.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.

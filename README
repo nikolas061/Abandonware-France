@@ -145,6 +145,7 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py \
   --archives output/vqa_runtime_pack_build_lcw_compact_report/archives.csv \
   --entries output/vqa_runtime_pack_build_lcw_compact_report/entries.csv \
   -o output/vqa_runtime_oversize_budget_lcw_compact_report
+python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -264,6 +265,13 @@ projette 66/66 MIX avec 1955/1955 remplacements trouves, 146 overlays compacts,
 1947/1955 remplacements appliques et 8 differes, tous dans `L20_BBI.MIX`.
 Le budget global `output/vqa_runtime_oversize_budget_lcw_compact_report/`
 confirme 1 archive oversized et `required_reduction_bytes=517191089`.
+`tools/lolg_vqa_runtime_sidecar_pack.py` transforme ces 8 lignes en un plan
+sidecar: `output/vqa_runtime_sidecar_pack/` contient 8 entrees pour 1 archive
+`L20_BBI_HD.MIX`, `replacement_bytes=593523178`, `output_bytes=593523280` et
+un body inferieur a la limite MIX 32 bits. Le sidecar binaire
+`mod_mix_vqa_fullhd_sidecar/L20_BBI_HD.MIX` a ete ecrit et valide localement,
+mais le runtime reste `gap` tant qu'un hook ou un ordre de chargement ne force
+pas le jeu a consulter ce sidecar apres `L20_BBI.MIX`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

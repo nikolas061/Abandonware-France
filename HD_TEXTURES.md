@@ -468,6 +468,11 @@ output/vqa_runtime_oversize_budget_lcw_compact_report/index.html
 output/vqa_runtime_oversize_budget_lcw_compact_report/summary.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/archives.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/entries.csv
+output/vqa_runtime_sidecar_pack/index.html
+output/vqa_runtime_sidecar_pack/summary.csv
+output/vqa_runtime_sidecar_pack/requirements.csv
+output/vqa_runtime_sidecar_pack/archives.csv
+output/vqa_runtime_sidecar_pack/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -555,6 +560,7 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py \
   --archives output/vqa_runtime_pack_build_lcw_compact_report/archives.csv \
   --entries output/vqa_runtime_pack_build_lcw_compact_report/entries.csv \
   -o output/vqa_runtime_oversize_budget_lcw_compact_report
+python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_native_exact_fixture_writer.py
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
 python3 tools/lolg_vqa_runtime_archive_seed_writer.py
@@ -1820,6 +1826,11 @@ output/vqa_runtime_oversize_budget_lcw_compact_report/index.html
 output/vqa_runtime_oversize_budget_lcw_compact_report/summary.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/archives.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/entries.csv
+output/vqa_runtime_sidecar_pack/index.html
+output/vqa_runtime_sidecar_pack/summary.csv
+output/vqa_runtime_sidecar_pack/requirements.csv
+output/vqa_runtime_sidecar_pack/archives.csv
+output/vqa_runtime_sidecar_pack/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -1926,6 +1937,10 @@ The global compact report then projects all 66 VQA runtime MIX files without
 writing the second 45 GB pack: 146 compact overlays are consumed, 1947/1955
 replacements apply, 8 remain deferred, and the only remaining oversized budget
 is still `L20_BBI.MIX` with `required_reduction_bytes=517191089`.
+The sidecar pack report moves those 8 deferred rows into one buildable sidecar
+MIX, `L20_BBI_HD.MIX`, with `replacement_bytes=593523178` and
+`output_bytes=593523280`; this proves the payloads fit outside the base archive,
+but runtime loading still needs a hook or load-order change.
 The native exact fixture
 writer now assembles a real `FORM/WVQA` payload with CBFZ/VPTZ literal-LCW
 chunks and validates 20/20 decoded frames; it is still native-size, not a Full
@@ -4145,6 +4160,11 @@ output/vqa_runtime_oversize_budget_lcw_compact_report/index.html
 output/vqa_runtime_oversize_budget_lcw_compact_report/summary.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/archives.csv
 output/vqa_runtime_oversize_budget_lcw_compact_report/entries.csv
+output/vqa_runtime_sidecar_pack/index.html
+output/vqa_runtime_sidecar_pack/summary.csv
+output/vqa_runtime_sidecar_pack/requirements.csv
+output/vqa_runtime_sidecar_pack/archives.csv
+output/vqa_runtime_sidecar_pack/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -4387,6 +4407,7 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py \
   --archives output/vqa_runtime_pack_build_lcw_compact_report/archives.csv \
   --entries output/vqa_runtime_pack_build_lcw_compact_report/entries.csv \
   -o output/vqa_runtime_oversize_budget_lcw_compact_report
+python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4418,6 +4439,21 @@ Current global compact report: `gap`, with `replacement_entries=1955/1955`,
 `output_archives=66/66`, and projected `output_bytes=47893513877`. The matching
 budget keeps the remaining blocker at one archive, `L20_BBI.MIX`, with
 `required_reduction_bytes=517191089`.
+
+`tools/lolg_vqa_runtime_sidecar_pack.py` converts those 8 deferred rows into a
+sidecar MIX plan:
+
+```sh
+python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
+```
+
+Current sidecar result: `gap` only because `runtime_loader_strategy` is not
+implemented yet. The pack side is valid: 8 deferred entries, 1 source archive,
+1 sidecar archive, `sidecar_entries=8`, `replacement_bytes=593523178`,
+`largest_sidecar_body_bytes=593523178`, and `output_bytes=593523280`. Rerunning
+without `--report-only` writes `mod_mix_vqa_fullhd_sidecar/L20_BBI_HD.MIX`; the
+local generated file has 8 entries and SHA-256
+`269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW
