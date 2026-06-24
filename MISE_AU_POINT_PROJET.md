@@ -142,7 +142,10 @@ Runtime gaps: 2
   ecrit maintenant 66/66 MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 0
   payload reste manquant, et 105 remplacements sont differes (101 dans
   `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body 32 bits
-  du format MIX.
+  du format MIX. Le budget oversized VQA chiffre cette frontiere: 2 archives
+  oversized, 155682538 octets de marge body encore disponible et 5256429632
+  octets a regagner pour appliquer tous les payloads WVQA Full HD sans depasser
+  le champ body 32 bits.
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
   entrees natives exact-block comme cibles de fixture.
   Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
@@ -222,6 +225,10 @@ output/vqa_runtime_pack_build/summary.csv
 output/vqa_runtime_pack_build/requirements.csv
 output/vqa_runtime_pack_build/archives.csv
 output/vqa_runtime_pack_build/entries.csv
+output/vqa_runtime_oversize_budget/index.html
+output/vqa_runtime_oversize_budget/summary.csv
+output/vqa_runtime_oversize_budget/archives.csv
+output/vqa_runtime_oversize_budget/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -247,7 +254,11 @@ tandis que 4 restent ouverts:
 `cbp_update_encoder`. Le build de pack VQA reste `gap` avec
 `replacement_entries=1955/1955`, `applied_replacements=1850/1955`,
 `deferred_replacements=105`, `missing_replacements=0`,
-`output_archives=66/66` et `output_bytes=47792090931`.
+`output_archives=66/66` et `output_bytes=47792090931`. Le rapport
+`output/vqa_runtime_oversize_budget/` precise que ces 105 remplacements
+differes concernent 2 archives, avec `required_reduction_bytes=5256429632`
+(`L20_BBI.MIX=3941667605`, `L4_HJI.MIX=1314762027`) et 155682538 octets de
+marge body cumulee.
 
 ## Textures .tex
 

@@ -16,6 +16,7 @@ DEFAULT_OUTPUT = Path("output/vqa_runtime_feasibility")
 DEFAULT_RUNTIME_PACK = Path("mod_mix_vqa_fullhd")
 DEFAULT_REPACK_READINESS_SUMMARY = Path("output/vqa_runtime_repack_readiness/summary.csv")
 DEFAULT_RUNTIME_PACK_BUILD_SUMMARY = Path("output/vqa_runtime_pack_build/summary.csv")
+DEFAULT_RUNTIME_OVERSIZE_SUMMARY = Path("output/vqa_runtime_oversize_budget/summary.csv")
 DEFAULT_LCW_LITERAL_PROBE_SUMMARY = Path("output/vqa_lcw_literal_probe/summary.csv")
 DEFAULT_NATIVE_EXACT_FIXTURE_SUMMARY = Path("output/vqa_native_exact_fixture_writer/summary.csv")
 DEFAULT_FULLHD_REPLACEMENT_SUMMARY = Path("output/vqa_fullhd_replacement_writer/summary.csv")
@@ -50,6 +51,11 @@ SUMMARY_FIELDS = [
     "runtime_pack_build_deferred_replacements",
     "runtime_pack_build_missing_replacements",
     "runtime_pack_build_output_archives",
+    "runtime_oversize_status",
+    "runtime_oversize_archives",
+    "runtime_oversize_deferred_replacements",
+    "runtime_oversize_headroom_bytes",
+    "runtime_oversize_required_reduction_bytes",
     "lcw_literal_probe_status",
     "lcw_literal_encoder_status",
     "lcw_literal_roundtrip_cases",
@@ -346,6 +352,7 @@ def build_requirement_rows(
     pack_files: list[Path],
     repack_summary: dict[str, str],
     pack_build_summary: dict[str, str],
+    oversize_summary: dict[str, str],
     lcw_summary: dict[str, str],
     native_fixture_summary: dict[str, str],
     fullhd_replacement_summary: dict[str, str],
@@ -369,6 +376,13 @@ def build_requirement_rows(
     pack_build_deferred = int_value(pack_build_summary, "deferred_replacements") if pack_build_summary else 0
     pack_build_missing = int_value(pack_build_summary, "missing_replacements") if pack_build_summary else 0
     pack_build_outputs = int_value(pack_build_summary, "output_archives") if pack_build_summary else 0
+    oversize_status = oversize_summary.get("status", "missing") if oversize_summary else "missing"
+    oversize_archives = int_value(oversize_summary, "oversize_archives") if oversize_summary else 0
+    oversize_deferred = int_value(oversize_summary, "deferred_replacements") if oversize_summary else 0
+    oversize_headroom = int_value(oversize_summary, "headroom_bytes") if oversize_summary else 0
+    oversize_required_reduction = (
+        int_value(oversize_summary, "required_reduction_bytes") if oversize_summary else 0
+    )
     materialized_runtime_pack = (
         pack_build_status == "pass"
         and pack_build_replacements == totals.entries
@@ -433,9 +447,14 @@ def build_requirement_rows(
                 f"deferred_replacements={pack_build_deferred};"
                 f"missing_replacements={pack_build_missing};"
                 f"output_archives={pack_build_outputs}/{len(totals.archives)};"
-                f"runtime_pack_files={len(pack_files)}"
+                f"runtime_pack_files={len(pack_files)};"
+                f"oversize_status={oversize_status};"
+                f"oversize_archives={oversize_archives};"
+                f"oversize_deferred_replacements={oversize_deferred};"
+                f"oversize_headroom_bytes={oversize_headroom};"
+                f"oversize_required_reduction_bytes={oversize_required_reduction}"
             ),
-            "next_step": "repack generated WVQA payloads into mod_mix_vqa_fullhd/ or provide a runtime override",
+            "next_step": "reduce oversized WVQA payloads enough to fit the 32-bit MIX body field, or provide a runtime override",
         },
         {
             "requirement": "mix_repack_roundtrip",
@@ -517,6 +536,7 @@ def build_reports(
     runtime_pack: Path,
     repack_readiness_summary: Path,
     runtime_pack_build_summary: Path,
+    runtime_oversize_summary: Path,
     lcw_literal_probe_summary: Path,
     native_exact_fixture_summary: Path,
     fullhd_replacement_summary: Path,
@@ -528,6 +548,8 @@ def build_reports(
     repack_summary = repack_summary_rows[0] if repack_summary_rows else {}
     pack_build_summary_rows = read_csv(runtime_pack_build_summary)
     pack_build_summary = pack_build_summary_rows[0] if pack_build_summary_rows else {}
+    oversize_summary_rows = read_csv(runtime_oversize_summary)
+    oversize_summary = oversize_summary_rows[0] if oversize_summary_rows else {}
     lcw_summary_rows = read_csv(lcw_literal_probe_summary)
     lcw_summary = lcw_summary_rows[0] if lcw_summary_rows else {}
     native_fixture_summary_rows = read_csv(native_exact_fixture_summary)
@@ -567,6 +589,7 @@ def build_reports(
         pack_files,
         repack_summary,
         pack_build_summary,
+        oversize_summary,
         lcw_summary,
         native_fixture_summary,
         fullhd_replacement,
@@ -603,6 +626,11 @@ def build_reports(
             "runtime_pack_build_deferred_replacements": pack_build_summary.get("deferred_replacements", ""),
             "runtime_pack_build_missing_replacements": pack_build_summary.get("missing_replacements", ""),
             "runtime_pack_build_output_archives": pack_build_summary.get("output_archives", ""),
+            "runtime_oversize_status": oversize_summary.get("status", "missing") if oversize_summary else "missing",
+            "runtime_oversize_archives": oversize_summary.get("oversize_archives", ""),
+            "runtime_oversize_deferred_replacements": oversize_summary.get("deferred_replacements", ""),
+            "runtime_oversize_headroom_bytes": oversize_summary.get("headroom_bytes", ""),
+            "runtime_oversize_required_reduction_bytes": oversize_summary.get("required_reduction_bytes", ""),
             "lcw_literal_probe_status": lcw_summary.get("status", "missing") if lcw_summary else "missing",
             "lcw_literal_encoder_status": lcw_literal_encoder_status,
             "lcw_literal_roundtrip_cases": lcw_summary.get("roundtrip_cases", ""),
@@ -762,6 +790,7 @@ def write_reports(
     runtime_pack: Path,
     repack_readiness_summary: Path,
     runtime_pack_build_summary: Path,
+    runtime_oversize_summary: Path,
     lcw_literal_probe_summary: Path,
     native_exact_fixture_summary: Path,
     fullhd_replacement_summary: Path,
@@ -772,6 +801,7 @@ def write_reports(
         runtime_pack,
         repack_readiness_summary,
         runtime_pack_build_summary,
+        runtime_oversize_summary,
         lcw_literal_probe_summary,
         native_exact_fixture_summary,
         fullhd_replacement_summary,
@@ -796,6 +826,7 @@ def main() -> None:
     parser.add_argument("--runtime-pack", type=Path, default=DEFAULT_RUNTIME_PACK)
     parser.add_argument("--repack-readiness-summary", type=Path, default=DEFAULT_REPACK_READINESS_SUMMARY)
     parser.add_argument("--runtime-pack-build-summary", type=Path, default=DEFAULT_RUNTIME_PACK_BUILD_SUMMARY)
+    parser.add_argument("--runtime-oversize-summary", type=Path, default=DEFAULT_RUNTIME_OVERSIZE_SUMMARY)
     parser.add_argument("--lcw-literal-probe-summary", type=Path, default=DEFAULT_LCW_LITERAL_PROBE_SUMMARY)
     parser.add_argument("--native-exact-fixture-summary", type=Path, default=DEFAULT_NATIVE_EXACT_FIXTURE_SUMMARY)
     parser.add_argument("--fullhd-replacement-summary", type=Path, default=DEFAULT_FULLHD_REPLACEMENT_SUMMARY)
@@ -809,6 +840,7 @@ def main() -> None:
         args.runtime_pack,
         args.repack_readiness_summary,
         args.runtime_pack_build_summary,
+        args.runtime_oversize_summary,
         args.lcw_literal_probe_summary,
         args.native_exact_fixture_summary,
         args.fullhd_replacement_summary,

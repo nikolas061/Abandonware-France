@@ -42,6 +42,10 @@ DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY = Path("output/vqa_runtime_pack_build/sum
 DEFAULT_VQA_RUNTIME_PACK_BUILD_REQUIREMENTS = Path("output/vqa_runtime_pack_build/requirements.csv")
 DEFAULT_VQA_RUNTIME_PACK_BUILD_ARCHIVES = Path("output/vqa_runtime_pack_build/archives.csv")
 DEFAULT_VQA_RUNTIME_PACK_BUILD_ENTRIES = Path("output/vqa_runtime_pack_build/entries.csv")
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET = Path("output/vqa_runtime_oversize_budget/index.html")
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY = Path("output/vqa_runtime_oversize_budget/summary.csv")
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES = Path("output/vqa_runtime_oversize_budget/archives.csv")
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ENTRIES = Path("output/vqa_runtime_oversize_budget/entries.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -940,6 +944,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_runtime_summary = first_row(DEFAULT_VQA_RUNTIME_FEASIBILITY_SUMMARY)
     vqa_repack_summary = first_row(DEFAULT_VQA_RUNTIME_REPACK_READINESS_SUMMARY)
     vqa_pack_build_summary = first_row(DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY)
+    vqa_oversize_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_fixture_summary = first_row(DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY)
@@ -989,6 +994,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{vqa_runtime_summary.get('runtime_pack_entries', '')} entrees pack, "
                 f"repack {vqa_repack_summary.get('mapped_entries', '')}/{vqa_repack_summary.get('vqa_entries', '')}, "
                 f"build {vqa_pack_build_summary.get('output_archives', '')} MIX, "
+                f"oversize {vqa_oversize_summary.get('deferred_replacements', '')} diff/"
+                f"{vqa_oversize_summary.get('required_reduction_bytes', '')} bytes, "
                 f"seed {vqa_archive_seed_summary.get('encoded_archives', '')}/"
                 f"{vqa_archive_seed_summary.get('target_archives', '')}, "
                 f"LCW {vqa_lcw_summary.get('roundtrip_cases', '')} tests, "
@@ -1062,6 +1069,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Requirements build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_REQUIREMENTS),
         ("Archives build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_ARCHIVES),
         ("Entrees build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_ENTRIES),
+        ("Budget oversized runtime VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET),
+        ("Synthese budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY),
+        ("Archives budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES),
+        ("Entrees budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ENTRIES),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),

@@ -55,6 +55,12 @@ Build/audit du pack MIX runtime VQA:
 python3 tools/lolg_vqa_runtime_pack_build.py
 ```
 
+Budget exact des payloads VQA differes par la limite body MIX:
+
+```sh
+python3 tools/lolg_vqa_runtime_oversize_budget.py
+```
+
 Probe de la primitive LCW literal pour le futur encodeur VQA:
 
 ```sh
@@ -142,7 +148,11 @@ materialises, mais le runtime reste partiel. Le builder
 frontiere: 1955/1955 payloads de remplacement, 1850 appliques, 105 differes
 (101 dans `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body
 32 bits des MIX, 0 manquant, et 66 MIX ecrits dans
-`mod_mix_vqa_fullhd/`. Le seed writer
+`mod_mix_vqa_fullhd/`. Le budget oversized
+`output/vqa_runtime_oversize_budget/` chiffre le verrou restant: 2 archives,
+105 remplacements differes, 155682538 octets de marge body encore disponible et
+5256429632 octets a regagner pour appliquer tous les payloads WVQA Full HD sans
+depasser la limite MIX. Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
 literal est maintenant prouvee dans `output/vqa_lcw_literal_probe/` avec 11

@@ -440,6 +440,10 @@ output/vqa_runtime_pack_build/summary.csv
 output/vqa_runtime_pack_build/requirements.csv
 output/vqa_runtime_pack_build/archives.csv
 output/vqa_runtime_pack_build/entries.csv
+output/vqa_runtime_oversize_budget/index.html
+output/vqa_runtime_oversize_budget/summary.csv
+output/vqa_runtime_oversize_budget/archives.csv
+output/vqa_runtime_oversize_budget/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -463,11 +467,13 @@ python3 tools/lolg_still_hd_gallery.py output/fullhd_images
 python3 tools/lolg_vqa_status_report.py output/vqa_batch_window_lcw_transparent0_allframes
 python3 tools/lolg_vqa_runtime_repack_readiness.py
 python3 tools/lolg_vqa_runtime_pack_build.py
+python3 tools/lolg_vqa_runtime_oversize_budget.py
 python3 tools/lolg_vqa_lcw_literal_probe.py
 python3 tools/lolg_vqa_native_exact_fixture_writer.py
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
 python3 tools/lolg_vqa_runtime_archive_seed_writer.py
 python3 tools/lolg_vqa_runtime_pack_build.py
+python3 tools/lolg_vqa_runtime_oversize_budget.py
 python3 tools/lolg_vqa_runtime_repack_readiness.py
 python3 tools/lolg_vqa_runtime_feasibility.py
 python3 tools/lolg_hd_archive_coverage.py C/LOLG/*.MIX -o output/fullhd_archive_coverage
@@ -1439,7 +1445,7 @@ The current master Full HD audit result is 252/252 gates passed:
   best prefix 64 bytes, best exact-byte count 4050, and 0 issue rows.
 - `output/cdcache_hd_asset_pack/index.html` verified with 3104 gallery assets,
   including 194 `.tex`-linked assets and 0 missing image/source paths.
-- `output/fullhd_dashboard/index.html` verified with 6 dashboard cards, 809 quick
+- `output/fullhd_dashboard/index.html` verified with 6 dashboard cards, 824 quick
   links, and 0 missing paths.
 - `RUN_HD.sh` and `lol2dos.conf` verify as the direct 1920x1080 DOSBox HD
   launch path.
@@ -1700,6 +1706,10 @@ output/vqa_runtime_pack_build/summary.csv
 output/vqa_runtime_pack_build/requirements.csv
 output/vqa_runtime_pack_build/archives.csv
 output/vqa_runtime_pack_build/entries.csv
+output/vqa_runtime_oversize_budget/index.html
+output/vqa_runtime_oversize_budget/summary.csv
+output/vqa_runtime_oversize_budget/archives.csv
+output/vqa_runtime_oversize_budget/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -1761,7 +1771,10 @@ uses 306/407 currently available replacements and defers 101 more, while
 and `SPKSTON2.MIX` applies 10/10. `L12_CMI.MIX` applies 56/56, `L1_DCI.MIX`
 applies 36/36, and `L5_HCI.MIX` applies 13/13. `TMPLDOR.MIX` applies 7/7 and
 `L8_SJI.MIX` applies 161/161. `L9_DRI.MIX` now applies 25/25, so all rebuilt
-bodies stay below the MIX 32-bit body-size field.
+bodies stay below the MIX 32-bit body-size field. The oversize budget report
+now quantifies the remaining VQA pack blocker as 2 oversized archives, 105
+deferred replacements, 155682538 bytes of cumulative body headroom, and
+5256429632 bytes of required reduction.
 The archive seed writer adds 8 targeted payloads for the previously uncovered MIX
 archives and validates 1675/1675 decoded frames. The LCW
 literal probe adds one concrete encoder primitive: 11 literal-LCW roundtrips
@@ -3957,6 +3970,10 @@ output/vqa_runtime_pack_build/summary.csv
 output/vqa_runtime_pack_build/requirements.csv
 output/vqa_runtime_pack_build/archives.csv
 output/vqa_runtime_pack_build/entries.csv
+output/vqa_runtime_oversize_budget/index.html
+output/vqa_runtime_oversize_budget/summary.csv
+output/vqa_runtime_oversize_budget/archives.csv
+output/vqa_runtime_oversize_budget/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -4040,6 +4057,22 @@ applies 7/7; `L8_SJI.MIX` applies 161/161; `L9_DRI.MIX` applies 25/25. These
 deferrals keep the rebuilt bodies under the 4294967295-byte MIX field limit.
 Partial or deferred files still cannot satisfy the full
 `mix_repack` requirement.
+
+`tools/lolg_vqa_runtime_oversize_budget.py` quantifies the remaining
+body-size budget for those deferred WVQA replacements:
+
+```sh
+python3 tools/lolg_vqa_runtime_oversize_budget.py
+```
+
+Current result: `gap`, with 2 oversized archives, 105 deferred replacements,
+155682538 bytes of cumulative body headroom, 5590242202 bytes of deferred WVQA
+payloads, and `required_reduction_bytes=5256429632` before every deferred
+payload can fit under the 32-bit MIX body field. `L20_BBI.MIX` requires
+3941667605 bytes of reduction across 101 deferred replacements; `L4_HJI.MIX`
+requires 1314762027 bytes across 4 deferred replacements. The largest deferred
+payload is `L4_HJI:0016:ccf92ed3` at 635392670 bytes; the largest deferred
+delta is 617385488 bytes.
 
 `tools/lolg_vqa_runtime_archive_seed_writer.py` keeps every VQA source archive
 represented in the runtime pack without forcing the main batch writer to jump to
