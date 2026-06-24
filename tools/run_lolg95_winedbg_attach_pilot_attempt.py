@@ -107,9 +107,10 @@ def build_attach_command_file(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def parse_lolg95_pid(info_proc_text: str) -> str:
+def parse_lolg95_pid(info_proc_text: str, executable_name: str = "LOLG95.EXE") -> str:
+    target = re.escape(executable_name)
     for line in info_proc_text.splitlines():
-        match = re.search(r"^\s*=?([0-9a-fA-F]{8})\s+\d+\s+.*'LOLG95\.EXE'", line, re.IGNORECASE)
+        match = re.search(rf"^\s*=?([0-9a-fA-F]{{8}})\s+\d+\s+.*'{target}'", line, re.IGNORECASE)
         if match:
             return match.group(1).lower()
     return ""
@@ -120,7 +121,9 @@ def parse_lolg95_linux_pid(ps_text: str, executable_name: str) -> str:
     found = ""
     for line in ps_text.splitlines():
         parts = line.split(None, 2)
-        if len(parts) >= 2 and parts[1].lower() == target:
+        command = parts[1].lower() if len(parts) >= 2 else ""
+        args = parts[2].lower() if len(parts) >= 3 else ""
+        if command == target or target in args:
             found = parts[0]
     return found
 
@@ -182,7 +185,7 @@ def stop_process(process: subprocess.Popen[str] | None) -> None:
 
 
 def run_attempt(args: argparse.Namespace) -> dict[str, str]:
-    output = args.output
+    output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     info_proc_log = output / "info_proc.log"
     raw_log = output / "raw.log"
@@ -268,7 +271,7 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
             )
             info_proc_text = info_stdout + info_stderr
             info_proc_log.write_text(info_proc_text, encoding="utf-8", errors="replace")
-            attach_pid = parse_lolg95_pid(info_proc_text)
+            attach_pid = parse_lolg95_pid(info_proc_text, args.runtime_executable.name)
             if args.force_level_index is not None or args.force_level_slot is not None:
                 ps_stdout, ps_stderr, _ps_returncode, _ps_timeout = run_with_timeout(
                     ["ps", "-eo", "pid=,comm=,args="],

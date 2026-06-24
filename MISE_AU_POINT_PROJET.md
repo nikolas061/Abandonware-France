@@ -446,6 +446,15 @@ observes incluent `L20_BB.MIX`, `l20_bb.MIX`, `L20_BBI.MIX`, `l20_bbI.MIX`,
 `sphere3\l20_bb\l20_bb.te_`, `.odf`, `.map`, `GLOBAL.IMG` et `l20_bb.img`.
 Le verrou restant est donc le fallback runtime `L20_BBI_HD.MIX` apres
 `L20_BBI.MIX`, plus l'acces au contenu L20 lui-meme.
+`tools/lolg95_sidecar_suffix_patch_probe.py` ajoute une preuve intermediaire:
+copie patchee uniquement sous `output/lolg95_sidecar_suffix_patch_probe/`,
+nouvelle chaine `I_HD.MIX` placee en `DGROUP` a `0x005ab2d3`, et immediat
+`0x004536ce` redirige depuis `I.MIX`. La trace
+`output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/` passe avec
+`breakpoint_hits=220`, `extracted_rows=220`, `path_rows=219`,
+`unique_paths=93`, `l20_bbi_hd_mentions=6`; elle observe `L20_BBI_HD.MIX` et
+`l20_bbI_HD.MIX`. Limite importante: ce patch remplace l'archive `I.MIX` par le
+sidecar HD, il ne constitue pas encore le fallback additionnel final.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 

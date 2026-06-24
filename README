@@ -321,6 +321,16 @@ runtime observes incluent `L20_BB.MIX`, `l20_bb.MIX`, `L20_BBI.MIX`,
 `l20_bbI.MIX`, `sphere3\l20_bb\l20_bb.te_`, `.odf`, `.map`, `GLOBAL.IMG` et
 `l20_bb.img`. Le verrou restant devient donc le fallback `L20_BBI_HD.MIX` au
 loader, pas l'acces runtime a `L20_BBI.MIX`.
+`tools/lolg95_sidecar_suffix_patch_probe.py` cree ensuite une copie patchee
+hors source dans `output/lolg95_sidecar_suffix_patch_probe/`: l'immediat
+`0x004536ce` pointe vers une nouvelle chaine `I_HD.MIX` en `DGROUP`
+(`0x005ab2d3`) et le stage lie `L20_BBI_HD.MIX`. La trace
+`output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/` valide cette
+injection de nom: `status=pass`, `breakpoint_hits=220`, `path_rows=219`,
+`unique_paths=93`, `l20_bbi_hd_mentions=6`, avec ouvertures
+`L20_BBI_HD.MIX` et `l20_bbI_HD.MIX`. Cette preuve remplace le suffixe
+`I.MIX` par `I_HD.MIX`; elle ne monte pas encore le sidecar en fallback en plus
+de `L20_BBI.MIX`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

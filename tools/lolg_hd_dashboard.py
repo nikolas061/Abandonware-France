@@ -207,6 +207,21 @@ DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_FORCED_RAW = Path(
 DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_FORCED_FORCE_LOG = Path(
     "output/lolg95_winedbg_attach_pilot_l20_forced_attempt/force_level_write.log"
 )
+DEFAULT_LOLG95_SIDECAR_SUFFIX_PATCH_PROBE_SUMMARY = Path(
+    "output/lolg95_sidecar_suffix_patch_probe/summary.csv"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_SUMMARY = Path(
+    "output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/summary.csv"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_TRACE = Path(
+    "output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/trace.tsv"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_RAW = Path(
+    "output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/raw.log"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_FORCE_LOG = Path(
+    "output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/force_level_write.log"
+)
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1138,6 +1153,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_loader_trace_summary = first_row(DEFAULT_VQA_RUNTIME_LOADER_TRACE_CONTRACT_SUMMARY)
     lolg95_loader_trace_attempt_summary = first_row(DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_SUMMARY)
     lolg95_attach_l20_summary = first_row(DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_FORCED_SUMMARY)
+    lolg95_suffix_patch_summary = first_row(DEFAULT_LOLG95_SIDECAR_SUFFIX_PATCH_PROBE_SUMMARY)
+    lolg95_suffix_patch_trace_summary = first_row(DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1229,6 +1246,9 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{lolg95_attach_l20_summary.get('unique_paths', '')} paths, "
                 f"L20_BBI {lolg95_attach_l20_summary.get('l20_bbi_mentions', '')}/"
                 f"HD {lolg95_attach_l20_summary.get('l20_bbi_hd_mentions', '')}, "
+                f"suffix patch {lolg95_suffix_patch_summary.get('status', '')}, "
+                f"HD trace {lolg95_suffix_patch_trace_summary.get('breakpoint_hits', '')}/"
+                f"{lolg95_suffix_patch_trace_summary.get('l20_bbi_hd_mentions', '')}, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1441,6 +1461,11 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Commandes trace attachee L20 force", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_FORCED_COMMANDS),
         ("Log brut trace attachee L20 force", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_FORCED_RAW),
         ("Ecriture memoire trace L20 force", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_FORCED_FORCE_LOG),
+        ("Synthese patch suffixe sidecar LOLG95", DEFAULT_LOLG95_SIDECAR_SUFFIX_PATCH_PROBE_SUMMARY),
+        ("Synthese trace suffixe sidecar L20", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_SUMMARY),
+        ("Trace suffixe sidecar L20", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_TRACE),
+        ("Log brut suffixe sidecar L20", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_RAW),
+        ("Ecriture memoire suffixe sidecar L20", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_L20_SUFFIX_PATCH_FORCE_LOG),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),
