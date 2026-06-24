@@ -440,10 +440,18 @@ output/vqa_runtime_pack_build/summary.csv
 output/vqa_runtime_pack_build/requirements.csv
 output/vqa_runtime_pack_build/archives.csv
 output/vqa_runtime_pack_build/entries.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/index.html
+output/vqa_runtime_pack_build_lcw_compact_sample/summary.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/archives.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv
 output/vqa_runtime_oversize_budget/index.html
 output/vqa_runtime_oversize_budget/summary.csv
 output/vqa_runtime_oversize_budget/archives.csv
 output/vqa_runtime_oversize_budget/entries.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/index.html
+output/vqa_runtime_oversize_budget_lcw_compact_sample/summary.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/archives.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -479,6 +487,15 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py
 python3 tools/lolg_vqa_lcw_literal_probe.py
 python3 tools/lolg_vqa_lcw_compression_probe.py
 python3 tools/lolg_vqa_lcw_compact_payloads.py
+python3 tools/lolg_vqa_runtime_pack_build.py \
+  --archive L20_BBI \
+  --replacement-overlay-root replacements_vqa_fullhd_lcw_compact \
+  -o output/vqa_runtime_pack_build_lcw_compact_sample \
+  --runtime-pack mod_mix_vqa_fullhd_lcw_compact_sample
+python3 tools/lolg_vqa_runtime_oversize_budget.py \
+  --archives output/vqa_runtime_pack_build_lcw_compact_sample/archives.csv \
+  --entries output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv \
+  -o output/vqa_runtime_oversize_budget_lcw_compact_sample
 python3 tools/lolg_vqa_native_exact_fixture_writer.py
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
 python3 tools/lolg_vqa_runtime_archive_seed_writer.py
@@ -1716,10 +1733,18 @@ output/vqa_runtime_pack_build/summary.csv
 output/vqa_runtime_pack_build/requirements.csv
 output/vqa_runtime_pack_build/archives.csv
 output/vqa_runtime_pack_build/entries.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/index.html
+output/vqa_runtime_pack_build_lcw_compact_sample/summary.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/archives.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv
 output/vqa_runtime_oversize_budget/index.html
 output/vqa_runtime_oversize_budget/summary.csv
 output/vqa_runtime_oversize_budget/archives.csv
 output/vqa_runtime_oversize_budget/entries.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/index.html
+output/vqa_runtime_oversize_budget_lcw_compact_sample/summary.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/archives.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -1803,7 +1828,13 @@ largest deferred payloads, saving 28260692 bytes on the tested chunks
 (`sample_saved_ratio=0.704964`). The LCW compact payload materializer writes the
 first complete compact deferred payload, `L20_BBI:0365:3c06766c`: 65 frames,
 130 chunks recompressed with 0 roundtrip failures, 19249866 -> 5239876 bytes,
-and `saved_ratio=0.727797`. The native exact fixture
+and `saved_ratio=0.727797`. The runtime pack builder now accepts compact
+replacement overlays with `--replacement-overlay-root`; the targeted
+`L20_BBI` sample under `output/vqa_runtime_pack_build_lcw_compact_sample/`
+uses that compact payload, reports `overlay_replacements=1`, applies 307/407
+replacements, defers 100, writes `output_bytes=4287450672`, and leaves
+`required_reduction_bytes=3927657615` in the matching sample oversize budget.
+The native exact fixture
 writer now assembles a real `FORM/WVQA` payload with CBFZ/VPTZ literal-LCW
 chunks and validates 20/20 decoded frames; it is still native-size, not a Full
 HD replacement payload. The Full HD replacement writer now encodes a 1568-entry
@@ -3994,10 +4025,18 @@ output/vqa_runtime_pack_build/summary.csv
 output/vqa_runtime_pack_build/requirements.csv
 output/vqa_runtime_pack_build/archives.csv
 output/vqa_runtime_pack_build/entries.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/index.html
+output/vqa_runtime_pack_build_lcw_compact_sample/summary.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/archives.csv
+output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv
 output/vqa_runtime_oversize_budget/index.html
 output/vqa_runtime_oversize_budget/summary.csv
 output/vqa_runtime_oversize_budget/archives.csv
 output/vqa_runtime_oversize_budget/entries.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/index.html
+output/vqa_runtime_oversize_budget_lcw_compact_sample/summary.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/archives.csv
+output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -4157,9 +4196,42 @@ Current result: `pass`, with 1/1 selected deferred replacement written,
 65 frames, 130 recompressed chunks, 0 chunk roundtrip failures,
 `original_payload_bytes=19249866`, `compact_payload_bytes=5239876`, and
 `saved_bytes=14009990` (`saved_ratio=0.727797`). The compact payload is written
-to `replacements_vqa_fullhd_lcw_compact/L20_BBI/3c06766c.vqa`. It is still a
-side-root proof; the runtime pack builder must be taught to consume this root
-before it can reduce the active `mod_mix_vqa_fullhd/` gap.
+to `replacements_vqa_fullhd_lcw_compact/L20_BBI/3c06766c.vqa`.
+
+`tools/lolg_vqa_runtime_pack_build.py` can now prefer compact side roots without
+rewriting the canonical replacement manifest:
+
+```sh
+python3 tools/lolg_vqa_runtime_pack_build.py \
+  --archive L20_BBI \
+  --replacement-overlay-root replacements_vqa_fullhd_lcw_compact \
+  -o output/vqa_runtime_pack_build_lcw_compact_sample \
+  --runtime-pack mod_mix_vqa_fullhd_lcw_compact_sample
+```
+
+Current compact sample result: `gap`, with `archive_filters=l20_bbi`,
+`replacement_overlay_roots=replacements_vqa_fullhd_lcw_compact`,
+`replacement_entries=407/407`, `overlay_replacements=1`,
+`applied_replacements=307/407`, `deferred_replacements=100`,
+`missing_replacements=0`, `output_archives=1/1`, and
+`output_bytes=4287450672`. The row `L20_BBI:0365:3c06766c` now resolves to
+`replacements_vqa_fullhd_lcw_compact/L20_BBI/3c06766c.vqa`, has
+`replacement_source=overlay`, shrinks its delta from 18856768 to 4846778 bytes,
+and is `replacement_ready` instead of `replacement_deferred_oversize`.
+
+The matching sample oversize budget is:
+
+```sh
+python3 tools/lolg_vqa_runtime_oversize_budget.py \
+  --archives output/vqa_runtime_pack_build_lcw_compact_sample/archives.csv \
+  --entries output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv \
+  -o output/vqa_runtime_oversize_budget_lcw_compact_sample
+```
+
+Current compact sample budget: `gap`, with 1 oversized archive, 100 deferred
+replacements, `headroom_bytes=7522233`,
+`deferred_replacement_bytes=4066695580`, and
+`required_reduction_bytes=3927657615` remaining for `L20_BBI.MIX`.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

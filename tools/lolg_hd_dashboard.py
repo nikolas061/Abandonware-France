@@ -42,10 +42,34 @@ DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY = Path("output/vqa_runtime_pack_build/sum
 DEFAULT_VQA_RUNTIME_PACK_BUILD_REQUIREMENTS = Path("output/vqa_runtime_pack_build/requirements.csv")
 DEFAULT_VQA_RUNTIME_PACK_BUILD_ARCHIVES = Path("output/vqa_runtime_pack_build/archives.csv")
 DEFAULT_VQA_RUNTIME_PACK_BUILD_ENTRIES = Path("output/vqa_runtime_pack_build/entries.csv")
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_sample/index.html"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_SUMMARY = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_sample/summary.csv"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_sample/archives.csv"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_ENTRIES = Path(
+    "output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv"
+)
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET = Path("output/vqa_runtime_oversize_budget/index.html")
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY = Path("output/vqa_runtime_oversize_budget/summary.csv")
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES = Path("output/vqa_runtime_oversize_budget/archives.csv")
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ENTRIES = Path("output/vqa_runtime_oversize_budget/entries.csv")
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_sample/index.html"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_SUMMARY = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_sample/summary.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_sample/archives.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_ENTRIES = Path(
+    "output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv"
+)
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -952,7 +976,9 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_runtime_summary = first_row(DEFAULT_VQA_RUNTIME_FEASIBILITY_SUMMARY)
     vqa_repack_summary = first_row(DEFAULT_VQA_RUNTIME_REPACK_READINESS_SUMMARY)
     vqa_pack_build_summary = first_row(DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY)
+    vqa_pack_build_lcw_sample_summary = first_row(DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_SUMMARY)
     vqa_oversize_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY)
+    vqa_oversize_lcw_sample_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1012,6 +1038,10 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"LCW comp {vqa_lcw_compression_summary.get('sample_saved_ratio', '')}, "
                 f"compact {vqa_lcw_compact_summary.get('entries_written', '')}/"
                 f"{vqa_lcw_compact_summary.get('saved_ratio', '')}, "
+                f"sample overlay {vqa_pack_build_lcw_sample_summary.get('overlay_replacements', '')}/"
+                f"{vqa_pack_build_lcw_sample_summary.get('applied_replacements', '')} appl, "
+                f"sample diff {vqa_pack_build_lcw_sample_summary.get('deferred_replacements', '')}/"
+                f"{vqa_oversize_lcw_sample_summary.get('required_reduction_bytes', '')} bytes, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1082,10 +1112,36 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Requirements build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_REQUIREMENTS),
         ("Archives build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_ARCHIVES),
         ("Entrees build pack runtime VQA", DEFAULT_VQA_RUNTIME_PACK_BUILD_ENTRIES),
+        ("Sample build pack runtime VQA LCW compact", DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE),
+        (
+            "Synthese sample build VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_SUMMARY,
+        ),
+        (
+            "Archives sample build VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_ARCHIVES,
+        ),
+        (
+            "Entrees sample build VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_ENTRIES,
+        ),
         ("Budget oversized runtime VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET),
         ("Synthese budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY),
         ("Archives budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES),
         ("Entrees budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ENTRIES),
+        ("Sample budget oversized VQA LCW compact", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE),
+        (
+            "Synthese sample budget VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_SUMMARY,
+        ),
+        (
+            "Archives sample budget VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_ARCHIVES,
+        ),
+        (
+            "Entrees sample budget VQA LCW compact",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_ENTRIES,
+        ),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),
