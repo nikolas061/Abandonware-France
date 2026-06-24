@@ -319,6 +319,10 @@ output/lolg95_runtime_archive_list_l20_sidecar_probe/summary.csv
 output/lolg95_runtime_archive_list_l20_sidecar_probe/archives.tsv
 output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv
 output/lolg95_runtime_archive_list_l20_sidecar_probe/force_level_write.log
+output/lolg95_sidecar_runtime_stage/summary.csv
+output/lolg95_sidecar_runtime_stage/requirements.csv
+output/lolg95_sidecar_runtime_stage/README.txt
+output/lolg95_sidecar_runtime_stage/run_lolg95_sidecar_fullhd_wine.sh
 output/lolg95_winedbg_loader_trace_attempt/trace.tsv
 output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
 output/lolg95_winedbg_loader_trace_attempt/raw.log
@@ -414,6 +418,11 @@ runtime base/missing/unknown. Le rapport note aussi que `CDCACHE.LST` et
 `CDCACHE.LS_` ne contiennent ni `L20_BBI.MIX` ni `L20_BBI_HD.MIX`; le chemin
 accepte est donc le hook du loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui
 contiennent `CDCACHE` et `.MIX`) prouve par le patch additif.
+`output/lolg95_sidecar_runtime_stage/` fige ce chemin en stage de test non
+destructif: `summary.csv` passe, `requirements.csv` valide le patch additif,
+le repertoire de stage, l'executable stage, les liens sidecar, le plan
+sidecar et la preuve archive-list, puis
+`run_lolg95_sidecar_fullhd_wine.sh` lance uniquement ce stage Wine.
 `output/vqa_runtime_loader_probe/` cartographie ce loader cote `LOLG95.EXE`:
 4 candidats hook, 7 references `CreateFileA`, constructeur generique `.MIX`,
 montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage `CDCACHE.MIX`, et 0
@@ -502,6 +511,10 @@ rattacher a un appel VQA joue.
 Le plan `output/vqa_runtime_sidecar_load_plan/` consomme maintenant cette
 preuve et passe: 8/8 base, 8/8 sidecar, `runtime_archive_list_status=pass`,
 `runtime_sidecar_first=8`, et aucun ID runtime base/missing/unknown.
+Le stage `output/lolg95_sidecar_runtime_stage/` passe a son tour et fournit un
+script Wine de test pointe vers
+`output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE`;
+il ne modifie pas le lanceur DOSBox.
 
 ## Textures .tex
 
@@ -5289,8 +5302,9 @@ liste runtime, via `l20_bbI_HD.MIX`. La trace lookup directe
 `output/lolg95_winedbg_mix_lookup_l20_additive_attempt/` observe toujours
 `0x004e3d18` avec 97 hits et 52 IDs uniques mais aucun de ces 8 hashes, parce
 que le parcours automatise ne sollicite pas encore ces VQA. La prochaine passe
-doit donc convertir le patch additif en fallback/stage final propre et, si
-possible, capturer un appel VQA joue qui consomme un de ces IDs. Les points de
+dispose maintenant du stage propre `output/lolg95_sidecar_runtime_stage/`; elle
+doit donc soit capturer un appel VQA joue qui consomme un de ces IDs, soit
+promouvoir ce chemin Wine stage apres revue visuelle manuelle. Les points de
 depart actuels sont le constructeur generique `0x004e41e0`, la liste globale
 d'archives `0x6a5b40`, le lookup hash `0x004e3c90`, le hit archive
 `0x004e3d18`, le saut additif `0x00453723 -> 0x005ab2d3`, et les refs

@@ -535,6 +535,10 @@ output/lolg95_runtime_archive_list_l20_sidecar_probe/summary.csv
 output/lolg95_runtime_archive_list_l20_sidecar_probe/archives.tsv
 output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv
 output/lolg95_runtime_archive_list_l20_sidecar_probe/force_level_write.log
+output/lolg95_sidecar_runtime_stage/summary.csv
+output/lolg95_sidecar_runtime_stage/requirements.csv
+output/lolg95_sidecar_runtime_stage/README.txt
+output/lolg95_sidecar_runtime_stage/run_lolg95_sidecar_fullhd_wine.sh
 output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
 output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
@@ -4527,6 +4531,7 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
   --force-level-index 20 --force-level-slot 4
+python3 tools/lolg95_sidecar_runtime_stage.py
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4583,6 +4588,11 @@ not declare `L20_BBI_HD`, so the accepted path is the compiled-loader hook
 proof from the additive runtime patch; `LOLG95.EXE`/`LOLG.DAT` remain the
 compiled-loader candidates because they contain both `CDCACHE` and `.MIX`
 markers.
+`output/lolg95_sidecar_runtime_stage/` wraps that accepted path into a clean
+non-destructive test stage: all requirements pass, the staged executable is
+`output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE`,
+both sidecar links exist, and the generated Wine script points only at this
+staged path.
 `output/vqa_runtime_loader_probe/` resolves the Windows PE side of that next
 step: 4 hook candidates, 7 `CreateFileA` xrefs, the generic `.MIX`
 constructor, startup archive mounts, `CDCACHE.MIX` mount evidence, and no
@@ -4665,6 +4675,12 @@ sidecar selection once those IDs are requested.
 proof, so `output/vqa_runtime_sidecar_load_plan/summary.csv` is `pass` with
 8/8 base entries, 8/8 sidecar entries, `runtime_archive_list_status=pass`,
 `runtime_sidecar_first=8`, and zero runtime base/missing/unknown first IDs.
+`tools/lolg95_sidecar_runtime_stage.py` promotes the proven output-only path
+into `output/lolg95_sidecar_runtime_stage/`: `summary.csv` is `pass`,
+`requirements.csv` checks the additive patch, staged EXE, sidecar links,
+sidecar load plan, and archive-list probe, and
+`run_lolg95_sidecar_fullhd_wine.sh` launches the staged Wine test path without
+modifying the DOSBox launcher.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

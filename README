@@ -162,6 +162,7 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
   --force-level-index 20 --force-level-slot 4
+python3 tools/lolg95_sidecar_runtime_stage.py
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -377,6 +378,10 @@ au fallback final ou a un appel VQA joue.
 `output/vqa_runtime_sidecar_load_plan/summary.csv` passe avec 8/8 entrees base,
 8/8 entrees sidecar, `runtime_archive_list_status=pass`, `runtime_sidecar_first=8`
 et aucun ID `runtime_base_first`/`runtime_missing`/`runtime_unknown_first`.
+`tools/lolg95_sidecar_runtime_stage.py` fige ce chemin dans un stage non
+destructif: `output/lolg95_sidecar_runtime_stage/summary.csv` passe, ecrit
+`requirements.csv`, `README.txt`, et le script de test Wine
+`run_lolg95_sidecar_fullhd_wine.sh` pointant vers le stage additif prouve.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
