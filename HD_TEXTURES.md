@@ -452,6 +452,10 @@ output/vqa_lcw_compression_probe/index.html
 output/vqa_lcw_compression_probe/summary.csv
 output/vqa_lcw_compression_probe/entries.csv
 output/vqa_lcw_compression_probe/chunks.csv
+output/vqa_lcw_compact_payloads/index.html
+output/vqa_lcw_compact_payloads/summary.csv
+output/vqa_lcw_compact_payloads/entries.csv
+output/vqa_lcw_compact_payloads/chunks.csv
 output/vqa_native_exact_fixture_writer/index.html
 output/vqa_native_exact_fixture_writer/summary.csv
 output/vqa_native_exact_fixture_writer/requirements.csv
@@ -474,6 +478,7 @@ python3 tools/lolg_vqa_runtime_pack_build.py
 python3 tools/lolg_vqa_runtime_oversize_budget.py
 python3 tools/lolg_vqa_lcw_literal_probe.py
 python3 tools/lolg_vqa_lcw_compression_probe.py
+python3 tools/lolg_vqa_lcw_compact_payloads.py
 python3 tools/lolg_vqa_native_exact_fixture_writer.py
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
 python3 tools/lolg_vqa_runtime_archive_seed_writer.py
@@ -1450,7 +1455,7 @@ The current master Full HD audit result is 252/252 gates passed:
   best prefix 64 bytes, best exact-byte count 4050, and 0 issue rows.
 - `output/cdcache_hd_asset_pack/index.html` verified with 3104 gallery assets,
   including 194 `.tex`-linked assets and 0 missing image/source paths.
-- `output/fullhd_dashboard/index.html` verified with 6 dashboard cards, 828 quick
+- `output/fullhd_dashboard/index.html` verified with 6 dashboard cards, 832 quick
   links, and 0 missing paths.
 - `RUN_HD.sh` and `lol2dos.conf` verify as the direct 1920x1080 DOSBox HD
   launch path.
@@ -1723,6 +1728,10 @@ output/vqa_lcw_compression_probe/index.html
 output/vqa_lcw_compression_probe/summary.csv
 output/vqa_lcw_compression_probe/entries.csv
 output/vqa_lcw_compression_probe/chunks.csv
+output/vqa_lcw_compact_payloads/index.html
+output/vqa_lcw_compact_payloads/summary.csv
+output/vqa_lcw_compact_payloads/entries.csv
+output/vqa_lcw_compact_payloads/chunks.csv
 output/vqa_native_exact_fixture_writer/index.html
 output/vqa_native_exact_fixture_writer/summary.csv
 output/vqa_native_exact_fixture_writer/requirements.csv
@@ -1791,7 +1800,10 @@ pass, 374 native exact-block entries are identified, and 0 Full HD naive
 exact-block entries fit without vector quantization. The LCW compression probe
 adds a compatible non-literal compression path and samples 128 frames from the 4
 largest deferred payloads, saving 28260692 bytes on the tested chunks
-(`sample_saved_ratio=0.704964`). The native exact fixture
+(`sample_saved_ratio=0.704964`). The LCW compact payload materializer writes the
+first complete compact deferred payload, `L20_BBI:0365:3c06766c`: 65 frames,
+130 chunks recompressed with 0 roundtrip failures, 19249866 -> 5239876 bytes,
+and `saved_ratio=0.727797`. The native exact fixture
 writer now assembles a real `FORM/WVQA` payload with CBFZ/VPTZ literal-LCW
 chunks and validates 20/20 decoded frames; it is still native-size, not a Full
 HD replacement payload. The Full HD replacement writer now encodes a 1568-entry
@@ -3994,6 +4006,10 @@ output/vqa_lcw_compression_probe/index.html
 output/vqa_lcw_compression_probe/summary.csv
 output/vqa_lcw_compression_probe/entries.csv
 output/vqa_lcw_compression_probe/chunks.csv
+output/vqa_lcw_compact_payloads/index.html
+output/vqa_lcw_compact_payloads/summary.csv
+output/vqa_lcw_compact_payloads/entries.csv
+output/vqa_lcw_compact_payloads/chunks.csv
 output/vqa_native_exact_fixture_writer/index.html
 output/vqa_native_exact_fixture_writer/summary.csv
 output/vqa_native_exact_fixture_writer/requirements.csv
@@ -4128,6 +4144,22 @@ chunk bytes, 11827439 compressed chunk bytes, 28260692 saved bytes, and
 `sample_saved_ratio=0.704964`. This is not yet full coverage, but it proves the
 current literal-only WVQA writer has a real LCW compression path to reduce the
 oversized VQA payload frontier.
+
+`tools/lolg_vqa_lcw_compact_payloads.py` materializes compact WVQA copies under
+`replacements_vqa_fullhd_lcw_compact/` while validating every recompressed
+`CBFZ`/`VPTZ` chunk by byte-identical LCW roundtrip:
+
+```sh
+python3 tools/lolg_vqa_lcw_compact_payloads.py
+```
+
+Current result: `pass`, with 1/1 selected deferred replacement written,
+65 frames, 130 recompressed chunks, 0 chunk roundtrip failures,
+`original_payload_bytes=19249866`, `compact_payload_bytes=5239876`, and
+`saved_bytes=14009990` (`saved_ratio=0.727797`). The compact payload is written
+to `replacements_vqa_fullhd_lcw_compact/L20_BBI/3c06766c.vqa`. It is still a
+side-root proof; the runtime pack builder must be taught to consume this root
+before it can reduce the active `mod_mix_vqa_fullhd/` gap.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

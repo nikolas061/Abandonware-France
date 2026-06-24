@@ -19,6 +19,7 @@ DEFAULT_RUNTIME_PACK_BUILD_SUMMARY = Path("output/vqa_runtime_pack_build/summary
 DEFAULT_RUNTIME_OVERSIZE_SUMMARY = Path("output/vqa_runtime_oversize_budget/summary.csv")
 DEFAULT_LCW_LITERAL_PROBE_SUMMARY = Path("output/vqa_lcw_literal_probe/summary.csv")
 DEFAULT_LCW_COMPRESSION_PROBE_SUMMARY = Path("output/vqa_lcw_compression_probe/summary.csv")
+DEFAULT_LCW_COMPACT_PAYLOADS_SUMMARY = Path("output/vqa_lcw_compact_payloads/summary.csv")
 DEFAULT_NATIVE_EXACT_FIXTURE_SUMMARY = Path("output/vqa_native_exact_fixture_writer/summary.csv")
 DEFAULT_FULLHD_REPLACEMENT_SUMMARY = Path("output/vqa_fullhd_replacement_writer/summary.csv")
 
@@ -69,6 +70,11 @@ SUMMARY_FIELDS = [
     "lcw_compression_probe_frames",
     "lcw_compression_probe_saved_bytes",
     "lcw_compression_probe_saved_ratio",
+    "lcw_compact_payloads_status",
+    "lcw_compact_payloads_entries",
+    "lcw_compact_payloads_frames",
+    "lcw_compact_payloads_saved_bytes",
+    "lcw_compact_payloads_saved_ratio",
     "native_exact_fixture_status",
     "native_exact_fixture_frames",
     "native_exact_fixture_matched_frames",
@@ -362,6 +368,7 @@ def build_requirement_rows(
     oversize_summary: dict[str, str],
     lcw_summary: dict[str, str],
     lcw_compression_summary: dict[str, str],
+    lcw_compact_summary: dict[str, str],
     native_fixture_summary: dict[str, str],
     fullhd_replacement_summary: dict[str, str],
 ) -> list[dict[str, str]]:
@@ -411,6 +418,10 @@ def build_requirement_rows(
         int_value(lcw_compression_summary, "sample_saved_bytes") if lcw_compression_summary else 0
     )
     lcw_compression_ratio = lcw_compression_summary.get("sample_saved_ratio", "") if lcw_compression_summary else ""
+    lcw_compact_status = lcw_compact_summary.get("status", "missing") if lcw_compact_summary else "missing"
+    lcw_compact_entries = int_value(lcw_compact_summary, "entries_written") if lcw_compact_summary else 0
+    lcw_compact_saved = int_value(lcw_compact_summary, "saved_bytes") if lcw_compact_summary else 0
+    lcw_compact_ratio = lcw_compact_summary.get("saved_ratio", "") if lcw_compact_summary else ""
     native_fixture_status = native_fixture_summary.get("status", "missing") if native_fixture_summary else "missing"
     native_fixture_frames = int_value(native_fixture_summary, "frames") if native_fixture_summary else 0
     native_fixture_matched = int_value(native_fixture_summary, "matched_frames") if native_fixture_summary else 0
@@ -501,7 +512,11 @@ def build_requirement_rows(
                 f"literal_lcw_native_exact_block_entries={lcw_native_exact_entries};"
                 f"compression_probe_status={lcw_compression_status};"
                 f"compression_probe_saved_bytes={lcw_compression_saved};"
-                f"compression_probe_saved_ratio={lcw_compression_ratio}"
+                f"compression_probe_saved_ratio={lcw_compression_ratio};"
+                f"compact_payloads_status={lcw_compact_status};"
+                f"compact_payloads_entries={lcw_compact_entries};"
+                f"compact_payloads_saved_bytes={lcw_compact_saved};"
+                f"compact_payloads_saved_ratio={lcw_compact_ratio}"
             ),
             "next_step": "connect literal LCW to CBFZ/VPTZ output, then add optimized/windowed variants where size limits require them",
         },
@@ -557,6 +572,7 @@ def build_reports(
     runtime_oversize_summary: Path,
     lcw_literal_probe_summary: Path,
     lcw_compression_probe_summary: Path,
+    lcw_compact_payloads_summary: Path,
     native_exact_fixture_summary: Path,
     fullhd_replacement_summary: Path,
 ) -> tuple[dict[str, str], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
@@ -573,6 +589,8 @@ def build_reports(
     lcw_summary = lcw_summary_rows[0] if lcw_summary_rows else {}
     lcw_compression_summary_rows = read_csv(lcw_compression_probe_summary)
     lcw_compression_summary = lcw_compression_summary_rows[0] if lcw_compression_summary_rows else {}
+    lcw_compact_summary_rows = read_csv(lcw_compact_payloads_summary)
+    lcw_compact_summary = lcw_compact_summary_rows[0] if lcw_compact_summary_rows else {}
     native_fixture_summary_rows = read_csv(native_exact_fixture_summary)
     native_fixture_summary = native_fixture_summary_rows[0] if native_fixture_summary_rows else {}
     fullhd_replacement = aggregate_fullhd_replacement_summaries(fullhd_replacement_summary)
@@ -613,6 +631,7 @@ def build_reports(
         oversize_summary,
         lcw_summary,
         lcw_compression_summary,
+        lcw_compact_summary,
         native_fixture_summary,
         fullhd_replacement,
     )
@@ -667,6 +686,13 @@ def build_reports(
             "lcw_compression_probe_frames": lcw_compression_summary.get("frames_sampled", ""),
             "lcw_compression_probe_saved_bytes": lcw_compression_summary.get("sample_saved_bytes", ""),
             "lcw_compression_probe_saved_ratio": lcw_compression_summary.get("sample_saved_ratio", ""),
+            "lcw_compact_payloads_status": (
+                lcw_compact_summary.get("status", "missing") if lcw_compact_summary else "missing"
+            ),
+            "lcw_compact_payloads_entries": lcw_compact_summary.get("entries_written", ""),
+            "lcw_compact_payloads_frames": lcw_compact_summary.get("frames", ""),
+            "lcw_compact_payloads_saved_bytes": lcw_compact_summary.get("saved_bytes", ""),
+            "lcw_compact_payloads_saved_ratio": lcw_compact_summary.get("saved_ratio", ""),
             "native_exact_fixture_status": native_fixture_summary.get("status", "missing") if native_fixture_summary else "missing",
             "native_exact_fixture_frames": native_fixture_summary.get("frames", ""),
             "native_exact_fixture_matched_frames": native_fixture_summary.get("matched_frames", ""),
@@ -823,6 +849,7 @@ def write_reports(
     runtime_oversize_summary: Path,
     lcw_literal_probe_summary: Path,
     lcw_compression_probe_summary: Path,
+    lcw_compact_payloads_summary: Path,
     native_exact_fixture_summary: Path,
     fullhd_replacement_summary: Path,
     title: str,
@@ -835,6 +862,7 @@ def write_reports(
         runtime_oversize_summary,
         lcw_literal_probe_summary,
         lcw_compression_probe_summary,
+        lcw_compact_payloads_summary,
         native_exact_fixture_summary,
         fullhd_replacement_summary,
     )
@@ -861,6 +889,7 @@ def main() -> None:
     parser.add_argument("--runtime-oversize-summary", type=Path, default=DEFAULT_RUNTIME_OVERSIZE_SUMMARY)
     parser.add_argument("--lcw-literal-probe-summary", type=Path, default=DEFAULT_LCW_LITERAL_PROBE_SUMMARY)
     parser.add_argument("--lcw-compression-probe-summary", type=Path, default=DEFAULT_LCW_COMPRESSION_PROBE_SUMMARY)
+    parser.add_argument("--lcw-compact-payloads-summary", type=Path, default=DEFAULT_LCW_COMPACT_PAYLOADS_SUMMARY)
     parser.add_argument("--native-exact-fixture-summary", type=Path, default=DEFAULT_NATIVE_EXACT_FIXTURE_SUMMARY)
     parser.add_argument("--fullhd-replacement-summary", type=Path, default=DEFAULT_FULLHD_REPLACEMENT_SUMMARY)
     parser.add_argument("--title", default="Lands of Lore II VQA Runtime Feasibility")
@@ -876,6 +905,7 @@ def main() -> None:
         args.runtime_oversize_summary,
         args.lcw_literal_probe_summary,
         args.lcw_compression_probe_summary,
+        args.lcw_compact_payloads_summary,
         args.native_exact_fixture_summary,
         args.fullhd_replacement_summary,
         args.title,

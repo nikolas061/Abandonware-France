@@ -149,7 +149,10 @@ Runtime gaps: 2
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
   entrees natives exact-block comme cibles de fixture. Le probe de compression
   LCW compatible economise 28260692 octets sur 128 frames echantillonnees dans
-  les 4 plus gros payloads differes (`sample_saved_ratio=0.704964`).
+  les 4 plus gros payloads differes (`sample_saved_ratio=0.704964`). La
+  materialisation compacte produit aussi un premier payload complet
+  `L20_BBI:0365:3c06766c`, 65 frames, 130 chunks roundtrip, 19249866 -> 5239876
+  octets (`saved_ratio=0.727797`).
   Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
   LCW literal et valide 20/20 frames au redecode.
 - La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
@@ -239,6 +242,10 @@ output/vqa_lcw_compression_probe/index.html
 output/vqa_lcw_compression_probe/summary.csv
 output/vqa_lcw_compression_probe/entries.csv
 output/vqa_lcw_compression_probe/chunks.csv
+output/vqa_lcw_compact_payloads/index.html
+output/vqa_lcw_compact_payloads/summary.csv
+output/vqa_lcw_compact_payloads/entries.csv
+output/vqa_lcw_compact_payloads/chunks.csv
 output/vqa_native_exact_fixture_writer/index.html
 output/vqa_native_exact_fixture_writer/summary.csv
 output/vqa_native_exact_fixture_writer/requirements.csv
@@ -267,7 +274,10 @@ differes concernent 2 archives, avec `required_reduction_bytes=5256429632`
 marge body cumulee. Le probe `output/vqa_lcw_compression_probe/` ajoute une
 preuve de compression LCW compatible: sur les 4 plus gros payloads differes et
 128 frames echantillonnees, les chunks testes economisent 28260692 octets
-(`sample_saved_ratio=0.704964`).
+(`sample_saved_ratio=0.704964`). `output/vqa_lcw_compact_payloads/` confirme un
+premier payload compact complet: `entries_written=1`, `frames=65`,
+`chunk_roundtrip_failures=0`, `saved_bytes=14009990`,
+`saved_ratio=0.727797`.
 
 ## Textures .tex
 

@@ -73,6 +73,12 @@ Probe de compression LCW compatible sur les payloads VQA oversized:
 python3 tools/lolg_vqa_lcw_compression_probe.py
 ```
 
+Materialisation de payloads WVQA compacts dans une racine separee:
+
+```sh
+python3 tools/lolg_vqa_lcw_compact_payloads.py
+```
+
 Writer de fixture WVQA native exact-block:
 
 ```sh
@@ -161,7 +167,10 @@ frontiere: 1955/1955 payloads de remplacement, 1850 appliques, 105 differes
 depasser la limite MIX. Le probe `output/vqa_lcw_compression_probe/` teste une
 compression LCW compatible sur les 4 plus gros payloads differes: 128 frames
 echantillonnees, 28260692 octets economises sur les chunks testes et
-`sample_saved_ratio=0.704964`. Le seed writer
+`sample_saved_ratio=0.704964`. `output/vqa_lcw_compact_payloads/` materialise
+maintenant un premier payload compact complet, `L20_BBI:0365:3c06766c`:
+65 frames, 130 chunks recompresses, 0 echec roundtrip, 19249866 -> 5239876
+octets (`saved_bytes=14009990`, `saved_ratio=0.727797`). Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
 literal est maintenant prouvee dans `output/vqa_lcw_literal_probe/` avec 11
