@@ -466,6 +466,12 @@ constructeur MIX `0x004e41e0` sur `*_HD.MIX`. Le run
 observe `L20_BBI.MIX` puis `l20_bbI_HD.MIX` avant `sphere3\l20_bb`. Le
 requirement `runtime_loader_hook` avance donc au montage additif prouve; le
 verrou restant est la selection/fallback par ID pour les 8 entrees differees.
+Le desassemblage localise aussi le prochain point de trace: `0x4e3c90` calcule
+le hash de l'entree demandee, parcourt la liste globale d'archives
+`0x6a5b34`, et `0x4e3d18` est le hit ou `EBX` pointe vers l'archive retenue et
+`EDX` vers l'entree MIX. Cette paire de breakpoints doit permettre de prouver
+si les hashes `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`, `46e8b785`,
+`46e8b985`, `46eab985` et `46eeb585` se resolvent dans l'objet sidecar.
 
 ## Textures .tex
 
@@ -5248,9 +5254,10 @@ tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`,
 `46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le sidecar,
 puis transformer le probe en fallback propre. Les points de depart actuels sont
 le constructeur generique `0x004e41e0`, la liste globale d'archives `0x6a5b40`,
-le saut additif `0x00453723 -> 0x005ab2d3`, et les refs `ReadFile` /
-`SetFilePointer` autour de `0x004eb390` / `0x004eb7eb` pour rattacher chaque
-lecture au handle d'archive.
+le lookup hash `0x004e3c90`, le hit archive `0x004e3d18`, le saut additif
+`0x00453723 -> 0x005ab2d3`, et les refs `ReadFile` / `SetFilePointer` autour
+de `0x004eb390` / `0x004eb7eb` pour rattacher chaque lecture au handle
+d'archive.
 Le fichier `output/vqa_runtime_loader_trace_contract/winedbg_commands.txt`
 contient ces 8 breakpoints. Le runner correspondant est
 `python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`; il ecrit

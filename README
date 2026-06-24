@@ -343,6 +343,11 @@ Le patch saute depuis `0x00453723` vers un stub `DGROUP` executable
 puis `l20_bbI_HD.MIX` avant de continuer sur `sphere3\l20_bb`. Ce jalon prouve
 le montage additif du sidecar, mais pas encore que les 8 IDs differes sont
 resolus depuis le sidecar plutot que depuis l'entree originale.
+Le prochain point de trace est maintenant precis: `0x004e3c90` calcule le hash
+MIX demande et parcourt la liste globale d'archives `0x6a5b34`; `0x004e3d18`
+est le hit ou `EBX` designe l'archive choisie et `EDX` l'entree MIX. C'est la
+cible directe pour prouver que les 8 hashes differes se resolvent dans le
+sidecar HD.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

@@ -4620,6 +4620,12 @@ constructor `0x004e41e0` after the original `I.MIX` mount. The attached run
 Captured paths include both `L20_BBI.MIX` and `l20_bbI_HD.MIX`, followed by
 `sphere3\l20_bb` assets. This proves sidecar loading order, but not yet the
 per-entry fallback that must source the 8 deferred IDs from `L20_BBI_HD.MIX`.
+The next trace target is now narrower: the entry lookup at `0x004e3c90`
+computes the requested MIX hash and scans the global archive list at
+`0x6a5b34`; the hit path reaches `0x004e3d18`, where `EBX` is the selected
+archive object and `EDX` is the matched 12-byte MIX table entry. Breakpoints
+there should prove whether the eight deferred hashes resolve against the HD
+sidecar object.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW
