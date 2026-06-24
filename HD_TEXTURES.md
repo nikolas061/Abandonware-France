@@ -527,6 +527,10 @@ output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/summary.csv
 output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/trace.tsv
 output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/raw.log
 output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/force_level_write.log
+output/lolg95_winedbg_mix_lookup_l20_additive_attempt/summary.csv
+output/lolg95_winedbg_mix_lookup_l20_additive_attempt/trace.tsv
+output/lolg95_winedbg_mix_lookup_l20_additive_attempt/raw.log
+output/lolg95_winedbg_mix_lookup_l20_additive_attempt/force_level_write.log
 output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
 output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
@@ -4507,6 +4511,12 @@ python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
 python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run --capture-stops 256 --wine-renderer no3d -o output/lolg95_winedbg_loader_trace_attempt_dry_run
+xvfb-run -a -s '-screen 0 1280x1024x24' \
+  python3 tools/run_lolg95_winedbg_mix_lookup_trace_attempt.py \
+  --wineprefix output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix \
+  --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
+  --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
+  --force-level-index 20 --force-level-slot 4
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4620,12 +4630,16 @@ constructor `0x004e41e0` after the original `I.MIX` mount. The attached run
 Captured paths include both `L20_BBI.MIX` and `l20_bbI_HD.MIX`, followed by
 `sphere3\l20_bb` assets. This proves sidecar loading order, but not yet the
 per-entry fallback that must source the 8 deferred IDs from `L20_BBI_HD.MIX`.
-The next trace target is now narrower: the entry lookup at `0x004e3c90`
-computes the requested MIX hash and scans the global archive list at
-`0x6a5b34`; the hit path reaches `0x004e3d18`, where `EBX` is the selected
-archive object and `EDX` is the matched 12-byte MIX table entry. Breakpoints
-there should prove whether the eight deferred hashes resolve against the HD
-sidecar object.
+`tools/run_lolg95_winedbg_mix_lookup_trace_attempt.py` now records the hit path
+at `0x004e3d18`, where `EBX` is the selected archive object and `EDX` is the
+matched 12-byte MIX table entry. The additive L20 run in
+`output/lolg95_winedbg_mix_lookup_l20_additive_attempt/` records
+`status=gap`, `session_status=started_timeout`, `force_level_write_status=pass`,
+`breakpoint_hits=97`, `extracted_rows=97`, `unique_entry_ids=52`,
+`target_hits=0`, `target_sidecar_hits=0`, and all 8 expected IDs still missing.
+This validates the lookup tracepoint and shows that the current automated L20
+path has not requested the deferred VQA entries yet; the next runtime proof
+needs deeper gameplay or a targeted entry-request probe.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

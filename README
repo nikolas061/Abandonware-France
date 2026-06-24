@@ -150,6 +150,12 @@ python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
 python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run --capture-stops 256 --wine-renderer no3d -o output/lolg95_winedbg_loader_trace_attempt_dry_run
+xvfb-run -a -s '-screen 0 1280x1024x24' \
+  python3 tools/run_lolg95_winedbg_mix_lookup_trace_attempt.py \
+  --wineprefix output/lolg95_runtime_renderer_matrix_warm/desktop_24/wineprefix \
+  --cwd output/lolg95_sidecar_additive_patch_probe/runtime_stage \
+  --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
+  --force-level-index 20 --force-level-slot 4
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -343,11 +349,15 @@ Le patch saute depuis `0x00453723` vers un stub `DGROUP` executable
 puis `l20_bbI_HD.MIX` avant de continuer sur `sphere3\l20_bb`. Ce jalon prouve
 le montage additif du sidecar, mais pas encore que les 8 IDs differes sont
 resolus depuis le sidecar plutot que depuis l'entree originale.
-Le prochain point de trace est maintenant precis: `0x004e3c90` calcule le hash
-MIX demande et parcourt la liste globale d'archives `0x6a5b34`; `0x004e3d18`
-est le hit ou `EBX` designe l'archive choisie et `EDX` l'entree MIX. C'est la
-cible directe pour prouver que les 8 hashes differes se resolvent dans le
-sidecar HD.
+`tools/run_lolg95_winedbg_mix_lookup_trace_attempt.py` trace maintenant le hit
+lookup `0x004e3d18`, ou `EBX` designe l'archive choisie et `EDX` l'entree MIX.
+Le run `output/lolg95_winedbg_mix_lookup_l20_additive_attempt/` force le meme
+L20 dans le banc Wine/Xvfb, garde `force_level_write_status=pass`, capture
+`breakpoint_hits=97`, `extracted_rows=97`, `unique_entry_ids=52`, mais
+`target_hits=0` et `target_sidecar_hits=0`: les 8 hashes differes n'ont pas ete
+sollicites dans ce parcours automatise. Le prochain verrou est donc de piloter
+une scene ou un appel cible qui demande ces VQA, puis de confirmer qu'elles
+sortent de `L20_BBI_HD.MIX`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
