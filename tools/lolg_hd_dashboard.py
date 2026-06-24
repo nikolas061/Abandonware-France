@@ -273,6 +273,28 @@ DEFAULT_LOLG95_SIDECAR_PLAYED_READ_PLAN_REQUIREMENTS = Path(
     "output/lolg95_sidecar_played_read_plan/requirements.csv"
 )
 DEFAULT_LOLG95_SIDECAR_PLAYED_READ_PLAN_TARGETS = Path("output/lolg95_sidecar_played_read_plan/targets.csv")
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT = Path("output/lolg95_sidecar_file_io_trace_contract/index.html")
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_SUMMARY = Path(
+    "output/lolg95_sidecar_file_io_trace_contract/summary.csv"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_REQUIREMENTS = Path(
+    "output/lolg95_sidecar_file_io_trace_contract/requirements.csv"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_TARGETS = Path(
+    "output/lolg95_sidecar_file_io_trace_contract/targets.csv"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_TRACEPOINTS = Path(
+    "output/lolg95_sidecar_file_io_trace_contract/tracepoints.tsv"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_COMMANDS = Path(
+    "output/lolg95_sidecar_file_io_trace_contract/commands.csv"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINEDBG = Path(
+    "output/lolg95_sidecar_file_io_trace_contract/winedbg_commands.txt"
+)
+DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINDBG = Path(
+    "output/lolg95_sidecar_file_io_trace_contract/windbg_breakpoints.cmd"
+)
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1218,6 +1240,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     lolg95_archive_list_probe_summary = first_row(DEFAULT_LOLG95_RUNTIME_ARCHIVE_LIST_L20_SIDECAR_SUMMARY)
     lolg95_sidecar_runtime_stage_summary = first_row(DEFAULT_LOLG95_SIDECAR_RUNTIME_STAGE_SUMMARY)
     lolg95_sidecar_played_read_summary = first_row(DEFAULT_LOLG95_SIDECAR_PLAYED_READ_PLAN_SUMMARY)
+    lolg95_sidecar_file_io_summary = first_row(DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1325,6 +1348,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{lolg95_sidecar_played_read_summary.get('played_sidecar_hits', '')}/"
                 f"{lolg95_sidecar_played_read_summary.get('targets', '')}, "
                 f"payload file-backed {lolg95_sidecar_played_read_summary.get('file_backed_targets', '')}, "
+                f"io contract {lolg95_sidecar_file_io_summary.get('contract_status', '')}/"
+                f"{lolg95_sidecar_file_io_summary.get('targets', '')} targets, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1563,6 +1588,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Synthese lecture jouee sidecar L20", DEFAULT_LOLG95_SIDECAR_PLAYED_READ_PLAN_SUMMARY),
         ("Requirements lecture jouee sidecar L20", DEFAULT_LOLG95_SIDECAR_PLAYED_READ_PLAN_REQUIREMENTS),
         ("Cibles lecture jouee sidecar L20", DEFAULT_LOLG95_SIDECAR_PLAYED_READ_PLAN_TARGETS),
+        ("Contrat I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT),
+        ("Synthese contrat I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_SUMMARY),
+        ("Requirements contrat I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_REQUIREMENTS),
+        ("Cibles contrat I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_TARGETS),
+        ("Tracepoints contrat I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_TRACEPOINTS),
+        ("Commandes contrat I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_COMMANDS),
+        ("Commandes winedbg I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINEDBG),
+        ("Breakpoints WinDbg I/O fichier sidecar L20", DEFAULT_LOLG95_SIDECAR_FILE_IO_TRACE_CONTRACT_WINDBG),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),

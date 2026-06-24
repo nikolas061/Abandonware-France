@@ -327,6 +327,14 @@ output/lolg95_sidecar_played_read_plan/index.html
 output/lolg95_sidecar_played_read_plan/summary.csv
 output/lolg95_sidecar_played_read_plan/requirements.csv
 output/lolg95_sidecar_played_read_plan/targets.csv
+output/lolg95_sidecar_file_io_trace_contract/index.html
+output/lolg95_sidecar_file_io_trace_contract/summary.csv
+output/lolg95_sidecar_file_io_trace_contract/requirements.csv
+output/lolg95_sidecar_file_io_trace_contract/targets.csv
+output/lolg95_sidecar_file_io_trace_contract/tracepoints.tsv
+output/lolg95_sidecar_file_io_trace_contract/commands.csv
+output/lolg95_sidecar_file_io_trace_contract/winedbg_commands.txt
+output/lolg95_sidecar_file_io_trace_contract/windbg_breakpoints.cmd
 output/lolg95_winedbg_loader_trace_attempt/trace.tsv
 output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
 output/lolg95_winedbg_loader_trace_attempt/raw.log
@@ -525,6 +533,12 @@ banc Wine/Xvfb: statut `gap`, ordre sidecar 8/8 conserve, mais
 avec `sidecar_body_pointer=0x00000000`. Autrement dit, le test a atteint le
 son et le montage runtime, mais il n'a pas encore demande les 8 VQA HD qui
 permettraient de prouver l'image sidecar.
+Le contrat `output/lolg95_sidecar_file_io_trace_contract/` prepare cette preuve
+avec des offsets fichier exacts: `contract_status=pass`, 8 cibles, plage
+`102..593523280` dans `l20_bbI_HD.MIX`, breakpoint `SetFilePointer=0x004eb7eb`
+et breakpoint `ReadFile=0x004eb390`. Le statut global reste volontairement
+`gap` tant qu'un run Wine/Xvfb ne montre pas un seek/read sidecar dans une de
+ces plages.
 
 ## Textures .tex
 

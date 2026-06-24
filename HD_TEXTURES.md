@@ -543,6 +543,14 @@ output/lolg95_sidecar_played_read_plan/index.html
 output/lolg95_sidecar_played_read_plan/summary.csv
 output/lolg95_sidecar_played_read_plan/requirements.csv
 output/lolg95_sidecar_played_read_plan/targets.csv
+output/lolg95_sidecar_file_io_trace_contract/index.html
+output/lolg95_sidecar_file_io_trace_contract/summary.csv
+output/lolg95_sidecar_file_io_trace_contract/requirements.csv
+output/lolg95_sidecar_file_io_trace_contract/targets.csv
+output/lolg95_sidecar_file_io_trace_contract/tracepoints.tsv
+output/lolg95_sidecar_file_io_trace_contract/commands.csv
+output/lolg95_sidecar_file_io_trace_contract/winedbg_commands.txt
+output/lolg95_sidecar_file_io_trace_contract/windbg_breakpoints.cmd
 output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
 output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
@@ -4536,6 +4544,7 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
   --force-level-index 20 --force-level-slot 4
 python3 tools/lolg95_sidecar_runtime_stage.py
+python3 tools/lolg95_sidecar_file_io_trace_contract.py
 python3 tools/lolg95_sidecar_played_read_plan.py
 ```
 
@@ -4575,6 +4584,7 @@ sidecar MIX plan:
 ```sh
 python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
+python3 tools/lolg95_sidecar_file_io_trace_contract.py
 python3 tools/lolg95_sidecar_played_read_plan.py
 ```
 
@@ -4694,6 +4704,13 @@ Its current `summary.csv` is `gap`: the sidecar order proof is still 8/8, but
 file-backed in the live archive list (`sidecar_body_pointer=0x00000000`). That
 keeps the Wine/Xvfb "sound but no image proof" issue isolated from the DOSBox
 launcher path.
+`tools/lolg95_sidecar_file_io_trace_contract.py` adds the exact file-I/O
+contract needed for the next runtime proof. It exports 8 target ranges in
+`l20_bbI_HD.MIX`, with expected file offsets from `102` through `593523280`,
+and debugger breakpoints for `SetFilePointer` at `0x004eb7eb` plus `ReadFile`
+at `0x004eb390`. The contract is ready (`contract_status=pass`) while the
+runtime evidence intentionally stays `gap` until a staged Wine run matches a
+sidecar seek/read to one of those ranges.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

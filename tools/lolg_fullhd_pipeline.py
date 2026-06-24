@@ -2609,6 +2609,18 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
             [sys.executable, "tools/lolg_vqa_runtime_loader_trace_contract.py"],
         ),
         Step(
+            "contrat I/O fichier sidecar L20",
+            [sys.executable, "tools/lolg95_sidecar_file_io_trace_contract.py"],
+        ),
+        Step(
+            "stage runtime sidecar L20",
+            [sys.executable, "tools/lolg95_sidecar_runtime_stage.py"],
+        ),
+        Step(
+            "plan lecture jouee sidecar L20",
+            [sys.executable, "tools/lolg95_sidecar_played_read_plan.py"],
+        ),
+        Step(
             "dry-run trace loader sidecar runtime VQA",
             [
                 sys.executable,

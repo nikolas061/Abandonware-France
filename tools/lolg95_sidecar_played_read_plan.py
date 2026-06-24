@@ -17,6 +17,7 @@ DEFAULT_RUNTIME_ARCHIVES = Path("output/lolg95_runtime_archive_list_l20_sidecar_
 DEFAULT_RUNTIME_TARGETS = Path("output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv")
 DEFAULT_LOOKUP_SUMMARY = Path("output/lolg95_winedbg_mix_lookup_l20_additive_attempt/summary.csv")
 DEFAULT_STAGE_SUMMARY = Path("output/lolg95_sidecar_runtime_stage/summary.csv")
+DEFAULT_FILE_IO_CONTRACT_SUMMARY = Path("output/lolg95_sidecar_file_io_trace_contract/summary.csv")
 
 SUMMARY_FIELDS = [
     "status",
@@ -29,6 +30,10 @@ SUMMARY_FIELDS = [
     "file_backed_targets",
     "resident_payload_targets",
     "stage_status",
+    "file_io_contract_status",
+    "file_io_tracepoints",
+    "file_io_offset_min",
+    "file_io_offset_max",
     "sidecar_archive",
     "sidecar_body_pointer",
     "issues",
@@ -113,6 +118,7 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
     archive_rows = read_delimited(args.runtime_archives, delimiter="\t")
     lookup_summary = first_row(args.lookup_summary)
     stage_summary = first_row(args.stage_summary)
+    file_io_summary = first_row(args.file_io_contract_summary)
 
     sidecar_archive = next((row for row in archive_rows if row.get("name", "").lower().endswith("_hd.mix")), {})
     sidecar_body_pointer = sidecar_archive.get("body_pointer", "")
@@ -208,6 +214,10 @@ def build_targets(args: argparse.Namespace) -> tuple[list[dict[str, str]], dict[
         "file_backed_targets": str(file_backed_targets),
         "resident_payload_targets": str(resident_payload_targets),
         "stage_status": stage_summary.get("status", ""),
+        "file_io_contract_status": file_io_summary.get("contract_status", ""),
+        "file_io_tracepoints": file_io_summary.get("tracepoints", ""),
+        "file_io_offset_min": file_io_summary.get("expected_offset_min", ""),
+        "file_io_offset_max": file_io_summary.get("expected_offset_max", ""),
         "sidecar_archive": sidecar_archive.get("name", ""),
         "sidecar_body_pointer": sidecar_body_pointer,
         "issues": ";".join(
@@ -244,6 +254,19 @@ def build_requirements(summary: dict[str, str], target_rows: list[dict[str, str]
                 f"runtime_sidecar_first={summary.get('runtime_sidecar_first', '')}/{target_count}"
             ),
             "next_step": "rerun tools/lolg_vqa_runtime_sidecar_load_plan.py",
+        },
+        {
+            "requirement": "file_io_trace_contract",
+            "status": pass_if(
+                summary.get("file_io_contract_status") == "pass"
+                and count_int(summary.get("file_io_tracepoints", "")) == 2
+            ),
+            "evidence": (
+                f"contract_status={summary.get('file_io_contract_status', '')};"
+                f"tracepoints={summary.get('file_io_tracepoints', '')};"
+                f"offsets={summary.get('file_io_offset_min', '')}..{summary.get('file_io_offset_max', '')}"
+            ),
+            "next_step": "rerun tools/lolg95_sidecar_file_io_trace_contract.py",
         },
         {
             "requirement": "target_metadata",
@@ -385,6 +408,7 @@ def main() -> None:
     parser.add_argument("--runtime-targets", type=Path, default=DEFAULT_RUNTIME_TARGETS)
     parser.add_argument("--lookup-summary", type=Path, default=DEFAULT_LOOKUP_SUMMARY)
     parser.add_argument("--stage-summary", type=Path, default=DEFAULT_STAGE_SUMMARY)
+    parser.add_argument("--file-io-contract-summary", type=Path, default=DEFAULT_FILE_IO_CONTRACT_SUMMARY)
     args = parser.parse_args()
 
     summary = build_report(args)

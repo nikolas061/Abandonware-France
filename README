@@ -163,6 +163,7 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
   --force-level-index 20 --force-level-slot 4
 python3 tools/lolg95_sidecar_runtime_stage.py
+python3 tools/lolg95_sidecar_file_io_trace_contract.py
 python3 tools/lolg95_sidecar_played_read_plan.py
 ```
 
@@ -389,6 +390,11 @@ banc Wine/Xvfb: `output/lolg95_sidecar_played_read_plan/summary.csv` reste
 `file_backed_targets=8/8` parce que l'archive sidecar a `body_pointer=0x00000000`.
 Ce n'est pas un changement du lanceur; c'est le constat que le test sonore
 actuel n'a pas encore force la lecture image des 8 VQA HD.
+`tools/lolg95_sidecar_file_io_trace_contract.py` prepare le prochain verrou
+technique: `output/lolg95_sidecar_file_io_trace_contract/summary.csv` garde le
+statut runtime `gap`, mais son `contract_status=pass` avec 8 plages d'offset
+exactes dans `l20_bbI_HD.MIX` (`102..593523280`) et les breakpoints
+`SetFilePointer=0x004eb7eb` / `ReadFile=0x004eb390`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
