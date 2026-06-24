@@ -508,6 +508,11 @@ output/lolg95_winedbg_attach_pilot_autosave_attempt/summary.csv
 output/lolg95_winedbg_attach_pilot_autosave_attempt/trace.tsv
 output/lolg95_winedbg_attach_pilot_autosave_attempt/winedbg_attach_commands.txt
 output/lolg95_winedbg_attach_pilot_autosave_attempt/raw.log
+output/lolg95_winedbg_attach_pilot_l20_forced_attempt/summary.csv
+output/lolg95_winedbg_attach_pilot_l20_forced_attempt/trace.tsv
+output/lolg95_winedbg_attach_pilot_l20_forced_attempt/winedbg_attach_commands.txt
+output/lolg95_winedbg_attach_pilot_l20_forced_attempt/raw.log
+output/lolg95_winedbg_attach_pilot_l20_forced_attempt/force_level_write.log
 output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
 output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
@@ -4563,9 +4568,19 @@ controlled timeout with `invalid_breakpoints=0`, `breakpoint_hits=42`,
 `extracted_rows=42`, `path_rows=42`, and `unique_paths=12`. Captured startup
 paths include `LANGUAGE.*`, `ERRTEXT.TRR`, `LOCAL.MIX`, `LOCALLNG.MIX`,
 `backtile.pcx`, `basepal.pal`, `Std8P.FNT`, `Std6P.FNT`, `MOUSEH.SHP`, and
-`LOLSETUP.INI`. The trace has not yet observed `L20_BBI.MIX` or
-`L20_BBI_HD.MIX`, so the next proof still needs gameplay/navigation beyond
-startup archive opens.
+`LOLSETUP.INI`. That bootstrap trace has not observed `L20_BBI.MIX` or
+`L20_BBI_HD.MIX`.
+
+The attached L20 proof is now in
+`output/lolg95_winedbg_attach_pilot_l20_forced_attempt/`. It uses the Wine/Xvfb
+test bench only, writes `0x5b0948=20` and `0x5b094c=4` into the running
+`LOLG95.EXE` process, then pilots `Nouvelle partie`. The run records
+`force_level_write_status=pass`, `breakpoint_hits=307`, `extracted_rows=307`,
+`path_rows=303`, `unique_paths=101`, `l20_bbi_mentions=6`, and
+`l20_bbi_hd_mentions=0`. Captured paths include `L20_BB.MIX`, `l20_bb.MIX`,
+`L20_BBI.MIX`, `l20_bbI.MIX`, `sphere3\l20_bb\l20_bb.te_`, `.odf`, `.map`,
+`GLOBAL.IMG`, and `l20_bb.img`. The remaining runtime gap is therefore the
+loader fallback to `L20_BBI_HD.MIX` after `L20_BBI.MIX`.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

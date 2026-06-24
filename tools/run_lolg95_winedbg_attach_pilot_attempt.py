@@ -9,6 +9,7 @@ import os
 import re
 import shlex
 import shutil
+import struct
 import subprocess
 import sys
 import time
@@ -37,6 +38,11 @@ SUMMARY_FIELDS = [
     "wine_desktop",
     "startup_wait_seconds",
     "attach_pid",
+    "linux_pid",
+    "force_level_index",
+    "force_level_slot",
+    "force_level_write_status",
+    "force_level_write_log",
     "command",
     "winedbg_command",
     "winedbg_returncode",
@@ -109,6 +115,38 @@ def parse_lolg95_pid(info_proc_text: str) -> str:
     return ""
 
 
+def parse_lolg95_linux_pid(ps_text: str, executable_name: str) -> str:
+    target = executable_name.lower()
+    found = ""
+    for line in ps_text.splitlines():
+        parts = line.split(None, 2)
+        if len(parts) >= 2 and parts[1].lower() == target:
+            found = parts[0]
+    return found
+
+
+def write_process_dwords(pid: str, writes: list[tuple[int, int]]) -> tuple[str, list[str]]:
+    rows: list[str] = []
+    issues: list[str] = []
+    try:
+        with open(f"/proc/{int(pid)}/mem", "r+b", buffering=0) as handle:
+            for address, value in writes:
+                handle.seek(address)
+                before = handle.read(4)
+                handle.seek(address)
+                handle.write(struct.pack("<I", value & 0xFFFFFFFF))
+                handle.seek(address)
+                after = handle.read(4)
+                rows.append(f"{address:#010x}\tbefore={before.hex()}\tafter={after.hex()}\tvalue={value:#010x}")
+                if after != struct.pack("<I", value & 0xFFFFFFFF):
+                    issues.append(f"write_mismatch:{address:#010x}")
+    except OSError as exc:
+        issues.append(f"proc_mem_error:{type(exc).__name__}:{exc}")
+    except ValueError as exc:
+        issues.append(f"invalid_linux_pid:{exc}")
+    return "\n".join(rows) + ("\n" if rows else ""), issues
+
+
 def run_with_timeout(
     command: list[str],
     timeout: int,
@@ -153,6 +191,8 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     xwininfo_log = output / "xwininfo.txt"
     xdotool_log = output / "xdotool.log"
     pilot_key_log = output / "pilot_keys.log"
+    ps_log = output / "ps.txt"
+    force_level_log = output / "force_level_write.log"
     game_stdout = output / "game.out"
     game_stderr = output / "game.err"
 
@@ -194,6 +234,8 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
     ]
     session_status = "not_started"
     attach_pid = ""
+    linux_pid = ""
+    force_level_write_status = ""
     xdotool_status = ""
     pilot_key_status = ""
     winedbg_returncode = ""
@@ -227,6 +269,33 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
             info_proc_text = info_stdout + info_stderr
             info_proc_log.write_text(info_proc_text, encoding="utf-8", errors="replace")
             attach_pid = parse_lolg95_pid(info_proc_text)
+            if args.force_level_index is not None or args.force_level_slot is not None:
+                ps_stdout, ps_stderr, _ps_returncode, _ps_timeout = run_with_timeout(
+                    ["ps", "-eo", "pid=,comm=,args="],
+                    8,
+                    env,
+                    args.cwd,
+                )
+                ps_text = ps_stdout + ps_stderr
+                ps_log.write_text(ps_text, encoding="utf-8", errors="replace")
+                linux_pid = parse_lolg95_linux_pid(ps_text, args.runtime_executable.name)
+                if not linux_pid:
+                    force_level_write_status = "missing_linux_pid"
+                    issues.append("missing_lolg95_linux_process")
+                    force_level_log.write_text("", encoding="utf-8")
+                else:
+                    writes = []
+                    if args.force_level_index is not None:
+                        writes.append((0x005B0948, args.force_level_index))
+                    if args.force_level_slot is not None:
+                        writes.append((0x005B094C, args.force_level_slot))
+                    force_log_text, force_issues = write_process_dwords(linux_pid, writes)
+                    force_level_log.write_text(force_log_text, encoding="utf-8", errors="replace")
+                    if force_issues:
+                        force_level_write_status = "failed"
+                        issues.extend(force_issues)
+                    else:
+                        force_level_write_status = "pass"
             if not attach_pid:
                 issues.append("missing_lolg95_process")
                 raw_log.write_text("", encoding="utf-8")
@@ -360,6 +429,11 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
         "wine_desktop": args.wine_desktop,
         "startup_wait_seconds": str(args.startup_wait),
         "attach_pid": attach_pid,
+        "linux_pid": linux_pid,
+        "force_level_index": "" if args.force_level_index is None else str(args.force_level_index),
+        "force_level_slot": "" if args.force_level_slot is None else str(args.force_level_slot),
+        "force_level_write_status": force_level_write_status,
+        "force_level_write_log": str(force_level_log) if force_level_write_status else "",
         "command": shlex.join(game_command),
         "winedbg_command": shlex.join([winedbg or "winedbg", "--file", str(command_file)]),
         "winedbg_returncode": winedbg_returncode,
@@ -437,6 +511,8 @@ def main() -> None:
     parser.add_argument("--click-interval", type=float, default=2.0)
     parser.add_argument("--pilot-key", action="append", default=[])
     parser.add_argument("--pilot-key-delay", type=float, default=8.0)
+    parser.add_argument("--force-level-index", type=lambda value: int(value, 0))
+    parser.add_argument("--force-level-slot", type=lambda value: int(value, 0))
     args = parser.parse_args()
 
     summary = run_attempt(args)

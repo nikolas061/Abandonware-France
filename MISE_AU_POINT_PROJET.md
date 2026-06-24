@@ -436,9 +436,16 @@ rows et atteint le runtime `L1_DC` (`L1_DC.MIX`, `L1_DCI.MIX`, `GLOBAL.MIX`,
 `LOCAL.MIX`, `CDCACHE.MIX`, `sphere1\l1_dc\l1_dc.map`, `sphere1\l1_dc\l1_dc.te_`,
 `GLOBAL.IMG`, `l1_dc.img`). `output/lolg95_winedbg_attach_pilot_autosave_attempt/`
 charge `.\SAVEGAME\$AUTOSAV.XXX`, capture 239 hits/239 rows, mais reste aussi
-sur `L1_DC`. Le verrou restant est donc d'obtenir une sauvegarde ou un pilotage
-qui atteint le contenu L20 pour observer `L20_BBI.MIX` avant de patcher le
-fallback `L20_BBI_HD.MIX`.
+sur `L1_DC`. Le run cible
+`output/lolg95_winedbg_attach_pilot_l20_forced_attempt/` force uniquement dans
+le processus de test `0x5b0948=20` et `0x5b094c=4`, ce qui charge
+`sphere3\l20_bb\l20_bb`: `force_level_write_status=pass`,
+`breakpoint_hits=307`, `extracted_rows=307`, `path_rows=303`,
+`unique_paths=101`, `l20_bbi_mentions=6`, `l20_bbi_hd_mentions=0`. Les chemins
+observes incluent `L20_BB.MIX`, `l20_bb.MIX`, `L20_BBI.MIX`, `l20_bbI.MIX`,
+`sphere3\l20_bb\l20_bb.te_`, `.odf`, `.map`, `GLOBAL.IMG` et `l20_bb.img`.
+Le verrou restant est donc le fallback runtime `L20_BBI_HD.MIX` apres
+`L20_BBI.MIX`, plus l'acces au contenu L20 lui-meme.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
