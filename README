@@ -149,7 +149,7 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
-python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run -o output/lolg95_winedbg_loader_trace_attempt_dry_run
+python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run --capture-stops 256 --wine-renderer no3d -o output/lolg95_winedbg_loader_trace_attempt_dry_run
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -289,10 +289,13 @@ exporte ces 8 tracepoints `winedbg` et les 8 IDs sidecar attendus comme cible
 de preuve. `output/lolg95_winedbg_loader_trace_attempt/` garde le rapport du
 vrai run; le pipeline ecrit son dry-run separement dans
 `output/lolg95_winedbg_loader_trace_attempt_dry_run/`. Dernier run borne:
-`invalid_breakpoints=0`, `breakpoint_hits=1`, `extracted_rows=1`, hit partiel
-sur `createfile_05` a `0x004eb259`. Le bloc assembleur montre que le chemin
-`CreateFileA` est dans `ESI` puis `[esp]`; il faut maintenant faire capturer
-registres/pile par `winedbg`, puis extraire la chaine ouverte.
+`--wine-renderer no3d --capture-stops 256 --timeout 90`, registre renderer
+pose avec `renderer_setup_status=exited_0`, session `started_timeout`,
+`invalid_breakpoints=0`, `breakpoint_hits=42`, `extracted_rows=42`,
+`path_rows=42`, `unique_paths=12`. Les chemins observes restent au bootstrap:
+`LANGUAGE.*`, `ERRTEXT.TRR`, `LOCAL.MIX`, `LOCALLNG.MIX`, `backtile.pcx`,
+`basepal.pal`, `Std8P.FNT`, `Std6P.FNT`, `MOUSEH.SHP` et `LOLSETUP.INI`.
+`L20_BBI.MIX` et `L20_BBI_HD.MIX` ne sont pas encore observes.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

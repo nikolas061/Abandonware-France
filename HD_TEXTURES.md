@@ -596,7 +596,7 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
-python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run -o output/lolg95_winedbg_loader_trace_attempt_dry_run
+python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run --capture-stops 256 --wine-renderer no3d -o output/lolg95_winedbg_loader_trace_attempt_dry_run
 python3 tools/lolg_vqa_native_exact_fixture_writer.py
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
 python3 tools/lolg_vqa_runtime_archive_seed_writer.py
@@ -4479,7 +4479,7 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
-python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run -o output/lolg95_winedbg_loader_trace_attempt_dry_run
+python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run --capture-stops 256 --wine-renderer no3d -o output/lolg95_winedbg_loader_trace_attempt_dry_run
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4548,12 +4548,16 @@ debugger-ready contract: 8 tracepoints at `0x004e2a07`, `0x004eb15a`,
 contract as a bounded session report. In pipeline mode, `--dry-run` writes the
 pipeline-safe report under `output/lolg95_winedbg_loader_trace_attempt_dry_run/`.
 Running it without `--dry-run` keeps real evidence under
-`output/lolg95_winedbg_loader_trace_attempt/`. The latest bounded real run sets
-all 8 corrected breakpoints with `invalid_breakpoints=0` and hits
-`createfile_05` at `0x004eb259` (`breakpoint_hits=1`, `extracted_rows=1`). The
-row is still partial because winedbg did not emit register/stack displays;
-disassembly shows the path pointer is `ESI`, then `[esp]`, immediately before
-the `CreateFileA` call.
+`output/lolg95_winedbg_loader_trace_attempt/`. The latest bounded real run uses
+`--wine-renderer no3d --capture-stops 256 --timeout 90`; the Wine registry setup
+reports `renderer_setup_status=exited_0`, then the session reaches the
+controlled timeout with `invalid_breakpoints=0`, `breakpoint_hits=42`,
+`extracted_rows=42`, `path_rows=42`, and `unique_paths=12`. Captured startup
+paths include `LANGUAGE.*`, `ERRTEXT.TRR`, `LOCAL.MIX`, `LOCALLNG.MIX`,
+`backtile.pcx`, `basepal.pal`, `Std8P.FNT`, `Std6P.FNT`, `MOUSEH.SHP`, and
+`LOLSETUP.INI`. The trace has not yet observed `L20_BBI.MIX` or
+`L20_BBI_HD.MIX`, so the next proof still needs gameplay/navigation beyond
+startup archive opens.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

@@ -417,12 +417,14 @@ attendus.
 `output/lolg95_winedbg_loader_trace_attempt/` materialise ce contrat en rapport
 de session reel. Le pipeline ecrit maintenant son `--dry-run` dans
 `output/lolg95_winedbg_loader_trace_attempt_dry_run/` pour ne pas ecraser cette
-preuve. Le dernier run reel borne a 45s pose les 8 breakpoints corriges sans
-invalidation (`invalid_breakpoints=0`) et touche `createfile_05` a
-`0x004eb259` (`breakpoint_hits=1`, `extracted_rows=1`). La ligne est partielle:
-`winedbg` n'a pas encore emis les registres/pile, mais le desassemblage montre
-que le pointeur de chemin `CreateFileA` est dans `ESI`, puis `[esp]`, juste
-avant le call.
+preuve. Le dernier run reel utilise `--wine-renderer no3d --capture-stops 256
+--timeout 90`; le registre renderer est applique
+(`renderer_setup_status=exited_0`), puis la session atteint le timeout controle
+avec `invalid_breakpoints=0`, `breakpoint_hits=42`, `extracted_rows=42`,
+`path_rows=42` et `unique_paths=12`. Les chemins captures couvrent le bootstrap:
+`LANGUAGE.*`, `ERRTEXT.TRR`, `LOCAL.MIX`, `LOCALLNG.MIX`, `backtile.pcx`,
+`basepal.pal`, `Std8P.FNT`, `Std6P.FNT`, `MOUSEH.SHP` et `LOLSETUP.INI`.
+`L20_BBI.MIX` et `L20_BBI_HD.MIX` ne sont pas encore observes.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
@@ -5214,10 +5216,11 @@ Le fichier `output/vqa_runtime_loader_trace_contract/winedbg_commands.txt`
 contient ces 8 breakpoints. Le runner correspondant est
 `python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`; il ecrit
 `raw.log`, `trace.tsv` et `summary.csv` sous
-`output/lolg95_winedbg_loader_trace_attempt/`. Comme le dernier run reel touche
-`createfile_05` mais ne capture pas encore `ESI`/`[esp]`, la prochaine passe
-doit ajuster les commandes `winedbg` pour sortir registres/pile au stop, puis
-lire la chaine de chemin avant de patcher le fallback `L20_BBI_HD.MIX`.
+`output/lolg95_winedbg_loader_trace_attempt/`. Comme le dernier run reel capture
+42 ouvertures mais reste au bootstrap (`LOCAL.MIX`/`LOCALLNG.MIX` et petits
+assets) sans atteindre `L20_BBI.MIX`, la prochaine passe doit piloter ou
+automatiser le runtime plus loin que l'ecran/menu courant, puis verifier que
+`L20_BBI.MIX` est ouvert avant de patcher le fallback `L20_BBI_HD.MIX`.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.

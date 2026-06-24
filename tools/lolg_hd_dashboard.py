@@ -1183,6 +1183,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"attempt {lolg95_loader_trace_attempt_summary.get('breakpoint_hits', '')}/"
                 f"{lolg95_loader_trace_attempt_summary.get('contract_tracepoints', '')} bp, "
                 f"rows {lolg95_loader_trace_attempt_summary.get('extracted_rows', '')}, "
+                f"paths {lolg95_loader_trace_attempt_summary.get('path_rows', '')}/"
+                f"{lolg95_loader_trace_attempt_summary.get('unique_paths', '')}, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
