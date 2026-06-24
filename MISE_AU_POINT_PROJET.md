@@ -405,11 +405,15 @@ sidecar buildable: `sidecar_entries=8`, `sidecar_archives=1`,
 `output_bytes=593523280`. Le fichier local
 `mod_mix_vqa_fullhd_sidecar/L20_BBI_HD.MIX` a ete ecrit avec 8 entrees et le
 SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
-`output/vqa_runtime_sidecar_load_plan/` valide le mapping de chargement statique:
-8/8 entrees retrouvent leur ID et leur taille dans `L20_BBI.MIX`, et 8/8 dans
-`L20_BBI_HD.MIX`. Le rapport note aussi que `CDCACHE.LST` et `CDCACHE.LS_` ne
-contiennent ni `L20_BBI.MIX` ni `L20_BBI_HD.MIX`; le point utile est donc plutot
-le loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui contiennent `CDCACHE` et `.MIX`).
+`output/vqa_runtime_sidecar_load_plan/` valide maintenant le mapping de
+chargement complet: 8/8 entrees retrouvent leur ID et leur taille dans
+`L20_BBI.MIX`, 8/8 dans `L20_BBI_HD.MIX`, puis 8/8 sont verifies
+`sidecar-first` par la preuve runtime archive-list. Son `summary.csv` passe avec
+`runtime_archive_list_status=pass`, `runtime_sidecar_first=8`, et 0 ID
+runtime base/missing/unknown. Le rapport note aussi que `CDCACHE.LST` et
+`CDCACHE.LS_` ne contiennent ni `L20_BBI.MIX` ni `L20_BBI_HD.MIX`; le chemin
+accepte est donc le hook du loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui
+contiennent `CDCACHE` et `.MIX`) prouve par le patch additif.
 `output/vqa_runtime_loader_probe/` cartographie ce loader cote `LOLG95.EXE`:
 4 candidats hook, 7 references `CreateFileA`, constructeur generique `.MIX`,
 montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage `CDCACHE.MIX`, et 0
@@ -495,6 +499,9 @@ la liste globale `0x6a5b34` dans `/proc/<pid>/mem`. Le run
 selection par ordre runtime est donc prouvee des que ces IDs sont demandes; le
 reste du travail est de stabiliser ce comportement en fallback final ou de le
 rattacher a un appel VQA joue.
+Le plan `output/vqa_runtime_sidecar_load_plan/` consomme maintenant cette
+preuve et passe: 8/8 base, 8/8 sidecar, `runtime_archive_list_status=pass`,
+`runtime_sidecar_first=8`, et aucun ID runtime base/missing/unknown.
 
 ## Textures .tex
 
@@ -5269,20 +5276,22 @@ core_project_file: 18 files
 
 ## Prochaine passe technique
 
-Priorite 1: prouver la selection runtime des 8 IDs depuis `L20_BBI_HD.MIX`.
-Les 8 payloads restants tiennent dans un sidecar MIX valide, le plan statique
-verifie les IDs dans la base et dans le sidecar, et le patch additif ouvre
-maintenant `L20_BBI.MIX` puis `L20_BBI_HD.MIX` dans le meme run. La trace
-lookup `output/lolg95_winedbg_mix_lookup_l20_additive_attempt/` observe bien
-`0x004e3d18` avec 97 hits et 52 IDs uniques, mais aucun des 8 hashes differes
-n'est encore demande par ce parcours automatise. La nouvelle preuve
-`output/lolg95_runtime_archive_list_l20_sidecar_probe/` ferme toutefois le
-point d'ordre: les 8 hashes `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`,
-`46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont tous
-`target_sidecar_first` dans la liste runtime, via `l20_bbI_HD.MIX`. La prochaine
-passe doit donc convertir ce probe additif en fallback propre et, si possible,
-capturer un appel VQA joue qui consomme un de ces IDs. Les points de depart
-actuels sont le constructeur generique `0x004e41e0`, la liste globale
+Priorite 1: promouvoir la preuve sidecar runtime en chemin final propre. Les 8
+payloads restants tiennent dans un sidecar MIX valide, le plan de chargement
+verifie maintenant les IDs dans la base, dans le sidecar, puis en ordre runtime:
+`output/vqa_runtime_sidecar_load_plan/summary.csv` passe avec 8/8 base, 8/8
+sidecar et `runtime_sidecar_first=8`. Le patch additif ouvre
+`L20_BBI.MIX` puis `L20_BBI_HD.MIX` dans le meme run, et
+`output/lolg95_runtime_archive_list_l20_sidecar_probe/` ferme le point d'ordre:
+les 8 hashes `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`, `46e8b785`,
+`46e8b985`, `46eab985` et `46eeb585` sont tous `target_sidecar_first` dans la
+liste runtime, via `l20_bbI_HD.MIX`. La trace lookup directe
+`output/lolg95_winedbg_mix_lookup_l20_additive_attempt/` observe toujours
+`0x004e3d18` avec 97 hits et 52 IDs uniques mais aucun de ces 8 hashes, parce
+que le parcours automatise ne sollicite pas encore ces VQA. La prochaine passe
+doit donc convertir le patch additif en fallback/stage final propre et, si
+possible, capturer un appel VQA joue qui consomme un de ces IDs. Les points de
+depart actuels sont le constructeur generique `0x004e41e0`, la liste globale
 d'archives `0x6a5b40`, le lookup hash `0x004e3c90`, le hit archive
 `0x004e3d18`, le saut additif `0x00453723 -> 0x005ab2d3`, et les refs
 `ReadFile` / `SetFilePointer` autour de `0x004eb390` / `0x004eb7eb` pour

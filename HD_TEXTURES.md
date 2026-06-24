@@ -4567,19 +4567,22 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 ```
 
-Current sidecar result: `gap` only because `runtime_loader_strategy` is not
-implemented yet. The pack side is valid: 8 deferred entries, 1 source archive,
-1 sidecar archive, `sidecar_entries=8`, `replacement_bytes=593523178`,
-`largest_sidecar_body_bytes=593523178`, and `output_bytes=593523280`. Rerunning
-without `--report-only` writes `mod_mix_vqa_fullhd_sidecar/L20_BBI_HD.MIX`; the
-local generated file has 8 entries and SHA-256
+Current sidecar load-plan result: `pass`. The pack side is valid: 8 deferred
+entries, 1 source archive, 1 sidecar archive, `sidecar_entries=8`,
+`replacement_bytes=593523178`, `largest_sidecar_body_bytes=593523178`, and
+`output_bytes=593523280`. Rerunning without `--report-only` writes
+`mod_mix_vqa_fullhd_sidecar/L20_BBI_HD.MIX`; the local generated file has 8
+entries and SHA-256
 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
-`output/vqa_runtime_sidecar_load_plan/` then verifies the 8 deferred IDs against
-the base `L20_BBI.MIX` index and the local `L20_BBI_HD.MIX` sidecar index. It
-records `CDCACHE.LST`/`CDCACHE.LS_` as non-load-list evidence for this sidecar
-because neither file contains `L20_BBI_HD`, while `LOLG95.EXE`/`LOLG.DAT` are
-the current compiled-loader candidates because they contain both `CDCACHE` and
-`.MIX` markers.
+`output/vqa_runtime_sidecar_load_plan/` verifies the 8 deferred IDs against the
+base `L20_BBI.MIX` index, the local `L20_BBI_HD.MIX` sidecar index, and the
+runtime archive-list proof. It records 8/8 base entries, 8/8 sidecar entries,
+`runtime_archive_list_status=pass`, `runtime_sidecar_first=8`, and zero
+runtime base/missing/unknown first IDs. `CDCACHE.LST`/`CDCACHE.LS_` still do
+not declare `L20_BBI_HD`, so the accepted path is the compiled-loader hook
+proof from the additive runtime patch; `LOLG95.EXE`/`LOLG.DAT` remain the
+compiled-loader candidates because they contain both `CDCACHE` and `.MIX`
+markers.
 `output/vqa_runtime_loader_probe/` resolves the Windows PE side of that next
 step: 4 hook candidates, 7 `CreateFileA` xrefs, the generic `.MIX`
 constructor, startup archive mounts, `CDCACHE.MIX` mount evidence, and no
@@ -4658,6 +4661,10 @@ passes with all 8 expected IDs in `target_sidecar_first`. `targets.tsv` records
 for `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`, `46e8b785`, `46e8b985`,
 `46eab985`, and `46eeb585`. This proves the runtime list/order required for
 sidecar selection once those IDs are requested.
+`tools/lolg_vqa_runtime_sidecar_load_plan.py` now consumes that archive-list
+proof, so `output/vqa_runtime_sidecar_load_plan/summary.csv` is `pass` with
+8/8 base entries, 8/8 sidecar entries, `runtime_archive_list_status=pass`,
+`runtime_sidecar_first=8`, and zero runtime base/missing/unknown first IDs.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

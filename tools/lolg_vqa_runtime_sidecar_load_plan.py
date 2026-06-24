@@ -15,6 +15,8 @@ from pathlib import Path
 DEFAULT_SIDECAR_ENTRIES = Path("output/vqa_runtime_sidecar_pack/entries.csv")
 DEFAULT_OUTPUT = Path("output/vqa_runtime_sidecar_load_plan")
 DEFAULT_GAME_ROOT = Path(".")
+DEFAULT_RUNTIME_ARCHIVE_LIST_SUMMARY = Path("output/lolg95_runtime_archive_list_l20_sidecar_probe/summary.csv")
+DEFAULT_RUNTIME_ARCHIVE_LIST_TARGETS = Path("output/lolg95_runtime_archive_list_l20_sidecar_probe/targets.tsv")
 DEFAULT_PROBES = [
     Path("CDCACHE.LST"),
     Path("CDCACHE.LS_"),
@@ -35,6 +37,12 @@ SUMMARY_FIELDS = [
     "cdcache_sidecar_name_hits",
     "cdcache_base_name_hits",
     "loader_candidate_files",
+    "runtime_archive_list_status",
+    "runtime_archive_list_targets",
+    "runtime_sidecar_first",
+    "runtime_base_first",
+    "runtime_missing",
+    "runtime_unknown_first",
     "issues",
     "next_step",
 ]
@@ -74,6 +82,9 @@ ENTRY_FIELDS = [
     "replacement_size",
     "sidecar_status",
     "load_order_status",
+    "runtime_first_archive",
+    "runtime_first_order",
+    "runtime_first_entry_size",
     "issues",
 ]
 
@@ -96,6 +107,13 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return []
     with path.open(newline="", encoding="utf-8") as handle:
         return list(csv.DictReader(handle))
+
+
+def read_tsv(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle, delimiter="\t"))
 
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
@@ -227,6 +245,70 @@ def probe_path(path: Path, base_name: str, sidecar_name: str) -> dict[str, str]:
     return row
 
 
+def split_csv_set(value: str) -> set[str]:
+    return {part.strip().lower() for part in value.split(",") if part.strip()}
+
+
+def archive_names_match(runtime_name: str, planned_name: str) -> bool:
+    return Path(runtime_name).name.lower() == Path(planned_name).name.lower()
+
+
+def load_runtime_archive_list_evidence(
+    summary_path: Path,
+    targets_path: Path,
+    plan_rows: list[dict[str, str]],
+) -> tuple[dict[str, str], dict[str, dict[str, str]], list[str]]:
+    summary_rows = read_csv(summary_path)
+    summary = summary_rows[0] if summary_rows else {}
+    target_rows = {row.get("file_id", "").lower(): row for row in read_tsv(targets_path) if row.get("file_id")}
+    issues: list[str] = []
+
+    if not summary:
+        issues.append("runtime_archive_list_summary_missing")
+    elif summary.get("status") != "pass":
+        issues.append(f"runtime_archive_list_status:{summary.get('status', '')}")
+
+    if not target_rows:
+        issues.append("runtime_archive_list_targets_missing")
+
+    sidecar_first = split_csv_set(summary.get("target_sidecar_first", ""))
+    base_first = split_csv_set(summary.get("target_base_first", ""))
+    missing = split_csv_set(summary.get("target_missing", ""))
+    unknown = split_csv_set(summary.get("target_unknown_first", ""))
+    plan_ids = {row.get("file_id", "").lower() for row in plan_rows if row.get("file_id")}
+    if summary.get("expected_ids") and summary.get("expected_ids") != str(len(plan_rows)):
+        issues.append(f"runtime_archive_list_expected_ids:{summary.get('expected_ids')}:{len(plan_rows)}")
+    if plan_ids and sidecar_first != plan_ids:
+        issues.append("runtime_archive_list_sidecar_ids_mismatch")
+    if base_first:
+        issues.append("runtime_archive_list_base_first:" + ",".join(sorted(base_first)))
+    if missing:
+        issues.append("runtime_archive_list_missing:" + ",".join(sorted(missing)))
+    if unknown:
+        issues.append("runtime_archive_list_unknown:" + ",".join(sorted(unknown)))
+
+    for row in plan_rows:
+        file_id = row.get("file_id", "").lower()
+        runtime_row = target_rows.get(file_id)
+        if runtime_row is None:
+            issues.append(f"runtime_target_missing:{file_id}")
+            continue
+        if runtime_row.get("first_status") != "sidecar":
+            issues.append(f"runtime_target_not_sidecar_first:{file_id}:{runtime_row.get('first_status', '')}")
+        if runtime_row.get("first_entry_size") != row.get("replacement_size", ""):
+            issues.append(
+                "runtime_target_size_mismatch:"
+                f"{file_id}:{runtime_row.get('first_entry_size', '')}:{row.get('replacement_size', '')}"
+            )
+        if not archive_names_match(runtime_row.get("first_archive", ""), row.get("sidecar_archive", "")):
+            issues.append(
+                "runtime_target_archive_mismatch:"
+                f"{file_id}:{runtime_row.get('first_archive', '')}:{row.get('sidecar_archive', '')}"
+            )
+
+    return summary, target_rows, list(dict.fromkeys(issues))
+
+
 def build_reports(args: argparse.Namespace) -> tuple[
     dict[str, str],
     list[dict[str, str]],
@@ -235,6 +317,11 @@ def build_reports(args: argparse.Namespace) -> tuple[
     list[dict[str, str]],
 ]:
     plan_rows = [row for row in read_csv(args.sidecar_entries) if row.get("status") == "sidecar_ready"]
+    runtime_summary, runtime_targets, runtime_issues = load_runtime_archive_list_evidence(
+        args.runtime_archive_list_summary,
+        args.runtime_archive_list_targets,
+        plan_rows,
+    )
     rows_by_archive: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in plan_rows:
         key = (row.get("source_archive", ""), row.get("sidecar_archive", ""), row.get("sidecar_path", ""))
@@ -297,6 +384,22 @@ def build_reports(args: argparse.Namespace) -> tuple[
                     sidecar_status = "pass"
                     sidecar_verified += 1
 
+            runtime_row = runtime_targets.get(expected_id, {})
+            load_order_status = "gap"
+            runtime_first_archive = runtime_row.get("first_archive", "")
+            runtime_first_order = runtime_row.get("first_order", "")
+            runtime_first_entry_size = runtime_row.get("first_entry_size", "")
+            if not runtime_row:
+                row_issues.append("runtime_target_missing")
+            elif runtime_row.get("first_status") != "sidecar":
+                row_issues.append(f"runtime_first_status:{runtime_row.get('first_status', '')}")
+            elif runtime_first_entry_size != str(expected_sidecar_size):
+                row_issues.append(f"runtime_size_mismatch:{runtime_first_entry_size}")
+            elif not archive_names_match(runtime_first_archive, sidecar_archive):
+                row_issues.append(f"runtime_archive_mismatch:{runtime_first_archive}")
+            else:
+                load_order_status = "pass"
+
             entry_rows.append(
                 {
                     "source_archive": source_archive,
@@ -312,7 +415,10 @@ def build_reports(args: argparse.Namespace) -> tuple[
                     "sidecar_size": sidecar_size,
                     "replacement_size": str(expected_sidecar_size),
                     "sidecar_status": sidecar_status,
-                    "load_order_status": "gap",
+                    "load_order_status": load_order_status,
+                    "runtime_first_archive": runtime_first_archive,
+                    "runtime_first_order": runtime_first_order,
+                    "runtime_first_entry_size": runtime_first_entry_size,
                     "issues": ";".join(row_issues),
                 }
             )
@@ -354,14 +460,19 @@ def build_reports(args: argparse.Namespace) -> tuple[
         if row.get("interpretation") == "compiled_loader_candidate"
     ]
 
+    runtime_order_ok = bool(plan_rows) and not runtime_issues and all(
+        row.get("load_order_status") == "pass" for row in entry_rows
+    )
+
     if not plan_rows:
         all_issues.append("sidecar_plan_empty")
-    if cdcache_sidecar_hits == 0:
+    if cdcache_sidecar_hits == 0 and not runtime_order_ok:
         all_issues.append("cdcache_no_sidecar_declaration")
-    all_issues.append("runtime_loader_hook_missing")
+    all_issues.extend(runtime_issues)
 
     all_base_ok = bool(plan_rows) and base_verified_total == len(plan_rows)
     all_sidecar_ok = bool(plan_rows) and sidecar_verified_total == len(plan_rows)
+    critical_ok = all_base_ok and all_sidecar_ok and runtime_order_ok
     requirements = [
         {
             "requirement": "sidecar_pack_report",
@@ -382,10 +493,15 @@ def build_reports(args: argparse.Namespace) -> tuple[
             "next_step": "rerun the sidecar pack without --report-only to materialize missing sidecar MIX files",
         },
         {
-            "requirement": "cdcache_sidecar_declaration",
-            "status": "pass" if cdcache_sidecar_hits else "gap",
-            "evidence": f"cdcache_sidecar_hits={cdcache_sidecar_hits};cdcache_base_hits={cdcache_base_hits}",
-            "next_step": "do not rely on CDCACHE.LST as the sidecar load list unless a sidecar name appears there",
+            "requirement": "sidecar_declaration_or_runtime_hook",
+            "status": "pass" if cdcache_sidecar_hits or runtime_order_ok else "gap",
+            "evidence": (
+                f"cdcache_sidecar_hits={cdcache_sidecar_hits};"
+                f"runtime_archive_list_status={runtime_summary.get('status', '')};"
+                f"runtime_sidecar_first={len(split_csv_set(runtime_summary.get('target_sidecar_first', '')))}/"
+                f"{len(plan_rows)}"
+            ),
+            "next_step": "keep the runtime hook proof if CDCACHE.LST does not declare the sidecar name",
         },
         {
             "requirement": "compiled_loader_candidate",
@@ -395,14 +511,24 @@ def build_reports(args: argparse.Namespace) -> tuple[
         },
         {
             "requirement": "runtime_loader_hook",
-            "status": "gap",
-            "evidence": "no traced or patched load order currently opens L20_BBI_HD.MIX after L20_BBI.MIX",
-            "next_step": "add or patch a loader hook, then trace the 8 deferred IDs being read from the sidecar",
+            "status": "pass" if runtime_order_ok else "gap",
+            "evidence": (
+                f"summary={args.runtime_archive_list_summary};"
+                f"targets={args.runtime_archive_list_targets};"
+                f"archive_nodes={runtime_summary.get('archive_nodes', '')};"
+                f"sidecar_first={len(split_csv_set(runtime_summary.get('target_sidecar_first', '')))}/"
+                f"{len(plan_rows)}"
+            ),
+            "next_step": (
+                "promote the additive runtime patch into a final staged runtime path"
+                if runtime_order_ok
+                else "run tools/run_lolg95_runtime_archive_list_probe.py until all planned IDs are sidecar-first"
+            ),
         },
     ]
 
     summary = {
-        "status": "gap",
+        "status": "pass" if critical_ok and not all_issues else "gap",
         "sidecar_entries": str(len(plan_rows)),
         "sidecar_archives": str(len(rows_by_archive)),
         "base_archives": str(len({row.get("source_archive", "") for row in plan_rows})),
@@ -411,8 +537,18 @@ def build_reports(args: argparse.Namespace) -> tuple[
         "cdcache_sidecar_name_hits": str(cdcache_sidecar_hits),
         "cdcache_base_name_hits": str(cdcache_base_hits),
         "loader_candidate_files": str(len(loader_candidates)),
+        "runtime_archive_list_status": runtime_summary.get("status", ""),
+        "runtime_archive_list_targets": str(len(runtime_targets)),
+        "runtime_sidecar_first": str(len(split_csv_set(runtime_summary.get("target_sidecar_first", "")))),
+        "runtime_base_first": str(len(split_csv_set(runtime_summary.get("target_base_first", "")))),
+        "runtime_missing": str(len(split_csv_set(runtime_summary.get("target_missing", "")))),
+        "runtime_unknown_first": str(len(split_csv_set(runtime_summary.get("target_unknown_first", "")))),
         "issues": ";".join(dict.fromkeys(all_issues)),
-        "next_step": "patch or wrap the MIX loader so L20_BBI_HD.MIX is queried after L20_BBI.MIX",
+        "next_step": (
+            "promote the proven additive sidecar stage into a clean user-facing runtime path"
+            if critical_ok and not all_issues
+            else "patch or wrap the MIX loader so L20_BBI_HD.MIX is queried after L20_BBI.MIX"
+        ),
     }
     return summary, requirements, archive_rows, entry_rows, source_rows
 
@@ -485,6 +621,8 @@ def write_html(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Audit the runtime load plan for VQA sidecar MIX archives.")
     parser.add_argument("--sidecar-entries", type=Path, default=DEFAULT_SIDECAR_ENTRIES)
+    parser.add_argument("--runtime-archive-list-summary", type=Path, default=DEFAULT_RUNTIME_ARCHIVE_LIST_SUMMARY)
+    parser.add_argument("--runtime-archive-list-targets", type=Path, default=DEFAULT_RUNTIME_ARCHIVE_LIST_TARGETS)
     parser.add_argument("--game-root", type=Path, default=DEFAULT_GAME_ROOT)
     parser.add_argument("--probe", type=Path, action="append", default=list(DEFAULT_PROBES))
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)

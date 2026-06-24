@@ -373,6 +373,10 @@ globale d'archives `0x6a5b34` depuis `/proc/<pid>/mem`. Le run
 et les tailles sidecar attendues pour les 8 hashes. Le sidecar est donc bien
 premier dans la liste runtime pour ces IDs; il reste a raccorder cette preuve
 au fallback final ou a un appel VQA joue.
+`tools/lolg_vqa_runtime_sidecar_load_plan.py` consomme maintenant cette preuve:
+`output/vqa_runtime_sidecar_load_plan/summary.csv` passe avec 8/8 entrees base,
+8/8 entrees sidecar, `runtime_archive_list_status=pass`, `runtime_sidecar_first=8`
+et aucun ID `runtime_base_first`/`runtime_missing`/`runtime_unknown_first`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
