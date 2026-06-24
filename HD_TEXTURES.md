@@ -479,6 +479,14 @@ output/vqa_runtime_sidecar_load_plan/requirements.csv
 output/vqa_runtime_sidecar_load_plan/archives.csv
 output/vqa_runtime_sidecar_load_plan/entries.csv
 output/vqa_runtime_sidecar_load_plan/sources.csv
+output/vqa_runtime_loader_probe/index.html
+output/vqa_runtime_loader_probe/summary.csv
+output/vqa_runtime_loader_probe/requirements.csv
+output/vqa_runtime_loader_probe/inputs.csv
+output/vqa_runtime_loader_probe/anchors.csv
+output/vqa_runtime_loader_probe/xrefs.csv
+output/vqa_runtime_loader_probe/imports.csv
+output/vqa_runtime_loader_probe/candidates.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -568,6 +576,7 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py \
   -o output/vqa_runtime_oversize_budget_lcw_compact_report
 python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
+python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_native_exact_fixture_writer.py
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
 python3 tools/lolg_vqa_runtime_archive_seed_writer.py
@@ -1844,6 +1853,14 @@ output/vqa_runtime_sidecar_load_plan/requirements.csv
 output/vqa_runtime_sidecar_load_plan/archives.csv
 output/vqa_runtime_sidecar_load_plan/entries.csv
 output/vqa_runtime_sidecar_load_plan/sources.csv
+output/vqa_runtime_loader_probe/index.html
+output/vqa_runtime_loader_probe/summary.csv
+output/vqa_runtime_loader_probe/requirements.csv
+output/vqa_runtime_loader_probe/inputs.csv
+output/vqa_runtime_loader_probe/anchors.csv
+output/vqa_runtime_loader_probe/xrefs.csv
+output/vqa_runtime_loader_probe/imports.csv
+output/vqa_runtime_loader_probe/candidates.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -4422,6 +4439,7 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py \
   -o output/vqa_runtime_oversize_budget_lcw_compact_report
 python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
+python3 tools/lolg_vqa_runtime_loader_probe.py
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4475,6 +4493,11 @@ records `CDCACHE.LST`/`CDCACHE.LS_` as non-load-list evidence for this sidecar
 because neither file contains `L20_BBI_HD`, while `LOLG95.EXE`/`LOLG.DAT` are
 the current compiled-loader candidates because they contain both `CDCACHE` and
 `.MIX` markers.
+`output/vqa_runtime_loader_probe/` resolves the Windows PE side of that next
+step: 4 hook candidates, 7 `CreateFileA` xrefs, the generic `.MIX` constructor
+at `0x004534ed`, startup archive mounts at `0x00453355`/`0x00453673` and
+`0x005060de`, `CDCACHE.MIX` mount evidence starting at `0x004e1354`, and no
+compiled `L20_BBI_HD.MIX` string yet.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

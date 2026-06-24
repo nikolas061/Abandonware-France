@@ -147,6 +147,7 @@ python3 tools/lolg_vqa_runtime_oversize_budget.py \
   -o output/vqa_runtime_oversize_budget_lcw_compact_report
 python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
+python3 tools/lolg_vqa_runtime_loader_probe.py
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -275,6 +276,10 @@ et `output/vqa_runtime_sidecar_load_plan/` verifie les 8 IDs dans l'archive de
 base et dans le sidecar local. `CDCACHE.LST`/`CDCACHE.LS_` ne declarent pas ce
 sidecar; le runtime reste `gap` tant qu'un hook ou un ordre de chargement ne
 force pas le jeu a consulter `L20_BBI_HD.MIX` apres `L20_BBI.MIX`.
+`output/vqa_runtime_loader_probe/` cartographie maintenant le loader compile:
+4 candidats hook dans `LOLG95.EXE`, 7 refs `CreateFileA`, constructeur `.MIX`
+vers `0x004534ed`, montage `CDCACHE.MIX` vers `0x004e1354`, et aucun nom
+`L20_BBI_HD.MIX` deja present dans les binaires.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

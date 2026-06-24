@@ -293,6 +293,14 @@ output/vqa_runtime_sidecar_load_plan/requirements.csv
 output/vqa_runtime_sidecar_load_plan/archives.csv
 output/vqa_runtime_sidecar_load_plan/entries.csv
 output/vqa_runtime_sidecar_load_plan/sources.csv
+output/vqa_runtime_loader_probe/index.html
+output/vqa_runtime_loader_probe/summary.csv
+output/vqa_runtime_loader_probe/requirements.csv
+output/vqa_runtime_loader_probe/inputs.csv
+output/vqa_runtime_loader_probe/anchors.csv
+output/vqa_runtime_loader_probe/xrefs.csv
+output/vqa_runtime_loader_probe/imports.csv
+output/vqa_runtime_loader_probe/candidates.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -376,6 +384,11 @@ SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
 `L20_BBI_HD.MIX`. Le rapport note aussi que `CDCACHE.LST` et `CDCACHE.LS_` ne
 contiennent ni `L20_BBI.MIX` ni `L20_BBI_HD.MIX`; le point utile est donc plutot
 le loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui contiennent `CDCACHE` et `.MIX`).
+`output/vqa_runtime_loader_probe/` cartographie ce loader cote `LOLG95.EXE`:
+4 candidats hook, 7 references `CreateFileA`, constructeur generique `.MIX`
+vers `0x004534ed`, montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage
+`CDCACHE.MIX` a partir de `0x004e1354`, et 0 occurrence compilee de
+`L20_BBI_HD.MIX`.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
@@ -5159,7 +5172,10 @@ pas le bon levier: il ne declare pas de MIX sidecar. Il faut donc patcher ou
 wrapper le loader MIX compile pour consulter `L20_BBI_HD.MIX` apres
 `L20_BBI.MIX`, puis tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`,
 `46e6b985`, `46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le
-sidecar.
+sidecar. Les points de depart actuels sont `0x004534ed` pour le constructeur
+generique `.MIX`, les refs `CreateFileA` `0x004e2a0a`, `0x004eb15d`,
+`0x004eb17d`, `0x004eb19d`, `0x004eb25c`, `0x00529c7c`, `0x00529ee0`, et le
+montage `CDCACHE.MIX` a `0x004e1354` seulement comme indice d'architecture.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.

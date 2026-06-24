@@ -129,6 +129,14 @@ DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_REQUIREMENTS = Path("output/vqa_runtime_si
 DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ARCHIVES = Path("output/vqa_runtime_sidecar_load_plan/archives.csv")
 DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ENTRIES = Path("output/vqa_runtime_sidecar_load_plan/entries.csv")
 DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SOURCES = Path("output/vqa_runtime_sidecar_load_plan/sources.csv")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE = Path("output/vqa_runtime_loader_probe/index.html")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE_SUMMARY = Path("output/vqa_runtime_loader_probe/summary.csv")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE_REQUIREMENTS = Path("output/vqa_runtime_loader_probe/requirements.csv")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE_INPUTS = Path("output/vqa_runtime_loader_probe/inputs.csv")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE_ANCHORS = Path("output/vqa_runtime_loader_probe/anchors.csv")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE_XREFS = Path("output/vqa_runtime_loader_probe/xrefs.csv")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE_IMPORTS = Path("output/vqa_runtime_loader_probe/imports.csv")
+DEFAULT_VQA_RUNTIME_LOADER_PROBE_CANDIDATES = Path("output/vqa_runtime_loader_probe/candidates.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1056,6 +1064,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_oversize_lcw_report_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_REPORT_SUMMARY)
     vqa_sidecar_summary = first_row(DEFAULT_VQA_RUNTIME_SIDECAR_PACK_SUMMARY)
     vqa_sidecar_load_summary = first_row(DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SUMMARY)
+    vqa_loader_probe_summary = first_row(DEFAULT_VQA_RUNTIME_LOADER_PROBE_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1134,6 +1143,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{vqa_sidecar_summary.get('replacement_bytes', '')} bytes, "
                 f"load {vqa_sidecar_load_summary.get('base_entries_verified', '')}/"
                 f"{vqa_sidecar_load_summary.get('sidecar_entries_verified', '')} verif, "
+                f"loader {vqa_loader_probe_summary.get('hook_candidates', '')}/"
+                f"{vqa_loader_probe_summary.get('createfile_xrefs', '')} refs, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1303,6 +1314,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Archives chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ARCHIVES),
         ("Entrees chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_ENTRIES),
         ("Sources chargement sidecar runtime VQA", DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SOURCES),
+        ("Probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE),
+        ("Synthese probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE_SUMMARY),
+        ("Requirements probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE_REQUIREMENTS),
+        ("Inputs probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE_INPUTS),
+        ("Ancres probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE_ANCHORS),
+        ("Xrefs probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE_XREFS),
+        ("Imports probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE_IMPORTS),
+        ("Candidats probe loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_PROBE_CANDIDATES),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),
