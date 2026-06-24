@@ -159,6 +159,15 @@ DEFAULT_VQA_RUNTIME_LOADER_TRACE_CONTRACT_WINEDBG = Path(
 DEFAULT_VQA_RUNTIME_LOADER_TRACE_CONTRACT_WINDBG = Path(
     "output/vqa_runtime_loader_trace_contract/windbg_breakpoints.cmd"
 )
+DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT = Path("output/lolg95_winedbg_loader_trace_attempt/index.html")
+DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_SUMMARY = Path(
+    "output/lolg95_winedbg_loader_trace_attempt/summary.csv"
+)
+DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_TRACE = Path("output/lolg95_winedbg_loader_trace_attempt/trace.tsv")
+DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_COMMANDS = Path(
+    "output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt"
+)
+DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_RAW = Path("output/lolg95_winedbg_loader_trace_attempt/raw.log")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1088,6 +1097,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_sidecar_load_summary = first_row(DEFAULT_VQA_RUNTIME_SIDECAR_LOAD_PLAN_SUMMARY)
     vqa_loader_probe_summary = first_row(DEFAULT_VQA_RUNTIME_LOADER_PROBE_SUMMARY)
     vqa_loader_trace_summary = first_row(DEFAULT_VQA_RUNTIME_LOADER_TRACE_CONTRACT_SUMMARY)
+    lolg95_loader_trace_attempt_summary = first_row(DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_SUMMARY)
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
@@ -1170,6 +1180,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{vqa_loader_probe_summary.get('createfile_xrefs', '')} refs, "
                 f"trace {vqa_loader_trace_summary.get('tracepoints', '')}/"
                 f"{vqa_loader_trace_summary.get('expected_sidecar_ids', '')} ids, "
+                f"attempt {lolg95_loader_trace_attempt_summary.get('breakpoint_hits', '')}/"
+                f"{lolg95_loader_trace_attempt_summary.get('extracted_rows', '')} hits, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1364,6 +1376,11 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Commandes contrat trace loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_TRACE_CONTRACT_COMMANDS),
         ("Commandes winedbg trace loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_TRACE_CONTRACT_WINEDBG),
         ("Breakpoints WinDbg trace loader sidecar runtime VQA", DEFAULT_VQA_RUNTIME_LOADER_TRACE_CONTRACT_WINDBG),
+        ("Tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT),
+        ("Synthese tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_SUMMARY),
+        ("Trace tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_TRACE),
+        ("Commandes tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_COMMANDS),
+        ("Log brut tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_RAW),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),

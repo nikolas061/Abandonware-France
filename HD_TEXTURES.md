@@ -495,6 +495,11 @@ output/vqa_runtime_loader_trace_contract/expected_sidecar_ids.csv
 output/vqa_runtime_loader_trace_contract/commands.csv
 output/vqa_runtime_loader_trace_contract/winedbg_commands.txt
 output/vqa_runtime_loader_trace_contract/windbg_breakpoints.cmd
+output/lolg95_winedbg_loader_trace_attempt/index.html
+output/lolg95_winedbg_loader_trace_attempt/summary.csv
+output/lolg95_winedbg_loader_trace_attempt/trace.tsv
+output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
+output/lolg95_winedbg_loader_trace_attempt/raw.log
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -586,6 +591,7 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
+python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run
 python3 tools/lolg_vqa_native_exact_fixture_writer.py
 python3 tools/lolg_vqa_fullhd_replacement_writer.py --batch-limit 1568
 python3 tools/lolg_vqa_runtime_archive_seed_writer.py
@@ -1878,6 +1884,11 @@ output/vqa_runtime_loader_trace_contract/expected_sidecar_ids.csv
 output/vqa_runtime_loader_trace_contract/commands.csv
 output/vqa_runtime_loader_trace_contract/winedbg_commands.txt
 output/vqa_runtime_loader_trace_contract/windbg_breakpoints.cmd
+output/lolg95_winedbg_loader_trace_attempt/index.html
+output/lolg95_winedbg_loader_trace_attempt/summary.csv
+output/lolg95_winedbg_loader_trace_attempt/trace.tsv
+output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
+output/lolg95_winedbg_loader_trace_attempt/raw.log
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -4458,6 +4469,7 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
+python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4521,6 +4533,13 @@ debugger-ready contract: 8 tracepoints, 7 `CreateFileA` call sites, 1 `.MIX`
 constructor breakpoint, `winedbg_commands.txt`, `windbg_breakpoints.cmd`, and
 the 8 expected sidecar IDs that must later be observed coming from
 `L20_BBI_HD.MIX`.
+`tools/run_lolg95_winedbg_loader_trace_attempt.py` now materializes that
+contract as a bounded session report. In pipeline mode it runs with `--dry-run`
+and writes the command file, empty trace table and summary; running it without
+`--dry-run` starts Xvfb/Wine/winedbg and records breakpoint hits plus raw logs
+under `output/lolg95_winedbg_loader_trace_attempt/`. The latest bounded real
+run sets all 8 breakpoints with `invalid_breakpoints=0`, then reaches
+`started_timeout` with `breakpoint_hits=0`.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

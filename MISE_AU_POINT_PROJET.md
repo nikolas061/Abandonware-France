@@ -309,6 +309,11 @@ output/vqa_runtime_loader_trace_contract/expected_sidecar_ids.csv
 output/vqa_runtime_loader_trace_contract/commands.csv
 output/vqa_runtime_loader_trace_contract/winedbg_commands.txt
 output/vqa_runtime_loader_trace_contract/windbg_breakpoints.cmd
+output/lolg95_winedbg_loader_trace_attempt/index.html
+output/lolg95_winedbg_loader_trace_attempt/summary.csv
+output/lolg95_winedbg_loader_trace_attempt/trace.tsv
+output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
+output/lolg95_winedbg_loader_trace_attempt/raw.log
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -400,6 +405,11 @@ vers `0x004534ed`, montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage
 `output/vqa_runtime_loader_trace_contract/` transforme ces ancres en contrat de
 trace: 8 tracepoints, 7 call sites `CreateFileA`, 1 breakpoint constructeur
 `.MIX`, commandes `winedbg`/WinDbg exportees et les 8 IDs sidecar attendus.
+`output/lolg95_winedbg_loader_trace_attempt/` materialise ce contrat en rapport
+de session. En pipeline il tourne en `--dry-run`: 8 breakpoints ecrits, 0 hit,
+0 row. Le run reel borne a 45s a ensuite pose les 8 breakpoints sans
+invalidation (`invalid_breakpoints=0`), puis atteint `started_timeout` avec
+`breakpoint_hits=0`: le flux courant ne passe pas encore par ces points.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
@@ -5189,7 +5199,13 @@ generique `.MIX`, les refs `CreateFileA` `0x004e2a0a`, `0x004eb15d`,
 montage `CDCACHE.MIX` a `0x004e1354` seulement comme indice d'architecture.
 Le fichier `output/vqa_runtime_loader_trace_contract/winedbg_commands.txt`
 contient maintenant ces 8 breakpoints et doit etre le prochain run runtime
-avant tout patch binaire.
+avant tout patch binaire. Le runner correspondant est
+`python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`; il ecrit
+`raw.log`, `trace.tsv` et `summary.csv` sous
+`output/lolg95_winedbg_loader_trace_attempt/`. Comme le premier run reel pose
+les breakpoints mais ne les touche pas en 45s, la prochaine passe doit soit
+piloter le jeu plus loin, soit descendre le breakpoint au wrapper fichier plus
+amont avant de patcher.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.

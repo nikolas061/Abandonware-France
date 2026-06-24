@@ -149,6 +149,7 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
+python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -283,7 +284,11 @@ vers `0x004534ed`, montage `CDCACHE.MIX` vers `0x004e1354`, et aucun nom
 `L20_BBI_HD.MIX` deja present dans les binaires. Le contrat suivant
 `output/vqa_runtime_loader_trace_contract/` exporte 8 tracepoints `winedbg`
 prets a lancer: 7 refs `CreateFileA`, le constructeur `.MIX`, et les 8 IDs
-sidecar attendus comme cible de preuve.
+sidecar attendus comme cible de preuve. `output/lolg95_winedbg_loader_trace_attempt/`
+genere le rapport de session; le pipeline l'ecrit en `--dry-run`, et le vrai
+run s'obtient avec `python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`.
+Dernier run borne: les 8 breakpoints sont poses, `invalid_breakpoints=0`, puis
+la session atteint `started_timeout` avec `breakpoint_hits=0`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
