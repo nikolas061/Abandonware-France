@@ -295,7 +295,22 @@ pose avec `renderer_setup_status=exited_0`, session `started_timeout`,
 `path_rows=42`, `unique_paths=12`. Les chemins observes restent au bootstrap:
 `LANGUAGE.*`, `ERRTEXT.TRR`, `LOCAL.MIX`, `LOCALLNG.MIX`, `backtile.pcx`,
 `basepal.pal`, `Std8P.FNT`, `Std6P.FNT`, `MOUSEH.SHP` et `LOLSETUP.INI`.
-`L20_BBI.MIX` et `L20_BBI_HD.MIX` ne sont pas encore observes.
+`L20_BBI.MIX` et `L20_BBI_HD.MIX` ne sont pas encore observes. Le test visuel
+Wine/Xvfb doit passer par `explorer /desktop=LOLG,1280x1024` avec `-CD
+D:\WESTWOOD\LOLG`; ce point concerne seulement le banc de test, pas le lanceur.
+`tools/run_lolg95_winedbg_attach_pilot_attempt.py` ajoute maintenant un mode
+attache au vrai processus `LOLG95.EXE` apres affichage du menu. Le run pilote
+`output/lolg95_winedbg_attach_pilot_escape_attempt/` clique `Nouvelle partie`,
+envoie `Escape` puis `Return`, et capture `breakpoint_hits=225`,
+`extracted_rows=225`, `path_rows=224`, `unique_paths=92`: il passe la video et
+atteint le runtime de jeu (`L1_DC.MIX`, `L1_DCI.MIX`, `GLOBAL.MIX`,
+`LOCAL.MIX`, `CDCACHE.MIX`, `sphere1\l1_dc\l1_dc.map`,
+`sphere1\l1_dc\l1_dc.te_`, `GLOBAL.IMG`, `l1_dc.img`, IA globale, musique).
+La variante `output/lolg95_winedbg_attach_pilot_autosave_attempt/` clique
+`Charger sauvegarde auto`, ouvre `.\SAVEGAME\$AUTOSAV.XXX`, puis reste aussi
+sur `L1_DC` (`breakpoint_hits=239`, `unique_paths=90`). La prochaine preuve
+runtime de `L20_BBI.MIX` demande donc une sauvegarde ou un pilotage qui atteint
+un contenu L20, pas une correction du lanceur.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

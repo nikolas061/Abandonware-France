@@ -168,6 +168,30 @@ DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_COMMANDS = Path(
     "output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt"
 )
 DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_RAW = Path("output/lolg95_winedbg_loader_trace_attempt/raw.log")
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_SUMMARY = Path(
+    "output/lolg95_winedbg_attach_pilot_escape_attempt/summary.csv"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_TRACE = Path(
+    "output/lolg95_winedbg_attach_pilot_escape_attempt/trace.tsv"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_COMMANDS = Path(
+    "output/lolg95_winedbg_attach_pilot_escape_attempt/winedbg_attach_commands.txt"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_RAW = Path(
+    "output/lolg95_winedbg_attach_pilot_escape_attempt/raw.log"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_SUMMARY = Path(
+    "output/lolg95_winedbg_attach_pilot_autosave_attempt/summary.csv"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_TRACE = Path(
+    "output/lolg95_winedbg_attach_pilot_autosave_attempt/trace.tsv"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_COMMANDS = Path(
+    "output/lolg95_winedbg_attach_pilot_autosave_attempt/winedbg_attach_commands.txt"
+)
+DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_RAW = Path(
+    "output/lolg95_winedbg_attach_pilot_autosave_attempt/raw.log"
+)
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS = Path(
@@ -1384,6 +1408,14 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Trace tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_TRACE),
         ("Commandes tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_COMMANDS),
         ("Log brut tentative winedbg trace loader LOLG95", DEFAULT_LOLG95_WINEDBG_LOADER_TRACE_ATTEMPT_RAW),
+        ("Synthese trace attachee menu nouvelle partie", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_SUMMARY),
+        ("Trace attachee menu nouvelle partie", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_TRACE),
+        ("Commandes trace attachee menu nouvelle partie", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_COMMANDS),
+        ("Log brut trace attachee menu nouvelle partie", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_ESCAPE_RAW),
+        ("Synthese trace attachee sauvegarde auto", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_SUMMARY),
+        ("Trace attachee sauvegarde auto", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_TRACE),
+        ("Commandes trace attachee sauvegarde auto", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_COMMANDS),
+        ("Log brut trace attachee sauvegarde auto", DEFAULT_LOLG95_WINEDBG_ATTACH_PILOT_AUTOSAVE_RAW),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),

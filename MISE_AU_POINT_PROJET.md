@@ -425,6 +425,20 @@ avec `invalid_breakpoints=0`, `breakpoint_hits=42`, `extracted_rows=42`,
 `LANGUAGE.*`, `ERRTEXT.TRR`, `LOCAL.MIX`, `LOCALLNG.MIX`, `backtile.pcx`,
 `basepal.pal`, `Std8P.FNT`, `Std6P.FNT`, `MOUSEH.SHP` et `LOLSETUP.INI`.
 `L20_BBI.MIX` et `L20_BBI_HD.MIX` ne sont pas encore observes.
+Le symptome "son sans image" venait du banc de test Wine/Xvfb, pas du lanceur:
+le chemin visuel valide utilise `explorer /desktop=LOLG,1280x1024` et l'argument
+`-CD D:\WESTWOOD\LOLG`. Le nouveau traceur
+`tools/run_lolg95_winedbg_attach_pilot_attempt.py` demarre ce chemin, recupere
+le PID Wine de `LOLG95.EXE` via `winedbg info proc`, s'attache au vrai processus,
+puis pilote le menu avec `xdotool`. `output/lolg95_winedbg_attach_pilot_escape_attempt/`
+clique `Nouvelle partie`, envoie `Escape Return Return`, capture 225 hits/225
+rows et atteint le runtime `L1_DC` (`L1_DC.MIX`, `L1_DCI.MIX`, `GLOBAL.MIX`,
+`LOCAL.MIX`, `CDCACHE.MIX`, `sphere1\l1_dc\l1_dc.map`, `sphere1\l1_dc\l1_dc.te_`,
+`GLOBAL.IMG`, `l1_dc.img`). `output/lolg95_winedbg_attach_pilot_autosave_attempt/`
+charge `.\SAVEGAME\$AUTOSAV.XXX`, capture 239 hits/239 rows, mais reste aussi
+sur `L1_DC`. Le verrou restant est donc d'obtenir une sauvegarde ou un pilotage
+qui atteint le contenu L20 pour observer `L20_BBI.MIX` avant de patcher le
+fallback `L20_BBI_HD.MIX`.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
