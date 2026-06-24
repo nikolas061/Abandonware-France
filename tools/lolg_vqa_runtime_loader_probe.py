@@ -83,6 +83,7 @@ XREF_FIELDS = [
     "target",
     "target_va",
     "ref_va",
+    "breakpoint_va",
     "ref_file_offset",
     "section",
     "context_hex",
@@ -322,14 +323,28 @@ def code_ranges(info: BinaryInfo) -> list[tuple[Section | None, int, bytes]]:
     return []
 
 
-def find_code_xrefs(info: BinaryInfo, target_va: int) -> list[tuple[int, int, Section | None]]:
+def breakpoint_offset_from_immediate(data: bytes, offset: int) -> int:
+    if offset >= 3 and data[offset - 3 : offset] == b"\x2e\xff\x15":
+        return offset - 3
+    if offset >= 2 and data[offset - 2 : offset] in {b"\xff\x15", b"\xff\x25", b"\xc7\x05"}:
+        return offset - 2
+    if offset >= 1 and (data[offset - 1] == 0x68 or 0xB8 <= data[offset - 1] <= 0xBF):
+        return offset - 1
+    if offset >= 1 and data[offset - 1] in {0xA1, 0xA3}:
+        return offset - 1
+    return offset
+
+
+def find_code_xrefs(info: BinaryInfo, target_va: int) -> list[tuple[int, int, Section | None, int]]:
     pattern = struct.pack("<I", target_va)
-    refs: list[tuple[int, int, Section | None]] = []
+    refs: list[tuple[int, int, Section | None, int]] = []
     for section, start, blob in code_ranges(info):
         for relative in find_all(blob, pattern):
             file_offset = start + relative
             ref_va = va_from_offset(info.sections, file_offset) if info.sections else None
-            refs.append((ref_va or 0, file_offset, section))
+            breakpoint_offset = breakpoint_offset_from_immediate(info.data, file_offset)
+            breakpoint_va = va_from_offset(info.sections, breakpoint_offset) if info.sections else None
+            refs.append((ref_va or 0, file_offset, section, breakpoint_va or ref_va or 0))
     return refs
 
 
@@ -405,7 +420,7 @@ def build_reports(args: argparse.Namespace) -> tuple[
                 section = section_for_offset(info.sections, offset) if info.sections else None
                 va = va_from_offset(info.sections, offset) if info.sections else None
                 refs = find_code_xrefs(info, va) if va is not None else []
-                xrefs_text = ",".join(hex_value(ref_va) for ref_va, _file_offset, _section in refs)
+                xrefs_text = ",".join(hex_value(breakpoint_va) for _ref_va, _file_offset, _section, breakpoint_va in refs)
                 interpretation = anchor_interpretation(anchor, len(refs))
                 anchor_rows.append(
                     {
@@ -419,7 +434,7 @@ def build_reports(args: argparse.Namespace) -> tuple[
                         "interpretation": interpretation,
                     }
                 )
-                for ref_va, file_offset, ref_section in refs:
+                for ref_va, file_offset, ref_section, breakpoint_va in refs:
                     xref_rows.append(
                         {
                             "path": str(info.path),
@@ -427,6 +442,7 @@ def build_reports(args: argparse.Namespace) -> tuple[
                             "target": anchor,
                             "target_va": hex_value(va),
                             "ref_va": hex_value(ref_va),
+                            "breakpoint_va": hex_value(breakpoint_va),
                             "ref_file_offset": hex_value(file_offset),
                             "section": ref_section.name if ref_section else "",
                             "context_hex": context_hex(info.data, file_offset),
@@ -447,11 +463,13 @@ def build_reports(args: argparse.Namespace) -> tuple[
                         "function": symbol.function,
                         "iat_va": hex_value(symbol.iat_va),
                         "xref_count": str(len(refs)),
-                        "xrefs": ",".join(hex_value(ref_va) for ref_va, _file_offset, _section in refs),
+                        "xrefs": ",".join(
+                            hex_value(breakpoint_va) for _ref_va, _file_offset, _section, breakpoint_va in refs
+                        ),
                         "interpretation": import_interpretation(symbol.function, len(refs)),
                     }
                 )
-                for ref_va, file_offset, ref_section in refs:
+                for ref_va, file_offset, ref_section, breakpoint_va in refs:
                     xref_rows.append(
                         {
                             "path": str(info.path),
@@ -459,6 +477,7 @@ def build_reports(args: argparse.Namespace) -> tuple[
                             "target": symbol.function,
                             "target_va": hex_value(symbol.iat_va),
                             "ref_va": hex_value(ref_va),
+                            "breakpoint_va": hex_value(breakpoint_va),
                             "ref_file_offset": hex_value(file_offset),
                             "section": ref_section.name if ref_section else "",
                             "context_hex": context_hex(info.data, file_offset),

@@ -183,32 +183,36 @@ def extract_trace_rows(raw_log: str, tracepoints: list[dict[str, str]]) -> tuple
         if not current:
             return
         required = ("eip", "eax", "ecx", "edx", "esi", "edi")
-        if all(current.get(field) for field in required):
-            contract = by_breakpoint[current["breakpoint_va"]]
-            rows.append(
-                {
-                    "tracepoint_id": contract["tracepoint_id"],
-                    "breakpoint_va": current["breakpoint_va"],
-                    "kind": contract["kind"],
-                    "target": contract["target"],
-                    "eip": current.get("eip", ""),
-                    "eax": current.get("eax", ""),
-                    "ecx": current.get("ecx", ""),
-                    "edx": current.get("edx", ""),
-                    "esi": current.get("esi", ""),
-                    "edi": current.get("edi", ""),
-                    "esp0": current.get("esp0", ""),
-                    "esp4": current.get("esp4", ""),
-                    "esp8": current.get("esp8", ""),
-                    "esp12": current.get("esp12", ""),
-                    "esp16": current.get("esp16", ""),
-                    "esp20": current.get("esp20", ""),
-                    "esp24": current.get("esp24", ""),
-                    "capture_note": "winedbg loader trace capture; path pointer still needs memory-string extraction",
-                }
-            )
-        else:
+        complete = all(current.get(field) for field in required)
+        if not complete:
             incomplete_hits += 1
+        contract = by_breakpoint[current["breakpoint_va"]]
+        rows.append(
+            {
+                "tracepoint_id": contract["tracepoint_id"],
+                "breakpoint_va": current["breakpoint_va"],
+                "kind": contract["kind"],
+                "target": contract["target"],
+                "eip": current.get("eip", ""),
+                "eax": current.get("eax", ""),
+                "ecx": current.get("ecx", ""),
+                "edx": current.get("edx", ""),
+                "esi": current.get("esi", ""),
+                "edi": current.get("edi", ""),
+                "esp0": current.get("esp0", ""),
+                "esp4": current.get("esp4", ""),
+                "esp8": current.get("esp8", ""),
+                "esp12": current.get("esp12", ""),
+                "esp16": current.get("esp16", ""),
+                "esp20": current.get("esp20", ""),
+                "esp24": current.get("esp24", ""),
+                "capture_note": (
+                    "winedbg loader trace capture; path pointer still needs memory-string extraction"
+                    if complete
+                    else "partial winedbg breakpoint hit; register/stack display was not captured"
+                ),
+            }
+        )
         current = None
 
     for line in raw_log.splitlines():
@@ -370,6 +374,9 @@ def run_attempt(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[str
     if l20_bbi_hd_mentions:
         status = "pass"
         next_step = "confirm that sidecar payload IDs are read from L20_BBI_HD.MIX"
+    elif trace_rows and incomplete_hits:
+        status = "gap"
+        next_step = "adjust winedbg capture commands to record registers/stack at the hit breakpoint, then extract path strings"
     elif trace_rows:
         status = "gap"
         next_step = "extract path strings from captured pointers and add the L20_BBI_HD.MIX fallback hook"

@@ -314,6 +314,11 @@ output/lolg95_winedbg_loader_trace_attempt/summary.csv
 output/lolg95_winedbg_loader_trace_attempt/trace.tsv
 output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
 output/lolg95_winedbg_loader_trace_attempt/raw.log
+output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
+output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
+output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
+output/lolg95_winedbg_loader_trace_attempt_dry_run/winedbg_commands.txt
+output/lolg95_winedbg_loader_trace_attempt_dry_run/raw.log
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -398,18 +403,26 @@ SHA-256 `269c2fe9f7fa08404e1950c330967f2e329f94b42390a40c0a3bffc76db26b03`.
 contiennent ni `L20_BBI.MIX` ni `L20_BBI_HD.MIX`; le point utile est donc plutot
 le loader compile (`LOLG95.EXE`/`LOLG.DAT`, qui contiennent `CDCACHE` et `.MIX`).
 `output/vqa_runtime_loader_probe/` cartographie ce loader cote `LOLG95.EXE`:
-4 candidats hook, 7 references `CreateFileA`, constructeur generique `.MIX`
-vers `0x004534ed`, montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage
-`CDCACHE.MIX` a partir de `0x004e1354`, et 0 occurrence compilee de
-`L20_BBI_HD.MIX`.
+4 candidats hook, 7 references `CreateFileA`, constructeur generique `.MIX`,
+montages startup `GLOBAL.MIX`/`LOCAL.MIX`, montage `CDCACHE.MIX`, et 0
+occurrence compilee de `L20_BBI_HD.MIX`. Les xrefs conservent maintenant deux
+adresses: `ref_va` pour l'operande immediate detectee et `breakpoint_va` pour
+le debut executable de l'instruction.
 `output/vqa_runtime_loader_trace_contract/` transforme ces ancres en contrat de
-trace: 8 tracepoints, 7 call sites `CreateFileA`, 1 breakpoint constructeur
-`.MIX`, commandes `winedbg`/WinDbg exportees et les 8 IDs sidecar attendus.
+trace: 8 tracepoints corriges, 7 call sites `CreateFileA`
+(`0x004e2a07`, `0x004eb15a`, `0x004eb17a`, `0x004eb19a`, `0x004eb259`,
+`0x00529c7a`, `0x00529ede`) et 1 breakpoint constructeur `.MIX`
+(`0x004534ec`), commandes `winedbg`/WinDbg exportees et les 8 IDs sidecar
+attendus.
 `output/lolg95_winedbg_loader_trace_attempt/` materialise ce contrat en rapport
-de session. En pipeline il tourne en `--dry-run`: 8 breakpoints ecrits, 0 hit,
-0 row. Le run reel borne a 45s a ensuite pose les 8 breakpoints sans
-invalidation (`invalid_breakpoints=0`), puis atteint `started_timeout` avec
-`breakpoint_hits=0`: le flux courant ne passe pas encore par ces points.
+de session reel. Le pipeline ecrit maintenant son `--dry-run` dans
+`output/lolg95_winedbg_loader_trace_attempt_dry_run/` pour ne pas ecraser cette
+preuve. Le dernier run reel borne a 45s pose les 8 breakpoints corriges sans
+invalidation (`invalid_breakpoints=0`) et touche `createfile_05` a
+`0x004eb259` (`breakpoint_hits=1`, `extracted_rows=1`). La ligne est partielle:
+`winedbg` n'a pas encore emis les registres/pile, mais le desassemblage montre
+que le pointeur de chemin `CreateFileA` est dans `ESI`, puis `[esp]`, juste
+avant le call.
 Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
 sidecar apres l'archive de base en runtime.
 
@@ -5193,19 +5206,18 @@ pas le bon levier: il ne declare pas de MIX sidecar. Il faut donc patcher ou
 wrapper le loader MIX compile pour consulter `L20_BBI_HD.MIX` apres
 `L20_BBI.MIX`, puis tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`,
 `46e6b985`, `46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le
-sidecar. Les points de depart actuels sont `0x004534ed` pour le constructeur
-generique `.MIX`, les refs `CreateFileA` `0x004e2a0a`, `0x004eb15d`,
-`0x004eb17d`, `0x004eb19d`, `0x004eb25c`, `0x00529c7c`, `0x00529ee0`, et le
-montage `CDCACHE.MIX` a `0x004e1354` seulement comme indice d'architecture.
+sidecar. Les points de depart actuels sont `0x004534ec` pour le constructeur
+generique `.MIX`, les refs `CreateFileA` corrigees `0x004e2a07`, `0x004eb15a`,
+`0x004eb17a`, `0x004eb19a`, `0x004eb259`, `0x00529c7a`, `0x00529ede`, et le
+montage `CDCACHE.MIX` seulement comme indice d'architecture.
 Le fichier `output/vqa_runtime_loader_trace_contract/winedbg_commands.txt`
-contient maintenant ces 8 breakpoints et doit etre le prochain run runtime
-avant tout patch binaire. Le runner correspondant est
+contient ces 8 breakpoints. Le runner correspondant est
 `python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`; il ecrit
 `raw.log`, `trace.tsv` et `summary.csv` sous
-`output/lolg95_winedbg_loader_trace_attempt/`. Comme le premier run reel pose
-les breakpoints mais ne les touche pas en 45s, la prochaine passe doit soit
-piloter le jeu plus loin, soit descendre le breakpoint au wrapper fichier plus
-amont avant de patcher.
+`output/lolg95_winedbg_loader_trace_attempt/`. Comme le dernier run reel touche
+`createfile_05` mais ne capture pas encore `ESI`/`[esp]`, la prochaine passe
+doit ajuster les commandes `winedbg` pour sortir registres/pile au stop, puis
+lire la chaine de chemin avant de patcher le fallback `L20_BBI_HD.MIX`.
 
 Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.

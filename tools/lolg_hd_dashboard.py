@@ -1181,7 +1181,8 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"trace {vqa_loader_trace_summary.get('tracepoints', '')}/"
                 f"{vqa_loader_trace_summary.get('expected_sidecar_ids', '')} ids, "
                 f"attempt {lolg95_loader_trace_attempt_summary.get('breakpoint_hits', '')}/"
-                f"{lolg95_loader_trace_attempt_summary.get('extracted_rows', '')} hits, "
+                f"{lolg95_loader_trace_attempt_summary.get('contract_tracepoints', '')} bp, "
+                f"rows {lolg95_loader_trace_attempt_summary.get('extracted_rows', '')}, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),

@@ -149,7 +149,7 @@ python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
 python3 tools/lolg_vqa_runtime_loader_probe.py
 python3 tools/lolg_vqa_runtime_loader_trace_contract.py
-python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run
+python3 tools/run_lolg95_winedbg_loader_trace_attempt.py --dry-run -o output/lolg95_winedbg_loader_trace_attempt_dry_run
 ```
 
 Writer de fixture WVQA native exact-block:
@@ -279,16 +279,20 @@ base et dans le sidecar local. `CDCACHE.LST`/`CDCACHE.LS_` ne declarent pas ce
 sidecar; le runtime reste `gap` tant qu'un hook ou un ordre de chargement ne
 force pas le jeu a consulter `L20_BBI_HD.MIX` apres `L20_BBI.MIX`.
 `output/vqa_runtime_loader_probe/` cartographie maintenant le loader compile:
-4 candidats hook dans `LOLG95.EXE`, 7 refs `CreateFileA`, constructeur `.MIX`
-vers `0x004534ed`, montage `CDCACHE.MIX` vers `0x004e1354`, et aucun nom
-`L20_BBI_HD.MIX` deja present dans les binaires. Le contrat suivant
-`output/vqa_runtime_loader_trace_contract/` exporte 8 tracepoints `winedbg`
-prets a lancer: 7 refs `CreateFileA`, le constructeur `.MIX`, et les 8 IDs
-sidecar attendus comme cible de preuve. `output/lolg95_winedbg_loader_trace_attempt/`
-genere le rapport de session; le pipeline l'ecrit en `--dry-run`, et le vrai
-run s'obtient avec `python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`.
-Dernier run borne: les 8 breakpoints sont poses, `invalid_breakpoints=0`, puis
-la session atteint `started_timeout` avec `breakpoint_hits=0`.
+4 candidats hook dans `LOLG95.EXE`, 7 refs `CreateFileA`, un constructeur
+`.MIX` et aucun nom `L20_BBI_HD.MIX` deja present dans les binaires. Les xrefs
+distinguent maintenant l'operande trouvee (`ref_va`) de l'adresse executable
+du breakpoint (`breakpoint_va`): le contrat pose donc `.MIX` a `0x004534ec`
+et `CreateFileA` a `0x004e2a07`, `0x004eb15a`, `0x004eb17a`, `0x004eb19a`,
+`0x004eb259`, `0x00529c7a`, `0x00529ede`. `output/vqa_runtime_loader_trace_contract/`
+exporte ces 8 tracepoints `winedbg` et les 8 IDs sidecar attendus comme cible
+de preuve. `output/lolg95_winedbg_loader_trace_attempt/` garde le rapport du
+vrai run; le pipeline ecrit son dry-run separement dans
+`output/lolg95_winedbg_loader_trace_attempt_dry_run/`. Dernier run borne:
+`invalid_breakpoints=0`, `breakpoint_hits=1`, `extracted_rows=1`, hit partiel
+sur `createfile_05` a `0x004eb259`. Le bloc assembleur montre que le chemin
+`CreateFileA` est dans `ESI` puis `[esp]`; il faut maintenant faire capturer
+registres/pile par `winedbg`, puis extraire la chaine ouverte.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

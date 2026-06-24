@@ -2610,7 +2610,13 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
         ),
         Step(
             "dry-run trace loader sidecar runtime VQA",
-            [sys.executable, "tools/run_lolg95_winedbg_loader_trace_attempt.py", "--dry-run"],
+            [
+                sys.executable,
+                "tools/run_lolg95_winedbg_loader_trace_attempt.py",
+                "--dry-run",
+                "-o",
+                "output/lolg95_winedbg_loader_trace_attempt_dry_run",
+            ],
         ),
         Step("readiness repack runtime VQA Full HD final", [sys.executable, "tools/lolg_vqa_runtime_repack_readiness.py"]),
         Step("faisabilite runtime VQA Full HD", [sys.executable, "tools/lolg_vqa_runtime_feasibility.py"]),
