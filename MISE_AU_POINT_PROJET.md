@@ -150,16 +150,16 @@ Runtime gaps: 2
   entrees natives exact-block comme cibles de fixture. Le probe de compression
   LCW compatible economise 28260692 octets sur 128 frames echantillonnees dans
   les 4 plus gros payloads differes (`sample_saved_ratio=0.704964`). La
-  materialisation compacte produit aussi 132 payloads complets sous 53 Mo dans
+  materialisation compacte produit aussi 140 payloads complets sous 350 Mo dans
   `L20_BBI.MIX` depuis le rapport compact precedent et les budgets oversized
-  de base et compact courant, 11719 frames, 23438 chunks roundtrip,
-  3469047518 -> 780324958 octets (`saved_ratio=0.775061`). Le builder runtime
+  de base et compact courant, 15708 frames, 31416 chunks roundtrip,
+  4798324652 -> 1373848136 octets (`saved_ratio=0.713682`). Le builder runtime
   VQA accepte maintenant une racine overlay via `--replacement-overlay-root`
   et un filtre `--archive`;
   le sample compact `L20_BBI` consomme ces payloads depuis
   `replacements_vqa_fullhd_lcw_compact/`, applique 399/407 remplacements,
   descend les differes de 101 a 8 et laisse
-  `required_reduction_bytes=1252945045` dans le budget oversized cible.
+  `required_reduction_bytes=517191089` dans le budget oversized cible.
   Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
   LCW literal et valide 20/20 frames au redecode.
 - La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
@@ -290,15 +290,16 @@ marge body cumulee. Le probe `output/vqa_lcw_compression_probe/` ajoute une
 preuve de compression LCW compatible: sur les 4 plus gros payloads differes et
 128 frames echantillonnees, les chunks testes economisent 28260692 octets
 (`sample_saved_ratio=0.704964`). `output/vqa_lcw_compact_payloads/` confirme
-132 payloads compacts complets: `entries_written=132`, `frames=11719`,
-`chunk_roundtrip_failures=0`, `saved_bytes=2688722560`,
-`saved_ratio=0.775061`. `output/vqa_runtime_pack_build_lcw_compact_sample/`
+140 payloads compacts complets: `entries_written=140`, `frames=15708`,
+`chunk_roundtrip_failures=0`, `saved_bytes=3424476516`,
+`saved_ratio=0.713682`. `output/vqa_runtime_pack_build_lcw_compact_sample/`
 confirme que ces payloads sont maintenant consommables en overlay:
-`overlay_replacements=132`, `applied_replacements=399/407`,
-`deferred_replacements=8`, `output_bytes=4294120522`; les 132 lignes compactes
-sont en `replacement_source=overlay` et `replacement_ready`. Le budget cible
+`overlay_replacements=140`, `applied_replacements=399/407`,
+`deferred_replacements=8`, `output_bytes=4294120522`; les 140 lignes compactes
+sont en `replacement_source=overlay`; 132 sont `replacement_ready` et les 8
+dernieres sont encore `replacement_deferred_oversize`. Le budget cible
 `output/vqa_runtime_oversize_budget_lcw_compact_sample/` donne encore
-`required_reduction_bytes=1252945045` pour les 8 payloads differes de
+`required_reduction_bytes=517191089` pour les 8 payloads differes de
 `L20_BBI.MIX`.
 
 ## Textures .tex
