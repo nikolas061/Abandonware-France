@@ -93,6 +93,10 @@ def int_value(row: dict[str, str], field: str) -> int:
         return 0
 
 
+def replacement_size_value(row: dict[str, str]) -> int:
+    return int_value(row, "replacement_size") or int_value(row, "original_payload_bytes")
+
+
 def ratio_text(numerator: int, denominator: int) -> str:
     if denominator <= 0:
         return "0.000000"
@@ -155,10 +159,10 @@ def select_rows(args: argparse.Namespace) -> tuple[int, list[dict[str, str]]]:
             rows_by_key.setdefault(key, row)
     rows = list(rows_by_key.values())
     if args.min_replacement_size:
-        rows = [row for row in rows if int_value(row, "replacement_size") >= args.min_replacement_size]
+        rows = [row for row in rows if replacement_size_value(row) >= args.min_replacement_size]
     if args.max_replacement_size:
-        rows = [row for row in rows if int_value(row, "replacement_size") <= args.max_replacement_size]
-    rows.sort(key=lambda row: int_value(row, "replacement_size"), reverse=True)
+        rows = [row for row in rows if replacement_size_value(row) <= args.max_replacement_size]
+    rows.sort(key=replacement_size_value, reverse=True)
     if args.archive:
         rows = [row for row in rows if row.get("archive") == args.archive]
     if args.index:
