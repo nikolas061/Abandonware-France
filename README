@@ -107,6 +107,32 @@ python3 tools/lolg_vqa_lcw_compact_payloads.py \
   --search-depth 8
 ```
 
+Palier compact cible `L4_HJI`:
+
+```sh
+python3 tools/lolg_vqa_lcw_compact_payloads.py \
+  --entries output/vqa_lcw_compact_payloads_l4_hji/entries.csv \
+  --entries output/vqa_runtime_oversize_budget/entries.csv \
+  --entries output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/entries.csv \
+  --archive C/LOLG/L4_HJI.MIX \
+  --max-replacement-size 700000000 \
+  --entry-limit 0 \
+  --compact-root replacements_vqa_fullhd_lcw_compact \
+  -o output/vqa_lcw_compact_payloads_l4_hji \
+  --reuse-existing \
+  --reuse-report-metrics \
+  --search-depth 8
+python3 tools/lolg_vqa_runtime_pack_build.py \
+  --archive L4_HJI \
+  --replacement-overlay-root replacements_vqa_fullhd_lcw_compact \
+  -o output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample \
+  --runtime-pack mod_mix_vqa_fullhd_l4_hji_lcw_compact_sample
+python3 tools/lolg_vqa_runtime_oversize_budget.py \
+  --archives output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/archives.csv \
+  --entries output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/entries.csv \
+  -o output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample
+```
+
 Writer de fixture WVQA native exact-block:
 
 ```sh
@@ -208,6 +234,16 @@ dans `L20_BBI.MIX` au lieu de 306, abaisse les differes de 101 a 8 et ecrit
 `mod_mix_vqa_fullhd_lcw_compact_sample/L20_BBI.MIX` avec
 `output_bytes=4294120522`. Le budget sample correspondant chiffre encore
 `required_reduction_bytes=517191089` pour les 8 differes de `L20_BBI.MIX`.
+Un palier compact separe couvre aussi `L4_HJI.MIX`: le rapport
+`output/vqa_lcw_compact_payloads_l4_hji/` materialise 6 payloads compacts,
+6153 frames et 12306 chunks recompresses, 0 echec roundtrip,
+1965579804 -> 597410568 octets (`saved_bytes=1368169236`,
+`saved_ratio=0.696064`). Le sample
+`output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/` consomme ces 6
+overlays, applique 129/129 remplacements dans `L4_HJI.MIX`, ne differe plus
+aucun payload et ecrit `output_bytes=4241561640`. Le budget cible
+`output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/` passe avec
+`deferred_replacements=0` et `required_reduction_bytes=0`.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW

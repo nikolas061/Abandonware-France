@@ -1,6 +1,6 @@
 # Mise au point du projet
 
-Date: 2026-06-20
+Date: 2026-06-24
 
 ## Etat general
 
@@ -33,7 +33,7 @@ Full HD audit: pass
 Gates: 252/252
 Full HD PNGs: 177463
 Dashboard cards: 6
-Dashboard links: 809
+Dashboard links: 863
 Runtime audit: gap
 Runtime components: 8
 Runtime ready components: 1
@@ -160,6 +160,11 @@ Runtime gaps: 2
   `replacements_vqa_fullhd_lcw_compact/`, applique 399/407 remplacements,
   descend les differes de 101 a 8 et laisse
   `required_reduction_bytes=517191089` dans le budget oversized cible.
+  Un palier compact separe couvre maintenant `L4_HJI.MIX`: 6 payloads
+  compacts, 6153 frames, 12306 chunks roundtrip, 1965579804 -> 597410568 octets
+  (`saved_ratio=0.696064`). Le sample compact `L4_HJI` consomme ces overlays,
+  applique 129/129 remplacements, ne differe plus aucun payload et le budget
+  cible passe avec `required_reduction_bytes=0`.
   Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
   LCW literal et valide 20/20 frames au redecode.
 - La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
@@ -241,6 +246,10 @@ output/vqa_runtime_pack_build_lcw_compact_sample/index.html
 output/vqa_runtime_pack_build_lcw_compact_sample/summary.csv
 output/vqa_runtime_pack_build_lcw_compact_sample/archives.csv
 output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv
+output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/index.html
+output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/summary.csv
+output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/archives.csv
+output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/entries.csv
 output/vqa_runtime_oversize_budget/index.html
 output/vqa_runtime_oversize_budget/summary.csv
 output/vqa_runtime_oversize_budget/archives.csv
@@ -249,6 +258,10 @@ output/vqa_runtime_oversize_budget_lcw_compact_sample/index.html
 output/vqa_runtime_oversize_budget_lcw_compact_sample/summary.csv
 output/vqa_runtime_oversize_budget_lcw_compact_sample/archives.csv
 output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv
+output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/index.html
+output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/summary.csv
+output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/archives.csv
+output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/entries.csv
 output/vqa_lcw_literal_probe/index.html
 output/vqa_lcw_literal_probe/summary.csv
 output/vqa_lcw_literal_probe/requirements.csv
@@ -261,6 +274,10 @@ output/vqa_lcw_compact_payloads/index.html
 output/vqa_lcw_compact_payloads/summary.csv
 output/vqa_lcw_compact_payloads/entries.csv
 output/vqa_lcw_compact_payloads/chunks.csv
+output/vqa_lcw_compact_payloads_l4_hji/index.html
+output/vqa_lcw_compact_payloads_l4_hji/summary.csv
+output/vqa_lcw_compact_payloads_l4_hji/entries.csv
+output/vqa_lcw_compact_payloads_l4_hji/chunks.csv
 output/vqa_native_exact_fixture_writer/index.html
 output/vqa_native_exact_fixture_writer/summary.csv
 output/vqa_native_exact_fixture_writer/requirements.csv
@@ -301,6 +318,15 @@ dernieres sont encore `replacement_deferred_oversize`. Le budget cible
 `output/vqa_runtime_oversize_budget_lcw_compact_sample/` donne encore
 `required_reduction_bytes=517191089` pour les 8 payloads differes de
 `L20_BBI.MIX`.
+`output/vqa_lcw_compact_payloads_l4_hji/` confirme aussi 6 payloads compacts
+pour `L4_HJI.MIX`: `entries_written=6`, `frames=6153`,
+`chunk_roundtrip_failures=0`, `saved_bytes=1368169236`,
+`saved_ratio=0.696064`. Le sample
+`output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/` consomme ces
+overlays avec `overlay_replacements=6`, `applied_replacements=129/129`,
+`deferred_replacements=0` et `output_bytes=4241561640`. Le budget cible
+`output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/` passe avec
+`required_reduction_bytes=0`.
 
 ## Textures .tex
 
@@ -5075,10 +5101,16 @@ core_project_file: 18 files
 
 ## Prochaine passe technique
 
-Priorite 1: continuer le decodeur `.tex` frame/row par frame, mais uniquement
+Priorite 1: resoudre les 8 payloads encore differes dans `L20_BBI.MIX`.
+Le palier compact LCW a deja abaisse cette archive a 399/407 remplacements
+appliques, mais il manque encore `required_reduction_bytes=517191089`. Les
+pistes propres sont un encodage WVQA plus agressif pour ces 8 entrees ou une
+strategie runtime qui ne depend pas d'un seul body MIX 32 bits.
+
+Priorite 2: continuer le decodeur `.tex` frame/row par frame, mais uniquement
 avec des hypotheses qui reduisent les gaps sans faux positifs.
 
-Priorite 2: transformer les meilleurs rapports de gaps en un module decodeur
+Priorite 3: transformer les meilleurs rapports de gaps en un module decodeur
 unique, au lieu d'accumuler seulement des sondes separees. Un premier point de
 controle reproductible existe maintenant avec:
 
@@ -5087,7 +5119,7 @@ python3 tools/lolg_fullhd_pipeline.py --mode quick --fail-on-issues
 python3 tools/lolg_fullhd_pipeline.py --mode reports --dry-run
 ```
 
-Priorite 3: garder le tableau de bord comme source de verite: toute nouvelle
+Priorite 4: garder le tableau de bord comme source de verite: toute nouvelle
 sonde utile doit produire `summary.csv`, `index.html`, puis etre auditee.
 
 ## Validation a relancer apres modification

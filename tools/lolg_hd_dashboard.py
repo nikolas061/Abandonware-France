@@ -54,6 +54,18 @@ DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
 DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_ENTRIES = Path(
     "output/vqa_runtime_pack_build_lcw_compact_sample/entries.csv"
 )
+DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE = Path(
+    "output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/index.html"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY = Path(
+    "output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/summary.csv"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
+    "output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/archives.csv"
+)
+DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES = Path(
+    "output/vqa_runtime_pack_build_l4_hji_lcw_compact_sample/entries.csv"
+)
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET = Path("output/vqa_runtime_oversize_budget/index.html")
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY = Path("output/vqa_runtime_oversize_budget/summary.csv")
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES = Path("output/vqa_runtime_oversize_budget/archives.csv")
@@ -69,6 +81,18 @@ DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
 )
 DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_ENTRIES = Path(
     "output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE = Path(
+    "output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/index.html"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY = Path(
+    "output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/summary.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_ARCHIVES = Path(
+    "output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/archives.csv"
+)
+DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES = Path(
+    "output/vqa_runtime_oversize_budget_l4_hji_lcw_compact_sample/entries.csv"
 )
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER = Path("output/vqa_runtime_archive_seed_writer/index.html")
 DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY = Path("output/vqa_runtime_archive_seed_writer/summary.csv")
@@ -88,6 +112,14 @@ DEFAULT_VQA_LCW_COMPACT_PAYLOADS = Path("output/vqa_lcw_compact_payloads/index.h
 DEFAULT_VQA_LCW_COMPACT_PAYLOADS_SUMMARY = Path("output/vqa_lcw_compact_payloads/summary.csv")
 DEFAULT_VQA_LCW_COMPACT_PAYLOADS_ENTRIES = Path("output/vqa_lcw_compact_payloads/entries.csv")
 DEFAULT_VQA_LCW_COMPACT_PAYLOADS_CHUNKS = Path("output/vqa_lcw_compact_payloads/chunks.csv")
+DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI = Path("output/vqa_lcw_compact_payloads_l4_hji/index.html")
+DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI_SUMMARY = Path(
+    "output/vqa_lcw_compact_payloads_l4_hji/summary.csv"
+)
+DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI_ENTRIES = Path(
+    "output/vqa_lcw_compact_payloads_l4_hji/entries.csv"
+)
+DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI_CHUNKS = Path("output/vqa_lcw_compact_payloads_l4_hji/chunks.csv")
 DEFAULT_VQA_NATIVE_EXACT_FIXTURE = Path("output/vqa_native_exact_fixture_writer/index.html")
 DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY = Path("output/vqa_native_exact_fixture_writer/summary.csv")
 DEFAULT_VQA_NATIVE_EXACT_FIXTURE_REQUIREMENTS = Path("output/vqa_native_exact_fixture_writer/requirements.csv")
@@ -977,12 +1009,19 @@ def dashboard_payload(output: Path) -> dict[str, object]:
     vqa_repack_summary = first_row(DEFAULT_VQA_RUNTIME_REPACK_READINESS_SUMMARY)
     vqa_pack_build_summary = first_row(DEFAULT_VQA_RUNTIME_PACK_BUILD_SUMMARY)
     vqa_pack_build_lcw_sample_summary = first_row(DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_SUMMARY)
+    vqa_pack_build_l4_hji_lcw_sample_summary = first_row(
+        DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY
+    )
     vqa_oversize_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY)
     vqa_oversize_lcw_sample_summary = first_row(DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_SUMMARY)
+    vqa_oversize_l4_hji_lcw_sample_summary = first_row(
+        DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY
+    )
     vqa_archive_seed_summary = first_row(DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY)
     vqa_lcw_summary = first_row(DEFAULT_VQA_LCW_LITERAL_PROBE_SUMMARY)
     vqa_lcw_compression_summary = first_row(DEFAULT_VQA_LCW_COMPRESSION_PROBE_SUMMARY)
     vqa_lcw_compact_summary = first_row(DEFAULT_VQA_LCW_COMPACT_PAYLOADS_SUMMARY)
+    vqa_lcw_compact_l4_hji_summary = first_row(DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI_SUMMARY)
     vqa_fixture_summary = first_row(DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY)
     vqa_fullhd_writer_summary = first_row(DEFAULT_VQA_FULLHD_REPLACEMENT_WRITER_SUMMARY)
     inventory_rows = read_csv(DEFAULT_INVENTORY_SUMMARY) if DEFAULT_INVENTORY_SUMMARY.exists() else []
@@ -1042,6 +1081,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
                 f"{vqa_pack_build_lcw_sample_summary.get('applied_replacements', '')} appl, "
                 f"sample diff {vqa_pack_build_lcw_sample_summary.get('deferred_replacements', '')}/"
                 f"{vqa_oversize_lcw_sample_summary.get('required_reduction_bytes', '')} bytes, "
+                f"L4 compact {vqa_lcw_compact_l4_hji_summary.get('entries_written', '')}/"
+                f"{vqa_lcw_compact_l4_hji_summary.get('saved_ratio', '')}, "
+                f"L4 overlay {vqa_pack_build_l4_hji_lcw_sample_summary.get('overlay_replacements', '')}/"
+                f"{vqa_pack_build_l4_hji_lcw_sample_summary.get('applied_replacements', '')} appl, "
+                f"L4 diff {vqa_pack_build_l4_hji_lcw_sample_summary.get('deferred_replacements', '')}/"
+                f"{vqa_oversize_l4_hji_lcw_sample_summary.get('required_reduction_bytes', '')} bytes, "
                 f"fixture {vqa_fixture_summary.get('matched_frames', '')}/{vqa_fixture_summary.get('frames', '')}, "
                 f"writer {vqa_writer_validated}/{vqa_writer_frames}"
             ),
@@ -1125,6 +1170,22 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             "Entrees sample build VQA LCW compact",
             DEFAULT_VQA_RUNTIME_PACK_BUILD_LCW_COMPACT_SAMPLE_ENTRIES,
         ),
+        (
+            "Sample build pack runtime VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE,
+        ),
+        (
+            "Synthese sample build VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY,
+        ),
+        (
+            "Archives sample build VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_ARCHIVES,
+        ),
+        (
+            "Entrees sample build VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_PACK_BUILD_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES,
+        ),
         ("Budget oversized runtime VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET),
         ("Synthese budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_SUMMARY),
         ("Archives budget oversized VQA", DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_ARCHIVES),
@@ -1142,6 +1203,22 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             "Entrees sample budget VQA LCW compact",
             DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_LCW_COMPACT_SAMPLE_ENTRIES,
         ),
+        (
+            "Sample budget oversized VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE,
+        ),
+        (
+            "Synthese sample budget VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_SUMMARY,
+        ),
+        (
+            "Archives sample budget VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_ARCHIVES,
+        ),
+        (
+            "Entrees sample budget VQA LCW compact L4_HJI",
+            DEFAULT_VQA_RUNTIME_OVERSIZE_BUDGET_L4_HJI_LCW_COMPACT_SAMPLE_ENTRIES,
+        ),
         ("Seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER),
         ("Synthese seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_SUMMARY),
         ("Requirements seed archives runtime VQA", DEFAULT_VQA_RUNTIME_ARCHIVE_SEED_WRITER_REQUIREMENTS),
@@ -1158,6 +1235,13 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         ("Synthese payloads compacts LCW VQA", DEFAULT_VQA_LCW_COMPACT_PAYLOADS_SUMMARY),
         ("Entrees payloads compacts LCW VQA", DEFAULT_VQA_LCW_COMPACT_PAYLOADS_ENTRIES),
         ("Chunks payloads compacts LCW VQA", DEFAULT_VQA_LCW_COMPACT_PAYLOADS_CHUNKS),
+        ("Payloads compacts LCW VQA L4_HJI", DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI),
+        (
+            "Synthese payloads compacts LCW VQA L4_HJI",
+            DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI_SUMMARY,
+        ),
+        ("Entrees payloads compacts LCW VQA L4_HJI", DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI_ENTRIES),
+        ("Chunks payloads compacts LCW VQA L4_HJI", DEFAULT_VQA_LCW_COMPACT_PAYLOADS_L4_HJI_CHUNKS),
         ("Fixture WVQA native exact-block", DEFAULT_VQA_NATIVE_EXACT_FIXTURE),
         ("Synthese fixture WVQA native", DEFAULT_VQA_NATIVE_EXACT_FIXTURE_SUMMARY),
         ("Requirements fixture WVQA native", DEFAULT_VQA_NATIVE_EXACT_FIXTURE_REQUIREMENTS),
