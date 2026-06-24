@@ -135,12 +135,13 @@ VQA jouees et les textures `.tex`. Le gap VQA est maintenant mesure dans
 exportees, 1 writer WVQA Full HD valide et 66 entrees de pack runtime partiel.
 La readiness repack
 VQA dans `output/vqa_runtime_repack_readiness/` confirme 1955/1955 entrees
-mappees et 66/66 archives en roundtrip exact; la couverture runtime reste
-partielle avec 1951/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
-materialises. Le builder `output/vqa_runtime_pack_build/` formalise cette
-frontiere: 1951/1955 payloads de remplacement, 1850 appliques, 101 differes
-(97 dans `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body
-32 bits des MIX, 4 encore manquants, et 66 MIX ecrits dans
+mappees et 66/66 archives en roundtrip exact; la couverture payload est complete
+avec 1955/1955 payloads WVQA Full HD reencodes et 66/66 packs runtime
+materialises, mais le runtime reste partiel. Le builder
+`output/vqa_runtime_pack_build/` formalise cette
+frontiere: 1955/1955 payloads de remplacement, 1850 appliques, 105 differes
+(101 dans `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body
+32 bits des MIX, 0 manquant, et 66 MIX ecrits dans
 `mod_mix_vqa_fullhd/`. Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
@@ -234,7 +235,11 @@ restent differes dans `L20_BBI.MIX`. Les six runs unitaires suivants ajoutent
 unitaires suivants ajoutent `L20_BBI:0405:46eeb585`,
 `L20_BBI:0020:9fee8483`, `L20_BBI:0402:46e8b785` et
 `L20_BBI:0404:46eab985`; ils valident respectivement 286/286, 268/268,
-312/312 et 462/462 frames, et restent differes dans `L20_BBI.MIX`. Le rapport writer
+312/312 et 462/462 frames, et restent differes dans `L20_BBI.MIX`. Les quatre
+derniers runs ajoutent `L20_BBI:0024:d3c844e7`, `L20_BBI:0401:46e6b985`,
+`L20_BBI:0403:46e8b985` et `L20_BBI:0400:46e6b785`; ils valident
+respectivement 290/290, 616/616, 675/675 et 1080/1080 frames, et restent
+differes dans `L20_BBI.MIX`. Le rapport writer
 agrege par la faisabilite valide 136389/136389 frames au redecode; le dernier
 batch incremental complet valide 8752/8752 frames supplementaires et installe les payloads
 dans `replacements_vqa_fullhd/`. Le gap `.tex` est
