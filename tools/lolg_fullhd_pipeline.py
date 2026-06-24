@@ -2465,7 +2465,7 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
                 sys.executable,
                 "tools/lolg_vqa_lcw_compact_payloads.py",
                 "--max-replacement-size",
-                "20000000",
+                "21000000",
                 "--entry-limit",
                 "0",
             ],
