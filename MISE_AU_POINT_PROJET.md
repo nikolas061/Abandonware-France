@@ -323,6 +323,10 @@ output/lolg95_sidecar_runtime_stage/summary.csv
 output/lolg95_sidecar_runtime_stage/requirements.csv
 output/lolg95_sidecar_runtime_stage/README.txt
 output/lolg95_sidecar_runtime_stage/run_lolg95_sidecar_fullhd_wine.sh
+output/lolg95_sidecar_played_read_plan/index.html
+output/lolg95_sidecar_played_read_plan/summary.csv
+output/lolg95_sidecar_played_read_plan/requirements.csv
+output/lolg95_sidecar_played_read_plan/targets.csv
 output/lolg95_winedbg_loader_trace_attempt/trace.tsv
 output/lolg95_winedbg_loader_trace_attempt/winedbg_commands.txt
 output/lolg95_winedbg_loader_trace_attempt/raw.log
@@ -515,6 +519,12 @@ Le stage `output/lolg95_sidecar_runtime_stage/` passe a son tour et fournit un
 script Wine de test pointe vers
 `output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE`;
 il ne modifie pas le lanceur DOSBox.
+Le rapport `output/lolg95_sidecar_played_read_plan/` fige le diagnostic du
+banc Wine/Xvfb: statut `gap`, ordre sidecar 8/8 conserve, mais
+`played_sidecar_hits=0/8`, `played_missing=8` et `file_backed_targets=8/8`
+avec `sidecar_body_pointer=0x00000000`. Autrement dit, le test a atteint le
+son et le montage runtime, mais il n'a pas encore demande les 8 VQA HD qui
+permettraient de prouver l'image sidecar.
 
 ## Textures .tex
 

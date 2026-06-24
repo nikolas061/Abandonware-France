@@ -539,6 +539,10 @@ output/lolg95_sidecar_runtime_stage/summary.csv
 output/lolg95_sidecar_runtime_stage/requirements.csv
 output/lolg95_sidecar_runtime_stage/README.txt
 output/lolg95_sidecar_runtime_stage/run_lolg95_sidecar_fullhd_wine.sh
+output/lolg95_sidecar_played_read_plan/index.html
+output/lolg95_sidecar_played_read_plan/summary.csv
+output/lolg95_sidecar_played_read_plan/requirements.csv
+output/lolg95_sidecar_played_read_plan/targets.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
 output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
@@ -4532,6 +4536,7 @@ xvfb-run -a -s '-screen 0 1280x1024x24' \
   --runtime-executable output/lolg95_sidecar_additive_patch_probe/runtime_stage/LOLG95_L20_SIDE_ADD.EXE \
   --force-level-index 20 --force-level-slot 4
 python3 tools/lolg95_sidecar_runtime_stage.py
+python3 tools/lolg95_sidecar_played_read_plan.py
 ```
 
 Current `L4_HJI` compact result: `pass`, with 6/6 selected replacements
@@ -4570,6 +4575,7 @@ sidecar MIX plan:
 ```sh
 python3 tools/lolg_vqa_runtime_sidecar_pack.py --report-only
 python3 tools/lolg_vqa_runtime_sidecar_load_plan.py
+python3 tools/lolg95_sidecar_played_read_plan.py
 ```
 
 Current sidecar load-plan result: `pass`. The pack side is valid: 8 deferred
@@ -4681,6 +4687,13 @@ into `output/lolg95_sidecar_runtime_stage/`: `summary.csv` is `pass`,
 sidecar load plan, and archive-list probe, and
 `run_lolg95_sidecar_fullhd_wine.sh` launches the staged Wine test path without
 modifying the DOSBox launcher.
+`tools/lolg95_sidecar_played_read_plan.py` now summarizes the remaining
+played-read evidence gap under `output/lolg95_sidecar_played_read_plan/`.
+Its current `summary.csv` is `gap`: the sidecar order proof is still 8/8, but
+`played_sidecar_hits=0/8`, `played_missing=8`, and the sidecar archive body is
+file-backed in the live archive list (`sidecar_body_pointer=0x00000000`). That
+keeps the Wine/Xvfb "sound but no image proof" issue isolated from the DOSBox
+launcher path.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW
