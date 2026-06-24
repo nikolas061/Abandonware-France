@@ -126,13 +126,17 @@ Runtime gaps: 2
   `L20_BBI:0305:33ee7e6c`, `L20_BBI:0352:3bee7e6c`,
   `L20_BBI:0415:4bee7e6c`, `L20_BBI:0164:1bee7e6c`,
   `L20_BBI:0211:23ee7e6c` et `L20_BBI:0386:43ee7e6c`, valident chacun
-  176/176 frames et restent differes dans `L20_BBI.MIX`. Le rapport
+  176/176 frames et restent differes dans `L20_BBI.MIX`. Les quatre runs
+  suivants ajoutent `L20_BBI:0405:46eeb585`, `L20_BBI:0020:9fee8483`,
+  `L20_BBI:0402:46e8b785` et `L20_BBI:0404:46eab985`; ils valident
+  respectivement 286/286, 268/268, 312/312 et 462/462 frames, et restent
+  differes dans `L20_BBI.MIX`. Le rapport
   de faisabilite agrege maintenant 136389/136389 frames 1920x1080 validees au
   redecode, et le dernier batch incremental complet valide 8752/8752 frames
   supplementaires. Un seed writer d'archives ajoute 8 payloads cibles et valide
-  1675/1675 frames. La racine runtime atteint 1947/1955 payloads; le builder
-  ecrit maintenant 66/66 MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 8
-  payloads restent manquants, et 97 remplacements sont differes (93 dans
+  1675/1675 frames. La racine runtime atteint 1951/1955 payloads; le builder
+  ecrit maintenant 66/66 MIX runtime partiels dans `mod_mix_vqa_fullhd/`; 4
+  payloads restent manquants, et 101 remplacements sont differes (97 dans
   `L20_BBI.MIX`, 4 dans `L4_HJI.MIX`) pour rester sous la limite body 32 bits
   du format MIX.
   La primitive LCW literal a maintenant 11 roundtrips sans echec et isole 374
@@ -237,8 +241,8 @@ requirements `wvqa_encoder`, `mix_repack_roundtrip`, `lcw_literal_encoder`,
 tandis que 4 restent ouverts:
 `mix_repack`, `lcw_format80_encoder`, `audio_handling` et
 `cbp_update_encoder`. Le build de pack VQA reste `gap` avec
-`replacement_entries=1947/1955`, `applied_replacements=1850/1955`,
-`deferred_replacements=97`, `missing_replacements=8`,
+`replacement_entries=1951/1955`, `applied_replacements=1850/1955`,
+`deferred_replacements=101`, `missing_replacements=4`,
 `output_archives=66/66` et `output_bytes=47792090931`.
 
 ## Textures .tex
