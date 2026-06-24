@@ -2471,7 +2471,7 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
                 "--entries",
                 "output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv",
                 "--max-replacement-size",
-                "30000000",
+                "32000000",
                 "--entry-limit",
                 "0",
                 "--reuse-existing",
