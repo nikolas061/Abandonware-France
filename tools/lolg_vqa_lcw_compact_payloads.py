@@ -146,11 +146,14 @@ def compact_output_path(root: Path, row: dict[str, str]) -> Path:
 
 
 def select_rows(args: argparse.Namespace) -> tuple[int, list[dict[str, str]]]:
-    rows = [
-        row
-        for row in read_csv(args.entries)
-        if row.get("replacement_path") and Path(row.get("replacement_path", "")).is_file()
-    ]
+    rows_by_key: dict[tuple[str, str, str], dict[str, str]] = {}
+    for entries_path in args.entries:
+        for row in read_csv(entries_path):
+            if not row.get("replacement_path") or not Path(row.get("replacement_path", "")).is_file():
+                continue
+            key = (row.get("archive", ""), row.get("index", ""), row.get("file_id", "").lower())
+            rows_by_key.setdefault(key, row)
+    rows = list(rows_by_key.values())
     if args.min_replacement_size:
         rows = [row for row in rows if int_value(row, "replacement_size") >= args.min_replacement_size]
     if args.max_replacement_size:
@@ -168,16 +171,154 @@ def select_rows(args: argparse.Namespace) -> tuple[int, list[dict[str, str]]]:
     return total, rows
 
 
+def audit_existing_compact_payload(
+    row: dict[str, str],
+    output_path: Path,
+) -> tuple[dict[str, str], list[dict[str, str]]]:
+    archive = row.get("archive", "")
+    index = row.get("index", "")
+    file_id = row.get("file_id", "").lower()
+    replacement_path = Path(row.get("replacement_path", ""))
+    issues: list[str] = []
+    chunk_rows: list[dict[str, str]] = []
+    frames = 0
+    chunks_recompressed = 0
+    roundtrip_failures = 0
+    original_chunk_bytes = 0
+    compact_chunk_bytes = 0
+    original_data = b""
+    compact_data = b""
+
+    try:
+        original_data = replacement_path.read_bytes()
+        compact_data = output_path.read_bytes()
+        if len(original_data) < 12 or original_data[:4] != b"FORM" or original_data[8:12] != b"WVQA":
+            raise ValueError("not_a_wvqa_payload")
+        header, _chunks = vqa.parse_vqa(original_data)
+        if len(compact_data) < 12 or compact_data[:4] != b"FORM" or compact_data[8:12] != b"WVQA":
+            raise ValueError("compact_not_a_wvqa_payload")
+
+        original_view = memoryview(original_data)
+        compact_view = memoryview(compact_data)
+        original_end = min(len(original_data), 8 + be32(original_view, 4))
+        compact_end = min(len(compact_data), 8 + be32(compact_view, 4))
+        original_chunks = list(iter_chunk_views(original_view, 12, original_end))
+        compact_chunks = list(iter_chunk_views(compact_view, 12, compact_end))
+        if len(original_chunks) != len(compact_chunks):
+            issues.append(f"top_chunk_count_mismatch:{len(original_chunks)}:{len(compact_chunks)}")
+
+        for chunk_index, ((chunk_id, payload), (compact_id, compact_payload_data)) in enumerate(
+            zip(original_chunks, compact_chunks)
+        ):
+            if chunk_id != compact_id:
+                issues.append(f"top_chunk_id_mismatch:{chunk_index}:{chunk_id}:{compact_id}")
+            if chunk_id != "VQFR":
+                if payload != compact_payload_data:
+                    issues.append(f"top_chunk_payload_mismatch:{chunk_index}:{chunk_id}")
+                continue
+            frame_index = frames
+            frames += 1
+            original_subchunks = list(iter_chunk_views(payload, 0, len(payload)))
+            compact_subchunks = list(iter_chunk_views(compact_payload_data, 0, len(compact_payload_data)))
+            if len(original_subchunks) != len(compact_subchunks):
+                issues.append(
+                    f"frame:{frame_index}:subchunk_count_mismatch:{len(original_subchunks)}:{len(compact_subchunks)}"
+                )
+            for (sub_id, sub_payload), (compact_sub_id, compact_sub_payload) in zip(
+                original_subchunks, compact_subchunks
+            ):
+                if sub_id != compact_sub_id:
+                    issues.append(f"frame:{frame_index}:subchunk_id_mismatch:{sub_id}:{compact_sub_id}")
+                if sub_id not in {"CBFZ", "VPTZ"}:
+                    if sub_payload != compact_sub_payload:
+                        issues.append(f"frame:{frame_index}:{sub_id}:payload_mismatch")
+                    continue
+                expected_size = expected_size_for_chunk(sub_id, header)
+                row_issues: list[str] = []
+                decoded = b""
+                roundtrip_ok = "0"
+                try:
+                    decoded = vqa.decode_lcw(
+                        sub_payload,
+                        expected_size=expected_size,
+                        allow_signed_source=sub_id == "VPTZ",
+                    )
+                    compact_decoded = vqa.decode_lcw(
+                        compact_sub_payload,
+                        expected_size=expected_size,
+                        allow_signed_source=sub_id == "VPTZ",
+                    )
+                    if compact_decoded != decoded:
+                        row_issues.append("decoded_mismatch")
+                    else:
+                        roundtrip_ok = "1"
+                    original_chunk_bytes += len(sub_payload)
+                    compact_chunk_bytes += len(compact_sub_payload)
+                    chunks_recompressed += 1
+                except Exception as exc:  # noqa: BLE001 - report all existing compact validation gaps
+                    detail = str(exc).replace("\n", " ").replace(";", ",")
+                    row_issues.append(f"{type(exc).__name__}:{detail}")
+                    roundtrip_failures += 1
+                if row_issues:
+                    issues.append(f"frame:{frame_index}:{sub_id}:{','.join(row_issues)}")
+                chunk_rows.append(
+                    {
+                        "archive": archive,
+                        "index": index,
+                        "file_id": file_id,
+                        "frame": str(frame_index),
+                        "chunk": sub_id,
+                        "decoded_size": str(len(decoded)),
+                        "original_size": str(len(sub_payload)),
+                        "compact_size": str(len(compact_sub_payload)),
+                        "saved_bytes": str(len(sub_payload) - len(compact_sub_payload)),
+                        "roundtrip_ok": roundtrip_ok,
+                        "issues": ",".join(row_issues),
+                    }
+                )
+    except Exception as exc:  # noqa: BLE001 - report row as failed
+        detail = str(exc).replace("\n", " ").replace(";", ",")
+        issues.append(f"entry_failed:{type(exc).__name__}:{detail}")
+
+    original_size = len(original_data) if original_data else int_value(row, "replacement_size")
+    compact_size = len(compact_data)
+    saved = original_size - compact_size if compact_size else 0
+    entry_row = {
+        "archive": archive,
+        "index": index,
+        "file_id": file_id,
+        "replacement_path": str(replacement_path),
+        "compact_path": str(output_path) if compact_data else "",
+        "frames": str(frames),
+        "chunks_recompressed": str(chunks_recompressed),
+        "chunk_roundtrip_failures": str(roundtrip_failures),
+        "original_payload_bytes": str(original_size),
+        "compact_payload_bytes": str(compact_size),
+        "saved_bytes": str(saved),
+        "saved_ratio": ratio_text(saved, original_size),
+        "original_chunk_bytes": str(original_chunk_bytes),
+        "compact_chunk_bytes": str(compact_chunk_bytes),
+        "chunk_saved_bytes": str(original_chunk_bytes - compact_chunk_bytes),
+        "compact_sha256": sha256_bytes(compact_data) if compact_data else "",
+        "issues": ";".join(issues),
+    }
+    return entry_row, chunk_rows
+
+
 def compact_payload(
     row: dict[str, str],
     compact_root: Path,
     search_depth: int,
+    reuse_existing: bool,
 ) -> tuple[dict[str, str], list[dict[str, str]]]:
     archive = row.get("archive", "")
     index = row.get("index", "")
     file_id = row.get("file_id", "").lower()
     replacement_path = Path(row.get("replacement_path", ""))
     output_path = compact_output_path(compact_root, row)
+    if reuse_existing and output_path.is_file():
+        return audit_existing_compact_payload(row, output_path)
+
     issues: list[str] = []
     chunk_rows: list[dict[str, str]] = []
     frames = 0
@@ -292,7 +433,7 @@ def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[s
     entry_rows: list[dict[str, str]] = []
     chunk_rows: list[dict[str, str]] = []
     for row in selected:
-        entry_row, rows = compact_payload(row, args.compact_root, args.search_depth)
+        entry_row, rows = compact_payload(row, args.compact_root, args.search_depth, args.reuse_existing)
         entry_rows.append(entry_row)
         chunk_rows.extend(rows)
 
@@ -386,7 +527,13 @@ td {{ overflow-wrap: anywhere; }}
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Materialize LCW-compacted WVQA replacement payloads.")
-    parser.add_argument("--entries", type=Path, default=DEFAULT_ENTRIES)
+    parser.add_argument(
+        "--entries",
+        type=Path,
+        action="append",
+        default=None,
+        help="Deferred replacement CSV to read; repeat to merge iterative budgets.",
+    )
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--compact-root", type=Path, default=DEFAULT_COMPACT_ROOT)
     parser.add_argument("--entry-limit", type=int, default=1, help="Maximum selected rows; use 0 for no limit.")
@@ -396,8 +543,14 @@ def main() -> None:
     parser.add_argument("--index", default="")
     parser.add_argument("--file-id", default="")
     parser.add_argument("--search-depth", type=int, default=32)
+    parser.add_argument(
+        "--reuse-existing",
+        action="store_true",
+        help="Validate and report existing compact payloads instead of recompressing them.",
+    )
     parser.add_argument("--fail-on-gaps", action="store_true")
     args = parser.parse_args()
+    args.entries = args.entries or [DEFAULT_ENTRIES]
 
     summary, entries, chunks = build_reports(args)
     args.output.mkdir(parents=True, exist_ok=True)

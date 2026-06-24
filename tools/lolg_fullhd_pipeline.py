@@ -2464,10 +2464,15 @@ def quick_steps(fail_on_issues: bool) -> list[Step]:
             [
                 sys.executable,
                 "tools/lolg_vqa_lcw_compact_payloads.py",
+                "--entries",
+                "output/vqa_runtime_oversize_budget/entries.csv",
+                "--entries",
+                "output/vqa_runtime_oversize_budget_lcw_compact_sample/entries.csv",
                 "--max-replacement-size",
-                "21000000",
+                "25000000",
                 "--entry-limit",
                 "0",
+                "--reuse-existing",
             ],
         ),
         Step(
