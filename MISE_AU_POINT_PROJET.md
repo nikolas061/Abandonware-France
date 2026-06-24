@@ -455,8 +455,17 @@ nouvelle chaine `I_HD.MIX` placee en `DGROUP` a `0x005ab2d3`, et immediat
 `unique_paths=93`, `l20_bbi_hd_mentions=6`; elle observe `L20_BBI_HD.MIX` et
 `l20_bbI_HD.MIX`. Limite importante: ce patch remplace l'archive `I.MIX` par le
 sidecar HD, il ne constitue pas encore le fallback additionnel final.
-Le requirement `runtime_loader_hook` reste `gap`: il faut encore charger ce
-sidecar apres l'archive de base en runtime.
+`tools/lolg95_sidecar_additive_patch_probe.py` ajoute maintenant une preuve
+additive: copie patchee sous `output/lolg95_sidecar_additive_patch_probe/`,
+stub `DGROUP` executable a `0x005ab2d3`, scratch chemin a `0x005ab350`, saut
+depuis `0x00453723` apres le montage original `I.MIX`, puis appel du
+constructeur MIX `0x004e41e0` sur `*_HD.MIX`. Le run
+`output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/` passe avec
+`breakpoint_hits=260`, `extracted_rows=260`, `path_rows=258`,
+`unique_paths=98`, `l20_bbi_mentions=10`, `l20_bbi_hd_mentions=4`; la trace
+observe `L20_BBI.MIX` puis `l20_bbI_HD.MIX` avant `sphere3\l20_bb`. Le
+requirement `runtime_loader_hook` avance donc au montage additif prouve; le
+verrou restant est la selection/fallback par ID pour les 8 entrees differees.
 
 ## Textures .tex
 
@@ -5231,17 +5240,17 @@ core_project_file: 18 files
 
 ## Prochaine passe technique
 
-Priorite 1: prouver le chargement runtime de `L20_BBI_HD.MIX`. Les 8 payloads
-restants tiennent maintenant dans un sidecar MIX valide et le plan de chargement
-statique verifie les IDs dans la base et dans le sidecar. `CDCACHE.LST` n'est
-pas le bon levier: il ne declare pas de MIX sidecar. Il faut donc patcher ou
-wrapper le loader MIX compile pour consulter `L20_BBI_HD.MIX` apres
-`L20_BBI.MIX`, puis tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`,
-`46e6b985`, `46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le
-sidecar. Les points de depart actuels sont `0x004534ec` pour le constructeur
-generique `.MIX`, les refs `CreateFileA` corrigees `0x004e2a07`, `0x004eb15a`,
-`0x004eb17a`, `0x004eb19a`, `0x004eb259`, `0x00529c7a`, `0x00529ede`, et le
-montage `CDCACHE.MIX` seulement comme indice d'architecture.
+Priorite 1: prouver la selection runtime des 8 IDs depuis `L20_BBI_HD.MIX`.
+Les 8 payloads restants tiennent dans un sidecar MIX valide, le plan statique
+verifie les IDs dans la base et dans le sidecar, et le patch additif ouvre
+maintenant `L20_BBI.MIX` puis `L20_BBI_HD.MIX` dans le meme run. Il faut donc
+tracer que les IDs `9fee8483`, `d3c844e7`, `46e6b785`, `46e6b985`,
+`46e8b785`, `46e8b985`, `46eab985` et `46eeb585` sont lus depuis le sidecar,
+puis transformer le probe en fallback propre. Les points de depart actuels sont
+le constructeur generique `0x004e41e0`, la liste globale d'archives `0x6a5b40`,
+le saut additif `0x00453723 -> 0x005ab2d3`, et les refs `ReadFile` /
+`SetFilePointer` autour de `0x004eb390` / `0x004eb7eb` pour rattacher chaque
+lecture au handle d'archive.
 Le fichier `output/vqa_runtime_loader_trace_contract/winedbg_commands.txt`
 contient ces 8 breakpoints. Le runner correspondant est
 `python3 tools/run_lolg95_winedbg_loader_trace_attempt.py`; il ecrit

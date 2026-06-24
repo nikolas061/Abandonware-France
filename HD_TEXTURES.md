@@ -520,6 +520,13 @@ output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/summary.csv
 output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/trace.tsv
 output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/raw.log
 output/lolg95_winedbg_attach_pilot_l20_suffix_patch_attempt/force_level_write.log
+output/lolg95_sidecar_additive_patch_probe/summary.csv
+output/lolg95_sidecar_additive_patch_probe/LOLG95_L20_SIDE_ADD.EXE
+output/lolg95_sidecar_additive_patch_probe/runtime_stage/
+output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/summary.csv
+output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/trace.tsv
+output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/raw.log
+output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/force_level_write.log
 output/lolg95_winedbg_loader_trace_attempt_dry_run/index.html
 output/lolg95_winedbg_loader_trace_attempt_dry_run/summary.csv
 output/lolg95_winedbg_loader_trace_attempt_dry_run/trace.tsv
@@ -4601,6 +4608,18 @@ with links to `L20_BBI_HD.MIX`. The corresponding attached run,
 mechanism only. It replaces `I.MIX` with `I_HD.MIX`, so the final runtime work
 still needs an additive fallback that keeps `L20_BBI.MIX` mounted and consults
 `L20_BBI_HD.MIX` for the 8 deferred IDs.
+
+`tools/lolg95_sidecar_additive_patch_probe.py` proves the additive mount stage
+without touching the active executable. It patches the copied executable at
+`0x00453723`, jumps to an executable `DGROUP` stub at `0x005ab2d3`, builds the
+`*_HD.MIX` name in scratch memory at `0x005ab350`, and calls the normal MIX
+constructor `0x004e41e0` after the original `I.MIX` mount. The attached run
+`output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/` records
+`status=pass`, `breakpoint_hits=260`, `extracted_rows=260`, `path_rows=258`,
+`unique_paths=98`, `l20_bbi_mentions=10`, and `l20_bbi_hd_mentions=4`.
+Captured paths include both `L20_BBI.MIX` and `l20_bbI_HD.MIX`, followed by
+`sphere3\l20_bb` assets. This proves sidecar loading order, but not yet the
+per-entry fallback that must source the 8 deferred IDs from `L20_BBI_HD.MIX`.
 
 `tools/lolg_vqa_native_exact_fixture_writer.py` assembles and validates a first
 native-size WVQA payload using exact per-frame block codebooks and literal LCW

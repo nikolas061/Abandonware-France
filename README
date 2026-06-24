@@ -331,6 +331,18 @@ injection de nom: `status=pass`, `breakpoint_hits=220`, `path_rows=219`,
 `L20_BBI_HD.MIX` et `l20_bbI_HD.MIX`. Cette preuve remplace le suffixe
 `I.MIX` par `I_HD.MIX`; elle ne monte pas encore le sidecar en fallback en plus
 de `L20_BBI.MIX`.
+`tools/lolg95_sidecar_additive_patch_probe.py` franchit le palier suivant avec
+une copie patchee separee dans `output/lolg95_sidecar_additive_patch_probe/`.
+Le patch saute depuis `0x00453723` vers un stub `DGROUP` executable
+(`0x005ab2d3`), conserve le montage original `L20_BBI.MIX`, construit
+`*_HD.MIX` dans le scratch `0x005ab350`, puis appelle le constructeur MIX
+`0x004e41e0`. La trace
+`output/lolg95_winedbg_attach_pilot_l20_additive_patch_attempt/` passe avec
+`breakpoint_hits=260`, `path_rows=258`, `unique_paths=98`,
+`l20_bbi_mentions=10` et `l20_bbi_hd_mentions=4`; elle observe `L20_BBI.MIX`
+puis `l20_bbI_HD.MIX` avant de continuer sur `sphere3\l20_bb`. Ce jalon prouve
+le montage additif du sidecar, mais pas encore que les 8 IDs differes sont
+resolus depuis le sidecar plutot que depuis l'entree originale.
 Le seed writer
 `output/vqa_runtime_archive_seed_writer/` ajoute 8 payloads cibles pour les
 archives encore sans pack et valide 1675/1675 frames au redecode. La primitive LCW
