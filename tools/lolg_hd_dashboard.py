@@ -1139,6 +1139,8 @@ DEFAULT_PROJECT_STATUS = Path("MISE_AU_POINT_PROJET.md")
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
     with path.open(newline="") as handle:
         return list(csv.DictReader(handle))
 
@@ -1161,6 +1163,14 @@ def relative_href(path_text: str | Path, base_dir: Path) -> str:
     except ValueError:
         relative = Path(os.path.relpath(path, base_dir))
     return relative.as_posix()
+
+
+def dashboard_target_exists(href: object, base_dir: Path) -> bool:
+    if not href:
+        return True
+    if not isinstance(href, str):
+        return False
+    return (base_dir / href).exists()
 
 
 def choose_existing(paths: list[Path]) -> Path:
@@ -1417,6 +1427,12 @@ def dashboard_payload(output: Path) -> dict[str, object]:
             "href": relative_href(DEFAULT_RUNTIME_AUDIT, base_dir),
             "image": "",
         },
+    ]
+    cards = [
+        card
+        for card in cards
+        if dashboard_target_exists(card.get("href"), base_dir)
+        and dashboard_target_exists(card.get("image"), base_dir)
     ]
 
     links = [
@@ -4571,6 +4587,7 @@ def dashboard_payload(output: Path) -> dict[str, object]:
         "links": [
             {"label": label, "href": relative_href(path, base_dir), "exists": Path(path).exists()}
             for label, path in links
+            if Path(path).exists()
         ],
     }
 
