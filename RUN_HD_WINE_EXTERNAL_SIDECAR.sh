@@ -11,6 +11,7 @@ CACHE_DIR="${LOLG_HD_EXTERNAL_SIDECAR_CACHE_DIR:-$BASE_DIR/output/vqa_external_s
 RUNTIME_DIR="${LOLG_HD_EXTERNAL_SIDECAR_RUNTIME_DIR:-$BASE_DIR/output/vqa_external_sidecar_runtime}"
 REBUILD="${LOLG_HD_EXTERNAL_SIDECAR_REBUILD:-0}"
 SCAN_CHUNKS="${LOLG_HD_EXTERNAL_SIDECAR_SCAN_CHUNKS:-0}"
+ENGINE="${LOLG_HD_EXTERNAL_SIDECAR_ENGINE:-wine-dgvoodoo-win10-safevqa}"
 
 if [ "$REBUILD" = "1" ] || [ ! -f "$MANIFEST" ]; then
 	echo "Preparation de l'index sidecar VQA externe..."
@@ -56,12 +57,29 @@ echo "Alias HUD court: ./LOLG_HD.sh sidecar-live-strace-wide-hud"
 echo "Alias HUD court toutes frames: ./LOLG_HD.sh sidecar-live-strace-wide-all-hud"
 echo "Player VQA HD: http://127.0.0.1:8765/?mode=player"
 echo "Player VQA HD HUD: http://127.0.0.1:8765/?mode=player&hud=1"
-echo "Mode moteur: safevqa stable; les VQA HD restent externes au moteur."
+case "$ENGINE" in
+	dgvoodoo|dg|default|wine-dgvoodoo-win10-safevqa)
+		ENGINE_COMMAND=wine-dgvoodoo-win10-safevqa
+		;;
+	nodg|nodgvoodoo|no-dgvoodoo|stable|wine-nodgvoodoo-safevqa)
+		ENGINE_COMMAND=wine-nodgvoodoo-safevqa
+		;;
+	wine-*)
+		ENGINE_COMMAND=$ENGINE
+		;;
+	*)
+		echo "Moteur sidecar inconnu: $ENGINE" >&2
+		echo "Valeurs connues: dgvoodoo, nodg, wine-dgvoodoo-win10-safevqa, wine-nodgvoodoo-safevqa" >&2
+		exit 1
+		;;
+esac
+echo "Mode moteur: $ENGINE_COMMAND; les VQA HD restent externes au moteur."
 
 export LOLG_HD_EXTERNAL_SIDECAR_MANIFEST="$MANIFEST"
 export LOLG_HD_EXTERNAL_SIDECAR_CACHE_DIR="$CACHE_DIR"
 export LOLG_HD_EXTERNAL_SIDECAR_RUNTIME_DIR="$RUNTIME_DIR"
 export LOLG_HD_EXTERNAL_SIDECAR_MODE="${LOLG_HD_EXTERNAL_SIDECAR_MODE:-manifest}"
+export LOLG_HD_EXTERNAL_SIDECAR_ENGINE="$ENGINE_COMMAND"
 export LOLG_HD_RESOLUTION="${LOLG_HD_RESOLUTION:-1920x1080}"
 
-exec ./LOLG_HD.sh wine-dgvoodoo-win10-safevqa "$@"
+exec ./LOLG_HD.sh "$ENGINE_COMMAND" "$@"

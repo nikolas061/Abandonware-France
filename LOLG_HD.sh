@@ -69,6 +69,8 @@ Commandes:
 		  sidecar-live-strace-wide-all-player Meme mode large, toutes frames, avec player
 		  sidecar-live-strace-wide-hud Meme mode large, player avec HUD
 		  sidecar-live-strace-wide-all-hud Meme mode large, toutes frames, player HUD
+		  sidecar-hd-nodg Meme chemin sidecar HD, mais moteur Wine safevqa sans dgVoodoo
+		  wine-nodgvoodoo-safevqa Meme profil safevqa que dgVoodoo, mais sans dgVoodoo
 		  wine-dgvoodoo-win10-safevqa-movies-safe Meme profil safevqa, mais MOVIES.MIX 892x560 complet
 		  wine-dgvoodoo-win95-safevqa-direct Meme profil safevqa, mais Wine win95 et lancement direct sans bureau virtuel
 		  wine-dgvoodoo-win10-originalmix Meme profil, mais tous les MIX originaux
@@ -167,6 +169,8 @@ Exemples:
 		  ./LOLG_HD.sh sidecar-live-strace-wide-all-player --player-hud
 		  ./LOLG_HD.sh sidecar-live-strace-wide-hud
 		  ./LOLG_HD.sh sidecar-live-strace-wide-all-hud
+		  ./LOLG_HD.sh sidecar-hd-nodg
+		  ./LOLG_HD.sh wine-nodgvoodoo-safevqa
 		  ./LOLG_HD.sh wine-dgvoodoo-win10-safevqa-movies-safe
 		  ./LOLG_HD.sh wine-dgvoodoo-win95-safevqa-direct
 		  ./LOLG_HD.sh wine-dgvoodoo-win10-originalmix
@@ -1196,6 +1200,39 @@ case "$command_name" in
 			export LOLG_HD_DGVOODOO_SOURCE_DIR
 			exec ./LOLG_HD.sh wine-dgvoodoo-win10 "$@"
 			;;
+		wine-nodgvoodoo-safevqa|wine-safevqa-nodg|wine-1920-nodgvoodoo-safevqa)
+			require_executable ./RUN_HD_WINE.sh
+			LOLG_HD_RESOLUTION=${LOLG_HD_RESOLUTION:-1920x1080}
+			LOLG_HD_USE_DGVOODOO=0
+			LOLG_HD_DGVOODOO_FORCE_RESOLUTION=0
+			LOLG_HD_USE_LOCAL_DDRAW=0
+			LOLG_HD_WINE_RENDERER=${LOLG_HD_WINE_RENDERER:-gdi}
+			LOLG_HD_WINE_DIRECTDRAW_RENDERER=${LOLG_HD_WINE_DIRECTDRAW_RENDERER:-gdi}
+			LOLG_HD_WINE_VERSION=${LOLG_HD_WINE_VERSION:-win10}
+			LOLG_HD_USE_DXVK=${LOLG_HD_USE_DXVK:-0}
+			LOLG_HD_SETUP_DXVK=${LOLG_HD_SETUP_DXVK:-0}
+			LOLG_HD_WINE_USE_XRANDR=${LOLG_HD_WINE_USE_XRANDR:-N}
+			LOLG_HD_WINE_USE_XVIDMODE=${LOLG_HD_WINE_USE_XVIDMODE:-N}
+			LOLG_HD_WINE_WAIT=${LOLG_HD_WINE_WAIT:-0}
+			LOLG_HD_AUTO_RESIZE=${LOLG_HD_AUTO_RESIZE:-0}
+			LOLG_HD_RESIZE_GAME_WINDOW=${LOLG_HD_RESIZE_GAME_WINDOW:-0}
+			LOLG_HD_LOCK_WINDOW_POSITION=${LOLG_HD_LOCK_WINDOW_POSITION:-0}
+			LOLG_HD_RESIZE_GAME_WINDOW_DELAY=${LOLG_HD_RESIZE_GAME_WINDOW_DELAY:-0}
+			LOLG_HD_WINE_USE_HD_MIX=${LOLG_HD_WINE_USE_HD_MIX:-1}
+			LOLG_HD_UNSTABLE_ANIMATION_MIX=${LOLG_HD_UNSTABLE_ANIMATION_MIX:-DANIEL.MIX,DRAGON.MIX,DSLAVE.MIX,LIZ.MIX,MCEL.MIX,MENT.MIX,MGAR.MIX,MLIB.MIX,MOFF.MIX,SHAMAN.MIX,SLAVES.MIX,WPN.MIX,MAGIC.MIX,L1_DCI.MIX,L3_DHI.MIX,L4_HJI.MIX,L5_HCI.MIX,L7_DHI.MIX,L8_SJI.MIX,L9_DRI.MIX,L10_DCI.MIX,L12_CMI.MIX,L13_RCI.MIX,L14_HTI.MIX,L16_CAI.MIX,L19_BCI.MIX,L20_BBI.MIX}
+			LOLG_HD_WINE_HD_EXCLUDE=${LOLG_HD_WINE_HD_EXCLUDE:-LOCALLNG.MIX,MOVIES.MIX,$LOLG_HD_UNSTABLE_ANIMATION_MIX}
+			LOLG_HD_USE_ORIGINAL_MOVIES=${LOLG_HD_USE_ORIGINAL_MOVIES:-1}
+			LOLG_HD_ALLOW_CRITICAL_HD_MIX=${LOLG_HD_ALLOW_CRITICAL_HD_MIX:-0}
+			WINEPREFIX=${WINEPREFIX:-"$BASE_DIR/output/lolg95_nodgvoodoo_safevqa_wine_prefix"}
+			export LOLG_HD_RESOLUTION LOLG_HD_USE_DGVOODOO LOLG_HD_DGVOODOO_FORCE_RESOLUTION LOLG_HD_USE_LOCAL_DDRAW
+			export LOLG_HD_WINE_RENDERER LOLG_HD_WINE_DIRECTDRAW_RENDERER LOLG_HD_WINE_VERSION LOLG_HD_USE_DXVK LOLG_HD_SETUP_DXVK
+			export LOLG_HD_WINE_USE_XRANDR LOLG_HD_WINE_USE_XVIDMODE
+			export LOLG_HD_WINE_WAIT LOLG_HD_AUTO_RESIZE LOLG_HD_RESIZE_GAME_WINDOW
+			export LOLG_HD_LOCK_WINDOW_POSITION LOLG_HD_RESIZE_GAME_WINDOW_DELAY
+			export LOLG_HD_WINE_USE_HD_MIX LOLG_HD_WINE_HD_EXCLUDE LOLG_HD_USE_ORIGINAL_MOVIES LOLG_HD_ALLOW_CRITICAL_HD_MIX
+			export WINEPREFIX
+			exec ./RUN_HD_WINE.sh "$@"
+			;;
 		wine-dgvoodoo-win10-safevqa|wine-win10-dgvoodoo-safevqa|wine-1920-dgvoodoo-win10-safevqa)
 			LOLG_HD_WINE_USE_HD_MIX=${LOLG_HD_WINE_USE_HD_MIX:-1}
 			LOLG_HD_UNSTABLE_ANIMATION_MIX=${LOLG_HD_UNSTABLE_ANIMATION_MIX:-DANIEL.MIX,DRAGON.MIX,DSLAVE.MIX,LIZ.MIX,MCEL.MIX,MENT.MIX,MGAR.MIX,MLIB.MIX,MOFF.MIX,SHAMAN.MIX,SLAVES.MIX,WPN.MIX,MAGIC.MIX,L1_DCI.MIX,L3_DHI.MIX,L4_HJI.MIX,L5_HCI.MIX,L7_DHI.MIX,L8_SJI.MIX,L9_DRI.MIX,L10_DCI.MIX,L12_CMI.MIX,L13_RCI.MIX,L14_HTI.MIX,L16_CAI.MIX,L19_BCI.MIX,L20_BBI.MIX}
@@ -1334,6 +1371,11 @@ case "$command_name" in
 			exec python3 tools/lolg_vqa_external_sidecar_strace_bridge.py "$@"
 			;;
 		sidecar-hd|vqa-sidecar-hd|external-sidecar-hd|fullhd-sidecar)
+			exec ./LOLG_HD.sh sidecar-live --trace-source strace --strace-all-reads --strace-dedupe --trace-dedupe-key --max-frames 0 --open-player --player-hud "$@"
+			;;
+		sidecar-hd-nodg|sidecar-hd-no-dgvoodoo|vqa-sidecar-hd-nodg|external-sidecar-hd-nodg)
+			LOLG_HD_EXTERNAL_SIDECAR_ENGINE=wine-nodgvoodoo-safevqa
+			export LOLG_HD_EXTERNAL_SIDECAR_ENGINE
 			exec ./LOLG_HD.sh sidecar-live --trace-source strace --strace-all-reads --strace-dedupe --trace-dedupe-key --max-frames 0 --open-player --player-hud "$@"
 			;;
 		sidecar-live-strace|vqa-sidecar-live-strace|external-sidecar-live-strace)

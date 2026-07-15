@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -311,13 +312,14 @@ def main() -> None:
     if not args.dry_run:
         prepare_runtime_files(args)
     processes = build_processes(args)
+    engine_mode = os.environ.get("LOLG_HD_EXTERNAL_SIDECAR_ENGINE", "wine-dgvoodoo-win10-safevqa")
     player_path = f"http://{args.web_host}:{args.web_port}/?mode=player"
     if args.player_hud:
         player_path += "&hud=1"
 
     status = {
         "status": "starting",
-        "engine_mode": "wine-dgvoodoo-win10-safevqa",
+        "engine_mode": engine_mode,
         "vqa_mode": "external_sidecar_player",
         "mode_note": "HD VQA are decoded outside the game engine; the Wine game keeps the stable safevqa runtime.",
         "trace_source": args.trace_source,
@@ -341,7 +343,7 @@ def main() -> None:
     }
     write_json(args.runtime_dir / "live_status.json", status)
 
-    print("Mode moteur: wine-dgvoodoo-win10-safevqa stable.")
+    print(f"Mode moteur: {engine_mode} stable.")
     print("Mode VQA HD: sidecar externe synchronise; sortie HD dans le player web.")
     print(f"Trace runtime sidecar: {args.trace_file}")
     if args.trace_source == "strace":

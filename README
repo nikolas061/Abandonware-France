@@ -220,6 +220,15 @@ Alias court equivalent:
 ./LOLG_HD.sh sidecar-hd
 ```
 
+Si ce profil crashe dans Wine/dgVoodoo, utiliser le repli sans dgVoodoo:
+
+```sh
+./LOLG_HD.sh sidecar-hd-nodg
+```
+
+Ce repli garde le meme sidecar VQA HD 1920x1080, mais lance le moteur Wine en
+`wine-nodgvoodoo-safevqa`.
+
 Tableau de bord local du travail HD:
 
 ```text

@@ -1214,6 +1214,19 @@ def run_check(args: argparse.Namespace) -> dict[str, str]:
         "./LOLG_HD.sh sidecar-hd --no-game --dry-run",
     )
 
+    sidecar_nodg_ok, sidecar_nodg_detail = shell_check(["./LOLG_HD.sh", "sidecar-hd-nodg", "--no-game", "--dry-run"], root)
+    add_check(
+        checks,
+        "sidecar_handoff_nodg_dry_run",
+        pass_if(
+            sidecar_nodg_ok
+            and "Player VQA HD:" in sidecar_nodg_detail
+            and "wine-nodgvoodoo-safevqa" in sidecar_nodg_detail
+        ),
+        sidecar_nodg_detail,
+        "./LOLG_HD.sh sidecar-hd-nodg --no-game --dry-run",
+    )
+
     sidecar_smoke_ok, sidecar_smoke_detail = shell_check(["./LOLG_HD.sh", "sidecar-test"], root)
     add_check(
         checks,
