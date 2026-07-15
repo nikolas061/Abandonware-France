@@ -1059,6 +1059,11 @@ def run_check(args: argparse.Namespace) -> dict[str, str]:
             "install desktop-file-utils to validate shortcuts",
         )
 
+    wine_dry_run_results: dict[str, tuple[bool, str]] = {
+        resolution: shell_check(["./RUN_HD_WINE.sh", "--dry-run", "--resolution", resolution], root)
+        for resolution in ("1920x1080", "1280x1024")
+    }
+
     stage = args.wine_stage
     add_check(
         checks,
@@ -1167,10 +1172,7 @@ def run_check(args: argparse.Namespace) -> dict[str, str]:
     )
 
     for resolution in ("1920x1080", "1280x1024"):
-        dry_ok, dry_detail = shell_check(
-            ["./RUN_HD_WINE.sh", "--dry-run", "--resolution", resolution],
-            root,
-        )
+        dry_ok, dry_detail = wine_dry_run_results[resolution]
         add_check(
             checks,
             f"wine_launcher_resolution_{resolution}",
