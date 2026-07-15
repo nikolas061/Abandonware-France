@@ -1345,6 +1345,8 @@ def run_check(args: argparse.Namespace) -> dict[str, str]:
         pass_if(
             sidecar_critical_status_ok
             and '"critical_ready": true' in sidecar_critical_status_detail
+            and '"critical_ready_count": 2' in sidecar_critical_status_detail
+            and '"critical_expected_count": 2' in sidecar_critical_status_detail
             and '"key": "LOCALLNG.MIX:fca4e133"' in sidecar_critical_status_detail
             and '"key": "MOVIES.MIX:4d6efa8e"' in sidecar_critical_status_detail
             and sidecar_critical_status_detail.count('"status": "decoded"') >= 2

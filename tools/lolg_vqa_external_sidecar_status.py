@@ -90,14 +90,21 @@ def critical_result_status(cache_root: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def critical_ready(rows: list[dict[str, Any]]) -> bool:
-    return all(
+def critical_row_ready(row: dict[str, Any]) -> bool:
+    return (
         row.get("status") == "decoded"
         and str(row.get("width", "")) == "1920"
         and str(row.get("height", "")) == "1080"
         and int(row.get("ready_frames") or 0) > 0
-        for row in rows
     )
+
+
+def critical_ready_count(rows: list[dict[str, Any]]) -> int:
+    return sum(1 for row in rows if critical_row_ready(row))
+
+
+def critical_ready(rows: list[dict[str, Any]]) -> bool:
+    return bool(rows) and critical_ready_count(rows) == len(rows)
 
 
 def summarize_events(events: list[dict[str, Any]]) -> dict[str, Any]:
@@ -151,6 +158,7 @@ def build_status(args: argparse.Namespace) -> dict[str, Any]:
     player_url = live_status.get("player_url") or default_player_url
 
     critical_results = critical_result_status(args.cache_root) if args.critical else []
+    critical_count = critical_ready_count(critical_results) if args.critical else None
     return {
         "manifest": str(args.manifest),
         "manifest_status": manifest_summary.get("status", "missing"),
@@ -176,6 +184,8 @@ def build_status(args: argparse.Namespace) -> dict[str, Any]:
         "latest_event_key": latest_event.get("key", ""),
         "event_summary": summarize_events(events) if args.events else {},
         "critical_ready": critical_ready(critical_results) if args.critical else None,
+        "critical_ready_count": critical_count,
+        "critical_expected_count": len(critical_results) if args.critical else 0,
         "critical_results": critical_results,
         "player_url": player_url,
         "runtime_dir": str(runtime_dir),
@@ -216,7 +226,10 @@ def print_text(status: dict[str, Any]) -> None:
         print(f"Dernier event: {status['latest_event_status']} | {status['latest_event_key']}")
     critical_results = status.get("critical_results", [])
     if critical_results:
-        print(f"VQA critiques pretes: {int(bool(status.get('critical_ready')))}")
+        print(
+            "VQA critiques pretes: "
+            f"{status.get('critical_ready_count', 0)}/{status.get('critical_expected_count', len(critical_results))}"
+        )
         for row in critical_results:
             if not isinstance(row, dict):
                 continue
