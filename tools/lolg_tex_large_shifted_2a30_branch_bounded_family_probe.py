@@ -12,11 +12,23 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from analyze_te_pcx_payloads import MARKERS, bounded_payload, load_rows
-from export_shp import read_palette
-from export_te_span_previews import render_indexed
 from probe_te_span_decode import decode_span
-from score_te_raw_layouts import row_score
+
+try:
+    from analyze_te_pcx_payloads import MARKERS, bounded_payload, load_rows
+    from export_shp import read_palette
+    from export_te_span_previews import render_indexed
+    from score_te_raw_layouts import row_score
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    MARKERS = []
+    bounded_payload = None
+    load_rows = None
+    read_palette = None
+    render_indexed = None
+    row_score = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_bounded_family_probe")
@@ -618,6 +630,38 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[st
     args.output.mkdir(parents=True, exist_ok=True)
     issues: list[str] = []
     path_rows = read_csv(args.decoder_paths)
+    if not path_rows:
+        family_rows: list[dict[str, str]] = []
+        candidates: list[dict[str, str]] = []
+        marker = ""
+        b3 = 0
+        renderer_summary = (read_csv(args.renderer_summary) or [{}])[0]
+        sheet_path = args.output / "sheet.png"
+        summary = build_summary(
+            path_rows,
+            family_rows,
+            candidates,
+            {},
+            renderer_summary,
+            marker,
+            b3,
+            sheet_path,
+            issues,
+            args.width,
+            args.height_probe,
+            args.low,
+            args.high,
+        )
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "family.csv", FAMILY_FIELDNAMES, family_rows)
+        write_csv(args.output / "candidates.csv", CANDIDATE_FIELDNAMES, candidates)
+        (args.output / "index.html").write_text(
+            build_html(summary, family_rows, candidates, issues, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, family_rows, candidates, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     if not path_rows:
         issues.append("missing_decoder_path_rows")
     marker, b3 = parse_family_b3(path_rows)

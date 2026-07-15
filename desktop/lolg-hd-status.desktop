@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Lands of Lore II HD - Status
+Comment=Resume l'etat du patch HD sans lancer Wine
+Exec=/home/kiki/lol2hd/RUN_HD_DESKTOP.sh status
+Path=/home/kiki/lol2hd
+Icon=utilities-system-monitor
+Type=Application
+Terminal=true
+Categories=Game;
+StartupNotify=false

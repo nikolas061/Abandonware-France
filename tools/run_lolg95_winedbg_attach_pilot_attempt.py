@@ -123,7 +123,13 @@ def parse_lolg95_linux_pid(ps_text: str, executable_name: str) -> str:
         parts = line.split(None, 2)
         command = parts[1].lower() if len(parts) >= 2 else ""
         args = parts[2].lower() if len(parts) >= 3 else ""
-        if command == target or target in args:
+        if command == target:
+            found = parts[0]
+            continue
+        if command not in {"wine", "wine-preloader", "wine64", "wine64-preloader"}:
+            continue
+        normalized_args = args.replace("\\", "/")
+        if any(token.strip("'\"").endswith("/" + target) or token.strip("'\"") == target for token in normalized_args.split()):
             found = parts[0]
     return found
 

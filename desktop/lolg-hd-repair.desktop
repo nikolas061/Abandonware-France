@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Lands of Lore II HD - Repair
+Comment=Stoppe, prepare et recontrole le runtime Wine HD sans lancer le jeu
+Exec=/home/kiki/lol2hd/RUN_HD_DESKTOP.sh repair
+Path=/home/kiki/lol2hd
+Icon=applications-system
+Type=Application
+Terminal=true
+Categories=Game;
+StartupNotify=false

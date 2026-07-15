@@ -547,11 +547,17 @@ def build_payload(
     frame_rows: list[dict[str, str]],
     progress_every: int = 0,
 ) -> tuple[bytes, dict[str, int]]:
-    source_header, _chunks = vqa.parse_vqa(source_payload)
+    source_header, source_chunks = vqa.parse_vqa(source_payload)
     if source_header.block_width <= 0 or source_header.block_height <= 0:
         raise ValueError("invalid source block geometry")
     if TARGET_SIZE[0] % source_header.block_width or TARGET_SIZE[1] % source_header.block_height:
         raise ValueError("target size must be divisible by VQA block geometry")
+    source_vqfr_count = sum(1 for chunk_row in source_chunks if chunk_row.chunk_id == "VQFR")
+    if source_vqfr_count != len(selected_frames):
+        raise ValueError(
+            f"selected frame count {len(selected_frames)} does not match source VQFR count {source_vqfr_count}; "
+            "refusing to write a runtime replacement with a changed frame contract"
+        )
 
     palette = palette_bytes(source_dir)
     vqfr_chunks: list[bytes] = []
@@ -601,7 +607,18 @@ def build_payload(
         )
 
     header = header_payload(source_header, TARGET_SIZE[0], TARGET_SIZE[1], len(selected_frames), max_cbfz_size, max_vptz_size)
-    body = b"WVQA" + chunk("VQHD", header) + chunk("CPL0", palette) + b"".join(vqfr_chunks)
+    output_chunks: list[bytes] = []
+    frame_index = 0
+    for source_chunk in source_chunks:
+        if source_chunk.chunk_id == "VQHD":
+            output_chunks.append(chunk("VQHD", header))
+        elif source_chunk.chunk_id == "VQFR":
+            output_chunks.append(vqfr_chunks[frame_index])
+            frame_index += 1
+        else:
+            output_chunks.append(chunk(source_chunk.chunk_id, source_chunk.payload))
+
+    body = b"WVQA" + b"".join(output_chunks)
     totals["max_cbfz_size"] = max_cbfz_size
     totals["max_vptz_size"] = max_vptz_size
     totals["max_codebook_entries"] = source_header.max_codebook_entries
@@ -902,7 +919,8 @@ def build_reports(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[s
         if validated != len(frame_rows):
             issues.append(f"validation_failed:{len(frame_rows) - validated}")
     except Exception as exc:  # noqa: BLE001 - keep a machine-readable gap report
-        issues.append(f"replacement_failed:{type(exc).__name__}")
+        message = str(exc).replace(";", ",").replace("\n", " ")
+        issues.append(f"replacement_failed:{type(exc).__name__}:{message}")
 
     block_count = (TARGET_SIZE[0] // 4) * (TARGET_SIZE[1] // 4)
     frame_count = len(frame_rows)

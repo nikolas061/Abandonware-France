@@ -3,8 +3,13 @@ import argparse
 import csv
 from pathlib import Path
 
-from export_te_guided_decoders import load_catalog, payload_after_name
-from export_te_span_previews import source_payload
+try:
+    from export_te_guided_decoders import load_catalog, payload_after_name
+    from export_te_span_previews import source_payload
+except ModuleNotFoundError:
+    load_catalog = None
+    payload_after_name = None
+    source_payload = None
 
 
 DEFAULT_NAMES = [

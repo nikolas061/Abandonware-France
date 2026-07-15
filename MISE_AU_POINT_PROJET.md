@@ -1,5 +1,554 @@
 # Mise au point du projet
 
+## Reprise courante - 2026-07-01
+
+Etat verifie apres regeneration `.tex`, restauration VQA all-frames et reprise
+du pack runtime VQA:
+
+```text
+Full HD audit: pass (257/257 gates passed)
+Full HD PNG inventory: 177463 fichiers existants, 177463 en 1920x1080, issues=0
+VQA all-frames: 1955 entrees, 171167 frames natives, 171167 frames Full HD, 0 issue
+VQA runtime pack: 1955/1955 remplacements appliques, 66/66 archives MIX ecrites, 0 manquant
+Dashboard: output/fullhd_dashboard/index.html
+```
+
+Commande unique ajoutee pour l'utilisation courante:
+
+```text
+desktop/lolg-hd.desktop
+desktop/lolg-hd-status.desktop
+desktop/lolg-hd-repair.desktop
+```
+
+```sh
+./LOLG_HD.sh              # lance Wine Full HD en 1920x1080, LOCALLNG original
+./LOLG_HD.sh wine-1280    # lance Wine Full HD en 1280x1024, LOCALLNG original
+./LOLG_HD.sh status       # resume sans relancer Wine, indique si runtime actif
+./LOLG_HD.sh repair       # stoppe, prepare et recontrole
+./LOLG_HD.sh stop         # arrete le runtime Wine HD du projet
+./LOLG_HD.sh check        # controle release + manifeste/verif
+./LOLG_HD.sh resolutions  # verifie 1920/1280 et rejet 640x400 sans lancer Wine
+./LOLG_HD.sh gpu          # diagnostic rendu/GPU
+./LOLG_HD.sh sidecar-hd   # jeu safevqa + player web VQA HD externe
+./LOLG_HD.sh dosbox-hd smooth  # ancien test DOSBox, garde LOCALLNG/MOVIES originaux
+./LOLG_HD.sh manifest     # manifeste release leger
+./LOLG_HD.sh verify-manifest  # verifie le manifeste sans hasher les gros MIX
+./LOLG_HD.sh install-desktop --dry-run  # previsualise installation menu
+./LOLG_HD.sh uninstall-desktop  # previsualise suppression menu
+./LOLG_HD.sh support      # collecte diagnostic leger
+./LOLG_HD.sh notice       # notice courte de lancement
+```
+
+## Point VQA critique / sidecar - 2026-07-08
+
+Le remplacement in-engine de `LOCALLNG.MIX` et `MOVIES.MIX` reste non jouable.
+Les fichiers contract-preserving passent les audits locaux, mais les probes
+Wine/dgVoodoo affichent `Application Error` avec:
+
+- `LOCALLNG.MIX` HD seul, `MOVIES.MIX` original;
+- `MOVIES.MIX` HD seul, `LOCALLNG.MIX` original;
+- les deux ensemble;
+- `LOCALLNG.MIX` reconstruit en 640x400, meme compact, plus petit que
+  l'original, et padde pour conserver les offsets originaux.
+
+Conclusion actuelle: `LOLG95.EXE` exige un comportement VQA/LCW plus strict que
+notre writer ne reproduit pour ces ressources critiques. Les modes
+`wine-vqa-contract*` sont gardes pour diagnostic mais bloques par defaut; les
+forcer demande `LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1`.
+
+Chemin recommande pour continuer le Full HD critique sans faire planter le jeu:
+
+```sh
+./LOLG_HD.sh sidecar-hd
+```
+
+Ce mode garde le jeu Wine en `wine-dgvoodoo-win10-safevqa` avec
+`LOCALLNG.MIX`/`MOVIES.MIX` originaux, puis affiche les VQA HD 1920x1080 dans
+le player web externe synchronise par strace. L'alias `sidecar-hd` pointe vers
+le mode long `sidecar-live-strace-wide-all-hud`.
+Le smoke non-GUI `./LOLG_HD.sh sidecar-test` decode une petite VQA HD externe
+en 1920x1080 via le meme cache sidecar; il est maintenant verifie par
+`./LOLG_HD.sh check`. Le meme check verifie aussi que l'index sidecar couvre
+`LOCALLNG.MIX` et les 28 entrees `MOVIES.MIX` en HD externe 1920x1080. Le smoke
+`./LOLG_HD.sh sidecar-critical-test` decode en plus une frame HD de
+`LOCALLNG.MIX:fca4e133` et une frame HD de `MOVIES.MIX:4d6efa8e`; le check web
+confirme ensuite que le lecteur expose ces frames. `./LOLG_HD.sh
+sidecar-critical-warmup` decode volontairement toutes les frames critiques dans
+le cache sidecar avant une session de jeu; `./LOLG_HD.sh status` expose ce
+palier avec `sidecar_critical_full_ready`. `./LOLG_HD.sh
+sidecar-critical-status` resume ce statut critique en une commande.
+
+Nouvelle candidate runtime LOCALLNG, encore diagnostic uniquement:
+
+```sh
+./LOLG_HD.sh vqa-contract-build-locallng-1280-padded
+LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-locallng
+./LOLG_HD.sh vqa-contract-build-locallng-896-padded
+LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-locallng-896-padded
+```
+
+La meilleure candidate actuelle utilise
+`output/vqa_contract_preserving_writer_locallng_1280x1024_vqaext_padded_cbpz_from_adaptive_decode/`,
+passe `runtime_compat=pass`, et le gate LCW `padded1280` passe
+CBFZ/CBPZ/VPTZ contre l'original. La variante 896 reste en fallback. Elles
+doivent rester separees du chemin stable
+tant qu'un probe Wine reel ne prouve pas qu'elle depasse l'`Application Error`.
+
+Le probe MOVIES suivant est maintenant reproductible sans rebuild frame lourd:
+`./LOLG_HD.sh vqa-contract-build-movies-cbpz-padded`. Il part du pack MOVIES
+0-27, recompresse seulement les `CBPZ` des entrees 0/19/20 avec un marqueur
+LCW `no_room`, et passe les gates locaux LCW + runtime sur les trois entrees.
+Le lanceur associe est
+`LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-movies-noroom`.
+Probe Wine reel du 2026-07-08: le bureau Wine 1920x1080 apparait brièvement,
+aucune fenetre `Application Error` n'est detectee, mais aucune fenetre de jeu
+`LOLG95` n'apparait et le bureau se ferme avant la seconde suivante. Cela reste
+donc diagnostic et non jouable.
+
+Mode isole ajoute pour separer les causes:
+`LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-movies-noroom-only`.
+Il garde `LOCALLNG.MIX` original et ne remplace que `MOVIES.MIX`. Probe reel:
+`LOLG95.EXE` apparait et reste actif jusqu'au stop manuel, sans fenetre
+`Application Error`, mais Wine loggue `free(): invalid pointer` puis une
+assertion, et la capture reste noire. Apres correction de `--no-dxvk` pour
+forcer aussi `DLL overrides Wine: ddraw,d3dimm,d3d8=b`, le meme probe sans DXVK
+donne le meme `free(): invalid pointer` et le meme ecran noir: ce n'est donc
+pas seulement un artefact DXVK.
+
+Matrice MOVIES single-entry ajoutee: `output/movies_single_entry_noroom_*_20260708/`
+part de `C/LOLG/MOVIES.MIX` et remplace une seule entree HD a la fois. Resultat:
+MOVIES original ne loggue pas d'assertion dans le meme profil no-DXVK, mais les
+entrees HD isolees `0000`, `0001`, `0002`, `0003`, `0004`, `0019` et `0020`
+declenchent toutes `free()/munmap_chunk invalid pointer` + assertion Wine. Le
+controle `output/vqa_contract_movies_0004_native_rewrite_20260708/` garde
+l'entree 4 en taille native `320x400`, passe les audits locaux avec 75/75
+frames, et ne declenche pas l'assertion dans un probe Wine `--no-dxvk` de 22 s.
+Les paliers suivants restent sans `free()` jusqu'a `892x560`, puis `896x560`
+declenche `free(): invalid pointer` alors que le plus gros `VPTZ` reste sous
+64K. Le verrou MOVIES n'est donc pas une entree unique corrompue; il pointe
+surtout vers un budget heap/buffer VQA tres proche de 500k pixels/frame.
+Le lanceur diagnostic `./LOLG_HD.sh wine-vqa-contract-custom-pair` combine
+`LOCALLNG` 1024x640 et `MOVIES` entree 4 en 892x560. Avec `--no-dxvk`, le probe
+court ne declenche pas `free()`, ce qui valide le principe du pair sous seuil,
+mais le chemin reste partiel tant que les autres entrees MOVIES ne sont pas
+reconstruites sous la meme limite.
+Le plan complet MOVIES est maintenant reproductible en deux etapes:
+`./LOLG_HD.sh vqa-plan-movies-safe` calcule les 28 cibles sous le budget stable
+mesure, puis `./LOLG_HD.sh vqa-contract-build-movies-safe` lance le writer batch
+contract-preserving vers
+`output/vqa_contract_batch_writer_movies_0000_0027_892x560_safe/`. Le check
+release verifie le plan et le dry-run du build. Le smoke reel
+`./LOLG_HD.sh vqa-contract-build-movies-safe-smoke` reconstruit MOVIES entree 4
+par le meme writer batch, passe `runtime_compat=pass` avec profil `4000` et
+`max_vptz=26328`. Le lot long `./LOLG_HD.sh
+vqa-contract-build-movies-safe-long0` reconstruit l'entree `0`, passe
+`runtime_compat=pass`, et garde `max_vptz=31742`. Le lot long
+`./LOLG_HD.sh vqa-contract-build-movies-safe-long1` reconstruit l'entree `1`,
+passe `runtime_compat=pass`, et garde `max_vptz=36492`. Le lot long
+`./LOLG_HD.sh vqa-contract-build-movies-safe-long2` reconstruit l'entree `2`,
+passe `runtime_compat=pass`, et garde `max_vptz=41996`. Le lot long
+`./LOLG_HD.sh vqa-contract-build-movies-safe-long3` reconstruit l'entree `3`,
+passe `runtime_compat=pass`, et garde `max_vptz=41319`. Le lot court
+`./LOLG_HD.sh vqa-contract-build-movies-safe-short` reconstruit les entrees
+`5-18`, passe 14/14 en `runtime_compat=pass`, et garde `max_vptz=27497` au
+plus haut. Le lot moyen `./LOLG_HD.sh vqa-contract-build-movies-safe-mid`
+reconstruit `19-20`, passe 2/2 en `runtime_compat=pass`, et garde
+`max_vptz=21157` au plus haut. Le lot court
+`./LOLG_HD.sh vqa-contract-build-movies-safe-tail` reconstruit les entrees
+`21-27`, passe 7/7 en `runtime_compat=pass`, et garde `max_vptz=27356` au plus
+haut; toutes les entrees MOVIES `0-27` ont maintenant un lot safe valide en
+`892x560`. Le build complet `./LOLG_HD.sh vqa-contract-build-movies-safe`
+assemble ces 28 lots vers
+`output/vqa_contract_batch_writer_movies_0000_0027_892x560_safe/mix/MOVIES.MIX`,
+passe `entries_replaced=28` avec `runtime_compat=pass` partout, et garde
+`max_vptz=41996`. Le lanceur
+`./LOLG_HD.sh wine-dgvoodoo-win10-safevqa-movies-safe` branche ce `MOVIES.MIX`
+safe dans un stage Wine separe: `LOCALLNG.MIX` reste original et les MIX
+monstres/animations instables restent exclus, pour isoler le test in-engine de
+MOVIES safe. Le probe reel
+`output/test_logs/wine_movies_safe_892_probe_20260708.log` detecte
+`LOLG95.EXE`, puis sort sur un page fault Wine; le lanceur est donc bloque par
+defaut et ne se relance qu'avec `LOLG_HD_ALLOW_CRASHING_MOVIES_SAFE=1` pour
+diagnostic.
+
+## Point DOSBox HD LOCALLNG - 2026-07-02
+
+Le lanceur `./LOLG_HD.sh dosbox-hd smooth` utilise maintenant tous les MIX HD
+de `mod_mix_vqa_fullhd/` sauf `LOCALLNG.MIX`. `LOCALLNG.MIX` reste branche sur
+`C/LOLG/LOCALLNG.MIX`, parce que le payload VQA Full HD de cette archive fait
+quitter ou planter l'executable DOS.
+
+Un test de reconstruction a ete ajoute:
+
+```sh
+python3 tools/lolg_rebuild_locallng_dos_compat.py
+./LOLG_HD.sh dosbox-hd smooth --use-mix-overrides
+```
+
+Ce test ecrit `output/lolg_dosbox_mix_overrides/LOCALLNG.MIX` en conservant
+l'ordre physique original du MIX et en remplacant seulement l'entree VQA
+`fca4e133`. Resultat: l'ordre du MIX n'etait pas le seul probleme; le VQA HD
+de `LOCALLNG` reste incompatible avec le lecteur DOS. Le mode override est donc
+desactive par defaut. La capture de controle stable avec `LOCALLNG` original est
+`output/screenshots/dosbox_original_locallng.png`.
+
+Test Wine sidecar ajoute ensuite:
+
+```sh
+./LOLG_HD.sh wine-locallng-sidecar
+```
+
+Ce chemin genere `output/lolg95_locallng_sidecar_patch_probe/`, garde
+`LOCALLNG.MIX` original dans le stage Wine, ajoute `LOCALLNG_HD.MIX` comme
+sidecar vers `mod_mix_vqa_fullhd/LOCALLNG.MIX`, et patche les trois references
+compilees `LOCALLNG.MIX` de `LOLG95.EXE` vers `LOCALLNG_HD.MIX`. Le log
+`output/wine_locallng_sidecar_stderr.txt` confirme des `CreateFileW
+LOCALLNG_HD.MIX`, puis le jeu retombe sur le meme crash Wine:
+`EXCEPTION_ACCESS_VIOLATION` a `00511545`. Le verrou est donc le payload VQA HD
+de `LOCALLNG`, pas seulement le packaging MIX, le nom de fichier ou le chemin
+sidecar.
+
+Controle Wine sidecar original:
+
+```sh
+python3 tools/lolg95_locallng_sidecar_patch_probe.py \
+  -o output/lolg95_locallng_sidecar_original_probe \
+  --hd-locallng C/LOLG/LOCALLNG.MIX
+```
+
+Le jeu reste actif sans exception quand `LOCALLNG_HD.MIX` pointe vers le
+`LOCALLNG.MIX` original. Le patch d'executable et le chargement sidecar sont
+donc valides.
+
+Deux variantes generees ont ensuite ete testees avec
+`tools/lolg_vqa_locallng_safe_sidecar.py`:
+
+- `output/lolg95_locallng_safe_sidecar_960x540/sidecar/LOCALLNG_HD.MIX`:
+  VQA 960x540, 237 frames validees localement, `max_vptz_size=41226`, mais
+  Wine plante a `00523ACE`.
+- `output/lolg95_locallng_safe_sidecar_640x400/sidecar/LOCALLNG_HD.MIX`:
+  VQA 640x400, 237 frames validees localement, `max_vptz_size=17658`, mais
+  Wine plante aussi a `00523ACE`.
+
+Controle natif ajoute:
+`output/vqa_contract_locallng_0002_native_rewrite_20260708/` regenere
+`LOCALLNG` depuis les frames natives 640x400, avec 237/237 frames, blocs exacts
+`1.000000`, pixels changes `0.000000`, et aucun crash Wine dans un probe
+`--no-dxvk` de 22 s. Conclusion: `LOCALLNG` accepte une WVQA nouvellement ecrite
+si elle reste pixel-identique; le crash vient des variantes issues des frames HD
+ou transformees. Des paliers reconstruits depuis frames natives restent sans
+exception dans les probes courts jusqu'a `1024x640`; `MOVIES` reste le verrou
+dur avec crash a `896x560` sur l'entree 4. Le lanceur Wine garde donc
+`LOCALLNG.MIX` original par defaut via `LOLG_HD_WINE_HD_EXCLUDE=LOCALLNG.MIX`.
+Les autres MIX HD restent actifs. Le lancement `./LOLG_HD.sh wine-1280` reste
+actif sans exception apres ce
+changement et le log confirme le chargement de
+`LOCALLNG.MIX`.
+
+Le lanceur Wine active aussi le resize xdotool par defaut:
+`LOLG_HD_AUTO_RESIZE=1` et `LOLG_HD_RESIZE_GAME_WINDOW=1`. Le controle
+`output/wine1280_locallng_original_autoresize_stdout.txt` confirme:
+`Bureau Wine ajuste en 1280x1024` puis
+`Fenetre jeu ajustee en 1280x1024 apres 6s`.
+
+Apres retour utilisateur "petit ecran blanc", le renderer Wine par defaut a
+ete bascule de `opengl` a `gdi`, avec `DirectDrawRenderer=gdi`. Le controle
+`output/wine1280_gdi_directdraw_gdi_stdout.txt` confirme un lancement actif en
+1280x1024, sans exception dans le log, avec les deux fenetres Wine/jeu a
+1280x1024.
+
+Apres retour utilisateur "debanni dgvoodoo", le lanceur garde dgVoodoo desactive
+par defaut mais ajoute le mode explicite
+`./LOLG_HD.sh wine-locallng-hd-dgvoodoo`. Ce mode conserve
+`DDraw.dll`, `D3DImm.dll`, `D3D8.dll`, `dgVoodoo.conf` et `dgVoodooCpl.exe`
+depuis `C/LOLG/`, force les overrides Wine `ddraw,d3dimm,d3d8=n,b`, et utilise
+`opengl` par defaut pour le rendu Wine.
+
+Ancien essai alternatif sans dgVoodoo: `./LOLG_HD.sh wine-gamescope` passe par
+`RUN_HD_WINE_GAMESCOPE.sh`. Ce mode existe encore pour diagnostic historique,
+mais il n'est plus le chemin de travail recommande; les essais actuels passent
+par `safevqa`, dgVoodoo/Wine stable, ou le sidecar VQA externe.
+
+Nettoyage CPU: aucun limiteur CPU externe n'est conserve dans les
+scripts/lanceurs du projet.
+
+Point WVQA runtime - 2026-07-02:
+
+Le probleme des animations HD n'est plus traite comme un probleme de lanceur.
+`tools/lolg_vqa_native_exact_fixture_writer.py` reconstruit maintenant une VQA
+native depuis ses chunks originaux et la reinjecte dans une copie de MIX. Les
+baselines `output/vqa_native_exact_fixture_writer_locallng/summary.csv` et
+`output/vqa_native_exact_fixture_writer_movies_0004/summary.csv` sont `pass`
+avec `payload_exact=1`, `mix_exact=1` et `runtime_compat_status=pass`.
+`tools/lolg_vqa_native_exact_batch_writer.py` etend ce verrou au perimetre
+actif: `output/vqa_native_exact_batch_locallng_entry2/summary.csv` passe sur
+`LOCALLNG` entree 2 et
+`output/vqa_native_exact_batch_movies_0000_0027/summary.csv` passe sur
+`MOVIES` entrees 0-27, avec `payload_exact_entries` complet, `mix_exact=1` et
+`runtime_compat_pass_entries` complet. Les writers HD appellent maintenant ce
+preflight et exposent `native_exact_status=pass` dans leurs CSV avant de
+modifier les pixels.
+`tools/lolg_vqa_runtime_compat_audit.py` compare aussi une VQA originale et une
+VQA regeneree au niveau du contrat runtime WVQA. Le test
+`output/lolg95_locallng_safe_sidecar_640x400/runtime_compat/summary.csv` est
+volontairement `gap`: le header, les chunks top-level et le nombre de frames
+passent, mais 237/237 frames changent de forme. L'original LOCALLNG utilise
+`CBFZ+CBPZ+CPL0+VPTZ` sur la premiere frame, puis surtout `CBPZ+VPTZ`, alors
+que la version regeneree ecrit `CPL0+CBFZ+VPTZ` a chaque frame et supprime les
+`CBPZ` sur 207 frames. Le writer LOCALLNG marque donc `runtime_compat_gap`
+malgre un redecode image local correct. Le writer Full HD refuse maintenant de
+produire un remplacement quand le nombre de frames exportees ne correspond pas
+au nombre de `VQFR` source, et reconstruit les payloads avec l'enveloppe
+top-level originale au lieu d'un `FORM/WVQA` minimal. La prochaine correction
+doit porter sur le contrat de frame (`CBPZ`/codebook updates et `VPTZ`) avant
+de remettre `LOCALLNG.MIX` ou `MOVIES.MIX` en HD dans le runtime.
+
+Suite de ce point: `tools/lolg_vqa_contract_preserving_writer.py` ajoute une
+premiere reconstruction non byte-exacte qui garde le contrat de frame original.
+`output/vqa_contract_preserving_writer_locallng_640/summary.csv` est `pass`
+avec 237/237 frames validees et `runtime_compat_status=pass`; les formes restent
+`CBFZ+CBPZ+CPL0+VPTZ:1;CBPZ+VPTZ:206;VPTZ:30`. L'entree `TITLE_E` de
+`MOVIES.MIX` passe aussi dans
+`output/vqa_contract_preserving_writer_movies_0004_native/summary.csv` avec
+75/75 frames et `CBFZ+CPL0+VPTZ:1;VPTZ:74`.
+
+Le jalon suivant est maintenant HD 1280x1024. Les frames sources ont ete
+exportees dans `output/locallng_entry2_source_decode_1280x1024/` et
+`output/movies_0004_source_decode_1280x1024/`. `LOCALLNG` passe dans
+`output/vqa_contract_preserving_writer_locallng_1280x1024_adaptive_extlcw/`:
+237/237 frames, `runtime_compat_status=pass`, formes preservees,
+`native_exact_status=pass`, `max_vptz_size=47322`,
+`exact_block_ratio=0.998703`. `MOVIES:TITLE_E` passe
+dans `output/vqa_contract_preserving_writer_movies_0004_1280x1024_extlcw_cb640/`:
+75/75 frames, formes preservees, `max_vptz_size=64957`,
+`exact_block_ratio=0.593463`; le codebook est limite a 640 vecteurs pour rester
+sous la taille de pointeur suivie par le writer. Les profils intermediaires
+128/256/384/416/448/480 ont ete mesures; 640 est le meilleur profil simple
+valide actuellement, tandis que les profils sans assez de compression depassent
+la limite.
+
+`tools/lolg_vqa_contract_batch_writer.py` ajoute ensuite l'ecriture batch dans
+un seul MIX. Le test
+`output/vqa_contract_batch_writer_movies_0000_0027_1280_mixed/summary.csv`
+est `pass`: entrees `MOVIES` 0 a 27 remplacees, 0 echec. Les 28 entrees ont
+leurs frames validees, `runtime_compat_status=pass`, formes de chunks
+conservees, et `max_vptz_size` sous 65535. Les entrees 9, 22, 24 et 27
+utilisent le profil 512; l'entree 3 utilise le profil 480; l'entree 2 utilise
+le profil 192 avec `--max-codebook-entries 1971`; les autres utilisent le
+profil 640. Les entrees 0, 2 et 3 utilisent le nouveau mode
+`--windowed-pointer-lcw`. Les entrees 19 et 20 conservent les formes `CBPZ` et
+ajoutent chacune 1360 vecteurs de mise a jour. Les entrees 0, 1, 2, 3 et 27 ont
+necessite le mode writer `--pad-initial-cbfz`: sans lui, la premiere frame
+gardait les bons chunks mais le `VQFR` et le `CBFZ` initial etaient trop
+reduits pour l'audit runtime. L'entree 0 necessite aussi un `CBPZ` de
+remplacement non vide quand le source en avait un, pour eviter le shrink
+runtime au debut de la premiere animation. Le dossier de test actif pointe
+maintenant son `MOVIES.MIX` vers ce batch 0-27.
+
+Le dossier de test courant est
+`output/vqa_contract_preserving_pair_1280x1024/`. Le lanceur
+`./LOLG_HD.sh wine-vqa-contract` l'utilise via `--extra-mix-dir`, desactive le
+pack global `mod_mix_vqa_fullhd`, et remplace seulement `LOCALLNG.MIX` et
+`MOVIES.MIX`. Le dry-run et `--prepare-only --skip-wine-setup` verifient un
+stage 1920x1080 en bureau Wine virtuel deplacable, renderer Wine `vulkan`,
+DirectDrawRenderer Wine `vulkan`, version Windows Wine `win95`, overrides DXVK
+pour `D3D8/D3D9/DXGI/D3D10/D3D11`, dgVoodoo desactive, sans `-LOWMEM`, avec
+les deux liens de stage pointant vers `LOCALLNG` 1280 et le `MOVIES.MIX` batch
+0-27. Le mode direct sans dgVoodoo est evite: le smoke garde-fou detecte une
+fenetre `Application Error` meme avec les MIX originaux. Le smoke courant du
+lanceur non-direct est
+`output/hd_wine_smoke_test_vqa_contract_1920_vulkan_dxvk_win95_default_detach_guarded/summary.csv`:
+pas de fenetre d'erreur, le processus et les fenetres `LOLG_HD - Wine Desktop`
+et `Lands Of Lore Guardians` apparaissent vers 2s, puis disparaissent avant 5s.
+Le controle avec MIX originaux
+`output/hd_wine_smoke_test_original_1920_vulkan_dxvk_win95_detach_early_guarded/`
+montre le meme symptome; ce n'est donc pas le sidecar LOCALLNG/MOVIES qui
+explique cette sortie rapide. Ce n'est pas encore une preuve runtime jusqu'a
+animation.
+Le prochain vrai test doit etre runtime utilisateur: atteindre une animation et
+confirmer qu'il n'y a plus de page fault.
+
+Le dossier externe demande pour l'ancien travail n'est pas monte dans cet environnement:
+
+```text
+/media/niko/niko/Abandonware-France/Lands-of-Lore-II
+```
+
+Travail .tex ajoute pendant la reprise:
+
+- Tous les gates `.tex` de l'audit local passent maintenant. Les deux gates
+  VQA restants ont ete resolus en regenerant l'export all-frames par chunks,
+  puis en fusionnant le manifest par defaut.
+- `output/vqa_batch_window_lcw_transparent0_allframes/verification.csv`:
+  1955 entrees, 171167 PNGs natifs, 171167 PNGs Full HD, 171167 render rows,
+  13 held frames, 0 non-output row, 0 issue.
+- `output/vqa_runtime_repack_readiness/index.html`: readiness repack restauree,
+  1955/1955 entrees mappees, 0 issue d'entree, 66/66 archives MIX en
+  roundtrip layout-preserving.
+- `output/vqa_fullhd_replacement_writer/index.html`: le pack runtime voit
+  1955 payloads WVQA Full HD disponibles via canonique+overlay;
+  les rapports agreges du writer couvrent 171167/171167 frames et 20306291830
+  octets de payloads, dont les soixante et onze batches paralleles recents
+  ajoutent 1742 payloads compacts directs, 167271/167271 frames validees,
+  19565068292 octets de payloads.
+- `tools/lolg_vqa_lcw_literal_probe.py` a ete ajoute pour combler le probe
+  reference par le pipeline; `output/vqa_lcw_literal_probe/index.html` passe
+  avec 47930 chunks LCW testes, 0 echec, sur un echantillon courant 16/1955; les 2 nouveaux payloads du lot 20260701c y sont inclus.
+- `output/vqa_lcw_compression_probe/index.html`: probe echantillon
+  Format80/LCW compact `pass`, 64 frames, 13299999 octets economises,
+  ratio 0.634804.
+- `tools/lolg_vqa_parallel_compact_batch.py` ajoute un lanceur compact direct
+  parallele; `output/vqa_fullhd_replacement_writer_parallel_compact_20260628e/summary.csv`
+  passe avec 16/16 entrees et 400/400 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628f/summary.csv`
+  passe avec 32/32 entrees et 844/844 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628g/summary.csv`
+  passe avec 32/32 entrees et 911/911 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628h/summary.csv`
+  passe avec 32/32 entrees et 956/956 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628i/summary.csv`
+  passe avec 32/32 entrees et 960/960 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628j/summary.csv`
+  passe avec 32/32 entrees et 960/960 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628k/summary.csv`
+  passe avec 32/32 entrees et 960/960 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628l/summary.csv`
+  passe avec 32/32 entrees et 991/991 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628m/summary.csv`
+  passe avec 32/32 entrees et 1028/1028 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628n/summary.csv`
+  passe avec 32/32 entrees et 1056/1056 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628o/summary.csv`
+  passe avec 32/32 entrees et 1081/1081 frames,
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628p/summary.csv`
+  passe avec 32/32 entrees et 1119/1119 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628q/summary.csv`
+  passe avec 32/32 entrees et 1184/1184 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628r/summary.csv`
+  passe avec 32/32 entrees et 1245/1245 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628s/summary.csv`
+  passe avec 32/32 entrees et 1280/1280 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628t/summary.csv`
+  passe avec 32/32 entrees et 1315/1315 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628u/summary.csv`
+  passe avec 32/32 entrees et 1344/1344 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628v/summary.csv`
+  passe avec 32/32 entrees et 1378/1378 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628w/summary.csv`
+  passe avec 32/32 entrees et 1437/1437 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628x/summary.csv`
+  passe avec 32/32 entrees et 1472/1472 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628y/summary.csv`
+  passe avec 32/32 entrees et 1472/1472 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628z/summary.csv`
+  passe avec 32/32 entrees et 1472/1472 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628aa/summary.csv`
+  passe avec 32/32 entrees et 1521/1521 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ab/summary.csv`
+  passe avec 32/32 entrees et 1559/1559 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ac/summary.csv`
+  passe avec 32/32 entrees et 1602/1602 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ad/summary.csv`
+  passe avec 32/32 entrees et 1640/1640 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ae/summary.csv`
+  passe avec 32/32 entrees et 1704/1704 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628af/summary.csv`
+  passe avec 32/32 entrees et 1767/1767 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ag/summary.csv`
+  passe avec 32/32 entrees et 1826/1826 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ah/summary.csv`
+  passe avec 32/32 entrees et 1888/1888 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ai/summary.csv`
+  passe avec 32/32 entrees et 1920/1920 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628aj/summary.csv`
+  passe avec 32/32 entrees et 1925/1925 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ak/summary.csv`
+  passe avec 32/32 entrees et 1952/1952 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628al/summary.csv`
+  passe avec 32/32 entrees et 1955/1955 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628am/summary.csv`
+  passe avec 32/32 entrees et 2018/2018 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628an/summary.csv`
+  passe avec 32/32 entrees et 2083/2083 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260628ao/summary.csv`
+  passe avec 32/32 entrees et 2151/2151 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629a/summary.csv`
+  passe avec 32/32 entrees et 2247/2247 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629b/summary.csv`
+  passe avec 32/32 entrees et 2381/2381 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629c/summary.csv`
+  passe avec 32/32 entrees et 2430/2430 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629d/summary.csv`
+  passe avec 32/32 entrees et 2538/2538 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629e/summary.csv`
+  passe avec 32/32 entrees et 2595/2595 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629f/summary.csv`
+  passe avec 32/32 entrees et 2741/2741 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629g/summary.csv`
+  passe avec 32/32 entrees et 2898/2898 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629h/summary.csv`
+  passe avec 32/32 entrees et 3032/3032 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629i/summary.csv`
+  passe avec 32/32 entrees et 3240/3240 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629j/summary.csv`
+  passe avec 32/32 entrees et 3441/3441 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629k/summary.csv`
+  passe avec 32/32 entrees et 3768/3768 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629l/summary.csv`
+  passe avec 32/32 entrees et 4060/4060 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629m/summary.csv`
+  passe avec 32/32 entrees et 4591/4591 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629n/summary.csv`
+  passe avec 32/32 entrees et 5217/5217 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629o/summary.csv`
+  passe avec 32/32 entrees et 6573/6573 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629p/summary.csv`
+  passe avec 32/32 entrees et 9565/9565 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629q/summary.csv`
+  passe avec 4/4 entrees et 1573/1573 frames, puis
+  `output/vqa_fullhd_replacement_writer_parallel_compact_20260629r/summary.csv`
+  passe avec 4/4 entrees et 1708/1708 frames. Les lots suivants jusqu'au
+  20260701c completent les payloads restants et terminent avec 2/2 entrees,
+  5800/5800 frames validees.
+- `tools/lolg_vqa_fullhd_replacement_writer.py` accepte maintenant
+  `--lcw-mode compact --lcw-search-depth 8`; les batches
+  `output/vqa_fullhd_replacement_writer_compact_batch32_20260628b/index.html`
+  et `output/vqa_fullhd_replacement_writer_compact_batch32_20260628c/index.html`,
+  puis `output/vqa_fullhd_replacement_writer_compact_batch32_20260628d/index.html`,
+  ajoutent 96 payloads compacts directs, 2174/2174 frames validees,
+  221923640 octets de payloads.
+- `output/vqa_lcw_compact_payloads/index.html`: overlay compact materialise
+  dans `replacements_vqa_fullhd_lcw_compact/`, 117/117 payloads, 1722 frames,
+  3444 chunks recompresses, 0 echec roundtrip, 174110456 octets compacts contre
+  519299898 octets canoniques, soit 345189442 octets economises
+  (`saved_ratio=0.664721`).
+- `output/vqa_runtime_pack_build/index.html`: pack runtime VQA complet ecrit,
+  via `--replacement-overlay-root replacements_vqa_fullhd_lcw_compact`,
+  1955/1955 remplacements appliques, 148 overlays et 1807 payloads canoniques
+  deja compacts, 66/66 archives generees dans `mod_mix_vqa_fullhd/`,
+  0 remplacement encore manquant, `output_bytes=19993702917`,
+  0 remplacement differe pour depassement MIX. `tools/lolg_vqa_runtime_pack_build.py`
+  ecrit maintenant les gros MIX en streaming pour eviter le pic memoire de
+  `build_mix_bytes` sur `L20_BBI.MIX`.
+- `output/vqa_runtime_feasibility/index.html`: le runtime VQA reste `gap` malgre
+  les exports valides; `wvqa_encoder`, `mix_repack_roundtrip`,
+  `lcw_literal_encoder` et `palette_codebook_pointer_encoder` passent
+  maintenant, mais `mix_repack`, LCW/Format80 complet, writer fixture natif,
+  audio et updates CBP restent a faire.
+- `output/tex_gap_decoder_len64_promoted_tiny_zero_source_probe/index.html`:
+  relance avec `output/tex_gap_zero_literal_segmentation_probe/operations.csv`,
+  1 jointure reelle sur 20 micro-runs zero (`2/21` octets); les 19 autres
+  restent sans operation source.
+- `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_noisy_review/index.html`:
+  5149 octets noisy gardes en revue, 52 decisions, 0 byte promotion-ready.
+- `output/tex_large_shifted_marker_low_control_sweep_probe/index.html`: 240 candidats, 91 selections/previews Full HD, `issue_rows=0`.
+- `output/tex_large_llse_marker_guard_replay_sweep_probe/index.html`: 17 actions LLSE testees sur 5 hauteurs; meilleur candidat stable a revoir `setxy_f1div4_f0_if_f1mod4_f0ge40_f0ltf0_f4ge80_ylt512`, `abs_max_delta=0.0963`, `issue_rows=0`.
+- `output/tex_large_rejected_candidate_review/index.html`: file de revue consolidee pour les 3 gros segments rejetes, 10 candidats, 6 `review_ready`, 0 promotion automatique, `issue_rows=0`.
+- Rapports exact/partial `.tex` restaures: `tex_exact_cdcache_compare`, `tex_exact_chunk_evidence`, `tex_exact_match_overlays`, `tex_decoder_seed_report`, `tex_exact_chunk_scan`, `tex_exact_chunk_clusters`, `tex_exact_cluster_overlays`, `tex_decoder_run_corpus`, `tex_partial_raw_decoder`, `tex_partial_raw_coverage`, `tex_gap_frontier_report`.
+
+La suite correcte est de revoir visuellement les candidats `review_ready`, puis de promouvoir une seule regle decodeur gardee a la fois. Les candidats `low_drop` restent utiles comme reference de score mais sont marques tronques verticalement.
+
 Date: 2026-06-24
 
 ## Etat general
@@ -43,16 +592,68 @@ Runtime gaps: 2
 
 ## Ce qui est stable
 
-- `RUN_HD.sh` est le lanceur HD principal.
-- `RUN_HD_PCX_FULLHD.sh` est le lanceur runtime PCX Full HD non destructif:
-  il regenere `output/fullhd_pcx_runtime_launch/` avec les MIX du pack
-  `mod_mix_pcx_fullhd/` et laisse les MIX actifs inchanges.
+- `LOLG_HD.sh` est le point d'entree courant: lancement Wine HD par defaut,
+  variantes 1280x1024, status sans relance Wine, repair sans lancement du jeu, stop cible Wine HD, validation release avec rafraichissement manifeste/verif, smoke
+  test, controle resolutions, diagnostic GPU, manifeste release leger, verification de manifeste, verification de paquet support, verification de l'archive support, installateur/desinstallateur de raccourcis, paquet support et notice courte.
+- `RUN_HD.sh` reste le lanceur DOSBox HD principal.
+- `RUN_HD_WINE.sh` est le lanceur Wine Full HD non destructif: il regenere
+  `output/lolg95_fullhd_wine_runtime/`, pointe les 66 MIX VQA vers
+  `mod_mix_vqa_fullhd/`, exclut les DLL/config dgVoodoo locales, force Wine
+  DirectDraw/GDI, verrouille le lecteur Wine `D:` vers le runtime HD, et
+  maintient la fenetre en 1920x1080 par defaut
+  (`LOLG_HD_RESOLUTION=1280x1024` possible) via `xdotool`; les tailles non verifiees comme 640x400 sont refusees par defaut.
+- `CHECK_HD.sh` valide le paquet de lancement local; le dernier rapport
+  `output/hd_release_check/index.html` passe avec 120 checks pass, 6 lignes
+  info, 126 checks au total et 0 gap. Il
+  valide les lanceurs, le stage Wine safevqa, le registre Wine/GDI, le lecteur
+  Wine `D:`, les resolutions 1920/1440/1280, le rejet de 640x400, le manifeste,
+  le dry-run `sidecar-hd`, le decode smoke `sidecar-test`, et la couverture
+  sidecar `LOCALLNG.MIX` + `MOVIES.MIX`, puis le decode critique
+  `sidecar-critical-test`, l'inventaire web des frames critiques, et
+  `sidecar-critical-status`, plus le contenu sidecar critique et les outils
+  Python diagnostiques du paquet support. Les anciens
+  smokes runtime Wine 1920x1080 + 1280x1024 restent presents comme diagnostics
+  non bloquants, car le chemin courant pour les VQA critiques est le sidecar externe. `./LOLG_HD.sh
+  resolutions` ecrit `output/hd_resolution_check/` sans lancer Wine. Le status
+  rafraichit aussi `output/hd_resolution_check/summary.csv` et
+  `output/hd_release_manifest_verify/summary.csv`, puis exige ces rapports en
+  pass; il affiche aussi `Sidecar critical: ready` avec les frames
+  `LOCALLNG`/`MOVIES` pretes, plus `sidecar_critical_full_ready` pour separer
+  le smoke minimal du cache complet. Le paquet support rafraichit le manifeste,
+  sa verification et les resolutions avant copie; son `SUPPORT_SUMMARY.txt`
+  recalcule donc `ready_to_launch=1` depuis les rapports copies et expose
+  `release_pass_count`, `release_checks`, `release_info`, `release_gaps` et
+  `release_display` pour separer les lignes pass/info/gap. Il copie ces preuves, dont
+  `SUPPORT_SUMMARY.txt`, `README_SUPPORT.txt`, `BUNDLE_MANIFEST.csv`
+  avec schema exact `path,size,sha256,executable`, lignes CSV bien formees,
+  chemins relatifs canoniques sans antislash et sans PNG lourd, `VERIFY_SUPPORT.sh`, le
+  checksum externe mono-ligne strict hash+archive avec nom exact sans chemin `output/hd_support_bundle.tar.gz.sha256`, le resume externe
+  `output/hd_support_bundle.tar.gz.summary` avec cles/champs exacts sans doublon ni ligne malformed, le compagnon autonome
+  `output/hd_support_bundle.tar.gz.verify.sh`, le manifeste externe
+  `output/hd_support_bundle.tar.gz.artifacts.csv` des 4 fichiers a copier ensemble
+  avec schema strict `path,size,sha256,executable`, en-tetes/chemins non dupliques et noms portables simples,
+  avec sous-statuts archive non vide/racine unique/nom de racine/schema/largeur/nombre/chemins dans le resume d'archive,
+  test apres copie isolee et tests negatifs du checksum externe hash/nom/chemin dans le nom/champ en trop/lignes, des chemins/lignes
+  manifest invalides, des fichiers manifestes manquants, non-fichiers ou inattendus, des entrees PNG manifest interdites, des tailles/SHA manifest incoherents, des chemins/en-tetes/lignes manifest dupliques, non canoniques ou invalides, du champ executable manifest invalide ou incoherent, du schema/lignes/chemins/formats/chemins unsafe ou non-portables artifacts invalides, du `.summary` externe
+  et des archives tar vides/dangereuses/non supportees, multi-racines ou a mauvaise racine,
+  les verificateurs
+  `verify-support` et `verify-support-archive`, l'index sidecar CSV,
+  `sidecar_critical_status.json`, les deux `result.json` critiques, les CSV de
+  rendu critiques sans les PNG lourds, le status du cache complet, les outils
+  Python diagnostiques, le decodeur VQA sidecar et le diagnostic Pillow.
+  `CHECK_HD_GPU.sh` ecrit `output/hd_graphics_check/index.html`; le rapport
+  courant est `gap` car le renderer OpenGL detecte est
+  `llvmpipe (LLVM 20.1.2, 256 bits)`, le GPU PCI est QXL, aucun
+  `/dev/dri/renderD*` n'est expose et XRandR annonce 0 provider. Le chemin
+  Wine/GDI est force et valide, mais cette session ne prouve pas une
+  acceleration GPU materielle.
 - Les reglages de qualite du jeu sont reappliques au lancement.
 - Les images fixes PCX sont exportees et verifiees en 1920x1080.
-- Un pack MIX PCX 1920x1080 experimental existe pour les 37 PCX de
-  `GLOBAL.MIX`/`LOCAL.MIX`; il n'est pas installe dans les MIX actifs.
-- Un staging de smoke test non destructif peut etre regenere dans
-  `output/fullhd_pcx_runtime_smoke/`.
+- Un pack MIX PCX 1920x1080 experimental a existe dans les rapports de reprise
+  pour les 37 PCX de `GLOBAL.MIX`/`LOCAL.MIX`; il n'est pas installe dans les
+  MIX actifs et le paquet courant ne fournit pas de lanceur PCX direct.
+- Les anciens rapports de staging PCX restent dans `output/fullhd_pcx_runtime_smoke/`
+  si ce dossier est present.
 - Le smoke DOSBox offscreen du staging PCX Full HD tient jusqu'au timeout de
   45s avec stage/ISO/VESA/swap confirmes, lectures tracees des deux MIX Full
   HD, lecture de l'entree PCX cible `LOCAL:0fe8e7df`, et frame SDL 640x480 non
@@ -177,8 +778,9 @@ Runtime gaps: 2
   et dans le sidecar local. `CDCACHE.LST`/`CDCACHE.LS_` ne declarent pas
   `L20_BBI_HD.MIX`; le verrou restant devient le hook ou l'ordre de chargement
   runtime du sidecar.
-  Le writer de fixture WVQA native assemble un payload `FORM/WVQA` CBFZ/VPTZ
-  LCW literal et valide 20/20 frames au redecode.
+  Le writer de fixture WVQA native exacte reconstruit LOCALLNG et MOVIES en
+  byte-identique, avec audit runtime `pass`; c'est le baseline avant de
+  retoucher les frames en HD.
 - La readiness de capture runtime `.tex` est auditee separement: Xvfb et Wine
   sont detectes. L'essai Xvfb/Wine standard atteint le bootstrap (`MMX`), puis
   sort en `exited_1` sur le rendu D3D/pixel-format; une variante

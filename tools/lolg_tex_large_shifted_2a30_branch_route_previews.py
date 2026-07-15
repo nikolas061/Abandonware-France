@@ -13,11 +13,19 @@ from pathlib import Path
 
 from PIL import Image
 
-from export_shp import read_palette
-from export_te_span_previews import render_indexed
+try:
+    from export_shp import read_palette
+    from export_te_span_previews import render_indexed
+    from score_te_raw_layouts import row_score
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    read_palette = None
+    render_indexed = None
+    row_score = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 from lolg_tex_large_shifted_2a30_branch_bounded_family_probe import catalog_payloads, key_for
 from probe_te_span_decode import decode_span
-from score_te_raw_layouts import row_score
 
 
 TARGET_SIZE = (1920, 1080)
@@ -458,6 +466,16 @@ def write_report(
 ) -> tuple[dict[str, str], list[dict[str, str]]]:
     output_dir.mkdir(parents=True, exist_ok=True)
     route_rows = read_csv(routes_path)
+    validation_summary = read_summary(validation_summary_path)
+    if not any(row.get("route_status") == ROUTED_STATUS for row in route_rows):
+        manifest_rows: list[dict[str, str]] = []
+        summary = build_summary(route_rows, manifest_rows, validation_summary)
+        write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(output_dir / "manifest.csv", MANIFEST_FIELDNAMES, manifest_rows)
+        (output_dir / "index.html").write_text(build_html(summary, manifest_rows, output_dir, title), encoding="utf-8")
+        return summary, manifest_rows
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     manifest_rows = build_manifest(
         output_dir,
         route_rows,
@@ -469,7 +487,6 @@ def write_report(
         low,
         high,
     )
-    validation_summary = read_summary(validation_summary_path)
     summary = build_summary(route_rows, manifest_rows, validation_summary)
     write_csv(output_dir / "summary.csv", SUMMARY_FIELDNAMES, [summary])
     write_csv(output_dir / "manifest.csv", MANIFEST_FIELDNAMES, manifest_rows)

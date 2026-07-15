@@ -41,6 +41,15 @@ def _lcw_match_length(data, source, target, limit):
     return length
 
 
+def _lcw_match_length_overlapping(data, source, target, limit):
+    length = 0
+    while length < limit and target + length < len(data):
+        if data[source + length] != data[target + length]:
+            break
+        length += 1
+    return length
+
+
 def _lcw_key(data, offset):
     return (data[offset] << 16) | (data[offset + 1] << 8) | data[offset + 2]
 
@@ -141,6 +150,398 @@ def lcw_compress(source, search_depth=32):
     return bytes(output)
 
 
+def lcw_compress_extended(source, search_depth=96, max_match=0xFFFF):
+    """Encode LCW/Format80 using long copy and fill commands when profitable."""
+
+    data = bytes(source)
+    if not data:
+        return b"\x80"
+
+    output = bytearray()
+    literal = bytearray()
+    recent = {}
+    offset = 0
+
+    def flush_literal():
+        if literal:
+            _emit_lcw_literal(output, literal)
+            literal.clear()
+
+    def remember(start, count):
+        end = min(len(data) - 2, start + count)
+        for pos in range(start, end):
+            key = _lcw_key(data, pos)
+            bucket = recent.setdefault(key, [])
+            bucket.append(pos)
+            if len(bucket) > 160:
+                del bucket[: len(bucket) - 160]
+
+    def fill_length(target):
+        value = data[target]
+        end = min(len(data), target + 0xFFFF)
+        pos = target + 1
+        while pos < end and data[pos] == value:
+            pos += 1
+        return pos - target
+
+    def best_copy(target):
+        if target + 2 >= len(data):
+            return 0, 0, ""
+        candidates = recent.get(_lcw_key(data, target), [])
+        best_length = 0
+        best_source = 0
+        best_kind = ""
+        checked = 0
+        limit = min(0xFFFF, max_match, len(data) - target)
+        for source_pos in reversed(candidates):
+            if source_pos >= target:
+                continue
+            distance = target - source_pos
+            if distance <= 0:
+                continue
+            if checked >= search_depth:
+                break
+            checked += 1
+            if distance <= 0x0FFF:
+                length = _lcw_match_length_overlapping(data, source_pos, target, min(10, limit))
+                if length >= 3 and (length - 2, length) > (best_length - (2 if best_kind == "short" else 3), best_length):
+                    best_length = length
+                    best_source = source_pos
+                    best_kind = "short"
+            if source_pos <= 0xFFFF:
+                length = _lcw_match_length_overlapping(data, source_pos, target, min(64, limit))
+                if length >= 4 and (length - 3, length) > (best_length - (2 if best_kind == "short" else 3), best_length):
+                    best_length = length
+                    best_source = source_pos
+                    best_kind = "absolute"
+                length = _lcw_match_length_overlapping(data, source_pos, target, limit)
+                if length >= 8 and length - 5 > best_length - (2 if best_kind == "short" else 3):
+                    best_length = length
+                    best_source = source_pos
+                    best_kind = "long"
+        return best_length, best_source, best_kind
+
+    while offset < len(data):
+        run_length = fill_length(offset)
+        copy_length, copy_source, copy_kind = best_copy(offset)
+
+        fill_score = run_length - 4 if run_length >= 4 else -1
+        copy_cost = 2 if copy_kind == "short" else 3 if copy_kind == "absolute" else 5
+        copy_score = copy_length - copy_cost if copy_kind else -1
+
+        if fill_score >= copy_score and fill_score >= 0:
+            flush_literal()
+            count = min(run_length, 0xFFFF)
+            output.append(0xFE)
+            output.extend((count & 0xFF, (count >> 8) & 0xFF, data[offset]))
+            remember(offset, count)
+            offset += count
+            continue
+
+        if copy_score >= 0:
+            flush_literal()
+            if copy_kind == "short":
+                distance = offset - copy_source
+                output.append(((copy_length - 3) << 4) | ((distance >> 8) & 0x0F))
+                output.append(distance & 0xFF)
+            elif copy_kind == "absolute":
+                output.append(0xC0 | (copy_length - 3))
+                output.extend((copy_source & 0xFF, (copy_source >> 8) & 0xFF))
+            else:
+                output.append(0xFF)
+                output.extend(
+                    (
+                        copy_length & 0xFF,
+                        (copy_length >> 8) & 0xFF,
+                        copy_source & 0xFF,
+                        (copy_source >> 8) & 0xFF,
+                    )
+                )
+            remember(offset, copy_length)
+            offset += copy_length
+            continue
+
+        literal.append(data[offset])
+        remember(offset, 1)
+        offset += 1
+        if len(literal) == 63:
+            flush_literal()
+
+    flush_literal()
+    output.append(0x80)
+    compact = bytes(output)
+    literal_size = lcw_literal_encoded_size(len(data))
+    if len(compact) >= literal_size:
+        return lcw_compress_literal(data)
+    return compact
+
+
+def lcw_compress_vqa_extended(source, search_depth=96, max_match=0xFFFF):
+    """Encode VQA LCW with the command meanings used by ``lolg_vqa_decode``.
+
+    For non-pointer VQA chunks, the local VQA decoder and original LOCALLNG
+    profiles use 0xFF for fill and 0xFE for long absolute copy. Keep this
+    separate from ``lcw_compress_extended``, which preserves an older local
+    helper dialect.
+    """
+
+    data = bytes(source)
+    if not data:
+        return b"\x80"
+
+    output = bytearray()
+    literal = bytearray()
+    recent = {}
+    offset = 0
+
+    def flush_literal():
+        if literal:
+            _emit_lcw_literal(output, literal)
+            literal.clear()
+
+    def remember(start, count):
+        end = min(len(data) - 2, start + count)
+        for pos in range(start, end):
+            key = _lcw_key(data, pos)
+            bucket = recent.setdefault(key, [])
+            bucket.append(pos)
+            if len(bucket) > 160:
+                del bucket[: len(bucket) - 160]
+
+    def fill_length(target):
+        value = data[target]
+        end = min(len(data), target + 0xFFFF)
+        pos = target + 1
+        while pos < end and data[pos] == value:
+            pos += 1
+        return pos - target
+
+    def best_copy(target):
+        if target + 2 >= len(data):
+            return 0, 0, ""
+        candidates = recent.get(_lcw_key(data, target), [])
+        best_length = 0
+        best_source = 0
+        best_kind = ""
+        checked = 0
+        limit = min(0xFFFF, max_match, len(data) - target)
+        for source_pos in reversed(candidates):
+            if source_pos >= target:
+                continue
+            distance = target - source_pos
+            if distance <= 0:
+                continue
+            if checked >= search_depth:
+                break
+            checked += 1
+            if distance <= 0x0FFF:
+                length = _lcw_match_length_overlapping(data, source_pos, target, min(10, limit))
+                if length >= 3 and (length - 2, length) > (best_length - (2 if best_kind == "short" else 3), best_length):
+                    best_length = length
+                    best_source = source_pos
+                    best_kind = "short"
+            if source_pos <= 0xFFFF:
+                length = _lcw_match_length_overlapping(data, source_pos, target, min(64, limit))
+                if length >= 4 and (length - 3, length) > (best_length - (2 if best_kind == "short" else 3), best_length):
+                    best_length = length
+                    best_source = source_pos
+                    best_kind = "absolute"
+                length = _lcw_match_length_overlapping(data, source_pos, target, limit)
+                if length >= 8 and length - 5 > best_length - (2 if best_kind == "short" else 3):
+                    best_length = length
+                    best_source = source_pos
+                    best_kind = "long"
+        return best_length, best_source, best_kind
+
+    while offset < len(data):
+        run_length = fill_length(offset)
+        copy_length, copy_source, copy_kind = best_copy(offset)
+
+        fill_score = run_length - 4 if run_length >= 4 else -1
+        copy_cost = 2 if copy_kind == "short" else 3 if copy_kind == "absolute" else 5
+        copy_score = copy_length - copy_cost if copy_kind else -1
+
+        if fill_score >= copy_score and fill_score >= 0:
+            flush_literal()
+            count = min(run_length, 0xFFFF)
+            output.append(0xFF)
+            output.extend((count & 0xFF, (count >> 8) & 0xFF, data[offset]))
+            remember(offset, count)
+            offset += count
+            continue
+
+        if copy_score >= 0:
+            flush_literal()
+            if copy_kind == "short":
+                distance = offset - copy_source
+                output.append(((copy_length - 3) << 4) | ((distance >> 8) & 0x0F))
+                output.append(distance & 0xFF)
+            elif copy_kind == "absolute":
+                output.append(0xC0 | (copy_length - 3))
+                output.extend((copy_source & 0xFF, (copy_source >> 8) & 0xFF))
+            else:
+                output.append(0xFE)
+                output.extend(
+                    (
+                        copy_length & 0xFF,
+                        (copy_length >> 8) & 0xFF,
+                        copy_source & 0xFF,
+                        (copy_source >> 8) & 0xFF,
+                    )
+                )
+            remember(offset, copy_length)
+            offset += copy_length
+            continue
+
+        literal.append(data[offset])
+        remember(offset, 1)
+        offset += 1
+        if len(literal) == 63:
+            flush_literal()
+
+    flush_literal()
+    output.append(0x80)
+    compact = bytes(output)
+    literal_size = lcw_literal_encoded_size(len(data))
+    if len(compact) >= literal_size:
+        return lcw_compress_literal(data)
+    return compact
+
+
+def lcw_compress_windowed_pointer(source, search_depth=192, max_match=0xFFFF, base_address=0x8200):
+    """Encode VPTZ-style LCW using the original 64K window commands.
+
+    VQA pointer chunks in the game data are decoded against a 64K rolling
+    window. This variant uses the command meanings handled by
+    ``decode_lcw_windowed_pointer``: 0xFE is a long window copy and 0xFF is a
+    fill. Copy sources are emitted as 16-bit window addresses, so matches must
+    be within the previous 64K of output.
+    """
+
+    data = bytes(source)
+    if not data:
+        return b"\x80"
+
+    output = bytearray()
+    literal = bytearray()
+    recent = {}
+    offset = 0
+
+    def flush_literal():
+        if literal:
+            _emit_lcw_literal(output, literal)
+            literal.clear()
+
+    def remember(start, count):
+        end = min(len(data) - 2, start + count)
+        for pos in range(start, end):
+            key = _lcw_key(data, pos)
+            bucket = recent.setdefault(key, [])
+            bucket.append(pos)
+            if len(bucket) > 512:
+                del bucket[: len(bucket) - 512]
+
+    def fill_length(target):
+        value = data[target]
+        end = min(len(data), target + 0xFFFF)
+        pos = target + 1
+        while pos < end and data[pos] == value:
+            pos += 1
+        return pos - target
+
+    def best_copy(target):
+        if target + 2 >= len(data):
+            return 0, 0, ""
+        candidates = recent.get(_lcw_key(data, target), [])
+        best_length = 0
+        best_source = 0
+        best_kind = ""
+        checked = 0
+        limit = min(0xFFFF, max_match, len(data) - target)
+        for source_pos in reversed(candidates):
+            if source_pos >= target:
+                continue
+            distance = target - source_pos
+            if distance <= 0 or distance > 0x10000:
+                continue
+            if checked >= search_depth:
+                break
+            checked += 1
+            if distance <= 0x0FFF:
+                length = _lcw_match_length_overlapping(data, source_pos, target, min(10, limit))
+                if length >= 3 and (length - 2, length) > (best_length - (2 if best_kind == "short" else 3), best_length):
+                    best_length = length
+                    best_source = source_pos
+                    best_kind = "short"
+            length = _lcw_match_length_overlapping(data, source_pos, target, min(64, limit))
+            if length >= 4 and (length - 3, length) > (best_length - (2 if best_kind == "short" else 3), best_length):
+                best_length = length
+                best_source = source_pos
+                best_kind = "window"
+            length = _lcw_match_length_overlapping(data, source_pos, target, limit)
+            if length >= 8 and length - 5 > best_length - (2 if best_kind == "short" else 3):
+                best_length = length
+                best_source = source_pos
+                best_kind = "long_window"
+        return best_length, best_source, best_kind
+
+    while offset < len(data):
+        run_length = fill_length(offset)
+        copy_length, copy_source, copy_kind = best_copy(offset)
+
+        fill_score = run_length - 4 if run_length >= 4 else -1
+        copy_cost = 2 if copy_kind == "short" else 3 if copy_kind == "window" else 5
+        copy_score = copy_length - copy_cost if copy_kind else -1
+
+        if fill_score >= copy_score and fill_score >= 0:
+            flush_literal()
+            count = min(run_length, 0xFFFF)
+            output.append(0xFF)
+            output.extend((count & 0xFF, (count >> 8) & 0xFF, data[offset]))
+            remember(offset, count)
+            offset += count
+            continue
+
+        if copy_score >= 0:
+            flush_literal()
+            if copy_kind == "short":
+                distance = offset - copy_source
+                output.append(((copy_length - 3) << 4) | ((distance >> 8) & 0x0F))
+                output.append(distance & 0xFF)
+            elif copy_kind == "window":
+                output.append(0xC0 | (copy_length - 3))
+                source = (base_address + copy_source) & 0xFFFF
+                output.extend((source & 0xFF, (source >> 8) & 0xFF))
+            else:
+                output.append(0xFE)
+                source = (base_address + copy_source) & 0xFFFF
+                output.extend(
+                    (
+                        copy_length & 0xFF,
+                        (copy_length >> 8) & 0xFF,
+                        source & 0xFF,
+                        (source >> 8) & 0xFF,
+                    )
+                )
+            remember(offset, copy_length)
+            offset += copy_length
+            continue
+
+        literal.append(data[offset])
+        remember(offset, 1)
+        offset += 1
+        if len(literal) == 63:
+            flush_literal()
+
+    flush_literal()
+    output.append(0x80)
+    compact = bytes(output)
+    literal_size = lcw_literal_encoded_size(len(data))
+    if len(compact) >= literal_size:
+        return lcw_compress_literal(data)
+    return compact
+
+
 def lcw_decompress(source, expected_size=None):
     src = memoryview(source)
     sp = 0
@@ -156,10 +557,12 @@ def lcw_decompress(source, expected_size=None):
     def copy_from(position, count):
         if position < 0:
             raise ValueError("LCW copy points before output buffer")
-        for i in range(count):
-            if position + i >= len(dest):
+        cursor = position
+        for _ in range(count):
+            if cursor >= len(dest):
                 raise ValueError("LCW copy points beyond output buffer")
-            dest.append(dest[position + i])
+            dest.append(dest[cursor])
+            cursor += 1
 
     while sp < len(src):
         command = src[sp]

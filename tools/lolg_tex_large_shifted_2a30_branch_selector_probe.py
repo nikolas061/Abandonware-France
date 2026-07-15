@@ -10,7 +10,16 @@ import os
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from analyze_te_pcx_payloads import bounded_payload, load_rows
+try:
+    from analyze_te_pcx_payloads import bounded_payload, load_rows
+    from trace_te_stream import trace_payload
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    bounded_payload = None
+    load_rows = None
+    trace_payload = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 from lolg_tex_large_shifted_2a30_branch_trace_probe import (
     classify_fingerprint,
     fmt_ratio,
@@ -22,8 +31,6 @@ from lolg_tex_large_shifted_2a30_branch_bounded_family_probe import (
     read_csv,
     write_csv,
 )
-from trace_te_stream import trace_payload
-
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_selector_probe")
 DEFAULT_RENDERER_CANDIDATES = Path("output/tex_large_shifted_2a30_branch_renderer_probe/candidates.csv")
@@ -531,14 +538,43 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[str]]:
     trace_summary = (read_csv(args.trace_summary) or [{}])[0]
     trace_candidates = read_csv(args.trace_candidates)
     family_rows = read_csv(args.bounded_family)
-    if not renderer_rows:
+    if not renderer_rows and renderer_summary.get("candidate_rows") not in ("", "0"):
         issues.append("missing_renderer_candidates")
     if not trace_summary:
         issues.append("missing_trace_summary")
-    if not trace_candidates:
+    if not trace_candidates and trace_summary.get("trace_candidate_rows") not in ("", "0"):
         issues.append("missing_trace_candidates")
-    if not family_rows:
+    if not family_rows and trace_summary.get("bounded_family_rows") not in ("", "0"):
         issues.append("missing_family_rows")
+    if not renderer_rows and not trace_candidates and not family_rows:
+        trace_rows: list[dict[str, str]] = []
+        prefix_rows: list[dict[str, str]] = []
+        support_any: set[str] = set()
+        target_payload = b""
+        marker_pos = -1
+        fingerprints = fingerprint_rows(trace_rows)
+        summary = build_summary(
+            renderer_summary,
+            trace_summary,
+            trace_rows,
+            prefix_rows,
+            support_any,
+            target_payload,
+            marker_pos,
+            args.near_delta,
+            issues,
+        )
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "renderer_trace.csv", TRACE_FIELDNAMES, trace_rows)
+        write_csv(args.output / "fingerprints.csv", FINGERPRINT_FIELDNAMES, fingerprints)
+        write_csv(args.output / "prefixes.csv", PREFIX_FIELDNAMES, prefix_rows)
+        (args.output / "index.html").write_text(
+            build_html(summary, fingerprints, trace_rows, prefix_rows, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     target_key = key_for(trace_summary.get("target_archive_tag", ""), trace_summary.get("target_pcx_name", ""))
     payloads = catalog_payloads(args.catalog)
     target_payload = payloads.get(target_key, b"")

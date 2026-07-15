@@ -1,0 +1,40 @@
+Pack LOLG HD dgVoodoo safevqa Windows/Linux
+===========================================
+
+Ce pack contient les fichiers necessaires pour lancer le profil safevqa:
+
+  ./LOLG_HD.sh wine-dgvoodoo-win10-safevqa
+
+Linux
+-----
+
+Prerequis:
+- Wine
+- bash
+- xdotool conseille pour les profils qui redimensionnent les fenetres
+
+Commande:
+
+  chmod +x *.sh
+  ./LOLG_HD.sh wine-dgvoodoo-win10-safevqa
+
+Windows
+-------
+
+Commande:
+
+  RUN_HD_WINDOWS_DGVOODOO_SAFEVQA.bat
+
+Le lanceur Windows cree un runtime dans:
+
+  output\lolg95_dgvoodoo_win10_safevqa_windows_runtime\WESTWOOD\LOLG
+
+Le profil safevqa garde en originaux les VQA critiques, les monstres, les
+animations de niveau et les effets animes. Les autres MIX disponibles dans
+mod_mix_vqa_fullhd sont utilises en HD.
+
+Si le jeu ne demarre pas sous Windows recent, essayer aussi:
+- clic droit sur LOLG95.EXE dans le runtime
+- Propriétés
+- Compatibilité
+- Windows 95 ou Windows 98

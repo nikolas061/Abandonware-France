@@ -50,13 +50,36 @@ def read_entries(path: Path) -> tuple[int, list[tuple[int, int, int]]]:
     return table_end, entries
 
 
-def extract(path: Path, output_dir: Path) -> None:
+def parse_entries(raw_entries: list[str] | None) -> set[int] | None:
+    if not raw_entries:
+        return None
+    selected: set[int] = set()
+    for raw in raw_entries:
+        for part in raw.split(","):
+            part = part.strip()
+            if not part:
+                continue
+            if "-" in part:
+                raw_start, raw_end = part.split("-", 1)
+                start = int(raw_start, 0)
+                end = int(raw_end, 0)
+                if end < start:
+                    raise ValueError(f"invalid entry range: {part}")
+                selected.update(range(start, end + 1))
+            else:
+                selected.add(int(part, 0))
+    return selected
+
+
+def extract(path: Path, output_dir: Path, selected_entries: set[int] | None, flat: bool) -> None:
     data = path.read_bytes()
     table_end, entries = read_entries(path)
-    target_dir = output_dir / path.stem
+    target_dir = output_dir if flat else output_dir / path.stem
     target_dir.mkdir(parents=True, exist_ok=True)
 
     for index, (file_id, offset, size) in enumerate(entries):
+        if selected_entries is not None and index not in selected_entries:
+            continue
         payload = data[table_end + offset : table_end + offset + size]
         ext = detect_extension(payload)
         name = f"{index:04d}_{file_id:08x}_{size}.{ext}"
@@ -67,10 +90,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("archives", nargs="+", type=Path)
     parser.add_argument("-o", "--output", type=Path, default=Path("extracted_mix"))
+    parser.add_argument("--entries", action="append", help="Entry index/range list, e.g. 0,2,19-20")
+    parser.add_argument("--flat", action="store_true", help="Write directly into output instead of output/archive_stem")
     args = parser.parse_args()
 
+    selected_entries = parse_entries(args.entries)
     for archive in args.archives:
-        extract(archive, args.output)
+        extract(archive, args.output, selected_entries, args.flat)
 
 
 if __name__ == "__main__":

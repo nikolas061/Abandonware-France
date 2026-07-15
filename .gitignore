@@ -10,6 +10,19 @@ mt32-roms/
 
 # Generated reports and exported assets
 output/
+mod_mix_vqa_fullhd/
+extracted/
+LOLG_HD_PATCH_runtime_*/
+previews_*/
+reports/*
+!reports/
+!reports/locallng_vqa_header_lcw_gap.md
+!reports/lolg95_mix_hd_engine_limits.md
+!reports/vqa_contract_runtime_gate.md
+!reports/vqa_external_sidecar_runtime_check.md
+
+# Local archives / downloaded vendor bundles
+*.zip
 
 # Python/runtime caches
 __pycache__/
@@ -18,6 +31,7 @@ tools/__pycache__/
 
 # Local captures and temporary files
 capture/
+backtrace*.txt
 *.log
 *.tmp
 *.bak

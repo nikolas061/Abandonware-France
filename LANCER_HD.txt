@@ -1,0 +1,189 @@
+Lands of Lore II - Patch HD local
+=================================
+
+Commande principale:
+
+  ./LOLG_HD.sh
+
+Cette commande lance le chemin Wine HD en 1920x1080. Elle utilise le stage
+non destructif `output/lolg95_fullhd_wine_runtime/`: les fichiers originaux
+dans `C/LOLG/` ne sont pas remplaces. `LOCALLNG.MIX` reste original car sa
+version regeneree plante le lecteur du jeu.
+
+Avant de lancer, verifier l'etat:
+
+  ./LOLG_HD.sh status
+
+Etat attendu actuellement:
+
+  LOLG HD status: pass
+  Ready to launch: yes
+  VQA MIX pack: 66/66 files
+  Manifest verify: 119 rows, gaps=0
+  Resolution check: 4/4 checks, gaps=0
+  Wine smoke 1920x1080: diagnostic, non bloquant
+  Wine smoke 1280x1024: diagnostic, non bloquant
+  Runtime Wine HD: not active
+  Hardware GPU: not proven
+
+Important: `Hardware GPU: not proven` ne veut pas dire que le patch HD est
+casse. Dans cette session, Wine voit le rendu logiciel `llvmpipe` au lieu
+d'une vraie carte GPU. Le paquet HD passe quand meme ses controles de release.
+
+Raccourcis graphiques dans le dossier `desktop/`:
+
+  desktop/lolg-hd.desktop          Lance Wine HD en 1920x1080
+  desktop/lolg-hd-status.desktop   Affiche le status
+  desktop/lolg-hd-repair.desktop   Stoppe, prepare et recontrole
+
+Selon l'environnement de bureau, il peut falloir autoriser le lancement du
+raccourci au premier clic. Les raccourcis ouvrent un terminal pour garder les
+messages visibles. Pour les ajouter au menu utilisateur Linux, lancer d'abord
+`./LOLG_HD.sh install-desktop --dry-run`, puis sans `--dry-run` si le chemin
+affiche est correct. Pour retirer les raccourcis du menu, lancer d'abord
+`./LOLG_HD.sh uninstall-desktop`; rien n'est supprime sans `--confirm`.
+
+Commandes utiles:
+
+  ./LOLG_HD.sh              Lance Wine HD en 1920x1080, LOCALLNG original
+  ./LOLG_HD.sh wine-1280    Lance Wine HD en 1280x1024, LOCALLNG original
+  ./LOLG_HD.sh wine-locallng-hd-1440
+                              Lance Wine 1440x1080 avec LOCALLNG/MOVIES originaux
+  ./LOLG_HD.sh sidecar-hd   Lance le jeu safevqa + player web VQA HD
+  ./LOLG_HD.sh sidecar-test Decode une petite VQA HD externe sans lancer Wine
+  ./LOLG_HD.sh sidecar-critical-test
+                             Decode 1 frame LOCALLNG + MOVIES HD externe
+  ./LOLG_HD.sh sidecar-critical-warmup
+                             Decode toutes les frames critiques LOCALLNG + MOVIES sidecar
+  ./LOLG_HD.sh sidecar-critical-status
+                             Resume l'etat critique LOCALLNG + MOVIES sidecar
+  ./LOLG_HD.sh wine-dgvoodoo-win10-safevqa-movies-safe
+                             Diagnostic bloque: MOVIES.MIX safe 892x560 page fault en Wine
+  ./LOLG_HD.sh status       Resume l'etat sans relancer Wine et indique si Wine HD tourne
+                             Affiche aussi si LOCALLNG/MOVIES sidecar critiques sont prets
+  ./LOLG_HD.sh repair       Stoppe, prepare et recontrole sans lancer le jeu
+  ./LOLG_HD.sh stop         Arrete le runtime Wine HD du projet
+  ./LOLG_HD.sh check        Controle release complet et rafraichit manifeste/verif
+  ./LOLG_HD.sh vqa-plan-movies-safe
+                             Planifie les 28 entrees MOVIES sous le seuil stable mesure
+  ./LOLG_HD.sh vqa-contract-build-movies-safe
+                             Reconstruit MOVIES 0-27 en 892x560 sous ce seuil
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-smoke
+                             Teste le meme writer sur MOVIES entree 4 seulement
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-long0
+                             Teste MOVIES entree longue 0 en 892x560
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-long1
+                             Teste MOVIES entree longue 1 en 892x560
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-long2
+                             Teste MOVIES entree longue 2 en 892x560
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-long3
+                             Teste MOVIES entree longue 3 en 892x560
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-short
+                             Teste MOVIES entrees 5-18 en lot court valide
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-mid
+                             Teste MOVIES entrees 19-20 en lot moyen valide
+  ./LOLG_HD.sh vqa-contract-build-movies-safe-tail
+                             Teste MOVIES entrees 21-27 en lot court valide
+  ./LOLG_HD.sh smoke        Test court du runtime Wine HD
+  ./LOLG_HD.sh resolutions  Verifie 1920/1440/1280 et le rejet 640x400 sans lancer Wine
+  ./LOLG_HD.sh gpu          Diagnostic rendu/GPU
+  ./LOLG_HD.sh manifest     Manifeste release leger, sans copier les 19 Go
+  ./LOLG_HD.sh verify-manifest  Verifie le manifeste sans hasher les gros MIX
+  ./LOLG_HD.sh verify-support   Verifie BUNDLE_MANIFEST.csv du paquet support
+  ./LOLG_HD.sh verify-support-archive
+                             Verifie le resume/SHA256 puis extrait l'archive support tar.gz
+  ./LOLG_HD.sh install-desktop --dry-run  Previsualise l'installation menu
+  ./LOLG_HD.sh uninstall-desktop  Previsualise la suppression menu
+  ./LOLG_HD.sh support      Collecte un diagnostic leger
+  ./LOLG_HD.sh notice       Affiche cette notice
+
+Si tu entends le son mais pas l'image:
+
+  ./LOLG_HD.sh repair
+  ./LOLG_HD.sh status
+  ./LOLG_HD.sh check
+  ./LOLG_HD.sh wine --dry-run
+
+Le lanceur Wine HD exclut dgVoodoo du stage par defaut et force le chemin Wine DirectDraw/GDI.
+Le mode explicite `./LOLG_HD.sh wine-locallng-hd-dgvoodoo` remet les fichiers
+dgVoodoo locaux dans le stage.
+Il demande la resolution 1920x1080, 1440x1080 ou 1280x1024 via le bureau virtuel Wine
+et maintient le bureau Wine plus la fenetre du jeu avec `xdotool`.
+Les autres tailles, dont 640x400, sont refusees par defaut;
+`--allow-unsupported-resolution` sert uniquement aux essais volontaires.
+
+VQA critiques:
+
+  Les remplacements in-engine de LOCALLNG.MIX et MOVIES.MIX plantent encore
+  avec Application Error, meme pour des variantes LOCALLNG 640x400 compactes.
+  Pour voir ces VQA en HD sans casser le jeu, utiliser:
+
+    ./LOLG_HD.sh sidecar-hd
+
+  Ce mode garde LOCALLNG.MIX/MOVIES.MIX originaux dans le jeu et affiche les
+  VQA HD dans un player web externe.
+
+  Candidate diagnostic suivante pour LOCALLNG:
+
+    ./LOLG_HD.sh vqa-contract-build-locallng-1280-padded
+    LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-locallng
+
+  Fallback 896x560:
+
+    ./LOLG_HD.sh vqa-contract-build-locallng-896-padded
+    LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-locallng-896-padded
+
+  La candidate 1280 passe les audits locaux et le gate LCW cible, mais reste bloquee par
+  defaut tant qu'un test Wine reel ne prouve pas qu'elle evite l'Application Error.
+  Controle utile: LOCALLNG reecrit depuis frames natives 640x400 passe un probe
+  Wine court sans exception; le crash vise les frames HD/transformees, pas tout
+  WVQA nouvellement ecrit. Les paliers LOCALLNG natifs restent sans exception
+  jusqu'a 1024x640 en probe court; MOVIES reste le verrou dur a 896x560.
+
+  Probe MOVIES CBPZ/LCW commun:
+
+    ./LOLG_HD.sh vqa-contract-build-movies-cbpz-padded
+
+  Ce probe recompresse seulement les CBPZ des entrees 0/19/20 et passe les
+  gates locaux LCW + runtime. Le test Wine reel ouvre seulement un bureau Wine
+  bref, sans Application Error visible mais sans fenetre de jeu. Il reste donc
+  diagnostic.
+
+  Lanceur diagnostic correspondant:
+
+    LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-movies-noroom
+
+  Isolation MOVIES seul, avec LOCALLNG original:
+
+    LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-movies-noroom-only
+
+  Ce mode atteint LOLG95.EXE, mais Wine loggue `free(): invalid pointer`,
+  demarre son debugger, et la capture reste noire. Le meme test avec
+  `--no-dxvk` donne le meme resultat.
+  Les tests single-entry confirment que plusieurs entrees MOVIES HD isolees
+  declenchent la meme assertion; ce n'est pas une seule entree corrompue. Le
+  controle entree 4 reecrite en taille native 320x400 passe et ne declenche pas
+  l'assertion dans un probe Wine court. Les paliers restent sans `free()`
+  jusqu'a 892x560; 896x560 declenche `free(): invalid pointer`. Le verrou vise
+  donc un budget VQA tres proche de 500k pixels/frame.
+  Pair diagnostic sous seuil:
+
+    LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-custom-pair --no-dxvk
+
+  Ce mode combine LOCALLNG 1024x640 et MOVIES entree 4 en 892x560; il ne
+  declenche pas `free()` en probe court, mais reste partiel pour MOVIES.
+
+Diagnostic a collecter si besoin:
+
+  ./LOLG_HD.sh support
+
+Ce paquet support rafraichit le manifeste, sa verification et les resolutions avant copie. Il inclut `SUPPORT_SUMMARY.txt` avec `ready_to_launch=1` recalcule depuis les rapports copies, `README_SUPPORT.txt`, `BUNDLE_MANIFEST.csv` avec schema exact `path,size,sha256,executable`, lignes CSV bien formees, chemins relatifs sans antislash et sans PNG lourd, `VERIFY_SUPPORT.sh`, `output/hd_support_bundle.tar.gz.sha256`, `output/hd_support_bundle.tar.gz.summary` avec cles exactes, `output/hd_support_bundle.tar.gz.verify.sh`, `output/hd_support_bundle.tar.gz.artifacts.csv` avec 4 lignes exactes et schema `path,size,sha256,executable` pour garder ensemble les 4 fichiers externes, les verificateurs `verify-support` et `verify-support-archive`, le status, le check release, le manifeste, la verification de manifeste, le rapport resolutions, les rapports Wine 1920x1080/1280x1024, le rapport GPU, l'index sidecar CSV, les CSV de rendu critiques, le status sidecar critique LOCALLNG/MOVIES, le champ `sidecar_critical_full_ready`, les scripts de lancement, les outils Python de diagnostic, le decodeur VQA sidecar et le diagnostic Pillow.
+
+Rapports utiles:
+
+  output/hd_status/index.html
+  output/hd_release_check/index.html
+  output/hd_release_manifest/index.html
+  output/hd_release_manifest_verify/index.html
+  output/hd_resolution_check/index.html
+  output/hd_graphics_check/index.html

@@ -20,7 +20,13 @@ from lolg_tex_large_shifted_2a30_branch_bounded_family_probe import (
     safe_name,
     write_csv,
 )
-from trace_te_stream import trace_payload
+try:
+    from trace_te_stream import trace_payload
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    trace_payload = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_trace_probe")
@@ -466,10 +472,26 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[str]]:
     candidate_rows = read_csv(args.bounded_candidates)
     if not bounded_summary:
         issues.append("missing_bounded_summary")
-    if not family_rows:
+    if not family_rows and bounded_summary.get("family_rows") not in ("", "0"):
         issues.append("missing_bounded_family_rows")
-    if not candidate_rows:
+    if not candidate_rows and bounded_summary.get("candidate_rows") not in ("", "0"):
         issues.append("missing_bounded_candidate_rows")
+    if not candidate_rows:
+        trace_rows: list[dict[str, str]] = []
+        action_rows: list[dict[str, str]] = []
+        event_rows: list[dict[str, str]] = []
+        summary = build_summary(bounded_summary, family_rows, trace_rows, action_rows, event_rows, issues)
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "candidates.csv", CANDIDATE_FIELDNAMES, trace_rows)
+        write_csv(args.output / "actions.csv", ACTION_FIELDNAMES, action_rows)
+        write_csv(args.output / "events.csv", EVENT_FIELDNAMES, event_rows)
+        (args.output / "index.html").write_text(
+            build_html(summary, trace_rows, action_rows, issues, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     payloads = catalog_payloads(args.catalog, family_payload_rows(family_rows))
 
     trace_rows: list[dict[str, str]] = []

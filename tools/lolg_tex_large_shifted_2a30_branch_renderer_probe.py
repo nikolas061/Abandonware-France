@@ -10,10 +10,22 @@ import json
 import os
 from pathlib import Path
 
-from export_shp import read_palette
-from export_te_span_previews import make_sheet, render_indexed, source_payload
 from probe_te_span_decode import decode_span
-from score_te_raw_layouts import load_rows, row_score
+
+try:
+    from export_shp import read_palette
+    from export_te_span_previews import make_sheet, render_indexed, source_payload
+    from score_te_raw_layouts import load_rows, row_score
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    read_palette = None
+    make_sheet = None
+    render_indexed = None
+    source_payload = None
+    load_rows = None
+    row_score = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_renderer_probe")
@@ -492,6 +504,20 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[dict[st
     args.output.mkdir(parents=True, exist_ok=True)
     paths = read_csv(args.decoder_paths)
     alignments = read_csv(args.alignments)
+    if not paths:
+        candidates: list[dict[str, str]] = []
+        issues: list[str] = []
+        sheet_path = args.output / "sheet.png"
+        summary = build_summary(paths, candidates, sheet_path, issues, args.min_clear_improvement)
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "candidates.csv", CANDIDATE_FIELDNAMES, candidates)
+        (args.output / "index.html").write_text(
+            build_html(summary, candidates, issues, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, candidates, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     candidates, sheet_entries, issues = build_candidates(
         paths,
         alignments,

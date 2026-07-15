@@ -10,7 +10,16 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from analyze_te_pcx_payloads import bounded_payload, load_rows
+try:
+    from analyze_te_pcx_payloads import bounded_payload, load_rows
+    from score_te_raw_layouts import row_score
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    bounded_payload = None
+    load_rows = None
+    row_score = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 from lolg_tex_large_shifted_2a30_branch_bounded_family_probe import float_text
 from lolg_tex_large_shifted_2a30_branch_singleton_header_probe import (
     int_text,
@@ -21,8 +30,6 @@ from lolg_tex_large_shifted_2a30_branch_singleton_header_probe import (
     write_csv,
 )
 from probe_te_span_decode import decode_span
-from score_te_raw_layouts import row_score
-
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_header_start_probe")
 DEFAULT_HEADER_RECORDS = Path("output/tex_large_shifted_2a30_branch_singleton_header_probe/records.csv")
@@ -509,12 +516,29 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[str]]:
     records = read_csv(args.header_records)
     header_summary = (read_csv(args.header_summary) or [{}])[0]
     selector_summary = (read_csv(args.selector_summary) or [{}])[0]
-    if not records:
+    if not records and header_summary.get("signature_rows") not in ("", "0"):
         issues.append("missing_header_records")
     if not header_summary:
         issues.append("missing_header_summary")
     if not selector_summary:
         issues.append("missing_selector_summary")
+    if header_summary.get("signature_rows") in ("", "0"):
+        candidates: list[dict[str, str]] = []
+        formula_bests: list[dict[str, str]] = []
+        groups: list[dict[str, str]] = []
+        target_tail0 = 0
+        summary = build_summary(header_summary, selector_summary, candidates, formula_bests, groups, target_tail0, issues)
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "formula_candidates.csv", CANDIDATE_FIELDNAMES, candidates)
+        write_csv(args.output / "formula_bests.csv", FORMULA_BEST_FIELDNAMES, formula_bests)
+        write_csv(args.output / "groups.csv", GROUP_FIELDNAMES, groups)
+        (args.output / "index.html").write_text(
+            build_html(summary, groups, formula_bests, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     target = next((row for row in records if row.get("is_target") == "yes"), {})
     if not target:
         issues.append("missing_target_header_record")

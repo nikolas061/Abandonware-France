@@ -1,18 +1,59 @@
-Pour lancer Lands of Lore 2 en Full HD:
+Pour lancer Lands of Lore 2 avec le patch HD local:
 
-1/ Mettez les droits de lecture, ecriture et execution sur l'executable RUN_HD.sh.
+1/ Ouvrez un terminal dans ce dossier.
 
-2/ Ouvrez un terminal dans ce dossier et tapez la commande suivante:
+2/ Verifiez l'etat du paquet HD:
+
+./LOLG_HD.sh status
+
+Cette commande indique aussi si un runtime Wine HD est encore actif et rafraichit la verification du manifeste et des resolutions.
+
+Vous pouvez aussi utiliser les raccourcis graphiques:
+
+desktop/lolg-hd.desktop
+desktop/lolg-hd-status.desktop
+desktop/lolg-hd-repair.desktop
+
+Si la ligne indique "Ready to launch: yes", lancez le jeu:
+
+./LOLG_HD.sh
+
+Le lancement Wine garde LOCALLNG.MIX original; sa version regeneree plante le
+lecteur du jeu. Les autres MIX HD restent actifs.
+
+Autres commandes utiles:
+
+./LOLG_HD.sh wine-1280    lance Wine HD en 1280x1024, LOCALLNG original
+./LOLG_HD.sh sidecar-hd   lance le jeu safevqa + player web VQA HD
+./LOLG_HD.sh repair       stoppe, prepare et recontrole sans lancer le jeu
+./LOLG_HD.sh stop         arrete le runtime Wine HD du projet
+./LOLG_HD.sh check        controle release complet, sidecar dry-run, manifeste/verif
+./LOLG_HD.sh resolutions  verifie 1920/1280 et le rejet 640x400 sans lancer Wine
+./LOLG_HD.sh gpu          diagnostic rendu/GPU
+./LOLG_HD.sh manifest     manifeste release leger
+./LOLG_HD.sh verify-manifest  verifie le manifeste sans hasher les gros MIX
+./LOLG_HD.sh install-desktop --dry-run  previsualise installation menu
+./LOLG_HD.sh uninstall-desktop  previsualise suppression menu
+./LOLG_HD.sh support      collecte diagnostic leger
+./LOLG_HD.sh notice       affiche la notice courte
+
+Les resolutions Wine validees sont 1920x1080, 1440x1080 et 1280x1024; 640x400 est refuse par defaut.
+
+Les VQA critiques LOCALLNG/MOVIES en remplacement direct plantent encore avec
+Application Error. Pour les voir en HD, utiliser le mode sidecar-hd: le jeu
+garde les MIX critiques originaux et le player web affiche les frames HD.
+
+Candidate diagnostic LOCALLNG 1280 paddee:
+
+./LOLG_HD.sh vqa-contract-build-locallng-1280-padded
+LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1 ./LOLG_HD.sh wine-vqa-contract-locallng
+
+Elle passe les audits locaux et le gate LCW cible, mais elle reste volontairement
+bloquee sans override tant qu'un test Wine reel ne prouve pas qu'elle evite
+l'Application Error.
+
+La notice moderne complete est dans LANCER_HD.txt.
+
+Le vieux lanceur DOSBox HD reste disponible avec:
 
 ./RUN_HD.sh
-
-Le lanceur Full HD force DOSBox en 1920x1080, sortie OpenGL, et reactive les
-reglages High du jeu au demarrage.
-
-Pour lancer la version classique, utilisez:
-
-./RUN.sh
-
-Si votre distribution le permet, clic droit sur RUN_HD.sh puis "executer comme
-un programme" ou "ouvrir dans un terminal".
-

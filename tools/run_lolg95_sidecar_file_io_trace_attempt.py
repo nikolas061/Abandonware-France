@@ -497,13 +497,17 @@ def run_attempt(args: argparse.Namespace) -> dict[str, str]:
         )
 
     runtime_args = args.runtime_arg or ["-CD", r"D:\WESTWOOD\LOLG"]
-    game_command = [
-        wine or "wine",
-        "explorer",
-        f"/desktop={args.wine_desktop}",
-        runtime_command_path(args.runtime_executable, args.cwd),
-        *runtime_args,
-    ]
+    runtime_command = args.runtime_command or runtime_command_path(args.runtime_executable, args.cwd)
+    if args.direct:
+        game_command = [wine or "wine", runtime_command, *runtime_args]
+    else:
+        game_command = [
+            wine or "wine",
+            "explorer",
+            f"/desktop={args.wine_desktop}",
+            runtime_command,
+            *runtime_args,
+        ]
     session_status = "dry_run" if args.dry_run else "not_started"
     attach_pid = ""
     attach_pid_source = ""
@@ -832,6 +836,7 @@ def main() -> None:
     parser.add_argument("--targets", type=Path, default=DEFAULT_TARGETS)
     parser.add_argument("--expected-ids", type=Path, default=DEFAULT_EXPECTED_IDS)
     parser.add_argument("--runtime-executable", type=Path, default=Path("LOLG95.EXE"))
+    parser.add_argument("--runtime-command", default="")
     parser.add_argument("--runtime-arg", action="append", default=[])
     parser.add_argument("--cwd", type=Path, default=Path.cwd())
     parser.add_argument("--wineprefix", type=Path, required=True)
@@ -839,6 +844,7 @@ def main() -> None:
     parser.add_argument("--winedbg", default="")
     parser.add_argument("--winedebug", default="-all")
     parser.add_argument("--wine-desktop", default="LOLG,1280x1024")
+    parser.add_argument("--direct", action="store_true")
     parser.add_argument("--startup-wait", type=int, default=35)
     parser.add_argument("--info-timeout", type=int, default=12)
     parser.add_argument("--attach-timeout", type=int, default=120)

@@ -1,16 +1,236 @@
 # Full HD / Texture Notes
 
-This package now has three DOSBox rendering paths:
+## Current recovery note - 2026-07-08
 
+Current launcher/support state verified in this checkout:
+
+```text
+./LOLG_HD.sh status
+LOLG HD status: pass
+Ready to launch: yes
+Release check: pass, 120 checks pass + 6 info / 126, 0 gaps
+Manifest verify: 105 pass + 43 info / 148 rows, 0 gaps
+Resolution check: 4 pass / 4 checks, 0 gaps
+Sidecar critical cache: LOCALLNG 237/237 frames, MOVIES 75/75 frames
+Support archive verify: pass, artifacts manifest pass
+```
+
+The older dashboard/audit reports for the full regenerated `.tex` and all-frame
+VQA pack are historical evidence when present; in this recovered checkout they
+are non-blocking `info` rows in `./LOLG_HD.sh check`. The current playable HD
+path is proven by the release/status/support gates above and by the sidecar cache
+rather than by direct in-engine critical VQA replacement.
+
+Current `.tex` large rejected review entry point:
+
+```text
+output/tex_large_rejected_candidate_review/index.html
+```
+
+This review consolidates the two shifted-marker candidates and the LLSE candidate. It is a review queue, not an automatic decoder promotion. The exact/partial `.tex` reports through `output/tex_gap_frontier_report/index.html` have also been regenerated.
+
+The easiest user entry point is `./LOLG_HD.sh`. The default Wine path starts at
+1920x1080 with the original `LOCALLNG.MIX`. The recommended path for the
+critical HD VQA work is now `./LOLG_HD.sh sidecar-hd`: the game stays on the
+stable safevqa runtime while the external player shows the requested VQA frames
+in 1920x1080. Direct in-engine `LOCALLNG.MIX` and `MOVIES.MIX` HD replacements
+remain diagnostic only because they still reach an `Application Error` in Wine.
+
+This package now has a unified entry point, three local desktop shortcuts, the
+Wine stable path, the VQA sidecar path, and older DOSBox/gamescope diagnostics:
+
+- `desktop/lolg-hd.desktop`, `desktop/lolg-hd-status.desktop`, and
+  `desktop/lolg-hd-repair.desktop`: GUI shortcuts that run through
+  `RUN_HD_DESKTOP.sh` with a visible terminal.
+- `LOLG_HD.sh`: unified launcher/check wrapper. Default command is Wine Full HD
+  1920x1080; use `./LOLG_HD.sh help` for the full command list.
+- `PACK_HD_RELEASE.sh`: lightweight release manifest generator. It records the
+  expected scripts, reports, 66 VQA MIX files, sizes, and small-file SHA256s
+  without copying the 19 GB VQA pack by default.
+- `VERIFY_HD_MANIFEST.sh`: verifies that manifest without hashing large MIX
+  files unless a SHA256 is already recorded for a row.
+- `tools/lolg_hd_resolution_check.py`: writes `output/hd_resolution_check/`
+  by dry-running the Wine launcher for 1920x1080, 1440x1080, 1280x1024, and rejected 640x400.
 - `RUN.sh`: original DOSBox launcher, forced to 1920x1080 fullscreen and 16:9 stretch.
 - `RUN_HD.sh`: DOSBox HD launcher. It reapplies the game quality settings,
-  forces the DOSBox config back to 1920x1080 OpenGL stretch output, fixes the
-  local CD image mount path, and starts the bundled `dosbox` binary.
-- `RUN_HD_PCX_FULLHD.sh`: non-destructive PCX Full HD runtime launcher. It
-  stages `output/fullhd_pcx_runtime_launch/`, copies
-  `mod_mix_pcx_fullhd/GLOBAL.MIX` and `mod_mix_pcx_fullhd/LOCAL.MIX` into that
-  staged C drive, symlinks the remaining game files, and starts DOSBox against
-  the staged config.
+  forces the DOSBox config back to 1920x1080 output, fixes the local CD image
+  mount path, and starts the bundled `dosbox` binary.
+- `RUN_HD_WINE.sh`: non-destructive LOLG95 Wine launcher. It stages
+  `output/lolg95_fullhd_wine_runtime/`, overlays the VQA MIX archives from
+  `mod_mix_vqa_fullhd/` except `LOCALLNG.MIX` (kept original because regenerated
+  LOCALLNG crashes the game reader), excludes local dgVoodoo DLLs/config by
+  default, sets the Wine DirectDraw/GDI registry keys, and keeps the Wine/game windows at
+  `LOLG_HD_RESOLUTION` (`1920x1080` by default, `1440x1080` and `1280x1024` supported) with
+  `xdotool` when available. It rejects unverified sizes such as 640x400 by
+  default unless `--allow-unsupported-resolution` is passed deliberately.
+  `./LOLG_HD.sh wine-locallng-hd-dgvoodoo` re-enables the local dgVoodoo files
+  for an explicit Wine probe; `./LOLG_HD.sh wine-locallng-hd-1440` is the
+  1440x1080 stable shortcut with HD MIX active except original
+  `LOCALLNG.MIX`/`MOVIES.MIX`.
+- `RUN_HD_WINE_GAMESCOPE.sh`: old diagnostic alternative without dgVoodoo. It
+  removes local `DDraw.dll`, keeps original `LOCALLNG.MIX`/`MOVIES.MIX`, uses
+  the other HD MIX files, launches Wine directly, and asks `gamescope` to
+  upscale the 640x400 game output into a movable 1920x1080, 1440x1080, or
+  1280x1024 window. It is kept for comparison, not as the recommended path.
+- `./LOLG_HD.sh sidecar-hd`: recommended VQA-critical path. It launches the
+  stable `wine-dgvoodoo-win10-safevqa` game runtime with original
+  `LOCALLNG.MIX`/`MOVIES.MIX`, watches the VQA reads, decodes the HD sidecar
+  frames, and opens the web player with HUD. The no-game smoke currently
+  decodes `HERB.MIX:98e2ff4f` at 1920x1080 with 6/6 frames.
+- `./LOLG_HD.sh wine-vqa-contract-locallng`: controlled diagnostic for the best
+  current in-engine LOCALLNG candidate. It uses
+  `output/vqa_contract_preserving_writer_locallng_1280x1024_vqaext_padded_cbpz_from_adaptive_decode/`,
+  which passes local runtime compatibility and restores the measured LCW
+  CBFZ/CBPZ/VPTZ dialect. It is blocked unless
+  `LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1` is set. The 896x560 padded mode
+  remains as `./LOLG_HD.sh wine-vqa-contract-locallng-896-padded`.
+  A native-frame control at
+  `output/vqa_contract_locallng_0002_native_rewrite_20260708/` rewrites
+  `LOCALLNG` at 640x400 with unchanged pixels and does not assert in a short
+  no-DXVK Wine probe, so the LOCALLNG crash path is tied to HD/transformed
+  frames rather than to every newly written WVQA payload. Follow-up LOCALLNG
+  native-frame upscales remain free of Wine exceptions through `1024x640` in
+  the same short probe, while MOVIES entry `0004` still asserts at `896x560`.
+- `./LOLG_HD.sh vqa-contract-build-locallng-1280-padded`: regenerates the
+  1280x1024 candidate and reruns the targeted LCW dialect gate.
+- `./LOLG_HD.sh vqa-contract-build-locallng-896-padded`: regenerates that
+  fallback candidate and reruns its targeted LCW dialect gate.
+- `./LOLG_HD.sh vqa-contract-build-movies-cbpz-padded`: starts from the
+  existing MOVIES 0-27 contract pack, recompresses only `CBPZ` for entries
+  0/19/20 with a `no_room` LCW marker, and reruns the targeted LCW + runtime
+  gates. It is a file-level diagnostic improvement, not a stable Wine runtime
+  claim.
+- `./LOLG_HD.sh wine-vqa-contract-movies-noroom`: diagnostic launcher for
+  LOCALLNG 1280 plus the MOVIES CBPZ no_room pack. It remains blocked unless
+  `LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1` is set. The forced Wine probe opens a
+  short-lived 1920x1080 Wine desktop with no visible `Application Error`, but
+  no `LOLG95` game window appears before it closes.
+- `./LOLG_HD.sh wine-vqa-contract-movies-noroom-only`: diagnostic launcher for
+  MOVIES CBPZ no_room only while keeping original `LOCALLNG.MIX`. It reaches
+  `LOLG95.EXE`, but Wine reports `free(): invalid pointer`, starts its debugger,
+  and the captured surface remains black. The true `--no-dxvk` retest reaches
+  the same assertion and black surface. Single-entry MOVIES probes then showed
+  the same assertion for independent HD entries `0000`, `0001`, `0002`, `0003`,
+  `0004`, `0019`, and `0020`, while original MOVIES did not assert in the same
+  profile. A native-size control for entry `0004` at `320x400`
+  (`output/vqa_contract_movies_0004_native_rewrite_20260708/`) passes local
+  audits and does not assert in a short no-DXVK Wine probe. Follow-up entry-4
+  threshold probes remain free of `free()` assertions through `892x560`, but
+  `896x560` triggers `free(): invalid pointer` with `max_vptz` still below
+  64K. The current MOVIES blocker therefore points to a VQA playback
+  heap/buffer budget very close to 500k pixels/frame rather than a single
+  corrupt entry. `./LOLG_HD.sh wine-vqa-contract-custom-pair --no-dxvk`
+  combines the stable `LOCALLNG` 1024x640 candidate with MOVIES entry `0004`
+  at 892x560 and does not assert in a short probe, but remains partial because
+  the rest of MOVIES is still original. `tools/lolg_vqa_safe_resolution_plan.py`
+  now plans all 28 MOVIES VQA entries at `892x560` under the same measured
+  block budget. `./LOLG_HD.sh vqa-contract-build-movies-safe` is the matching
+  batch rebuild entry point for `MOVIES` entries 0-27; the release check covers
+  the plan plus the build dry-run. `./LOLG_HD.sh
+  vqa-contract-build-movies-safe-smoke` has also passed the real batch path for
+  entry 4 at `892x560` with profile `4000`, `runtime_compat=pass`, and
+  `max_vptz=26328`. `./LOLG_HD.sh vqa-contract-build-movies-safe-long0` has
+  passed the long entry `0` with `runtime_compat=pass` and max `VPTZ=31742`.
+  `./LOLG_HD.sh vqa-contract-build-movies-safe-long1` has passed the long entry
+  `1` with `runtime_compat=pass` and max `VPTZ=36492`. `./LOLG_HD.sh
+  vqa-contract-build-movies-safe-long2` has passed the long entry `2` with
+  `runtime_compat=pass` and max `VPTZ=41996`. `./LOLG_HD.sh
+  vqa-contract-build-movies-safe-long3` has passed the long entry `3` with
+  `runtime_compat=pass` and max `VPTZ=41319`.
+  `./LOLG_HD.sh vqa-contract-build-movies-safe-short` has passed entries `5-18`
+  as a short multi-entry batch, 14/14 pass, with `runtime_compat=pass` and max
+  `VPTZ=27497`. `./LOLG_HD.sh vqa-contract-build-movies-safe-mid` has passed
+  entries `19-20`, 2/2 pass, with `runtime_compat=pass` and max `VPTZ=21157`.
+  `./LOLG_HD.sh vqa-contract-build-movies-safe-tail` has passed entries
+  `21-27`, 7/7 pass, with `runtime_compat=pass` and max `VPTZ=27356`. All
+  MOVIES entries `0-27` now have a validated safe `892x560` batch. The full
+  `./LOLG_HD.sh vqa-contract-build-movies-safe` assembly now passes with
+  `entries_replaced=28`, `runtime_compat=pass` for all rows, and max
+  `VPTZ=41996`. `./LOLG_HD.sh wine-dgvoodoo-win10-safevqa-movies-safe` is the
+  matching in-engine Wine probe: it keeps `LOCALLNG.MIX` and the unstable
+  monster/level animation MIX files original, while linking this safe
+  `MOVIES.MIX` through the stage extra-MIX mechanism. The real Wine probe log
+  `output/test_logs/wine_movies_safe_892_probe_20260708.log` detects
+  `LOLG95.EXE`, then hits an unhandled Wine page fault, so this launcher is
+  guarded by default and requires `LOLG_HD_ALLOW_CRASHING_MOVIES_SAFE=1` for
+  further diagnostics.
+- `tools/lolg_vqa_native_exact_fixture_writer.py`,
+  `tools/lolg_vqa_native_exact_batch_writer.py`, and
+  `tools/lolg_vqa_runtime_compat_audit.py`: WVQA runtime-contract baseline and
+  audit. Native exact fixtures for LOCALLNG and MOVIES now pass with
+  `payload_exact=1` and `runtime_compat_status=pass`; the batch baseline also
+  passes for `LOCALLNG` entry 2 plus `MOVIES` entries 0-27 with `mix_exact=1`.
+  The regenerated LOCALLNG
+  sidecar remains `gap`: local image redecode passes, but the regenerated
+  frames use `CPL0+CBFZ+VPTZ` everywhere instead of preserving the original
+  `CBFZ/CBPZ/VPTZ` frame contract.
+- `tools/lolg_vqa_contract_preserving_writer.py` and
+  `tools/lolg_vqa_contract_batch_writer.py`: focused WVQA writers for the
+  critical archives only. `output/vqa_contract_preserving_writer_locallng_640/`
+  passes for `LOCALLNG.MIX` entry 2 with 237/237 frames and preserved
+  `CBFZ/CBPZ/VPTZ` shapes. The launcher mode
+  `./LOLG_HD.sh wine-vqa-contract` now disables the full HD MIX pack and
+  overlays only the 1280x1024 contract-preserving pair from
+  `output/vqa_contract_preserving_pair_1280x1024/`. This mode is blocked by
+  default and must be forced with `LOLG_HD_ALLOW_CRASHING_VQA_CONTRACT=1`
+  because it reproduces the critical VQA crash path. Current 1280 file reports pass
+  for `LOCALLNG` (`237/237`, `native_exact_status=pass`,
+  `max_vptz_size=47322`) and the full `MOVIES.MIX`
+  batch 0-27 (`max_vptz_size` below 65535; entries 9, 22, 24, and 27 use the
+  512-vector fallback, entry 3 uses 480 vectors, entry 2 uses 192 vectors with
+  `--max-codebook-entries 1971`, entries 0/2/3 use `--windowed-pointer-lcw`,
+  entries 19/20 preserve `CBPZ` updates, and entries 0/1/2/3/27 also preserve
+  the original initial CBFZ decoded size with `--pad-initial-cbfz`).
+
+`./LOLG_HD.sh check` runs the launch/release preflight, refreshes the manifest
+verification, decodes a cached sidecar VQA sample through `./LOLG_HD.sh
+sidecar-test`, checks sidecar coverage for `LOCALLNG.MIX` and the 28
+`MOVIES.MIX` entries, decodes one critical LOCALLNG frame and one MOVIES frame
+through `./LOLG_HD.sh sidecar-critical-test`, checks the web-player frame
+inventory for those critical results, verifies `./LOLG_HD.sh
+sidecar-critical-status --json`, verifies the support bundle sidecar-critical
+metadata, runs the support bundle manifest verifier, checks diagnostic tool
+copies, checks the standalone `VERIFY_SUPPORT.sh` bundle launcher, verifies the
+support tar.gz summary/checksum and temporary extraction, and writes the release
+reports. The direct `CHECK_HD.sh` script
+runs only the raw preflight and writes `output/hd_release_check/index.html`;
+the current report is `pass` with 120 checks pass, 6 info rows, 126 total
+checks and 0 blocking gaps. Wine smoke
+results are kept as diagnostic information rather than release blockers because
+the recommended HD-critical launch path is `sidecar-hd`. Use
+`./LOLG_HD.sh sidecar-critical-warmup` to predecode every critical
+LOCALLNG/MOVIES frame in the sidecar cache before a play session.
+`./LOLG_HD.sh status`
+also refreshes and requires the manifest verifier and resolution check to pass;
+it reports `sidecar_critical_full_ready` separately from the minimal critical
+smoke readiness.
+the current expected state is `Ready to launch: yes`, VQA MIX pack 66 files / 66 expected,
+manifest verify 105 pass + 43 info / 148 rows with 0 gaps, resolution check
+4 pass / 4 checks, and sidecar
+critical ready for `LOCALLNG`/`MOVIES`; the support bundle also includes compact
+`SUPPORT_SUMMARY.txt` and `README_SUPPORT.txt` files, with explicit
+`release_pass_count`, `release_checks`, `release_info`, `release_gaps`, and
+`release_display` fields in the support summary,
+`BUNDLE_MANIFEST.csv` with the exact `path,size,sha256,executable` schema, non-duplicated headers, non-duplicated paths, well-formed CSV rows, canonical relative paths without backslashes and no heavyweight PNGs,
+the strict single-line, two-field external `output/hd_support_bundle.tar.gz.sha256` checksum with exact archive basename and
+`output/hd_support_bundle.tar.gz.summary` archive summary with exact non-duplicated keys/fields and no malformed lines,
+the standalone `output/hd_support_bundle.tar.gz.verify.sh` archive companion
+and strict four-row `output/hd_support_bundle.tar.gz.artifacts.csv` external-file manifest with non-duplicated headers, paths and portable filenames,
+with archive-not-empty/single-root/root-name and schema/row-width/count/path sub-statuses in the archive verifier summary,
+validated again after isolated copy,
+plus release-check negative tests proving checksum mismatches, bad archive names, path-like checksum archive names, extra checksum fields, bad checksum line counts, unsafe or noncanonical manifest paths, duplicated manifest paths, missing, non-file or unexpected manifest files, forbidden PNG manifest entries, malformed or duplicated manifest schema/rows, size or SHA256 mismatches, invalid or mismatched manifest executable flags, invalid or duplicated artifact schema/rows/paths/formats, unsafe or non-portable artifact paths, invalid, duplicated or malformed summary keys/fields and empty/unsafe/unsupported/multi-root/wrong-root tar archives are rejected,
+the `VERIFY_SUPPORT.sh` launcher plus `verify-support` and
+`verify-support-archive` tools,
+`sidecar_critical_status.json`, the critical sidecar index CSVs, sidecar
+`result.json` files, the full-cache status field, the critical rendered-frame
+CSVs without heavyweight PNGs, the diagnostic Python tools, and the VQA sidecar
+decoder plus Pillow diagnostics.
+`CHECK_HD_GPU.sh` writes
+`output/hd_graphics_check/index.html`; the current graphics check is `gap`
+because the detected OpenGL renderer is `llvmpipe (LLVM 20.1.2, 256 bits)`, the
+PCI adapter is QXL, no `/dev/dri/renderD*` node is exposed, and XRandR reports
+0 providers. This environment proves the Wine launch path and HD window sizing
+but not hardware GPU acceleration.
 
 Game-side texture quality is already set to the engine maximum in:
 
@@ -38,10 +258,10 @@ Asset format findings:
   `C/LOLG/CDCACHE.LST`.
 - The official patch only exposes `High`/`Low` texture resolution. There is no native 1920x1080 texture mode in the game data or config.
 
-The practical no-Wine HD path is therefore DOSBox-Staging rendering with forced
-1920x1080 output, 16:9 stretch, OpenGL output, and the Catmull-Rom shader.
-`RUN_HD.sh` reapplies the high game/movie/texture settings to all three local
-profiles before launching DOSBox.
+The old no-Wine diagnostic path is DOSBox-Staging rendering with forced
+1920x1080 output. It remains useful for comparison, but it does not solve the
+critical `LOCALLNG.MIX`/`MOVIES.MIX` HD runtime problem. The active workaround
+for those resources is the external VQA sidecar.
 
 ## Full HD export inventory
 
@@ -1996,14 +2216,13 @@ output/lolg95_winedbg_payload_trace_attempt_no3d/raw.log
 The current runtime audit status is `gap`: 8 components are audited, with 2
 runtime gaps, 2 informational PCX components, and 1 runtime-ready component.
 Active PCX entries in `GLOBAL.MIX`/`LOCAL.MIX` still use original dimensions
-but are covered by the non-destructive PCX Full HD launcher; the 4x PCX pack is
-superseded and remains informational. The separate 1920x1080 PCX pack validates
-as 37/37 Full HD PCX entries and starts under DOSBox
-offscreen smoke with staged-MIX file-load proof (`file_load_proof=1`,
-`pcx_entry_read_proof=1`, `target_pcx_read_proof=1`,
-`after_pcx_frame_temporal_proof=1`, `sentinel_proof=pass`, `runtime_proof=0`)
-and has a non-destructive runtime launcher in `RUN_HD_PCX_FULLHD.sh`, VQA files
-have Full HD PNG frame exports plus decoded WVQA Full HD replacement batches, and
+and the 4x PCX pack is superseded/informational in the current release. The
+separate 1920x1080 PCX pack validated historically as 37/37 Full HD PCX entries
+and started under DOSBox offscreen smoke with staged-MIX file-load proof
+(`file_load_proof=1`, `pcx_entry_read_proof=1`, `target_pcx_read_proof=1`,
+`after_pcx_frame_temporal_proof=1`, `sentinel_proof=pass`, `runtime_proof=0`),
+but no `RUN_HD_PCX_FULLHD.sh` launcher is present in the current package. VQA
+files have Full HD PNG frame exports plus decoded WVQA Full HD replacement batches, and
 the `.tex` render proof is synthetic-only until a real apply/upload/surface
 capture validates it with `--require-real`. The VQA runtime feasibility report
 quantifies that gap as 1955 entries, 171167 Full HD frames, 1 WVQA Full HD
@@ -3802,7 +4021,7 @@ unique payload signatures, 0 repeated payload bytes, and 0 promotion-ready
 bytes.
 `output/tex_gap_decoder_len64_promoted_tiny_nonzero_gap_noisy_review/index.html`
 condenses the core noisy reports into a promotion decision table. It keeps all
-5149 noisy bytes in review, marks 0 bytes as promotion-ready, and records 43
+5149 noisy bytes in review, marks 0 bytes as promotion-ready, and records 52
 blocked decision rows across gradient, gradient-repeat, flat-walk, palette, backref, micro-token,
 jump-token, jump-token-context, repeated-nibble, repeated-nibble-context, mixed, mixed-jump-context, mixed-token-control,
 mixed-token-control-context, residual,
@@ -3831,6 +4050,7 @@ python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delt
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_state_probe.py
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_opcode_sequence_probe.py
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_semantic_opcode_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_gradient_seed_delta_payload_opcode_probe.py
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_probe.py
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_source_probe.py
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_flat_walk_shape_control_probe.py
@@ -3873,11 +4093,19 @@ python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_ex
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_direction_value_partial_context_probe.py
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_palette_shape_value_probe.py
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_palette_pair_value_probe.py
+python3 tools/lolg_tex_gap_decoder_len64_promoted_zero_source_probe.py --targets output/tex_gap_decoder_len64_promoted_tiny_zero_queue/queue.csv --operations output/tex_gap_zero_literal_segmentation_probe/operations.csv -o output/tex_gap_decoder_len64_promoted_tiny_zero_source_probe --title "Lands of Lore II .tex Tiny Zero Source Probe"
 python3 tools/lolg_tex_gap_decoder_len64_promoted_nonzero_gap_noisy_review.py
-python3 tools/lolg_hd_audit.py --fail-on-issues
+python3 tools/lolg_hd_audit.py
 python3 tools/lolg_hd_dashboard.py
-python3 tools/lolg_hd_audit.py --fail-on-issues
+python3 tools/lolg_hd_audit.py
 ```
+
+Current audit after this chain plus the VQA all-frame restore is `257/257`.
+The VQA restore was regenerated in four archive chunks, merged into
+`output/vqa_batch_window_lcw_transparent0_allframes/manifest.csv`, and verified
+with `tools/lolg_vqa_verify_export.py --expect-all --fail-on-issues`: 1955
+entries, 171167 native PNGs, 171167 Full HD PNGs, 171167 render rows, 13 held
+frames, and 0 issue rows.
 
 Regenerate the false-free non-zero fill replay with:
 
@@ -4356,8 +4584,18 @@ python3 tools/lolg_vqa_runtime_repack_readiness.py
 ```
 
 Current result: `pass`, with 1955/1955 VQA entries mapped, 0 entry issues,
-66/66 exact layout-preserving MIX roundtrips, 1955/1955 encoded WVQA replacement
-payloads, and 66/66 runtime-pack entries.
+66/66 exact layout-preserving MIX roundtrips, 5 existing WVQA replacement
+payloads, and the replacement root `replacements_vqa_fullhd`.
+
+`tools/lolg_vqa_fullhd_replacement_writer.py` can materialize quantized WVQA
+Full HD payloads from the restored all-frame export:
+
+```sh
+python3 tools/lolg_vqa_fullhd_replacement_writer.py --missing-only --batch-limit 4
+```
+
+Current result: `pass`, with 5 payloads written and 60/60 frames
+decode-validated across `ALTAR`, `HERB`, `SLAVES`, and `MLIB`.
 
 `tools/lolg_vqa_runtime_pack_build.py` materializes the VQA runtime MIX pack
 only when WVQA replacement payloads exist:
@@ -4366,19 +4604,12 @@ only when WVQA replacement payloads exist:
 python3 tools/lolg_vqa_runtime_pack_build.py
 ```
 
-Current result: `gap`, with `replacement_entries=1955/1955`,
-`applied_replacements=1850/1955`, `deferred_replacements=105`,
-`missing_replacements=0`, `output_archives=66/66`, and
-`output_bytes=47792090931`. Sixty-six partial runtime
-VQA MIX files are written. `L20_BBI.MIX` applies 306/407 available replacements
-and defers 101 entries; `L4_HJI.MIX` applies 125/129 and defers 4 entries;
-`CHV.MIX` applies 5/5; `MOVIES.MIX` applies 28/28 available replacements;
-`L19_BCI.MIX` applies 7/7. `SPKSTON2.MIX` applies 10/10; `L12_CMI.MIX` applies
-56/56; `L1_DCI.MIX` applies 36/36; `L5_HCI.MIX` applies 13/13; `TMPLDOR.MIX`
-applies 7/7; `L8_SJI.MIX` applies 161/161; `L9_DRI.MIX` applies 25/25. These
-deferrals keep the rebuilt bodies under the 4294967295-byte MIX field limit.
-Partial or deferred files still cannot satisfy the full
-`mix_repack` requirement.
+Current result: `gap`, with `replacement_entries=5/1955`,
+`applied_replacements=5/1955`, `deferred_replacements=0`,
+`missing_replacements=1950`, `output_archives=4/66`, and
+`output_bytes=90790470`. Four partial runtime VQA MIX files are written under
+`mod_mix_vqa_fullhd/`. The full `mix_repack` requirement remains blocked until
+the other 1950 WVQA replacement payloads exist and validate.
 
 `tools/lolg_vqa_runtime_oversize_budget.py` quantifies the remaining
 body-size budget for those deferred WVQA replacements:

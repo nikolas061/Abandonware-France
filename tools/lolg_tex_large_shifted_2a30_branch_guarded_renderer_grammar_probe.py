@@ -12,7 +12,13 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from lolg_tex_large_shifted_2a30_branch_bounded_family_probe import catalog_payloads, key_for
-from trace_te_stream import trace_payload
+try:
+    from trace_te_stream import trace_payload
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    trace_payload = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_guarded_renderer_grammar_probe")
@@ -603,14 +609,46 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[str]]:
     family_rows = read_csv(args.bounded_family)
     if not route_summary:
         issues.append("missing_route_summary")
-    if not route_rows:
+    if not route_rows and route_summary.get("branch_start_guard_rows") not in ("", "0"):
         issues.append("missing_route_rows")
-    if not renderer_trace_rows:
+    if not renderer_trace_rows and route_summary.get("branch_renderer_blocked_rows") not in ("", "0"):
         issues.append("missing_trace_candidates")
-    if not support_trace_rows:
+    if not support_trace_rows and route_summary.get("branch_renderer_blocked_rows") not in ("", "0"):
         issues.append("missing_support_trace_candidates")
-    if not family_rows:
+    if not family_rows and route_summary.get("branch_start_guard_rows") not in ("", "0"):
         issues.append("missing_bounded_family")
+    if (
+        route_summary.get("branch_start_guard_rows") in ("", "0")
+        and not renderer_trace_rows
+        and not support_trace_rows
+        and not family_rows
+    ):
+        target_trace: dict[str, str] = {}
+        markers: dict[tuple[str, str], int] = {}
+        command_rows: list[dict[str, str]] = []
+        class_rows_out: list[dict[str, str]] = []
+        grammar_rows_out: list[dict[str, str]] = []
+        summary = build_summary(
+            route_summary,
+            trace_rows,
+            target_trace,
+            markers,
+            command_rows,
+            class_rows_out,
+            grammar_rows_out,
+            issues,
+        )
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "command_windows.csv", COMMAND_FIELDNAMES, command_rows)
+        write_csv(args.output / "command_classes.csv", CLASS_FIELDNAMES, class_rows_out)
+        write_csv(args.output / "grammar_candidates.csv", GRAMMAR_FIELDNAMES, grammar_rows_out)
+        (args.output / "index.html").write_text(
+            build_html(summary, class_rows_out, grammar_rows_out, command_rows, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     target_key = target_key_from_routes(route_rows, route_summary)
     target_trace = best_target_trace_row(renderer_trace_rows or trace_rows, target_key)
     if not target_trace:

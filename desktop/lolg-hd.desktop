@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Lands of Lore II HD
+Comment=Lance le patch HD Wine en 1920x1080
+Exec=/home/kiki/lol2hd/RUN_HD_DESKTOP.sh launch
+Path=/home/kiki/lol2hd
+Icon=applications-games
+Type=Application
+Terminal=true
+Categories=Game;
+StartupNotify=false

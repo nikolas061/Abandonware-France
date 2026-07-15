@@ -5,7 +5,10 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from export_shp import read_palette
+try:
+    from export_shp import read_palette
+except ModuleNotFoundError:
+    read_palette = None
 
 
 def load_rows(catalog, level, names):

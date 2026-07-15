@@ -11,7 +11,15 @@ import os
 from collections import defaultdict
 from pathlib import Path
 
-from analyze_te_pcx_payloads import MARKERS, bounded_payload, load_rows
+try:
+    from analyze_te_pcx_payloads import MARKERS, bounded_payload, load_rows
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    MARKERS = []
+    bounded_payload = None
+    load_rows = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_singleton_header_probe")
@@ -474,6 +482,21 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[str]]:
     selector_summary = (read_csv(args.selector_summary) or [{}])[0]
     if not selector_summary:
         issues.append("missing_selector_summary")
+    if selector_summary.get("renderer_candidate_rows") in ("", "0"):
+        records: list[dict[str, str]] = []
+        groups: list[dict[str, str]] = []
+        target: dict[str, str] = {}
+        summary = build_summary(records, selector_summary, target, args.signature, args.scan_head, issues)
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "records.csv", RECORD_FIELDNAMES, records)
+        write_csv(args.output / "groups.csv", GROUP_FIELDNAMES, groups)
+        (args.output / "index.html").write_text(
+            build_html(summary, groups, records, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     payloads = catalog_payloads(args.catalog)
     features = lookup_by_resource(args.features)
     prologues = lookup_by_resource(args.prologues)

@@ -10,11 +10,19 @@ import json
 import os
 from pathlib import Path
 
-from export_shp import read_palette
-from export_te_span_previews import render_indexed
+try:
+    from export_shp import read_palette
+    from export_te_span_previews import render_indexed
+    from score_te_raw_layouts import row_score
+except ModuleNotFoundError as exc:
+    OPTIONAL_IMPORT_ERROR = exc
+    read_palette = None
+    render_indexed = None
+    row_score = None
+else:
+    OPTIONAL_IMPORT_ERROR = None
 from lolg_tex_large_shifted_2a30_branch_bounded_family_probe import catalog_payloads, key_for
 from probe_te_span_decode import decode_span
-from score_te_raw_layouts import row_score
 
 
 DEFAULT_OUTPUT = Path("output/tex_large_shifted_2a30_branch_high_arg2_skip_validation_probe")
@@ -478,12 +486,24 @@ def write_report(args: argparse.Namespace) -> tuple[dict[str, str], list[str]]:
     family_rows = read_csv(args.bounded_family)
     if not grammar_summary:
         issues.append("missing_grammar_summary")
-    if not renderer_rows:
+    if not renderer_rows and grammar_summary.get("trace_candidate_rows") not in ("", "0"):
         issues.append("missing_renderer_trace")
-    if not support_rows:
+    if not support_rows and grammar_summary.get("trace_candidate_rows") not in ("", "0"):
         issues.append("missing_support_trace")
-    if not family_rows:
+    if not family_rows and grammar_summary.get("route_branch_start_guard_rows") not in ("", "0"):
         issues.append("missing_bounded_family")
+    if not renderer_rows and not support_rows and not family_rows:
+        variant_rows: list[dict[str, str]] = []
+        summary = build_summary(grammar_summary, variant_rows, issues)
+        write_csv(args.output / "summary.csv", SUMMARY_FIELDNAMES, [summary])
+        write_csv(args.output / "variants.csv", VARIANT_FIELDNAMES, variant_rows)
+        (args.output / "index.html").write_text(
+            build_html(summary, variant_rows, args.output, args.title),
+            encoding="utf-8",
+        )
+        return summary, issues
+    if OPTIONAL_IMPORT_ERROR is not None:
+        raise OPTIONAL_IMPORT_ERROR
     variant_rows, variant_issues = build_variant_rows(
         grammar_summary,
         renderer_rows,
