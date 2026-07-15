@@ -4832,6 +4832,8 @@ def run_check(args: argparse.Namespace) -> dict[str, str]:
             and "top_level_name=pass" in support_archive_companion_copy_detail
             and support_hd_status_summary.get("sidecar_critical_full_ready") in {"0", "1"}
             and '"critical_ready": true' in support_status_text
+            and '"critical_ready_count": 2' in support_status_text
+            and '"critical_expected_count": 2' in support_status_text
             and '"key": "LOCALLNG.MIX:fca4e133"' in support_status_text
             and '"key": "MOVIES.MIX:4d6efa8e"' in support_status_text
         ),
